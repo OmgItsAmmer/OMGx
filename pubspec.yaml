@@ -1,0 +1,94 @@
+name: admin_dashboard_v3
+description: "A new Flutter project."
+
+publish_to: 'none'
+
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.0
+
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+
+  #Utility packages
+  http: ^1.1.0
+  intl: ^0.18.1
+  logger: ^2.0.1
+  url_launcher: ^6.1.12
+  flutter_native_splash: ^2.4.1
+  smooth_page_indicator: ^1.1.0
+  lottie: ^2.7.0
+  connectivity_plus: ^5.0.1
+  shimmer: ^3.0.0
+  image_picker: ^1.1.2
+  flutter_side_menu: ^0.5.3
+
+
+
+
+
+  cupertino_icons: ^1.0.8
+  iconsax: ^0.0.6
+
+
+  #State Management
+  get: ^4.6.5
+  get_storage: ^2.1.1
+
+
+
+
+  #Product Specific
+  readmore: ^2.2.0
+  carousel_slider: ^5.0.0
+  flutter_rating_bar: ^4.0.1
+
+  cached_network_image: ^3.4.1
+  js: ^0.6.5
+  supabase_flutter: ^2.8.3
+  vtable: ^0.4.0
+
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+
+  flutter_lints: ^4.0.0
+
+
+flutter:
+
+
+
+  uses-material-design: true
+
+  assets:
+    - assets/logos/
+    - assets/icons/
+    - assets/images/
+    - assets/images/on_boarding_images/
+    - assets/images/animations/
+    - assets/icons/categories/
+    - assets/images/banners/
+    - assets/images/products/
+    - assets/images/content/
+    - assets/images/reviews/
+    - assets/icons/payment_methods/
+
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Poppins-Italic.ttf
+          style: italic
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 800
+
