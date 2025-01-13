@@ -1,5 +1,6 @@
 import 'package:admin_dashboard_v3/views/orders/orderScreen.dart';
 import 'package:admin_dashboard_v3/views/products/product_screen.dart';
+import 'package:admin_dashboard_v3/views/settings/settings.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
@@ -18,7 +19,7 @@ class NavigationController extends GetxController {
        const Orderscreen(),
        const ProductScreen(),
        const Orderscreen(),
-       const Orderscreen(),
+       const SettingsScreen()
   ];
 
   // Update the selected index and update the body

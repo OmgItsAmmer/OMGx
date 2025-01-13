@@ -9,8 +9,10 @@ import '../../../../common/widgets/list_tile/user_profile_tile.dart';
 import '../../common/widgets/appbar/TAppBar.dart';
 import '../../common/widgets/custom_shapes/containers/primary_header_container.dart';
 import '../../common/widgets/texts/heading_text.dart';
+import '../../controllers/user/user_controller.dart';
 import '../../utils/constants/colors.dart';
 import '../../utils/constants/sizes.dart';
+import '../profile/profile.dart';
 
 
 class SettingsScreen extends StatelessWidget {
@@ -18,7 +20,7 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-   // final controller   = Get.put(UserController());
+    final controller   = Get.put(UserController());
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -54,12 +56,7 @@ class SettingsScreen extends StatelessWidget {
                   const SizedBox(
                     height: TSizes.spaceBtwItems,
                   ),
-                  TSettingMenuTile(
-                    icon: Iconsax.safe_home,
-                    title: "My Addresses",
-                    subTitle: "Set shopping delivery address",
-                    onTap: ()=> Get.to(()=>  UserAddressScreen()),
-                  ),
+
                   const TSettingMenuTile(icon: Iconsax.bank, title: 'Bank Account', subTitle: 'Withdraw balance to registered bank account'),
                   const TSettingMenuTile(icon: Iconsax.notification, title: 'Notifications', subTitle: 'Set any kind of notification message'),
                   const TSettingMenuTile(icon: Iconsax.security_card, title: 'Account Privacy', subTitle: 'Manage data usage and connected accounts'),

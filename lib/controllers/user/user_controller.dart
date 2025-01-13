@@ -15,6 +15,7 @@ import '../../repositories/user/user_repository.dart';
 import '../../utils/constants/image_strings.dart';
 import '../../utils/constants/sizes.dart';
 import '../../utils/popups/full_screen_loader.dart';
+import '../../views/login/login.dart';
 
 class UserController extends GetxController {
   static UserController get instance => Get.find();

@@ -8,6 +8,8 @@ import '../../../../../utils/constants/sizes.dart';
 import '../../../../../utils/constants/text_strings.dart';
 import '../../../controllers/login/login_controller.dart';
 import '../../../utils/validators/validation.dart';
+import '../../forgetpassword/forget_password.dart';
+import '../../signup/signup.dart';
 
 class TLoginForm extends StatelessWidget {
   const TLoginForm({

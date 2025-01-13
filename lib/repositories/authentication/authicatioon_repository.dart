@@ -1,5 +1,3 @@
-
-
 import 'package:admin_dashboard_v3/navigation_drawer.dart';
 import 'package:admin_dashboard_v3/views/orders/orderScreen.dart';
 import 'package:admin_dashboard_v3/views/variants/variation_form_screen.dart';
@@ -10,19 +8,21 @@ import 'package:get_storage/get_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../common/widgets/loaders/tloaders.dart';
 import '../../main.dart';
+import '../../sidemneu.dart';
+import '../../supabase_strings.dart';
 import '../../utils/exceptions/TFormatException.dart';
+import '../../views/login/login.dart';
 import '../../views/products/add_product_form.dart';
 import '../../views/products/product_screen.dart';
 
 class AuthenticationRepository extends GetxController {
   static AuthenticationRepository get instance => Get.find();
 
-
   //Variables
   final deviceStorage = GetStorage();
 
   @override
-  void onReady()  {
+  void onReady() {
     // Get.put(BrandController());
     // Get.put(ProductController());
     // Get.put(UserController());
@@ -33,12 +33,37 @@ class AuthenticationRepository extends GetxController {
 
   screenRedirect() async {
     try {
-  Get.to(() =>  NavigationScreen());
+      final Session? session = supabase.auth.currentSession;
+      final User? user = supabase.auth.currentUser;
+
+      if (user != null && session != null) {
+        if (user.emailConfirmedAt != null) {
+          // Navigate to NavigationMenu only after confirming email is verified
+          await Get.offAll(() =>  NavigationScreen());
+        } else {
+          // Navigate to VerifyEmailScreen for unverified emails
+          // await Get.offAll(() => VerifyEmailScreen(email: user.email));
+        }
+      } else {
+        // Local Storage
+        deviceStorage.writeIfNull('IsFirstTime', true);
+
+        // Check if it's the first time launching the app
+        bool isFirstTime = deviceStorage.read('IsFirstTime') ?? true;
+
+        // Navigate to LoginScreen or OnBoardingScreen based on the first-time check
+        if (isFirstTime) {
+            await Get.offAll(() => const LoginScreen());
+        } else {
+          //await Get.offAll(() => const OnBoardingScreen());
+        }
+      }
     } catch (e) {
       print('Error during redirection: $e');
       // Optionally show an error snack bar or handle navigation errors
       TLoader.errorsnackBar(
-          title: 'Error', message: 'An error occurred during screen redirection.');
+          title: 'Error',
+          message: 'An error occurred during screen redirection.');
     }
   }
 
@@ -59,8 +84,7 @@ class AuthenticationRepository extends GetxController {
   // }
   /*-------- Email & PasSSWOrd Sign-in --------*/
   /// [EmailAuthentication] - Sign in
-  Future<void> loginWithEmailAndPassword(
-      String email, String password) async {
+  Future<void> loginWithEmailAndPassword(String email, String password) async {
     try {
       final AuthResponse res = await supabase.auth.signInWithPassword(
         email: email,
@@ -134,24 +158,19 @@ class AuthenticationRepository extends GetxController {
 //   // }
 //
 //   /// [EmailAuthentication] - FORGET PASSWORD
-//   Future<void> sendPasswordResetEmail(String email) async {
-//     try {
-//       supabase.auth.updateUser(UserAttributes(
-//         email: email,
-//         nonce: '123456',
-//       ));
-//
-//       await supabase.auth.reauthenticate();
-//
-//
-//     }  on FormatException catch (_) {
-//       throw const TFormatException();
-//     } on PlatformException catch (e) {
-//       throw TPlatformException(e.code).message;
-//     } catch (e) {
-//       throw 'Something went wrong. Please try again';
-//     }
-//   }
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      supabase.auth.updateUser(UserAttributes(
+        email: email,
+        nonce: '123456',
+      ));
+
+      await supabase.auth.reauthenticate();
+    } on FormatException catch (_) {
+      throw const TFormatException();
+    }
+  }
+
 //
 // /*=------------- Federated identity & social sign-in ------------*/
 //   /// [GoogleAuthentication] - GOOGLE
@@ -205,35 +224,30 @@ class AuthenticationRepository extends GetxController {
 // //     }
 // //   }
 //
-//   Future<void> deleteAccount() async {
-//     try {
-//       // Admin client with Service Role key (store securely, e.g., in an environment variable)
-//       final supabaseAdmin = SupabaseClient(
-//         SupabaseStrings.projectUrl,
-//         SupabaseStrings.service_role_key,
-//       );
-//
-//       final User? currentUser = Supabase.instance.client.auth.currentUser;
-//
-//       // Ensure the user is logged in before proceeding
-//       if (currentUser == null) {
-//         TLoader.errorsnackBar(title: "Error",message: "User is Null");
-//         return;
-//       }
-//
-//
-//       // Delete user with the admin client
-//       await supabaseAdmin.auth.admin.deleteUser(currentUser.id);
-//     TLoader.successSnackBar(title: "Account Deleted Succefully" );
-//      Get.to(() => const LoginScreen());
-//     } on FormatException catch (_) {
-//       throw const TFormatException();
-//     } on PlatformException catch (e) {
-//       throw TPlatformException(e.code).message;
-//     } catch (e) {
-//       TLoader.errorsnackBar(title: "Oh Snap!", message: e.toString());
-//     }
-//   }
+  Future<void> deleteAccount() async {
+    try {
+      // Admin client with Service Role key (store securely, e.g., in an environment variable)
+      final supabaseAdmin = SupabaseClient(
+        SupabaseStrings.projectUrl,
+        SupabaseStrings.service_role_key,
+      );
+
+      final User? currentUser = Supabase.instance.client.auth.currentUser;
+
+      // Ensure the user is logged in before proceeding
+      if (currentUser == null) {
+        TLoader.errorsnackBar(title: "Error", message: "User is Null");
+        return;
+      }
+
+      // Delete user with the admin client
+      await supabaseAdmin.auth.admin.deleteUser(currentUser.id);
+      TLoader.successSnackBar(title: "Account Deleted Succefully");
+      Get.to(() => const LoginScreen());
+    } on FormatException catch (_) {
+      throw const TFormatException();
+    }
+  }
 //
 //   Future<void> logOut() async {
 //
@@ -241,29 +255,3 @@ class AuthenticationRepository extends GetxController {
 //
 //   }
 }
-
-// final Session? session = supabase.auth.currentSession;
-// final User? user = supabase.auth.currentUser;
-//
-// if (user != null && session != null) {
-//   if (user.emailConfirmedAt != null) {
-//     // Navigate to NavigationMenu only after confirming email is verified
-//     //await Get.offAll(() => const NavigationMenu());
-//   } else {
-//     // Navigate to VerifyEmailScreen for unverified emails
-//    // await Get.offAll(() => VerifyEmailScreen(email: user.email));
-//   }
-// } else {
-//   // Local Storage
-//   deviceStorage.writeIfNull('IsFirstTime', true);
-//
-//   // Check if it's the first time launching the app
-//   bool isFirstTime = deviceStorage.read('IsFirstTime') ?? true;
-//
-//   // Navigate to LoginScreen or OnBoardingScreen based on the first-time check
-//   if (isFirstTime) {
-//   //  await Get.offAll(() => const LoginScreen());
-//   } else {
-//     //await Get.offAll(() => const OnBoardingScreen());
-//   }
-// }

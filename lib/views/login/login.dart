@@ -1,8 +1,5 @@
-import 'package:ecommerenceapp/common/styles/spacingstyles.dart';
-import 'package:ecommerenceapp/features/authentication/screens/login/widgets/TLoginForm.dart';
-import 'package:ecommerenceapp/features/authentication/screens/login/widgets/login_header.dart';
-import 'package:ecommerenceapp/utils/constants/text_strings.dart';
-import 'package:ecommerenceapp/utils/helpers/helper_functions.dart';
+import 'package:admin_dashboard_v3/views/login/widgets/login_form.dart';
+import 'package:admin_dashboard_v3/views/login/widgets/login_header.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -12,6 +9,7 @@ import '../../../../utils/constants/sizes.dart';
 import '../../common/styles/spacingstyles.dart';
 import '../../utils/constants/text_strings.dart';
 import '../../utils/helpers/helper_functions.dart';
+import '../signup/widgets/sociol_buttons.dart';
 // ignore_for_file: prefer_const_constructors
 
 class LoginScreen extends StatelessWidget {
