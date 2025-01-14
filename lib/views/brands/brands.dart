@@ -1,29 +1,31 @@
 import 'package:admin_dashboard_v3/common/widgets/appbar/TAppBar.dart';
 import 'package:admin_dashboard_v3/views/products/add_product_form.dart';
-import 'package:admin_dashboard_v3/views/products/widgets/product_table.dart';
+import 'package:admin_dashboard_v3/common/widgets/table/big_table.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 
-class ProductScreen extends StatelessWidget {
-  const ProductScreen({super.key});
+import 'add_brand_form.dart';
+
+class BrandScreen extends StatelessWidget {
+  const BrandScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final listOfMaps = [
       {
-        'Order No': '001',
-        'Order ID': 'A123',
-        'Customer Name': 'John Doe',
-        'Status': 'Shipped',
-        'Cost': '\$100',
+        'Name': '001',
+        'Verified': 'A123',
+        'Featured': 'John Doe',
+        'Product Count': 'Shipped',
+
       },
       {
-        'Order No': '002',
-        'Order ID': 'B456',
-        'Customer Name': 'Jane Smith',
-        'Status': 'Pending',
-        'Cost': '\$200',
+        'Name': '002',
+        'Verified': 'B123',
+        'Featured': 'Sarah Doe',
+        'Product Count': 'Shipped',
+
       },
     ];
     final innertable = [
@@ -38,7 +40,7 @@ class ProductScreen extends StatelessWidget {
     ];
     return Scaffold(
       appBar: const TAppBar(
-        title: Text('Products'),
+        title: Text('Brands'),
         showBackArrow: false,
       ),
       body: Padding(
@@ -59,24 +61,37 @@ class ProductScreen extends StatelessWidget {
                         onPressed: () {
 
 
-                          Get.to(() => AddProductForm());
+                          Get.to(() => AddBrandForm(formTitle: 'Add Brand',));
 
-                        }, child: const Text('Add Products')))
+                        }, child: const Text('Add New Brand')))
               ],
             ),
             Expanded(
-              child: ProductTable(
+              child: OBigTable(
                 items: listOfMaps,
                 columnKeys: const [
-                  'Order No',
-                  'Order ID',
-                  'Customer Name',
-                  'Status',
-                  'Cost'
+                  'Name',
+                  'Verified',
+                  'Featured',
+                  'Product Count',
+
                 ],
                 enableDoubleTap: true,
-                innerTableItems: innertable,
-                innerColumnKeys: const ['ProductName', 'Cost'],
+                innerTableItems: [],
+                innerColumnKeys:  [],
+                enableInnerTableDoubleTap: false,
+                button1Title: 'Add Variant',
+                button2Title: 'Edit',
+                button3Title: 'Delete',
+                showButton1: false,
+                showButton2: true,
+                showButton3: true,
+                showChip1: true,
+                showChip2: true,
+                showChip3: false,
+
+
+
               ),
             ),
           ],

@@ -1,9 +1,10 @@
 import 'package:admin_dashboard_v3/controllers/user/user_controller.dart';
-import 'package:admin_dashboard_v3/side_menu_item.dart';
+import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+import 'package:admin_dashboard_v3/views/Navigation/widgets/side_menu_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-import 'controllers/navigation/navigation_controller.dart';
+import '../../controllers/navigation/navigation_controller.dart';
 
 class NavigationScreen extends StatelessWidget {
   const NavigationScreen({super.key});
@@ -33,7 +34,7 @@ class NavigationScreen extends StatelessWidget {
                     children: [
                       // Side Menu Items with smooth visibility transition
                       Expanded(
-                        child: ListView(
+                        child: Column(
                           children: [
                             SideMenuItem(
                               icon: const Icon(Iconsax.home),
@@ -57,12 +58,49 @@ class NavigationScreen extends StatelessWidget {
                               isSelected: controller.selectedIndex.value == 2,
                             ),
                             SideMenuItem(
-                              icon: const Icon(Iconsax.user),
-                              title: 'Profile',
+                              icon: const Icon(Iconsax.heart_slash),
+                              title: 'Brands',
                               isMinimized: isMinimized.value,
                               onTap: () => controller.selectScreen(3),
                               isSelected: controller.selectedIndex.value == 3,
                             ),
+                            SideMenuItem(
+                              icon: const Icon(Iconsax.heart_slash),
+                              title: 'Category',
+                              isMinimized: isMinimized.value,
+                              onTap: () => controller.selectScreen(4),
+                              isSelected: controller.selectedIndex.value == 4,
+                            ),
+                            SideMenuItem(
+                              icon: const Icon(Iconsax.message),
+                              title: 'Reviews',
+                              isMinimized: isMinimized.value,
+                              onTap: () => controller.selectScreen(5),
+                              isSelected: controller.selectedIndex.value == 5,
+                            ),
+                            const Spacer(),
+                            SideMenuItem(
+                              icon: const Icon(Iconsax.user),
+                              title: 'Profile',
+                              isMinimized: isMinimized.value,
+                              onTap: () => controller.selectScreen(6),
+                              isSelected: controller.selectedIndex.value == 6,
+                            ),
+
+                            const SizedBox(height: TSizes.spaceBtwInputFields,),
+
+                            const Column(
+                              children: [
+                                Divider(height: 2,thickness: 2,),
+                                 SizedBox(height: TSizes.spaceBtwInputFields,),
+                                Text('Version 0.1'),
+
+                              ],
+                            ),
+                            const SizedBox(height: TSizes.spaceBtwInputFields,),
+                            
+
+
                           ],
                         ),
                       ),

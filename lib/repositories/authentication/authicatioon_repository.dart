@@ -1,4 +1,4 @@
-import 'package:admin_dashboard_v3/navigation_drawer.dart';
+import 'package:admin_dashboard_v3/views/Navigation/navigation_drawer.dart';
 import 'package:admin_dashboard_v3/views/orders/orderScreen.dart';
 import 'package:admin_dashboard_v3/views/variants/variation_form_screen.dart';
 
@@ -8,12 +8,12 @@ import 'package:get_storage/get_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../common/widgets/loaders/tloaders.dart';
 import '../../main.dart';
-import '../../sidemneu.dart';
+
 import '../../supabase_strings.dart';
 import '../../utils/exceptions/TFormatException.dart';
 import '../../views/login/login.dart';
 import '../../views/products/add_product_form.dart';
-import '../../views/products/product_screen.dart';
+import '../../views/products/products.dart';
 
 class AuthenticationRepository extends GetxController {
   static AuthenticationRepository get instance => Get.find();
