@@ -11,9 +11,12 @@ import '../../main.dart';
 
 import '../../supabase_strings.dart';
 import '../../utils/exceptions/TFormatException.dart';
+import '../../views/data_table.dart';
 import '../../views/login/login.dart';
+import '../../views/orders/order_detail.dart';
 import '../../views/products/add_product_form.dart';
 import '../../views/products/products.dart';
+import '../../views/profile/profile_detail.dart';
 
 class AuthenticationRepository extends GetxController {
   static AuthenticationRepository get instance => Get.find();
@@ -39,7 +42,7 @@ class AuthenticationRepository extends GetxController {
       if (user != null && session != null) {
         if (user.emailConfirmedAt != null) {
           // Navigate to NavigationMenu only after confirming email is verified
-          await Get.offAll(() =>  NavigationScreen());
+          await Get.offAll(() =>  TDataTable());
         } else {
           // Navigate to VerifyEmailScreen for unverified emails
           // await Get.offAll(() => VerifyEmailScreen(email: user.email));

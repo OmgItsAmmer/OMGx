@@ -27,7 +27,7 @@ dependencies:
   shimmer: ^3.0.0
   image_picker: ^1.1.2
   flutter_side_menu: ^0.5.3
-
+  data_table_2: ^2.5.12
 
 
 

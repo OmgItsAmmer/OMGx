@@ -1,6 +1,5 @@
 import 'package:admin_dashboard_v3/common/widgets/appbar/TAppBar.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:admin_dashboard_v3/views/products/add_product_form.dart';
 import 'package:admin_dashboard_v3/common/widgets/table/big_table.dart';
 import 'package:flutter/material.dart';

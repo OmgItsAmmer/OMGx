@@ -5,6 +5,8 @@
 class TImages {
 
   // -- App Logos
+
+  static const String ammer = "assets/images/products/ammer.jpg";
   static const String darkAppLogo = "assets/logos/t-store-splash-logo-black.png";
   static const String lightAppLogo = "assets/logos/t-store-splash-logo-white.png";
 
@@ -14,6 +16,7 @@ class TImages {
 
   // -- Category Icons
   static const String sportIcon = "assets/icons/categories/icons8-bowling-64.png";
+
   static const String clothIcon = "assets/icons/categories/icons8-tailors-dummy-64.png";
   static const String shoeIcon = "assets/icons/categories/icons8-shoes-64.png";
   static const String cosmeticsIcon = "assets/icons/categories/icons8-cosmetics-64.png";

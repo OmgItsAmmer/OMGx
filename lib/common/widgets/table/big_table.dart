@@ -80,7 +80,6 @@ class OBigTable extends StatelessWidget {
     // Dynamically create columns based on the main table keys
     final columns = columnKeys.map((key) {
       return VTableColumn(
-
         styleFunction: (Map<String, dynamic>? row) =>
             const TextStyle(color: Colors.white),
         label: key,
@@ -96,8 +95,7 @@ class OBigTable extends StatelessWidget {
       width: TDeviceUtils.getScreenWidth(context),
       height: TDeviceUtils.getScreenHeight(),
       child: VTable(
-
-
+        rowHeight: 80.0,
         items: items,
         columns: columns,
         onDoubleTap: enableDoubleTap
