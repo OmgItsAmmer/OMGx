@@ -1,3 +1,6 @@
+// import 'dart:html' as html;
+// import 'dart:io';
+//
 // import 'package:firebase_storage/firebase_storage.dart';
 // import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart';
@@ -84,6 +87,48 @@
 //       throw e.message!;
 //     } catch (e) {
 //       throw 'Something went wrong.';
+//     }
+//   }
+//
+//   /// Upload any Image using File
+//   static Future<String> uploadImageFile({required html.File file, required String path, required String imageName}) async {
+//     try {
+//       final ref = FirebaseStorage.instance.ref(path).child(imageName);
+//       await ref.putBlob(file);
+//
+//       final String downloadURL = await ref.getDownloadURL();
+//
+//       // Return the download URL
+//       return downloadURL;
+//     } on FirebaseException catch (e) {
+//       throw e.message!;
+//     } on SocketException catch (e) {
+//       throw e.message;
+//     } on PlatformException catch (e) {
+//       throw e.message!;
+//     } catch (e) {
+//       throw e.toString();
+//     }
+//   }
+//
+//   static Future<void> deleteFileFromStorage(String downloadUrl) async {
+//     try {
+//       Reference ref = FirebaseStorage.instance.refFromURL(downloadUrl);
+//       await ref.delete();
+//
+//       print('File deleted successfully.');
+//     } on FirebaseException catch (e) {
+//       if (e.code == 'object-not-found') {
+//         print('The file does not exist in Firebase Storage.');
+//       } else {
+//         throw e.message!;
+//       }
+//     } on SocketException catch (e) {
+//       throw e.message;
+//     } on PlatformException catch (e) {
+//       throw e.message!;
+//     } catch (e) {
+//       throw e.toString();
 //     }
 //   }
 // }

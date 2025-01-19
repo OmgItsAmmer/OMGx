@@ -3,8 +3,6 @@ import 'package:admin_dashboard_v3/views/login/widgets/login_header.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../common/widgets/form_divider.dart';
-import '../../../../common/widgets/sociol_buttons.dart';
 import '../../../../utils/constants/sizes.dart';
 import '../../common/styles/spacingstyles.dart';
 import '../../utils/constants/text_strings.dart';
@@ -27,7 +25,7 @@ class LoginScreen extends StatelessWidget {
             children: [
               TLoginHeader(dark: dark),
               TLoginForm(),
-              TFormDivider(divierText: TTexts.orSignInWith.capitalize!,dark: dark),
+       //       TFormDivider(divierText: TTexts.orSignInWith.capitalize!,dark: dark),
               SizedBox(
                 height: TSizes.spaceBtwItems,
               ),

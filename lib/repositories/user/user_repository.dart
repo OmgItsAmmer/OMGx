@@ -7,9 +7,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../main.dart';
-import '../../../utils/exceptions/TFirebaseException.dart';
-import '../../../utils/model/user_model.dart';
-import '../../utils/exceptions/TFormatException.dart';
+
+import '../../utils/exceptions/platform_exceptions.dart';
 import '../authentication/authicatioon_repository.dart';
 
 class UserRespository extends GetxController {

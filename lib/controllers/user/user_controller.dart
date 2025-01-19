@@ -8,7 +8,6 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../main.dart';
-import '../../../utils/model/user_model.dart';
 import '../../common/widgets/loaders/tloaders.dart';
 import '../../repositories/authentication/authicatioon_repository.dart';
 import '../../repositories/user/user_repository.dart';

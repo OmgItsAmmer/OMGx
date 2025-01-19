@@ -1,5 +1,4 @@
-import 'package:admin_dashboard_v3/common/widgets/appbar/TAppBar.dart';
-import 'package:admin_dashboard_v3/common/widgets/chips/choice_chip.dart';
+
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:admin_dashboard_v3/views/products/widgets/variation_item.dart';
 import 'package:admin_dashboard_v3/views/variants/widgets/variant_dropdown_menu.dart';
@@ -7,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:iconsax/iconsax.dart';
 
+import '../../common/widgets/appbar/appbar.dart';
 import '../../utils/constants/colors.dart';
 import '../../utils/constants/image_strings.dart';
 

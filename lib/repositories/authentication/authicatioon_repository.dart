@@ -1,19 +1,26 @@
+import 'package:admin_dashboard_v3/common/layouts/templates/site_template.dart';
+import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/views/Navigation/navigation_drawer.dart';
 import 'package:admin_dashboard_v3/views/orders/orderScreen.dart';
 import 'package:admin_dashboard_v3/views/variants/variation_form_screen.dart';
+import 'package:flutter/cupertino.dart';
 
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../app.dart';
 import '../../common/widgets/loaders/tloaders.dart';
 import '../../main.dart';
 
 import '../../supabase_strings.dart';
-import '../../utils/exceptions/TFormatException.dart';
+import '../../utils/exceptions/format_exceptions.dart';
 import '../../views/data_table.dart';
 import '../../views/login/login.dart';
+import '../../views/orders/TCodes/torder_screen.dart';
 import '../../views/orders/order_detail.dart';
+import '../../views/orders/table/order_table.dart';
+import '../../views/orders/TCodes/paginated_Order_Screen.dart';
 import '../../views/products/add_product_form.dart';
 import '../../views/products/products.dart';
 import '../../views/profile/profile_detail.dart';
@@ -32,7 +39,7 @@ class AuthenticationRepository extends GetxController {
     // Get.put(CheckoutController());
     FlutterNativeSplash.remove();
     screenRedirect();
-  } //Called from main.dart on app launch
+  } //Called from main.dart on app launchz
 
   screenRedirect() async {
     try {
@@ -42,7 +49,19 @@ class AuthenticationRepository extends GetxController {
       if (user != null && session != null) {
         if (user.emailConfirmedAt != null) {
           // Navigate to NavigationMenu only after confirming email is verified
-          await Get.offAll(() =>  TDataTable());
+          await Get.offAll(() =>  const TSiteTemplate(
+                desktop: Column(
+
+                  children: [
+                    Expanded(
+                      child: TRoundedContainer(
+
+                        child: OrderTable(),
+                      ),
+                    )
+                  ],
+                ),
+              ));
         } else {
           // Navigate to VerifyEmailScreen for unverified emails
           // await Get.offAll(() => VerifyEmailScreen(email: user.email));
@@ -56,7 +75,7 @@ class AuthenticationRepository extends GetxController {
 
         // Navigate to LoginScreen or OnBoardingScreen based on the first-time check
         if (isFirstTime) {
-            await Get.offAll(() => const LoginScreen());
+          await Get.offAll(() => const LoginScreen());
         } else {
           //await Get.offAll(() => const OnBoardingScreen());
         }

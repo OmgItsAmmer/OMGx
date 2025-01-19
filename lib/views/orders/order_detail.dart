@@ -1,10 +1,10 @@
-import 'package:admin_dashboard_v3/common/widgets/appbar/TAppBar.dart';
 import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:admin_dashboard_v3/views/variants/widgets/variant_dropdown_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../common/widgets/appbar/appbar.dart';
 import '../../utils/constants/colors.dart';
 
 class OrderDetailScree extends StatelessWidget {

@@ -1,7 +1,9 @@
-import 'package:admin_dashboard_v3/common/widgets/appbar/TAppBar.dart';
+import 'package:admin_dashboard_v3/views/orders/table/order_table.dart';
 import 'package:admin_dashboard_v3/views/orders/widgets/AvTable.dart';
 
 import 'package:flutter/material.dart';
+
+import '../../common/widgets/appbar/appbar.dart';
 
 class Orderscreen extends StatelessWidget {
   const Orderscreen({super.key});
@@ -34,29 +36,20 @@ class Orderscreen extends StatelessWidget {
         'Cost': 'Rs' '350',
       },
     ];
-    return Scaffold(
-        appBar: const TAppBar(
+    return const Scaffold(
+        appBar: TAppBar(
           title: Text('Orders'),
           showBackArrow: false,
         ),
         body: Padding(
-          padding: const EdgeInsets.all(30.0),
+          padding: EdgeInsets.all(30.0),
           child: Column(
             children: [
-              Expanded(
-                  child: AvTABLE(
-                items: listOfMaps,
-                columnKeys: const [
-                  'Order No',
-                  'Order ID',
-                  'Customer Name',
-                  'Status',
-                  'Cost'
+              Row(
+                children: [
+                  Expanded(child: OrderTable())
                 ],
-                    enableDoubleTap: true,
-                    innerTableItems: innertable,
-                    innerColumnKeys: const [ 'ProductName', 'Cost'],
-              )),
+              )
             ],
           ),
         ));

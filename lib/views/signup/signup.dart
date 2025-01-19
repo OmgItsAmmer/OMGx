@@ -4,7 +4,7 @@ import 'package:admin_dashboard_v3/views/signup/widgets/sociol_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../common/widgets/form_divider.dart';
+import '../../common/widgets/login_signup/form_divider.dart';
 import '../../utils/constants/sizes.dart';
 import '../../utils/constants/text_strings.dart';
 import '../../utils/helpers/helper_functions.dart';
@@ -38,7 +38,7 @@ class SignUpScreen extends StatelessWidget {
                 height: TSizes.spaceBtwSections,
               ),
               //Divider
-              TFormDivider(dark: dark, divierText: TTexts.orSignUpWith.capitalize!),
+           //   TFormDivider(dark: dark, divierText: TTexts.orSignUpWith.capitalize!,dividerText: 'ammee',),
               const SizedBox(
                 height: TSizes.spaceBtwSections,
               ),

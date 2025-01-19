@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../../utils/constants/sizes.dart';
-import '../../../utils/effects/shimmer effect.dart';
+import '../shimmers/shimmer.dart';
 
 class TRoundedImage extends StatelessWidget {
   const TRoundedImage({

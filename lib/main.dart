@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_strategy/url_strategy.dart';
 
 import 'app.dart';
 
@@ -19,18 +20,21 @@ final supabase = Supabase.instance.client;
 
 Future<void> main() async {
   //Widget Binding
-  final WidgetsBinding widgetsBinding =
+
   WidgetsFlutterBinding.ensureInitialized();
 
+  // remove # sign from url
+ setPathUrlStrategy();
   //Get Local Storage
   await GetStorage.init();
 
   //Await Splash until other issues Load
-  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+ // FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   await Supabase.initialize(
     url: SupabaseStrings.projectUrl,
     anonKey: SupabaseStrings.anonKey,
-  ).then((_) => Get.put(AuthenticationRepository()));
+  );
+  // .then((_) => Get.put(AuthenticationRepository()));
   // await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)
   //     .then((FirebaseApp value) => Get.put(AuthenticationRepository()));
   runApp(const App());

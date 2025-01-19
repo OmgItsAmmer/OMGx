@@ -1,10 +1,11 @@
-import 'package:admin_dashboard_v3/common/widgets/appbar/TAppBar.dart';
+
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
 import 'package:admin_dashboard_v3/views/variants/widgets/variant_dropdown_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 
+import '../../common/widgets/appbar/appbar.dart';
 import '../../utils/constants/sizes.dart';
 
 class VariationFormScreen extends StatelessWidget {

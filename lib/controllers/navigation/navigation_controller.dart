@@ -26,7 +26,7 @@ class NavigationController extends GetxController {
     const BrandScreen(),
     const CategoryScreen(),
     const ReviewScreen(),
-    const SettingsScreen()
+    //const SettingsScreen()
   ];
 
   // Update the selected index and update the body

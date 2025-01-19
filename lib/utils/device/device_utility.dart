@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
-import 'package:url_launcher/url_launcher_string.dart';
+
+import '../constants/sizes.dart';
 
 class TDeviceUtils {
   static void hideKeyboard(BuildContext context) {
@@ -103,14 +104,15 @@ class TDeviceUtils {
     return Platform.isAndroid;
   }
 
-  static void launchUrl(String url) async {
-    if (await canLaunchUrlString(url)) {
-      await launchUrlString(url);
-    } else {
-      throw 'Could not launch $url';
-    }
+  static bool isDesktopScreen(BuildContext context) {
+    return MediaQuery.of(context).size.width >= TSizes.desktopScreenSize;
   }
 
+  static bool isTabletScreen(BuildContext context) {
+    return MediaQuery.of(context).size.width >= TSizes.tabletScreenSize && MediaQuery.of(context).size.width < TSizes.desktopScreenSize;
+  }
 
-// Add more device utility methods as per your specific requirements.
+  static bool isMobileScreen(BuildContext context) {
+    return MediaQuery.of(context).size.width < TSizes.tabletScreenSize;
+  }
 }

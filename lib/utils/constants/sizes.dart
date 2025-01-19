@@ -20,8 +20,8 @@ class TSizes {
 
   // Button sizes
   static const double buttonHeight = 18.0;
-  static const double buttonRadius = 12.0;
-  static const double buttonWidth = 120.0;
+  static const double buttonRadius = 10.0;
+  static const double buttonWidth = 130.0;
   static const double buttonElevation = 4.0;
 
   // AppBar height
@@ -67,6 +67,12 @@ class TSizes {
 
   // Grid view spacing
   static const double gridViewSpacing = 16.0;
+
+  // Responsive Screen Sizes
+  static const int desktopScreenSize = 1366;
+  static const int tabletScreenSize = 768;
+  static const int mobileScreenSize = 360;
+  static const int customScreenSize = 1100;
 }
 
 

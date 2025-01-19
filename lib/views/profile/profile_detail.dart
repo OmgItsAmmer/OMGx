@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:admin_dashboard_v3/common/widgets/appbar/TAppBar.dart';
-import 'package:admin_dashboard_v3/common/widgets/table/big_table.dart';
+
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:admin_dashboard_v3/views/profile/widgets/profile_menu.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
+
+import '../../common/widgets/appbar/appbar.dart';
 
 class ProfileDetail extends StatelessWidget {
   ProfileDetail({super.key});
@@ -79,19 +80,7 @@ class ProfileDetail extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        OBigTable(
-                          items: listOfMaps,
-                          columnKeys: const [
-                            'Order No',
-                            'Order ID',
-                            'Customer Name',
-                            'Status',
-                            'Cost',
-                          ],
-                          enableDoubleTap: true,
-                          innerTableItems: [],
-                          innerColumnKeys: [],
-                        ),
+
                       ],
                     ),
                   ),
@@ -124,19 +113,7 @@ class ProfileDetail extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        OBigTable(
-                          items: listOfMaps,
-                          columnKeys: const [
-                            'Order No',
-                            'Order ID',
-                            'Customer Name',
-                            'Status',
-                            'Cost',
-                          ],
-                          enableDoubleTap: true,
-                          innerTableItems: [],
-                          innerColumnKeys: [],
-                        ),
+                        //Table 2
                       ],
                     ),
                   ),

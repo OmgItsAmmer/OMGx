@@ -4,13 +4,13 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:iconsax/iconsax.dart';
 
-import '../../common/widgets/appbar/TAppBar.dart';
+import '../../common/widgets/appbar/appbar.dart';
 import '../../common/widgets/images/t_circular_image.dart';
-import '../../common/widgets/texts/heading_text.dart';
+import '../../common/widgets/shimmers/shimmer.dart';
+import '../../common/widgets/texts/section_heading.dart';
 import '../../controllers/user/user_controller.dart';
 import '../../utils/constants/image_strings.dart';
 import '../../utils/constants/sizes.dart';
-import '../../utils/effects/shimmer effect.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -21,13 +21,13 @@ class ProfileScreen extends StatelessWidget {
 
 
     return Scaffold(
-      appBar: TAppBar(
+      appBar: const TAppBar(
         title: Text("Profile"),
         showBackArrow: true,
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.all(TSizes.defaultSpace),
+          padding: const EdgeInsets.all(TSizes.defaultSpace),
           child: Column(
             children: [
               SizedBox(
@@ -37,34 +37,34 @@ class ProfileScreen extends StatelessWidget {
                     Obx(
                           () {
                         return controller.imageUploading.value
-                            ? TShimmerEffect(width: 80, height: 80, radius: 80)
-                            : TCircularImage(
+                            ? const TShimmerEffect(width: 80, height: 80, radius: 80)
+                            : const TCircularImage(
                           image: TImages.user,
                           width: 80,
                           height: 80,
-                          isNetworkImage: false,
+                        //  isNetworkImage: false,
                         );
                       },
                     ),
                     TextButton(
                       onPressed: () => {}, //controller.uploadUserProfilePicture()
-                      child: Text("Change Profile Picture"),
+                      child: const Text("Change Profile Picture"),
                     ),
                   ],
                 ),
               ),
 
-              SizedBox(
+              const SizedBox(
                 height: TSizes.spaceBtwItems / 2,
               ),
-              Divider(),
-              SizedBox(height: TSizes.spaceBtwItems),
+              const Divider(),
+              const SizedBox(height: TSizes.spaceBtwItems),
 
-              TSectionHeading(
+              const TSectionHeading(
                 title: "Profile Information",
-                showActionButton: false,
+             //   showActionButton: false,
               ),
-              SizedBox(height: TSizes.spaceBtwItems),
+              const SizedBox(height: TSizes.spaceBtwItems),
 
               TProfilemenu(
                 title: "Name",
@@ -83,17 +83,17 @@ class ProfileScreen extends StatelessWidget {
                     "", // Fallback to empty string if null
               ),
 
-              SizedBox(
+              const SizedBox(
                 height: TSizes.spaceBtwItems / 2,
               ),
-              Divider(),
-              SizedBox(height: TSizes.spaceBtwItems),
+              const Divider(),
+              const SizedBox(height: TSizes.spaceBtwItems),
 
               TSectionHeading(
                 title: "Personal Information",
-                showActionButton: false,
+          //      showActionButton: false,
               ),
-              SizedBox(height: TSizes.spaceBtwItems),
+              const SizedBox(height: TSizes.spaceBtwItems),
 
               TProfilemenu(
                 onPressed: () {},
@@ -125,12 +125,12 @@ class ProfileScreen extends StatelessWidget {
                     'Not Available', // Fallback if null
               ),
 
-              Divider(),
-              SizedBox(height: TSizes.spaceBtwItems),
+              const Divider(),
+              const SizedBox(height: TSizes.spaceBtwItems),
 
               TextButton(
                 onPressed: () => controller.DeleteAccountWarning(),
-                child: Text(
+                child: const Text(
                   "Close Account",
                   style: TextStyle(color: Colors.red),
                 ),

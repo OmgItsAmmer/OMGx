@@ -4,10 +4,11 @@ import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../main.dart';
-import '../../../../utils/exceptions/TFormatException.dart';
 import '../../common/widgets/loaders/tloaders.dart';
 import '../../network_manager.dart';
 import '../../utils/constants/image_strings.dart';
+import '../../utils/exceptions/format_exceptions.dart';
+import '../../utils/exceptions/platform_exceptions.dart';
 import '../../utils/popups/full_screen_loader.dart';
 
 class SignUpController extends GetxController {

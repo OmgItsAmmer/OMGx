@@ -1,10 +1,13 @@
-import 'package:admin_dashboard_v3/common/widgets/appbar/TAppBar.dart';
+
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/views/products/add_product_form.dart';
-import 'package:admin_dashboard_v3/common/widgets/table/big_table.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+
+import '../../common/widgets/appbar/appbar.dart';
+import '../data_table.dart';
 
 class ProductScreen extends StatelessWidget {
   const ProductScreen({super.key});
@@ -169,28 +172,11 @@ class ProductScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                Expanded(
-                  child: OBigTable(
-                    items: listOfMaps,
-                    columnKeys: const [
-                      'Order No',
-                      'Order ID',
-                      'Customer Name',
-                      'Status',
-                      'Cost'
-                    ],
-                    enableDoubleTap: true,
-                    innerTableItems: innertable,
-                    innerColumnKeys: const ['ProductName', 'Cost'],
-                    enableInnerTableDoubleTap: true,
-                    button1Title: 'Add Variant',
-                    button2Title: 'Edit',
-                    button3Title: 'Delete',
-                    showButton1: true,
-                    showButton2: true,
-                    showButton3: true,
-                  ),
-                ),
+                // const Expanded(child: TPaginatedDataTable(
+                //
+                //   columnNames: ['Option 1', 'Option 2'],
+                //   rowData:  ['Option 1', 'Option 2'],
+                // ))
               ],
             ),
           ),
