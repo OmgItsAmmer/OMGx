@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
+import '../controllers/dashboard/dashboard_controoler.dart';
 import '../utils/constants/image_strings.dart';
 
 class TPaginatedDataTable extends StatelessWidget {
@@ -33,8 +34,9 @@ class TPaginatedDataTable extends StatelessWidget {
   final double? minWidth;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
+    return SizedBox(
+      height: tableHeight,
+      child: Padding(
         padding: EdgeInsets.all(30.0),
         child: Center(
             child: PaginatedDataTable2(
@@ -127,23 +129,4 @@ class MyData extends DataTableSource {
   int get selectedRowCount => 0;
 }
 
-class DashboardController extends GetxController {
-  var DataList = <Map<String, String>>[].obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-    fetchDummyData();
-  }
-
-  void fetchDummyData() {
-    DataList.addAll(List.generate(
-        36,
-        (index) => {
-              'Column 1': 'Data ${index + 1}-1',
-              'Column 2': 'Data ${index + 1}-2',
-              'Column 3': 'Data ${index + 1}-3',
-              'Column 4': 'Data ${index + 1}-4',
-            }));
-  }
-}

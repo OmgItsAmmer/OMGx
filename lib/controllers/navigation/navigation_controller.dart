@@ -1,5 +1,5 @@
 import 'package:admin_dashboard_v3/views/brands/brands.dart';
-import 'package:admin_dashboard_v3/views/orders/orderScreen.dart';
+import 'package:admin_dashboard_v3/views/orders/old_orders/orderScreen.dart';
 import 'package:admin_dashboard_v3/views/products/products.dart';
 import 'package:admin_dashboard_v3/views/settings/settings.dart';
 import 'package:get/get.dart';

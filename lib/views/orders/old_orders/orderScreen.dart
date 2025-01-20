@@ -1,9 +1,8 @@
-import 'package:admin_dashboard_v3/views/orders/table/order_table.dart';
-import 'package:admin_dashboard_v3/views/orders/widgets/AvTable.dart';
 
 import 'package:flutter/material.dart';
 
-import '../../common/widgets/appbar/appbar.dart';
+import '../../../common/widgets/appbar/appbar.dart';
+import '../all_orders/table/order_table.dart';
 
 class Orderscreen extends StatelessWidget {
   const Orderscreen({super.key});

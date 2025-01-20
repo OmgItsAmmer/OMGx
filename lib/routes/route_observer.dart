@@ -22,7 +22,7 @@ class RouteObserver extends GetObserver{
   }
 
   @override
-  void didPush(Route route, Route previousRoute) {
+  void didPush(Route<dynamic>? route, Route<dynamic>? previousRoute) {
     final sidebarController = Get.put(SideBarController());
 
     if(route != null )

@@ -43,7 +43,7 @@ class TSideBar extends StatelessWidget {
 
                     //Menu Items
                  const TMenuItem(icon: Iconsax.status,itemName: 'DashBoard', route: TRoutes.dashboard,),
-                 const TMenuItem(icon: Iconsax.status,itemName: 'Orders', route: TRoutes.responsiveScreenDesignScreen,),
+                 const TMenuItem(icon: Iconsax.status,itemName: 'Orders', route: TRoutes.orders,),
                  const TMenuItem(icon: Iconsax.status,itemName: 'Products', route: TRoutes.resetPassword,),
 
                   ],

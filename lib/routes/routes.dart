@@ -4,6 +4,7 @@ class TRoutes {
   static const forgetPassword ='/login';
   static const resetPassword ='/login';
   static const dashboard ='/dashboard';
+
   static const String responsiveScreenDesignScreen ='/ResponsiveDesignScreen/';
   static const firstScreen ='/';
 
@@ -13,4 +14,8 @@ class TRoutes {
   //static const secondScreen ='/';
   //static const secondScreenWithUi ='/';
 
+
+//Order Screens
+  static const orders ='/TOrderScreen/';
+  static const orderDetails ='/OrderDetailDesktopScreen/';
 }
