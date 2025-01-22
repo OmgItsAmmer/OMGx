@@ -21,3 +21,12 @@ enum MediaCategory { folders, banners, brands, categories, products, users }
 enum OrderStatus { pending, processing, shipped, delivered, cancelled }
 
 enum PaymentMethods { paypal, googlePay, applePay, visa, masterCard, creditCard, paystack, razorPay, paytm }
+
+
+enum VariationType { Regular , small , medium , large }
+
+enum StockLocation { Shop , Garage1 , Garage2  } // temporary
+
+
+
+enum SaleType { Cash  , CreditSale   }

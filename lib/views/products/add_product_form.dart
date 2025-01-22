@@ -100,6 +100,7 @@ class AddProductForm extends StatelessWidget {
                               ),
                               TextFormField(
                                 decoration: const InputDecoration(
+
                                     labelText: 'Description'),
                                 maxLines: 12,
                               ),

@@ -4,23 +4,25 @@ import 'package:flutter/material.dart';
 
 import '../../../../utils/device/device_utility.dart';
 import '../../../data_table.dart';
+import 'customer_table_soruce.dart';
 
-class ProductTable extends StatelessWidget {
-  const ProductTable({super.key});
+class CustomerTable extends StatelessWidget {
+  const CustomerTable({super.key});
 
   @override
   Widget build(BuildContext context) {
     return TPaginatedDataTable(
       sortAscending: true,
       minWidth: 700,
+      showCheckBox: true,
       columns: const [
-        DataColumn2(label: Text('Product')),
-        DataColumn2(label: Text('Price')),
-        DataColumn2(label: Text('Sold')),
-        DataColumn2(label: Text('Brand')),
+        DataColumn2(label: Text('Customer')),
+        DataColumn2(label: Text('Email')),
+        DataColumn2(label: Text('Phone Number')),
+
         DataColumn2(label: Text('Action'), fixedWidth: 100),
       ],
-      source: ProductRow(),
+      source: CustomerRow(),
     );
   }
 }

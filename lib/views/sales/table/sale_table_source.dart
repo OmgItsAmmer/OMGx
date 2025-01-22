@@ -8,49 +8,59 @@ import 'package:get_storage/get_storage.dart';
 
 import '../../../../Models/products/product_model.dart';
 import '../../../../common/widgets/icons/table_action_icon_buttons.dart';
-import '../../../orders/order_details/order_detail.dart';
+import '../../../Models/orders/order_model.dart';
 
-class ProductRow extends DataTableSource {
+
+class SaleRow extends DataTableSource {
   @override
   DataRow? getRow(int index) {
-    final product = ProductModel.empty();
+    final orders = OrderModel.empty();
     return DataRow2(
-        onTap: () => Get.toNamed(TRoutes.productsDetail, arguments: product),
+        onTap: () {},
         selected: false,
+
         onSelectChanged: (value) {},
         cells: [
           DataCell(Text(
-            product.name.toString(),
+            'ProductName', //Dummy
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
                 .apply(color: TColors.primary),
           )),
           DataCell(Text(
-            product.stockQuantity.toString(),
+            'UnitPrice',
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
                 .apply(color: TColors.primary),
           )),
           DataCell(Text(
-            product.basePrice.toString(),
+            'Quantity',
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
                 .apply(color: TColors.primary),
           )),
           DataCell(Text(
-            product.brandID.toString(),
+            'Unit',
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
                 .apply(color: TColors.primary),
           )), //TODO show brand names
+
+          DataCell(Text(
+            orders.totalPrice.toString(),
+            style: Theme.of(Get.context!)
+                .textTheme
+                .bodyLarge!
+                .apply(color: TColors.primary),
+          )),
           DataCell(TTableActionButtons(
-            view: true,
+            view: false,
             edit: false,
-            onViewPressed:() => Get.toNamed(TRoutes.productsDetail, arguments: product), // TODO use get argument to send data in order detail screen
+            onViewPressed:() => Get.toNamed(TRoutes.productsDetail, arguments: orders), // TODO use get argument to send data in order detail screen
             onDeletePressed: () {},
           ))
         ]);

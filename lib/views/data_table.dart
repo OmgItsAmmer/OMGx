@@ -20,9 +20,10 @@ class TPaginatedDataTable extends StatelessWidget {
       this.onPageChanged,
       this.dataRowHeight = TSizes.xl * 2,
       this.tableHeight = 760,
-      this.minWidth = 1000});
+      this.minWidth = 1000,
+        this.showCheckBox = true});
   // Dynamic column names
-
+final bool showCheckBox;
   final bool sortAscending;
   final int? sortColumnIndex;
   final int rowsperPage;
@@ -53,7 +54,7 @@ class TPaginatedDataTable extends StatelessWidget {
           dataRowHeight: dataRowHeight,
 
           //checkbox
-          showCheckboxColumn: true,
+          showCheckboxColumn: showCheckBox,
 
           //Header Design
 

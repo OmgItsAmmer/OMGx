@@ -18,4 +18,18 @@ class TRoutes {
 //Order Screens
   static const orders ='/TOrderScreen/';
   static const orderDetails ='/OrderDetailDesktopScreen/';
+
+
+  //Product Screens
+static const products = '/AllProducts';
+static const productsDetail = '/ProductDetail';
+
+// Sales Screen
+  static const sales = '/sales';
+
+
+  //Customer Screens
+  static const customer = '/customer';
+
+
 }

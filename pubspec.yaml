@@ -31,6 +31,12 @@ dependencies:
   lottie: ^3.3.1
   image: ^4.3.0
   image_picker: ^0.8.5+3
+#date pciker
+  datepicker_dropdown: ^0.1.6
+
+  #dropdown search
+  flutter_typeahead: ^5.2.0
+  searchfield: ^1.2.2
 
 
 #Web Specific
