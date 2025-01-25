@@ -30,3 +30,9 @@ enum StockLocation { Shop , Garage1 , Garage2  } // temporary
 
 
 enum SaleType { Cash  , CreditSale   }
+
+
+enum DurationType { Duration,Monthly , Quartly  , Yearly   }
+
+
+enum UnitType { Unit ,Item, Dozen   }

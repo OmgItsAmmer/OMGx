@@ -47,7 +47,7 @@ class ProfileDetail extends StatelessWidget {
                   children: [
                     CustomerInfoContainer(),
                     SizedBox(height: TSizes.spaceBtwItems),
-                    ShippingContainer(),
+                  //  ShippingContainer(),
                   ],
                 ),
               ),
@@ -219,62 +219,7 @@ class CustomerInfoContainer extends StatelessWidget {
   }
 }
 
-class ShippingContainer extends StatelessWidget {
-  const ShippingContainer({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      constraints: BoxConstraints(
-        maxWidth: MediaQuery.of(context).size.width > 800 ? 600 : double.infinity,
-      ),
-      height: 300,
-      decoration: BoxDecoration(
-        color: TColors.pureBlack,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.white.withOpacity(0.2),
-            spreadRadius: 5,
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          children: [
-            Text(
-              'Address Information',
-              style: Theme.of(context).textTheme.bodySmall,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: TSizes.spaceBtwItems),
-            TProfilemenu(
-              onPressed: () {},
-              title: "Username",
-              value: 'ammersaeed',
-            ),
-            const SizedBox(height: TSizes.spaceBtwItems),
-            TProfilemenu(
-              onPressed: () {},
-              title: "City",
-              value: 'Chishtian',
-            ),
-            const SizedBox(height: TSizes.spaceBtwItems),
-            TProfilemenu(
-              onPressed: () {},
-              title: "Phone Number",
-              value: '03236508184',
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 class OUserAdvanceInfoTile extends StatelessWidget {
   const OUserAdvanceInfoTile({
@@ -293,10 +238,10 @@ class OUserAdvanceInfoTile extends StatelessWidget {
       children: [
         Text(
           firstTile,
-          style: Theme.of(context).textTheme.bodySmall,
+          style: Theme.of(context).textTheme.headlineSmall,
           overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: TSizes.spaceBtwItems),
+       // const SizedBox(height: TSizes.spaceBtwSections),
         Text(
           secondTile,
           style: Theme.of(context).textTheme.bodyMedium,

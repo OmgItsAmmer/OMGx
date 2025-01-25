@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../main.dart';
+import '../../Models/customer/customer_model.dart';
 import '../../common/widgets/loaders/tloaders.dart';
 import '../../repositories/authentication/authicatioon_repository.dart';
 import '../../repositories/user/user_repository.dart';
@@ -18,6 +19,10 @@ import '../../views/login/login.dart';
 
 class UserController extends GetxController {
   static UserController get instance => Get.find();
+  final UserRespository userRespository = Get.put(UserRespository());
+
+
+
 
   final profileLoading = false.obs;
 
@@ -26,13 +31,14 @@ class UserController extends GetxController {
   final imageUploading = false.obs;
 
   RxList<Map<String, dynamic>> userData = <Map<String, dynamic>>[].obs;
+  RxList<CustomerModel> allUsers = <CustomerModel>[].obs;
+  RxList<String> allUserNames = <String>[].obs;
 
   final verifyEmail = TextEditingController();
   final verifyPassword = TextEditingController();
 
   GlobalKey<FormState> reAuthFormKey = GlobalKey<FormState>();
 
-  final userRespository = Get.put(UserRespository());
 //  final cartController = Get.put(CartController());
 
 
@@ -44,6 +50,7 @@ class UserController extends GetxController {
   void onInit() {
     super.onInit();
     fetchUserRecord();
+    fetchallUsers();
   }
 
   Future<void> fetchUserRecord() async {
@@ -52,7 +59,6 @@ class UserController extends GetxController {
 
       // Wait for Supabase to restore the session
       await supabase.auth.refreshSession();
-
       final user = supabase.auth.currentUser;
 
       if (user == null) {
@@ -83,6 +89,25 @@ class UserController extends GetxController {
       profileLoading.value = false;
     }
   }
+
+  Future<void> fetchallUsers() async {
+    try {
+
+      final customers = await userRespository.fetchallUsers();
+      allUsers.assignAll(customers);
+
+      //filter names
+      final names = allUsers.map((user) => user.fullName).toList();
+      allUserNames.assignAll(names);
+
+
+    } catch (e) {
+      TLoader.errorsnackBar(title: "Oh Snap!", message: e.toString());
+    }
+  }
+
+
+
 
 
 

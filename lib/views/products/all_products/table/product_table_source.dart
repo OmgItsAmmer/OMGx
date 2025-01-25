@@ -1,3 +1,4 @@
+import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
 import 'package:admin_dashboard_v3/routes/routes.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:data_table_2/data_table_2.dart';
@@ -11,13 +12,21 @@ import '../../../../common/widgets/icons/table_action_icon_buttons.dart';
 import '../../../orders/order_details/order_detail.dart';
 
 class ProductRow extends DataTableSource {
+
+  ProductRow({required this.productCount});
+  final productController = Get.put(ProductController());
+  final  productCount;
+
   @override
   DataRow? getRow(int index) {
     final product = ProductModel.empty();
     return DataRow2(
         onTap: () => Get.toNamed(TRoutes.productsDetail, arguments: product),
-        selected: false,
-        onSelectChanged: (value) {},
+        selected: productController.selectedRows[index],
+        onSelectChanged: (value) {
+          productController.selectedRows[index] = value ?? false;
+         // productController.selectedRows.refresh(); // Refresh observable list
+        },
         cells: [
           DataCell(Text(
             product.name.toString(),
@@ -62,7 +71,7 @@ class ProductRow extends DataTableSource {
 
   @override
   // TODO: implement rowCount
-  int get rowCount => 10;
+  int get rowCount => productController.allProducts.length;
 
   @override
   // TODO: implement selectedRowCount

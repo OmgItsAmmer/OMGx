@@ -9,11 +9,12 @@ class TProfilemenu extends StatelessWidget {
     super.key,
     this.icon = Iconsax.arrow_right_34,
     required this.onPressed,
-    required this.title, required this.value,
+    required this.title, required this.value,  this.isTap = false,
   });
   final IconData icon;
   final VoidCallback onPressed;
   final String title,value;
+  final bool isTap;
 
   @override
   Widget build(BuildContext context) {
@@ -38,10 +39,10 @@ class TProfilemenu extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 )),
             Expanded(
-                child: Icon(
+                child: (isTap) ? Icon(
                   icon,
                   size: 18,
-                )),
+                ): const SizedBox()),
           ],
         ),
       ),

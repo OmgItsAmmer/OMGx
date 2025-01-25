@@ -1,6 +1,8 @@
 import 'dart:io';
 
 
+import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,6 +10,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../main.dart';
 
+import '../../Models/customer/customer_model.dart';
 import '../../utils/exceptions/platform_exceptions.dart';
 import '../authentication/authicatioon_repository.dart';
 
@@ -30,6 +33,25 @@ class UserRespository extends GetxController {
       throw TPlatformException(e.code).message;
     } catch (e) {
       throw 'Something went wrong. Please try again';
+    }
+
+  }
+
+  Future<List<CustomerModel>> fetchallUsers() async {
+    try {
+      final data =  await supabase.from('users').select();
+      //print(data);
+
+      final userList = data.map((item) {
+        return CustomerModel.fromJson(item);
+      }).toList();
+      if (kDebugMode) {
+        print(userList[1].fullName);
+      }
+      return userList;
+    } catch (e) {
+      TLoader.errorsnackBar(title: 'Oh Snap', message: e.toString());
+      return [];
     }
 
   }

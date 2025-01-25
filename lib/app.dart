@@ -5,6 +5,7 @@ import 'package:admin_dashboard_v3/utils/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'bindings/general_bindings.dart';
 import 'common/widgets/containers/rounded_container.dart';
 
 
@@ -22,7 +23,9 @@ class _AppState extends State<App> {
         themeMode: ThemeMode.system,
         theme: TAppTheme.lightTheme,
         darkTheme: TAppTheme.darkTheme,
+        initialBinding: GeneralBindings(),
         getPages: TAppRoutes.pages,
+
         initialRoute: TRoutes.responsiveScreenDesignScreen,
         unknownRoute: GetPage(
             name: '/page-not-found',

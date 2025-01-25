@@ -9,12 +9,18 @@ import 'package:get_storage/get_storage.dart';
 import '../../../../Models/products/product_model.dart';
 import '../../../../common/widgets/icons/table_action_icon_buttons.dart';
 import '../../../Models/orders/order_model.dart';
+import '../../../controllers/sales/sales_controller.dart';
 
 
 class SaleRow extends DataTableSource {
+  final SalesController salesController = Get.find<SalesController>();
+  SaleRow({required this.saleCount});
+  final saleCount;
+
+
   @override
   DataRow? getRow(int index) {
-    final orders = OrderModel.empty();
+   final saleItem = salesController.allSales[index];
     return DataRow2(
         onTap: () {},
         selected: false,
@@ -22,28 +28,28 @@ class SaleRow extends DataTableSource {
         onSelectChanged: (value) {},
         cells: [
           DataCell(Text(
-            'ProductName', //Dummy
+            salesController.allSales[index].name, //Dummy
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
                 .apply(color: TColors.primary),
           )),
           DataCell(Text(
-            'UnitPrice',
+            salesController.allSales[index].salePrice,
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
                 .apply(color: TColors.primary),
           )),
           DataCell(Text(
-            'Quantity',
+            salesController.allSales[index].quantity,
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
                 .apply(color: TColors.primary),
           )),
           DataCell(Text(
-            'Unit',
+            salesController.allSales[index].unit,
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
@@ -51,7 +57,7 @@ class SaleRow extends DataTableSource {
           )), //TODO show brand names
 
           DataCell(Text(
-            orders.totalPrice.toString(),
+            salesController.allSales[index].totalPrice,
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
@@ -60,7 +66,7 @@ class SaleRow extends DataTableSource {
           DataCell(TTableActionButtons(
             view: false,
             edit: false,
-            onViewPressed:() => Get.toNamed(TRoutes.productsDetail, arguments: orders), // TODO use get argument to send data in order detail screen
+            onViewPressed:() => Get.toNamed(TRoutes.productsDetail, arguments: saleItem), // TODO use get argument to send data in order detail screen
             onDeletePressed: () {},
           ))
         ]);
@@ -72,7 +78,7 @@ class SaleRow extends DataTableSource {
 
   @override
   // TODO: implement rowCount
-  int get rowCount => 10;
+  int get rowCount => saleCount;
 
   @override
   // TODO: implement selectedRowCount

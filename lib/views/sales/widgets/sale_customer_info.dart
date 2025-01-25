@@ -2,20 +2,34 @@ import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.d
 import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
 import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
-import 'package:datepicker_dropdown/datepicker_dropdown.dart';
-import 'package:datepicker_dropdown/order_format.dart';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../../common/widgets/dropdown_search/drop_down_searchbar.dart';
-import '../../../utils/constants/enums.dart';
+import '../../../common/widgets/dropdown_search/dropdown_search.dart';
+import '../../../controllers/sales/sales_controller.dart';
+import '../../../utils/constants/colors.dart';
+import '../../../utils/validators/validation.dart';
 
 class SaleCustomerInfo extends StatelessWidget {
-  const SaleCustomerInfo({super.key});
+  final String hintText;
+
+  final  suggestionsList;
+  final onSelected;
+  final userNameTextController;
+
+  const SaleCustomerInfo({super.key, required this.hintText,required this.suggestionsList,required this.onSelected,required this.userNameTextController});
 
   @override
   Widget build(BuildContext context) {
+    final SalesController salesController = Get.find<SalesController>();
+
+
     return TRoundedContainer(
+      backgroundColor: TColors.primaryBackground,
+
       //  height: 500,
       padding: const EdgeInsets.all(TSizes.defaultSpace),
       child: Column(
@@ -30,74 +44,95 @@ class SaleCustomerInfo extends StatelessWidget {
           ),
 
           Row(
-
+//  mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Expanded(
-                flex: 1,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
+               Expanded(
+                 child: Column(
+                   crossAxisAlignment: CrossAxisAlignment.center,
+                   children: [
+                 
+                 
+                     const TRoundedImage(
+                         width: 100, height: 100, imageurl: TImages.user),
+                     const SizedBox(
+                       height: TSizes.spaceBtwItems,
+                     ),
+                 
+                     SizedBox(
+                   width: 300  ,
+                 //  height: 60,
+                   child: DropDownSearch(
 
+                     // key: salesController.searchDropDownKey,
+                     title: hintText,
+                     items: suggestionsList,
+                     textController: userNameTextController,
+                     parameterFunc: onSelected,
 
-                    TRoundedImage(
-                        width: 100, height: 100, imageurl: TImages.user),
-                    SizedBox(
-                      height: TSizes.spaceBtwItems,
-                    ),
-                    // OSearchDropDown(
-                    //   suggestions: ['Ammer','Muhid'],
-                    //   onSelected: (value){},
-                    //
-                    // ),
-
-
-                    SizedBox(
-                      height: TSizes.spaceBtwItems,
-                    ),
-
-
-                  ],
-                ),
-              ),
+                   ),
+                 ),
+                 
+                 
+                     const SizedBox(
+                       height: TSizes.spaceBtwItems,
+                     ),
+                 
+                 
+                   ],
+                 ),
+               ),
               const SizedBox(width: TSizes.spaceBtwSections,),
               Expanded(
-                flex: 2,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      width: 300,
-                      // height: 80,
-                      child: TextFormField(
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        decoration: const InputDecoration(labelText: 'Phone Number'),
+                child: Obx(
+                  () => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: double.infinity,
+                        // height: 80,
+                        child: TextFormField(
+                          controller: salesController.customerPhoneNoController.value,
+                          validator: (value) => TValidator.validateEmptyText('Phone Number', value),
+                          keyboardType: TextInputType.number, // Ensure numeric keyboard is shown
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly], // Allow only digits
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          decoration: const InputDecoration(labelText: 'Phone Number'),
+                        ),
                       ),
-                    ),
-                    const SizedBox(
-                      height: TSizes.spaceBtwInputFields/2,
-                    ),
-                    SizedBox(
-                      width: 300,
-                      // height: 80,
+                      const SizedBox(
+                        height: TSizes.spaceBtwInputFields/2,
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        // height: 80,
 
-                      child: TextFormField(
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        decoration: const InputDecoration(labelText: 'Address'),
-                        maxLines: 3,
+                        child: TextFormField(
+                          controller: salesController.customerAddressController.value,
+                          validator: (value) =>
+                              TValidator.validateEmptyText('Address', value),
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          decoration: const InputDecoration(labelText: 'Address'),
+                          maxLines: 3,
+                        ),
                       ),
-                    ),
-                    const SizedBox(
-                      height: TSizes.spaceBtwInputFields/2,
-                    ),
-                    SizedBox(
-                      width: 300,
-                      //     height: 80,
-                      child: TextFormField(
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        decoration: const InputDecoration(labelText: 'P.BALANCE'),
+                      const SizedBox(
+                        height: TSizes.spaceBtwInputFields/2,
                       ),
-                    ),
-                  ],
+                      SizedBox(
+                        width: double.infinity,
+                        //     height: 80,
+                        child: TextFormField(
+                          controller: salesController.customerCNICController.value,
+                          validator: (value) =>
+                              TValidator.validateEmptyText('CNIC', value),
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          decoration: const InputDecoration(labelText: 'CNIC'),
+                          keyboardType: TextInputType.number, // Ensure numeric keyboard is shown
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               )
             ],

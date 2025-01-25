@@ -6,11 +6,14 @@ import 'package:get/get.dart';
 
 import '../repsonsive_screen.dart';
 import '../views/customer/all_customer/customer.dart';
+import '../views/customer/customer_detail/customer_detail.dart';
+import '../views/installments/installments.dart';
 import '../views/orders/order_details/order_detail.dart';
 import '../views/products/all_products/all_products.dart';
 import '../views/products/product_detail/product_detail.dart';
 import '../views/sales/sales.dart';
 import '../views/sales/widgets/cashier_info.dart';
+import '../views/salesman/all_salesman/salesman.dart';
 
 class TAppRoutes {
   static final List<GetPage> pages = [
@@ -31,6 +34,14 @@ class TAppRoutes {
 
     //Customer Screebs
     GetPage(name: TRoutes.customer, page: () => const CustomerScreen(),middlewares: [TRouteMiddleeare()] ),
+    GetPage(name: TRoutes.customerDetails, page: () => const CustomerDetailScreen(),middlewares: [TRouteMiddleeare()] ),
+    //Salesman Screebs
+    GetPage(name: TRoutes.salesman, page: () => const SalesmanScreen(),middlewares: [TRouteMiddleeare()] ),
+    GetPage(name: TRoutes.salesmanDetails, page: () => const CustomerDetailScreen(),middlewares: [TRouteMiddleeare()] ),
+
+
+    //installment Screebs
+    GetPage(name: TRoutes.installment, page: () => const InstallmentsScreen(),middlewares: [TRouteMiddleeare()] ),
 
 
 

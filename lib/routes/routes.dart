@@ -30,6 +30,17 @@ static const productsDetail = '/ProductDetail';
 
   //Customer Screens
   static const customer = '/customer';
+  static const customerDetails = '/customerDetails';
+
+  //Salesman Screens
+  static const salesman = '/salesman';
+  static const salesmanDetails = '/salesmanDetails';
+
+
+
+  //Installment Screens
+  static const installment = '/installment';
+
 
 
 }

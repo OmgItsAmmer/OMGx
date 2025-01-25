@@ -1,4 +1,4 @@
-
+import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -28,9 +28,12 @@ class TLoader {
           ),
           child: Center(
               child: Text(
-            message,
-            style: Theme.of(Get.context!).textTheme.labelLarge,
-          )),
+                message,
+                style: Theme
+                    .of(Get.context!)
+                    .textTheme
+                    .labelLarge,
+              )),
         ),
       ),
     );
@@ -45,6 +48,9 @@ class TLoader {
         snackPosition: SnackPosition.BOTTOM,
         duration: Duration(seconds: duration),
         margin: const EdgeInsets.all(20),
+        snackStyle: SnackStyle.FLOATING,
+        // Allows width customization
+        maxWidth: !TDeviceUtils.isMobileScreen(Get.context!) ? 700 : null ,
         icon: const Icon(
           Iconsax.warning_2,
           color: TColors.white,
@@ -63,21 +69,26 @@ class TLoader {
       duration: const Duration(seconds: 3),
       margin: const EdgeInsets.all(20),
       icon: const Icon(Iconsax.warning_2, color: TColors.white),
-    );
-  }
-  static errorsnackBar({required title, message = ''}) {
-  Get.snackbar(
-  title,
-  message,
-  isDismissible: true,
-  shouldIconPulse: true,
-  colorText: TColors.white,
-  backgroundColor: Colors. red.shade600,
-  snackPosition: SnackPosition.BOTTOM,
-  duration: const Duration(seconds: 3),
-  margin: const EdgeInsets.all(20),
-  icon: const Icon(Iconsax.warning_2, color: TColors.white),
-  );
+      snackStyle: SnackStyle.FLOATING,
+      // Allows width customization
+      maxWidth: !TDeviceUtils.isMobileScreen(Get.context!) ? 700 : null ,    );
   }
 
+  static errorsnackBar({required String title, String message = ''}) {
+    Get.snackbar(
+      title,
+      message,
+      isDismissible: true,
+      shouldIconPulse: true,
+      colorText: TColors.white,
+      backgroundColor: Colors.red.shade600,
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 3),
+      margin: const EdgeInsets.all(20),
+      icon: const Icon(Iconsax.warning_2, color: TColors.white),
+      snackStyle: SnackStyle.FLOATING,
+      // Allows width customization
+      maxWidth: !TDeviceUtils.isMobileScreen(Get.context!) ? 700 : null , // Sets maximum width
+    );
+  }
 }

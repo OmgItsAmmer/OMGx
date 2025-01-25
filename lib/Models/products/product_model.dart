@@ -9,7 +9,7 @@ class ProductModel {
   final String thumbnail;
   final String salePrice;
   final int? categoryId;
-  final String productType;
+
   final String brand;
   final bool isPopular;
   final int stockQuantity;
@@ -25,7 +25,7 @@ class ProductModel {
     required this.thumbnail,
     required this.salePrice,
     this.categoryId,
-    required this.productType,
+
     required this.brand,
     required this.isPopular,
     required this.stockQuantity,
@@ -43,7 +43,7 @@ class ProductModel {
     thumbnail: "",
     salePrice: "",
     categoryId: null,
-    productType: "",
+
     brand: "",
     isPopular: false,
     stockQuantity: 0,
@@ -62,7 +62,6 @@ class ProductModel {
       'thumbnail': thumbnail,
       'sale_price': salePrice,
       'category_id': categoryId,
-      'producttype': productType,
       'brand': brand,
       'ispopular': isPopular,
       'stock_quantity': stockQuantity,
@@ -81,7 +80,6 @@ class ProductModel {
       thumbnail: json['thumbnail'] as String? ?? "",
       salePrice: json['sale_price'] as String? ?? "",
       categoryId: json['category_id'] as int?,
-      productType: json['producttype'] as String? ?? "",
       brand: json['brand'] as String? ?? "",
       isPopular: json['ispopular'] as bool? ?? false,
       stockQuantity: json['stock_quantity'] as int? ?? 0,

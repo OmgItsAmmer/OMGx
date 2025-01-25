@@ -37,7 +37,11 @@ dependencies:
   #dropdown search
   flutter_typeahead: ^5.2.0
   searchfield: ^1.2.2
+  dropdown_search: ^6.0.2
 
+
+#  date picker
+  syncfusion_flutter_datepicker: ^28.1.41
 
 #Web Specific
   url_strategy: ^0.3.0
