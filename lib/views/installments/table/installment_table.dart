@@ -1,28 +1,34 @@
-import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
 import 'package:admin_dashboard_v3/views/products/all_products/table/product_table_source.dart';
+import 'package:admin_dashboard_v3/views/sales/table/sale_table_source.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../utils/device/device_utility.dart';
+import '../../../controllers/installments/installments_controller.dart';
+import '../../../controllers/sales/sales_controller.dart';
 import '../../data_table.dart';
+import 'installment_table_source.dart';
 
 class InstallmentTable extends StatelessWidget {
   const InstallmentTable({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final productController = Get.put(ProductController());
-    return  Obx(
+    final InstallmentController installmentController = Get.find<InstallmentController>();
+
+
+    return Obx(
             () {
 
-
           return TPaginatedDataTable(
-
+            showCheckBox: false,
             sortAscending: true,
-            minWidth: 300,
+            minWidth: 700,
+            rowsperPage: 5,
+
             columns: const [
-              DataColumn2(label: Text('No')),
+              DataColumn2(label: Text('#')),
               DataColumn2(label: Text('Description')),
               DataColumn2(label: Text('Due Date')),
               DataColumn2(label: Text('Paid Date')),
@@ -33,15 +39,13 @@ class InstallmentTable extends StatelessWidget {
               DataColumn2(label: Text('Status')),
               DataColumn2(label: Text('Action'), fixedWidth: 100),
             ],
-            source: ProductRow(
-              productCount: productController.allProducts.length,
+            source: InstallmentRow(
+                installmentCount: installmentController.installmentPlans.length
 
             ),
           );
 
-
         }
     );
-
   }
 }

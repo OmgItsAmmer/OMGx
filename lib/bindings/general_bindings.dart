@@ -1,7 +1,12 @@
+import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
+import 'package:admin_dashboard_v3/controllers/installments/installments_controller.dart';
 import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
+import 'package:admin_dashboard_v3/controllers/sales/sales_controller.dart';
 import 'package:admin_dashboard_v3/controllers/user/user_controller.dart';
 import 'package:get/get.dart';
 
+import '../controllers/customer/customer_controller.dart';
+import '../controllers/salesman/salesman_controller.dart';
 import '../network_manager.dart';
 import '../repositories/user/user_repository.dart';
 
@@ -11,6 +16,11 @@ class GeneralBindings extends Bindings {
     Get.put(NetworkManager());
     Get.put(UserController());
     Get.put(ProductController());
+    Get.put(CustomerController());
+    Get.put(SalesController());
+    Get.put(AddressController());
+    Get.put(InstallmentController());
+    Get.put(SalesmanController());
 
     // final UserRespository userRespository = Get.find<UserRespository>();
 

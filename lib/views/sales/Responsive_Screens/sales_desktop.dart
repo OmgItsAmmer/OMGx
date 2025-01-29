@@ -1,5 +1,7 @@
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
+import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
+import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
 import 'package:admin_dashboard_v3/controllers/user/user_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
@@ -8,6 +10,7 @@ import 'package:admin_dashboard_v3/views/sales/widgets/sale_action_buttons.dart'
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
+import 'package:get_storage/get_storage.dart';
 
 import '../../../controllers/sales/sales_controller.dart';
 import '../table/sale_table.dart';
@@ -27,7 +30,9 @@ class SalesDesktop extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final SalesController salesController = Get.put(SalesController());
-    final UserController userController = Get.find<UserController>();
+    final CustomerController customerController = Get.find<CustomerController>();
+    final AddressController addressController = Get.find<AddressController>();
+
     return Expanded(
       child: SizedBox(
         // height: 900,
@@ -66,20 +71,28 @@ class SalesDesktop extends StatelessWidget {
                                 
                               // Customer Info
                               Expanded(flex: 2, child: SaleCustomerInfo(
-                                suggestionsList:  userController.allUserNames,
+                                namesList:  customerController.allCustomerNames,
                                 hintText: 'Customer Name',
                                 userNameTextController: salesController.customerNameController ,
-                                onSelected: (val) {
-
-                                  final selectedCustomer = userController.allUsers
+                                onSelectedName: (val) {
+                                  customerController.selectedCustomer.value = customerController.allCustomers
                                       .firstWhere((user) => user.fullName == val);
+                                  addressController.fetchCustomerAddresses(customerController.selectedCustomer.value.customerId );
 
                                   //Automatic gives unit price
-                                  salesController.customerPhoneNoController.value.text = selectedCustomer.phoneNumber;
-                                //  salesController.customerCNICController.value.text = selectedCustomer.;
-
-
+                                  salesController.customerPhoneNoController.value.text = customerController.selectedCustomer?.value.phoneNumber ?? '';
+                                  salesController.customerCNICController.value.text = customerController.selectedCustomer?.value.cnic ?? '';
                                   },
+                                addressList: addressController.allCustomerAddressesLocation,
+                                addressTextController: salesController.customerAddressController.value ,
+                                onSelectedAddress: (val){
+                                  addressController.selectedCustomerAddress.value = addressController.allCustomerAddresses
+                                      .firstWhere((address) => address.location == val);
+
+                                  salesController.selectedAddressId = addressController.selectedCustomerAddress.value.addressId;
+                                  print(salesController.selectedAddressId);
+
+                                },
 
                               )),
                               const SizedBox(

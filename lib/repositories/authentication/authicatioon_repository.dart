@@ -1,27 +1,18 @@
 import 'package:admin_dashboard_v3/common/layouts/templates/site_template.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
-import 'package:admin_dashboard_v3/views/Navigation/navigation_drawer.dart';
-import 'package:admin_dashboard_v3/views/orders/old_orders/orderScreen.dart';
-import 'package:admin_dashboard_v3/views/variants/variation_form_screen.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../app.dart';
 import '../../common/widgets/loaders/tloaders.dart';
 import '../../main.dart';
 
 import '../../supabase_strings.dart';
 import '../../utils/exceptions/format_exceptions.dart';
-import '../../views/data_table.dart';
 import '../../views/login/login.dart';
-import '../../views/orders/all_orders/orders.dart';
 import '../../views/orders/all_orders/table/order_table.dart';
-import '../../views/orders/old_orders/order_detail.dart';
-import '../../views/products/products.dart';
-import '../../views/profile/profile_detail.dart';
 
 class AuthenticationRepository extends GetxController {
   static AuthenticationRepository get instance => Get.find();

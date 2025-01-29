@@ -31,8 +31,8 @@ class UserController extends GetxController {
   final imageUploading = false.obs;
 
   RxList<Map<String, dynamic>> userData = <Map<String, dynamic>>[].obs;
-  RxList<CustomerModel> allUsers = <CustomerModel>[].obs;
-  RxList<String> allUserNames = <String>[].obs;
+
+
 
   final verifyEmail = TextEditingController();
   final verifyPassword = TextEditingController();
@@ -50,7 +50,7 @@ class UserController extends GetxController {
   void onInit() {
     super.onInit();
     fetchUserRecord();
-    fetchallUsers();
+
   }
 
   Future<void> fetchUserRecord() async {
@@ -90,21 +90,7 @@ class UserController extends GetxController {
     }
   }
 
-  Future<void> fetchallUsers() async {
-    try {
 
-      final customers = await userRespository.fetchallUsers();
-      allUsers.assignAll(customers);
-
-      //filter names
-      final names = allUsers.map((user) => user.fullName).toList();
-      allUserNames.assignAll(names);
-
-
-    } catch (e) {
-      TLoader.errorsnackBar(title: "Oh Snap!", message: e.toString());
-    }
-  }
 
 
 

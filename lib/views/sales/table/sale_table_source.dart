@@ -49,7 +49,7 @@ class SaleRow extends DataTableSource {
                 .apply(color: TColors.primary),
           )),
           DataCell(Text(
-            salesController.allSales[index].unit,
+            salesController.allSales[index].unit.toString().split('.').last,
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!

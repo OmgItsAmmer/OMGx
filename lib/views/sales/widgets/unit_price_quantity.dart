@@ -32,6 +32,7 @@ class UnitPriceQuantity extends StatelessWidget {
                         (double.parse(salesController.unitPrice.value.text) *
                             double.parse(salesController.quantity.value.text)).toStringAsFixed(2);
 
+
                   },
                   controller: salesController.unitPrice.value,
                   validator: (value) =>

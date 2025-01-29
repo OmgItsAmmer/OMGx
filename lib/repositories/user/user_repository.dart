@@ -37,24 +37,7 @@ class UserRespository extends GetxController {
 
   }
 
-  Future<List<CustomerModel>> fetchallUsers() async {
-    try {
-      final data =  await supabase.from('users').select();
-      //print(data);
 
-      final userList = data.map((item) {
-        return CustomerModel.fromJson(item);
-      }).toList();
-      if (kDebugMode) {
-        print(userList[1].fullName);
-      }
-      return userList;
-    } catch (e) {
-      TLoader.errorsnackBar(title: 'Oh Snap', message: e.toString());
-      return [];
-    }
-
-  }
 //Function to update user details in Firestore
 // Future<void> updateUserDetails(UserModel updateUser) async {
 //   try {

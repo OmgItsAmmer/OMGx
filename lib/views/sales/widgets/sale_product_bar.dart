@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 
 import '../../../common/widgets/dropdown_search/drop_down_searchbar.dart';
 import '../../../common/widgets/dropdown_search/dropdown_search.dart';
+import '../../../common/widgets/dropdown_search/searchable_text_field.dart';
 import '../../../controllers/product/product_controller.dart';
 import '../../../controllers/sales/sales_controller.dart';
 
@@ -22,11 +23,11 @@ class ProductSearchBar extends StatelessWidget {
     return  SizedBox(
       width:double.infinity  ,
       //height: 100,
-      child: DropDownSearch(
+      child: AutoCompleteTextField(
 
-        // key: salesController.searchDropDownKey,
-        title: 'Product Name',
-        items: productController.productNames,
+
+        titleText: 'Product Name',
+        optionList: productController.productNames,
         textController: salesController.dropdownController,
         parameterFunc: (val) {
 

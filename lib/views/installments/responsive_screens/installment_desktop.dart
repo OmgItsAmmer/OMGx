@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
 import '../../sales/widgets/sale_customer_info.dart';
+import '../table/installment_table.dart';
 import '../widgets/charges_form.dart';
 import '../widgets/advance_info.dart';
 import '../widgets/duration_info.dart';
 import '../widgets/installment_action_buttons.dart';
+import '../widgets/installment_footer_buttons.dart';
 
 class InstallmentDesktop extends StatelessWidget {
   const InstallmentDesktop({super.key});
@@ -129,7 +131,7 @@ class InstallmentDesktop extends StatelessWidget {
                 const SizedBox(height: TSizes.spaceBtwSections,),
 
                  TRoundedContainer(
-                  padding: EdgeInsets.all(TSizes.defaultSpace),
+                  padding: const EdgeInsets.all(TSizes.defaultSpace),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -138,15 +140,18 @@ class InstallmentDesktop extends StatelessWidget {
                         'Installment Plan',
                         style: Theme.of(context).textTheme.headlineMedium,
                       ),
-
+                      const SizedBox(height: TSizes.spaceBtwSections,),
                       //Table
-
+                      const InstallmentTable(),
 
 
                     ],
 
                   ),
-                )
+                ),
+
+                const SizedBox(height: TSizes.spaceBtwSections,),
+                 const InstallmentFooterButtons()
               ],
             ),
           ),
@@ -155,3 +160,4 @@ class InstallmentDesktop extends StatelessWidget {
     );
   }
 }
+

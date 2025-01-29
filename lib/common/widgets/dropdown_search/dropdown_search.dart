@@ -1,4 +1,7 @@
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
+import 'package:admin_dashboard_v3/utils/constants/colors.dart';
+import 'package:flutter/material.dart';
+
 import 'package:flutter/material.dart';
 
 class DropDownSearch extends StatefulWidget {
@@ -12,7 +15,7 @@ class DropDownSearch extends StatefulWidget {
   final String title;
   final TextEditingController? textController;
   final List<String>? items;
-  final parameterFunc;
+  final Function(String) parameterFunc;
 
   @override
   State<DropDownSearch> createState() => _DropDownSearchState();
@@ -21,25 +24,81 @@ class DropDownSearch extends StatefulWidget {
 class _DropDownSearchState extends State<DropDownSearch> with TickerProviderStateMixin {
   bool _isTapped = false;
   List<String> _filteredList = [];
-  List<String> _subFilteredList = [];
-  late AnimationController _animationController;
+  late OverlayEntry _overlayEntry;
+  final LayerLink _layerLink = LayerLink();
 
   @override
   void initState() {
     super.initState();
-    _filteredList = widget.items!;
-    _subFilteredList = _filteredList;
+    _filteredList = widget.items ?? [];
+  }
 
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
+  OverlayEntry _createOverlayEntry() {
+    RenderBox renderBox = context.findRenderObject() as RenderBox;
+    var size = renderBox.size;
+    var offset = renderBox.localToGlobal(Offset.zero);
+
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        width: size.width,
+        child: CompositedTransformFollower(
+          link: _layerLink,
+          showWhenUnlinked: false,
+          offset: Offset(0, size.height + 5),
+          child: Material(
+            elevation: 4,
+            child: Container(
+              color: Colors.white,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: _filteredList.length,
+                itemBuilder: (context, index) {
+                  return InkWell(
+                    onTap: () {
+                      widget.textController?.text = _filteredList[index];
+                      widget.parameterFunc(_filteredList[index]);
+                      _removeOverlay();
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                      child: Text(
+                        _filteredList[index],
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
+  void _showOverlay() {
+    _overlayEntry = _createOverlayEntry();
+    Overlay.of(context)?.insert(_overlayEntry);
+  }
+
+  void _removeOverlay() {
+    // Check if _overlayEntry exists and is mounted before removing
+    if (_overlayEntry.mounted) {
+      _overlayEntry.remove();
+    }
+    // Clear the reference to avoid reuse
+    _overlayEntry = OverlayEntry(builder: (_) => Container());
+    _isTapped = false;
+    setState(() {});
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-        mainAxisAlignment: MainAxisAlignment.start,
+    return CompositedTransformTarget(
+      link: _layerLink,
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
@@ -47,124 +106,56 @@ class _DropDownSearchState extends State<DropDownSearch> with TickerProviderStat
             style: const TextStyle(fontSize: 16, color: Color(0xFF858597)),
           ),
           const SizedBox(height: 5),
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
+          TextFormField(
+           // readOnly: true,
+            controller: widget.textController,
+            onChanged: (val) {
+              setState(() {
+                if (val.isEmpty) {
+                  _filteredList = widget.items ?? [];
+                } else {
+                  _filteredList = widget.items
+                      ?.where((item) => item.toLowerCase().contains(val.toLowerCase()))
+                      .toList() ?? [];
+                }
+              });
+            },
+
+            style: const TextStyle(color: Colors.black, fontSize: 16.0),
+            onTap: () {
+              if (!_isTapped) {
+                _showOverlay();
+              } else {
+                _removeOverlay();
+              }
+              _isTapped = !_isTapped;
+            },
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.grey.shade200,
+              contentPadding: const EdgeInsets.only(bottom: 10, left: 10),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.black.withOpacity(0.7)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.black.withValues(alpha: 0.7  )),
+              ),
+              suffixIcon: const Icon(Icons.arrow_drop_down),
             ),
-            child: Column(
-              children: [
-                TextFormField(
-
-                  controller: widget.textController,
-                  onChanged: (val) {
-                    setState(() {
-                      _filteredList = _subFilteredList
-                          .where((element) => element.toLowerCase().contains(
-                          widget.textController!.text.toLowerCase()))
-                          .toList();
-
-                    });
-                  },
-                  validator: (val) =>
-                  val!.isEmpty ? 'Field can\'t be empty' : null,
-                  style: TextStyle(color: Colors.black, fontSize: 16.0),
-                  onTap: () {
-                    setState(() {
-                      _isTapped = !_isTapped;
-
-                    });
-                    _isTapped
-                        ? _animationController.forward()
-                        : _animationController.reverse();
-                  },
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    errorStyle: const TextStyle(fontSize: 0.01),
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: Colors.black,
-                        style: BorderStyle.solid,
-                      ),
-                    ),
-                    contentPadding: const EdgeInsets.only(bottom: 10, left: 10),
-                    focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                            color: Colors.black.withOpacity(0.7),
-                            width: 0.8)),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                            color: Colors.black.withOpacity(0.7),
-                            width: 0.8)),
-                    labelStyle: const TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                          color: Colors.black.withOpacity(0.7), width: 0.8),
-                    ),
-                    suffixIcon: Icon(Icons.arrow_drop_down, size: 25),
-                    isDense: true,
-                  ),
-                ),
-                // Animated dropdown list
-                AnimatedBuilder(
-                  animation: _animationController,
-                  builder: (context, child) {
-                    return SizeTransition(
-                      sizeFactor: _animationController,
-                      axisAlignment: -1.0,
-                      child: _isTapped && _filteredList.isNotEmpty
-                          ? Container(
-                        height: 150.0,
-                        color: Colors.grey.shade200,
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: ListView.builder(
-                          itemCount: _filteredList.length,
-                          itemBuilder: (context, index) {
-                            return InkWell(
-                              onTap: () {
-                                setState(() => _isTapped = !_isTapped);
-                                widget.textController!.text =
-                                _filteredList[index];
-                                //another function in parameter
-                                widget.parameterFunc(widget.textController!.text);
-                              //  TLoader.successSnackBar(title: widget.textController!.text);
-
-                                _animationController.reverse();
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                                child: Text(
-                                  _filteredList[index],
-                                  style: TextStyle(
-                                    color: Colors.grey.shade800,
-                                    fontSize: 16.0,
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      )
-                          : const SizedBox.shrink(),
-                    );
-                  },
-                ),
-              ],
-            ),
-          )
-        ]);
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
+    if (_isTapped) {
+      _removeOverlay();
+    }
     super.dispose();
   }
 }
+
