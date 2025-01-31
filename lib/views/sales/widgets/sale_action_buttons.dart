@@ -39,6 +39,7 @@ class SaleActionButtons extends StatelessWidget {
                 onPressed: () {
                   if (salesController.selectedSaleType == SaleType.Installment) {
                     installmentController.billAmount.value.text = salesController.netTotal.value.toString();
+                    installmentController.installmentPlans.clear();
                     Get.toNamed(TRoutes.installment );
                   } else {
                     Get.defaultDialog(

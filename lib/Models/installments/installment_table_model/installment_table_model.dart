@@ -5,23 +5,23 @@ class InstallmentTableModel {
   final String description;
   final String dueDate;
   final String? paidDate;
-  final String amount_due;
-  final String paid_amount;
+  final String amountDue;
+  final String? paidAmount;
   final String remarks;
   final String remaining;
-  final String status;
+  final String? status;
   final String action;
 
   InstallmentTableModel({
     required this.sequenceNo,
     this.description = "",
     required this.dueDate,
-    required this.paidDate,
-    required this.amount_due,
-    required this.paid_amount,
+    this.paidDate,
+    required this.amountDue,
+    this.paidAmount,
     required this.remarks,
     required this.remaining,
-    required this.status,
+    this.status,
     required this.action,
   });
 
@@ -30,12 +30,12 @@ class InstallmentTableModel {
     sequenceNo: 0,
     description: "",
     dueDate: DateTime.now().toIso8601String(),
-    paidDate: DateTime.now().toIso8601String(),
-    paid_amount: "",
-    amount_due: "",
+    paidDate: null,
+    amountDue: "0.00",
+    paidAmount: null,
     remarks: "",
-    remaining: "",
-    status: "",
+    remaining: "0.00",
+    status: null,
     action: "",
   );
 
@@ -44,39 +44,44 @@ class InstallmentTableModel {
     return {
       'sequence_no': sequenceNo,
       'description': description,
-      'due_date': dueDate,  // ✅ Convert DateTime to String
-      'paid_date': paidDate, // ✅ Convert DateTime to String
-      'amount_due': amount_due,
-      'paid_amount': paid_amount,
-      'remarks': remarks, // ✅ Fixing duplicate key issue
+      'due_date': dueDate,
+      'paid_date': paidDate,
+      'amount_due': amountDue,
+      'paid_amount': paidAmount,
+      'remarks': remarks,
       'balance': remaining,
       'status': status,
       'action': action,
     };
   }
 
-
   // Factory method to create an InstallmentTableModel from a JSON object
   factory InstallmentTableModel.fromJson(Map<String, dynamic> json) {
-    DateTime fullDueDate = DateTime.parse(json['due_date']);
-    String formattedDueDate = "${fullDueDate.year.toString().padLeft(4, '0')}-${fullDueDate.month.toString().padLeft(2, '0')}-${fullDueDate.day.toString().padLeft(2, '0')}";
-    DateTime fullPaidDate = DateTime.parse(json['paid_date']);
-    String formattedPaidDate = "${fullPaidDate.year.toString().padLeft(4, '0')}-${fullPaidDate.month.toString().padLeft(2, '0')}-${fullPaidDate.day.toString().padLeft(2, '0')}";
     return InstallmentTableModel(
-      sequenceNo: json['sequence_no'] as int,
-      description: json['description'] as String,
-      dueDate: formattedDueDate,
+      sequenceNo: json['sequence_no'] as int? ?? 0, // Handle null case
+      description: json['description'] as String? ?? "",
+      dueDate: json['due_date'] != null
+          ? _formatDate(json['due_date'] as String)
+          : DateTime.now().toIso8601String(),
       paidDate: json['paid_date'] != null
-          ? formattedPaidDate
+          ? _formatDate(json['paid_date'] as String)
           : null,
-      amount_due: json['amount_due'] as String? ?? "",
-      paid_amount: json['paid_amount'] as String? ?? "",
+      amountDue: json['amount_due'] as String? ?? "0.00",
+      paidAmount: json['paid_amount'] as String?,
       remarks: json['remarks'] as String? ?? "",
-      remaining: json['balance'] as String? ?? "",
-      status: json['status'] as String? ?? "",
+      remaining: json['balance'] as String? ?? "0.00",
+      status: json['status'] as String?,
       action: json['action'] as String? ?? "",
     );
   }
+
+  // Helper method to format date strings
+  static String _formatDate(String dateString) {
+    final DateTime date = DateTime.parse(dateString);
+    return "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+  }
+
+  // Convert a list of JSON objects to a list of InstallmentTableModel
   static List<InstallmentTableModel> fromJsonList(List<dynamic> jsonList) {
     return jsonList.map((json) => InstallmentTableModel.fromJson(json)).toList();
   }

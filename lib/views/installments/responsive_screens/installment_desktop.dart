@@ -1,8 +1,13 @@
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
+import 'package:admin_dashboard_v3/controllers/guarantors/guarantor_controller.dart';
+import 'package:admin_dashboard_v3/controllers/installments/installments_controller.dart';
+import 'package:admin_dashboard_v3/controllers/sales/sales_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
+import '../../../repositories/guarantors/guarantor_repository.dart';
 import '../../sales/widgets/sale_customer_info.dart';
 import '../table/installment_table.dart';
 import '../widgets/charges_form.dart';
@@ -10,65 +15,94 @@ import '../widgets/advance_info.dart';
 import '../widgets/duration_info.dart';
 import '../widgets/installment_action_buttons.dart';
 import '../widgets/installment_footer_buttons.dart';
+import '../widgets/user_info_card.dart';
 
 class InstallmentDesktop extends StatelessWidget {
   const InstallmentDesktop({super.key});
 
   @override
   Widget build(BuildContext context) {
+   // final InstallmentController installmentController = Get.find<InstallmentController>();
+    final SalesController salesController = Get.find<SalesController>();
+    final GuarantorController guarantorController = Get.put(GuarantorController());
+
+
     return Expanded(
       child: SizedBox(
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(TSizes.defaultSpace),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const TRoundedContainer(
-                  padding: EdgeInsets.all(TSizes.defaultSpace),
+                 TRoundedContainer(
+                  padding: const EdgeInsets.all(TSizes.defaultSpace),
                   child: Row(
+                   // crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Expanded(
-                      //   flex: 1,
-                      //   child: SaleCustomerInfo(
-                      //     suggestionsList: [
-                      //       'Muhammad Saeed Sarwar',
-                      //       'Ammer Saeed',
-                      //       'Muhid Saeed'
-                      //     ],
-                      //     hintText: 'Customer Name',
-                      //   ),
-                      // ),
-                      SizedBox(
+
+                      Expanded(
+                        flex: 1,
+                        child: UserInfoCard(
+                          cardTitle: 'Customer Info',
+                          hintText: 'Customer Name',
+                          namesList: const ['empty'],
+                          addressList: const ['empty'],
+                          readOnly: true,
+                          onSelectedName: (val){},
+                          userNameTextController: salesController.customerNameController,
+                          addressTextController: salesController.customerAddressController.value,
+                          cnicTextController: salesController.customerCNICController.value,
+                          phoneNoTextController: salesController.customerPhoneNoController.value,
+                          formKey: salesController.customerFormKey,
+
+
+                        ),
+                      ),
+                      const SizedBox(
                         width: TSizes.spaceBtwSections, // Replace TSizes.spaceBtwSections if needed
                       ),
-                      // Expanded(
-                      //   flex: 1,
-                      //   child: SaleCustomerInfo(
-                      //     suggestionsList: [
-                      //       'Muhammad Saeed Sarwar',
-                      //       'Ammer Saeed',
-                      //       'Muhid Saeed'
-                      //     ],
-                      //     hintText: 'Gurrante 1',
-                      //   ),
-                      // ),
-                      SizedBox(
+                      Expanded(
+                        flex: 1,
+                        child: UserInfoCard(
+                          cardTitle: 'Guarantee 1 Info',
+                          hintText: 'Guarantee Name',
+                          namesList: const ['empty'],
+                          addressList: const ['empty'],
+                          readOnly: false,
+                          onSelectedName: (val){},
+                          userNameTextController: guarantorController.guraante1Name,
+                          addressTextController: guarantorController.guraante1Address,
+                          cnicTextController: guarantorController.guraante1CNIC,
+                          phoneNoTextController: guarantorController.guraante1PhoneNo,
+                          formKey: guarantorController.guraante1FormKey,
+
+                        ),
+                      ),
+                      const SizedBox(
                         width: TSizes.spaceBtwSections, // Replace TSizes.spaceBtwSections if needed
                       ),
-                      // Expanded(
-                      //   flex: 1,
-                      //   child: SaleCustomerInfo(
-                      //     suggestionsList: [
-                      //       'Muhammad Saeed Sarwar',
-                      //       'Ammer Saeed',
-                      //       'Muhid Saeed'
-                      //     ],
-                      //     hintText: 'Gurrante 2',
-                      //   ),
-                      // ),
-                      SizedBox(
-                        width: TSizes.spaceBtwSections, // Replace TSizes.spaceBtwSections if needed
+                      Expanded(
+                        flex: 1,
+                        child: UserInfoCard(
+
+                          cardTitle: 'Guarantee 2 Info',
+                          hintText: 'Guarantee Name',
+                          namesList: const ['empty'],
+                          addressList: const ['empty'],
+                          readOnly: false,
+                          onSelectedName: (val){},
+                          userNameTextController: guarantorController.guraante2Name,
+                          addressTextController: guarantorController.guraante2Address,
+                          cnicTextController: guarantorController.guraante2CNIC,
+                          phoneNoTextController: guarantorController.guraante2PhoneNo,
+                          formKey: guarantorController.guraante2FormKey,
+
+
+                        ),
+                      ),
+                      const SizedBox(
+                        width: TSizes.spaceBtwSections, // Replace\ TSizes.spaceBtwSections if needed
                       ),
                     ],
                   ),
@@ -109,18 +143,11 @@ class InstallmentDesktop extends StatelessWidget {
                             child: Column(
                               children: [
                                 AdvanceInfo(),
-                            
                                 SizedBox(height: TSizes.spaceBtwSections,),
-                            
-                            
                                 InstallmentActionButtons()
                               ],
                             ),
                           ),
-
-
-
-
 
                         ],
                       ),

@@ -26,8 +26,10 @@ class SalesController extends GetxController {
  final UserController userController = Get.find<UserController>();
 
 
-
+//making order
   RxList<SaleModel> allSales = <SaleModel>[].obs;
+
+
 
   // Loading state for fetching products
   final isLoading = false.obs;
@@ -212,6 +214,8 @@ class SalesController extends GetxController {
   }
 
   }
+
+
 
   // int findAddressId(String address) {
   //     try{

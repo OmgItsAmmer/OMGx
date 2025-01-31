@@ -17,6 +17,8 @@ class InstallmentPlanModel {
   final DateTime? firstInstallmentDate;
   final String? note;
   final List<InstallmentTableModel>? installemtPaymentList;
+  final int guarantor1_id;
+  final int guarantor2_id;
 
   InstallmentPlanModel({
     required this.installmentPlanId,
@@ -33,6 +35,8 @@ class InstallmentPlanModel {
     this.firstInstallmentDate,
     this.note,
     this.installemtPaymentList,
+    required this.guarantor1_id,
+    required this.guarantor2_id,
   });
 
   // Static function to create an empty installment plan model
@@ -50,6 +54,9 @@ class InstallmentPlanModel {
     duration: null,
     firstInstallmentDate: null,
     note: null,
+    guarantor1_id: 0,
+    guarantor2_id: 0,
+
   );
 
   // Convert model to JSON for database insertion
@@ -69,6 +76,8 @@ class InstallmentPlanModel {
       'first_installment_date': firstInstallmentDate?.toIso8601String(),
       'note': note,
       'installemtPaymentList': [],
+      'guarantor1_id': guarantor1_id,
+      'guarantor2_id': guarantor2_id,
     };
     if (!isUpdate) {
       data['installment_plans_id'] = installmentPlanId; // Only include `order_id` if it's not an update
@@ -99,6 +108,8 @@ class InstallmentPlanModel {
       installemtPaymentList: json['installemtPaymentList'] != null //TODO might be a issue
           ? InstallmentTableModel.fromJsonList(json['order_items'] as List)
           : null,
+      guarantor1_id: json['guarantor1_id'] as int,
+      guarantor2_id: json['guarantor2_id'] as int,
     );
   }
 }

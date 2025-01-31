@@ -1,0 +1,103 @@
+
+import 'package:admin_dashboard_v3/Models/guarantors/guarantors_model.dart';
+import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
+import 'package:admin_dashboard_v3/repositories/guarantors/guarantor_repository.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:get/get.dart';
+
+class GuarantorController extends GetxController {
+  static GuarantorController get instance => Get.find();
+  final GuarantorRepository guarantorRepository = Get.put(GuarantorRepository());
+
+  //Guarantor 1 Info
+  final guraante1Name = TextEditingController();
+  final guraante1PhoneNo = TextEditingController();
+  final guraante1Address = TextEditingController();
+  final guraante1CNIC = TextEditingController();
+  GlobalKey<FormState> guraante1FormKey = GlobalKey<FormState>(); // Form key for form validation
+
+
+
+  //Guarantor  2 Info
+  final guraante2Name = TextEditingController();
+  final guraante2PhoneNo = TextEditingController();
+  final guraante2Address = TextEditingController();
+  final guraante2CNIC = TextEditingController();
+  GlobalKey<FormState> guraante2FormKey = GlobalKey<FormState>(); // Form key for form validation
+
+
+
+
+
+
+Future<List<int>> uploadGuarantors () async {
+
+  try{
+
+    //Validate Form
+    if ((!guraante1FormKey.currentState!.validate() && !guraante2FormKey.currentState!.validate())) {
+      TLoader.errorsnackBar(title: "Guarantee Form Empty",message: 'Kindly fill all the Text fields before proceed');
+      return [];
+    }
+
+
+
+    //Splitting fullname into twos
+    String fullName1 = guraante1Name.text.trim();
+    List<String> nameParts1= fullName1.split(' ');
+
+    String firstName1 = nameParts1.isNotEmpty ? nameParts1.first : "";
+    String lastName1 = nameParts1.length > 1 ? nameParts1.sublist(1).join(' ') : "";
+
+    String fullName2 = guraante2Name.text.trim();
+    List<String> nameParts2 = fullName2.split(' ');
+
+    String firstName2 = nameParts2.isNotEmpty ? nameParts2.first : "";
+    String lastName2 = nameParts2.length > 1 ? nameParts2.sublist(1).join(' ') : "";
+    // Make model
+
+
+
+    GuarantorsModel guarantor1 = GuarantorsModel(
+      guarantorId: -1, // Assuming ID is auto-generated
+      firstName: firstName1,
+      lastName: lastName1, // If last name is optional
+      phoneNumber: guraante1PhoneNo.text,
+      cnic: guraante1CNIC.text,
+    );
+
+    GuarantorsModel guarantor2 = GuarantorsModel(
+      guarantorId: -1,
+      firstName: firstName2,
+      lastName: lastName2,
+      phoneNumber: guraante2PhoneNo.text,
+      cnic: guraante2CNIC.text,
+    );
+
+    // Upload
+    final ids = await guarantorRepository.uploadGuarantors([guarantor1.toJson(), guarantor2.toJson()]);
+
+
+
+    //Success Message
+    return ids;
+
+  }
+  catch(e)
+  {
+    TLoader.errorsnackBar(title: 'Oh Snap! Guarantors!!',message: e.toString());
+    return [];
+  }
+}
+
+
+
+
+}
+
+
+
+
+
+
+

@@ -62,6 +62,54 @@ class OrderRepository extends GetxController {
         }
       }
 
+  Future<List<OrderModel>> fetchOrders() async
+  {
+
+    try{
+      final data =  await supabase.from('orders').select();
+      //print(data);
+
+      final orderList = data.map((item) {
+        return OrderModel.fromJson(item);
+      }).toList();
+      if (kDebugMode) {
+        print(orderList[1].orderId);
+      }
+      return orderList;
+
+    }
+    catch(e)
+    {
+      TLoader.errorsnackBar(title: 'Order Fetch',message: e.toString());
+      print(e.toString());
+      return [];
+    }
+
+  }
+
+  Future<List<OrderItemModel>> fetchOrderItems(int orderId) async {
+    try {
+      final data = await supabase
+          .from('order_items')
+          .select('*, product_variants(variant_id, variant_image, variant_name)') // Joining with product_variant
+          .eq('order_id', orderId);
+
+      if (kDebugMode) {
+        print(data);
+      }
+
+      final orderItemList = data.map((item) {
+        return OrderItemModel.fromJson(item);
+      }).toList();
+
+      return orderItemList;
+    } catch (e) {
+      TLoader.errorsnackBar(title: 'Order Item Fetch', message: e.toString());
+      print(e.toString());
+      return [];
+    }
+  }
+
 
 
 

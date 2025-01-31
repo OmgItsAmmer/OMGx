@@ -14,8 +14,8 @@ class OrderDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final order = Get.arguments;
-    return  const TSiteTemplate(
-      desktop: OrderDetailDesktopScreen() ,
+    return   TSiteTemplate(
+      desktop: OrderDetailDesktopScreen(orderModel: order,) ,
     );
   }
 }

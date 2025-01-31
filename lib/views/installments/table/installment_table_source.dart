@@ -35,7 +35,7 @@ class InstallmentRow extends DataTableSource {
                 .apply(color: TColors.primary),
           )),
           DataCell(Text(
-            saleItem.description,
+            saleItem.description == '' ? 'Installment No${saleItem.sequenceNo}' : saleItem.description,
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
@@ -57,14 +57,14 @@ class InstallmentRow extends DataTableSource {
           )),
 
           DataCell(Text(
-            saleItem.amount_due,
+            saleItem.amountDue,
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
                 .apply(color: TColors.primary),
           )),
           DataCell(Text(
-            saleItem.paid_amount,
+            saleItem.paidAmount.toString(),
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
@@ -85,7 +85,7 @@ class InstallmentRow extends DataTableSource {
                 .apply(color: TColors.primary),
           )),
           DataCell(Text(
-            saleItem.status,
+            saleItem.status.toString(),
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!

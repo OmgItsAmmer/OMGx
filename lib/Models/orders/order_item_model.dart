@@ -6,6 +6,8 @@ class OrderItemModel {
   final int variantId;
   final String unit;
   final int? orderId;
+  final String? variantName;
+  final String? image;
 
   OrderItemModel({
     required this.quantity,
@@ -13,6 +15,8 @@ class OrderItemModel {
     required this.variantId,
     required this.unit,
     this.orderId,
+    this.variantName,
+    this.image,
   });
 
   // Static function to create an empty order item model
@@ -32,19 +36,29 @@ class OrderItemModel {
       'variant_id': variantId,
       'order_id': orderId,
       'unit': unit,
+      'variationDescription': variantName,
+      'variant_image': image,
     };
   }
 
   // Factory method to create an OrderItemModel from Supabase response
   factory OrderItemModel.fromJson(Map<String, dynamic> json) {
+    final productVariants = json['product_variants'] as Map<String, dynamic>?;
+
     return OrderItemModel(
       quantity: json['quantity'] as int,
       price: (json['price'] as num).toDouble(),
       variantId: json['variant_id'] as int,
       orderId: json['order_id'] as int?,
       unit: json['unit'] as String,
+      variantName: productVariants != null ? productVariants['variant_name'] as String? : null,
+      image: productVariants != null ? productVariants['variant_image'] as String? : null,
     );
   }
+
+
+
+
 
   static List<OrderItemModel> fromJsonList(List<dynamic> jsonList) {
     return jsonList.map((json) => OrderItemModel.fromJson(json)).toList();
@@ -62,7 +76,7 @@ class OrderModel {
   final int? salesmanId;
   final double? paidAmount;
   final int? customerId;
-  final List<OrderItemModel>? orderItems; // To include related order items
+  List<OrderItemModel>? orderItems; // To include related order items
 
   OrderModel({
     required this.orderId,

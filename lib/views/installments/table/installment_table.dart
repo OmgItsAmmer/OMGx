@@ -1,3 +1,4 @@
+import 'package:admin_dashboard_v3/common/widgets/shimmers/shimmer.dart';
 import 'package:admin_dashboard_v3/views/products/all_products/table/product_table_source.dart';
 import 'package:admin_dashboard_v3/views/sales/table/sale_table_source.dart';
 import 'package:data_table_2/data_table_2.dart';
@@ -20,12 +21,19 @@ class InstallmentTable extends StatelessWidget {
 
     return Obx(
             () {
+              if(installmentController.isLoading.value){
+                return const TShimmerEffect(width: 100, height: 100);
+              }
+              if(installmentController.installmentPlans.isEmpty)
+                {
+                  return const Text('No Installment Plan!!',);
+                }
 
           return TPaginatedDataTable(
             showCheckBox: false,
             sortAscending: true,
             minWidth: 700,
-            rowsperPage: 5,
+            rowsperPage: 10,
 
             columns: const [
               DataColumn2(label: Text('#')),

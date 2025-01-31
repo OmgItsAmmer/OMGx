@@ -1,13 +1,8 @@
 
 import 'package:admin_dashboard_v3/Models/address/address_model.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 
-import '../../../network_manager.dart';
-import '../../../utils/constants/image_strings.dart';
-import '../../../utils/popups/full_screen_loader.dart';
 import '../../common/widgets/loaders/tloaders.dart';
 import '../../repositories/address/address_repository.dart';
 

@@ -1,22 +1,11 @@
 
 
 import 'package:admin_dashboard_v3/repositories/customer/customer_repository.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:image_picker/image_picker.dart';
 
-import '../../../main.dart';
 import '../../Models/customer/customer_model.dart';
 import '../../common/widgets/loaders/tloaders.dart';
-import '../../repositories/authentication/authicatioon_repository.dart';
-import '../../repositories/user/user_repository.dart';
-import '../../utils/constants/image_strings.dart';
-import '../../utils/constants/sizes.dart';
-import '../../utils/popups/full_screen_loader.dart';
-import '../../views/login/login.dart';
 
 class CustomerController extends GetxController {
   static CustomerController get instance => Get.find();
@@ -43,12 +32,12 @@ class CustomerController extends GetxController {
   void onInit() {
     super.onInit();
 
-    fetchallCustomers();
+    fetchAllCustomers();
   }
 
 
 
-  Future<void> fetchallCustomers() async {
+  Future<void> fetchAllCustomers() async {
     try {
 
       final customers = await customerRepository.fetchallCustomers();
