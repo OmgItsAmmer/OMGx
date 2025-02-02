@@ -35,4 +35,4 @@ enum SaleType { Cash  , CreditSale  , Installment }
 enum DurationType { Duration,Monthly , Quarterly  , Yearly   }
 
 
-enum UnitType { Unit ,Item, Dozen   }
+enum UnitType { item, dozen   }

@@ -2,6 +2,7 @@ import 'package:admin_dashboard_v3/Models/orders/order_item_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/repositories/order/order_repository.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 class OrderController extends GetxController {
@@ -14,6 +15,9 @@ class OrderController extends GetxController {
 
   RxList<OrderItemModel> orderItems = <OrderItemModel>[].obs;
 
+  final isStatusLoading = false.obs;
+
+
 
 
 
@@ -25,6 +29,39 @@ class OrderController extends GetxController {
     super.onInit();
   }
 
+
+
+
+  Future<String> updateStatus(int orderId , String status) async {
+    try{
+      isStatusLoading.value = true;
+      await orderRepository.updateStatus(orderId,status);
+
+      return status;
+
+    }
+    catch(e)
+    {
+      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      if (kDebugMode) {
+        print(e);
+      }
+
+      return '';
+    }
+    finally{
+      isStatusLoading.value = false;
+
+    }
+  }
+  OrderStatus? stringToOrderStatus(String status) {
+    try {
+      return OrderStatus.values.firstWhere((e) => e.toString() == status);
+    } catch (e) {
+      return null; // Return null if the status string doesn't match any enum value
+    }
+  }
+
   Future<void> fetchOrders() async {
     try {
 
@@ -34,7 +71,7 @@ class OrderController extends GetxController {
 
 
     } catch (e) {
-      TLoader.errorsnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
       print(e);
     }
   }
@@ -47,7 +84,7 @@ class OrderController extends GetxController {
       orderItems.assignAll(orderItems1);
 
     } catch (e) {
-      TLoader.errorsnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
       print(e);
     }
   }

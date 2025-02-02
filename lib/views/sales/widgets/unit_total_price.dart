@@ -29,7 +29,7 @@ class UnitTotalPrice extends StatelessWidget {
                   // padding: EdgeInsets.all(TSizes.defaultSpace),
                   child: DropdownButton<UnitType>(
                     padding: EdgeInsets.zero, // Remove all padding
-                    value: UnitType.Unit,
+                    value: UnitType.item,
                     underline: SizedBox.shrink(), // Remove the default underline
                     isExpanded: true, // Ensures proper alignment and resizing
                     isDense: true, // Makes the dropdown less tall vertically
@@ -49,7 +49,7 @@ class UnitTotalPrice extends StatelessWidget {
                       );
                     }).toList(),
                     onChanged: (value) {
-                      salesController.selectedUnit.value = value ?? UnitType.Unit;
+                      salesController.selectedUnit.value = value ?? UnitType.item;
                     },
                   ),
                 )

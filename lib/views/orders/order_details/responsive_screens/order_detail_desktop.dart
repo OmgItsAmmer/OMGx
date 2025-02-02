@@ -7,8 +7,11 @@ import 'package:admin_dashboard_v3/views/orders/order_details/widgets/oorder_tra
 import 'package:admin_dashboard_v3/views/orders/order_details/widgets/order_info.dart';
 import 'package:admin_dashboard_v3/views/orders/order_details/widgets/order_items.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 
 import '../../../../Models/orders/order_item_model.dart';
+import '../../../../controllers/installments/installments_controller.dart';
 
 class OrderDetailDesktopScreen extends StatelessWidget {
   const OrderDetailDesktopScreen({super.key, required this.orderModel});
@@ -18,6 +21,8 @@ class OrderDetailDesktopScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
  //   OrderModel order = OrderModel.empty();
+    final InstallmentController installmentController = Get.find<InstallmentController>();
+
     return  Expanded(
       child: SizedBox(
         //height: 1000,
@@ -72,17 +77,28 @@ class OrderDetailDesktopScreen extends StatelessWidget {
                     ))
                   ],
                 ),
-                  TRoundedContainer(
+                  Obx(
+                    () {
+                      if(installmentController.installmentPlans.isNotEmpty)
+                      {
+                        return TRoundedContainer(
 
-                   // height: 600,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start ,
-                      children: [
-                        Text('Installment Plans',style: Theme.of(context).textTheme.headlineMedium,),
-                        const SizedBox(height: TSizes.spaceBtwSections,),
-                        const InstallmentTable(),
-                      ],
-                    )),
+                          // height: 600,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start ,
+                              children: [
+                                Text('Installment Plans',style: Theme.of(context).textTheme.headlineMedium,),
+                                const SizedBox(height: TSizes.spaceBtwSections,),
+                                const InstallmentTable(),
+                              ],
+                            ));
+                      }
+                      else {
+                        return SizedBox();
+                      }
+
+                    }
+                  ),
               ],
             ),
           ),

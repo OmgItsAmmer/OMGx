@@ -65,7 +65,7 @@ class SaleActionButtons extends StatelessWidget {
                                     salesController.remainingAmount.value.text = salesController.netTotal.value.toStringAsFixed(2);
 
                                     // Optionally show a message to the user
-                                    TLoader.errorsnackBar(
+                                    TLoader.errorSnackBar(
                                       title: "Invalid Payment",
                                       message: "Paid amount cannot exceed the total amount.",
                                     );

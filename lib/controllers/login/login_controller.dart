@@ -72,7 +72,7 @@ class LoginController extends GetxController {
       AuthenticationRepository.instance.screenRedirect();
     } catch (e) {
       TFullScreenLoader.stopLoading();
-      TLoader.errorsnackBar(title: 'Oh Snap', message: e.toString());
+      TLoader.errorSnackBar(title: 'Oh Snap', message: e.toString());
     }
   }
 
@@ -94,13 +94,13 @@ class LoginController extends GetxController {
       //Save user Record
       //  await userController.saveUserRecord(userCredentional);
       TFullScreenLoader.stopLoading();
-      TLoader.errorsnackBar(title: "Not available at the moment");
+      TLoader.errorSnackBar(title: "Not available at the moment");
       return;
     //  Get.to(()=> NavigationMenu());
 
     } catch (e) {
       TFullScreenLoader.stopLoading();
-      TLoader.errorsnackBar(title: 'Oh Snap', message: e.toString());
+      TLoader.errorSnackBar(title: 'Oh Snap', message: e.toString());
     }
   }
 }

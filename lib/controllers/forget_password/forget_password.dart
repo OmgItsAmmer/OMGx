@@ -42,7 +42,7 @@ class ForgetPasswordController extends GetxController{
     {
       TFullScreenLoader.stopLoading();
 
-      TLoader.errorsnackBar(title: "Oh Snap!",message: e.toString());
+      TLoader.errorSnackBar(title: "Oh Snap!",message: e.toString());
     }
   }
 
@@ -64,7 +64,7 @@ class ForgetPasswordController extends GetxController{
     catch(e)
     {
       TFullScreenLoader.stopLoading();
-      TLoader.errorsnackBar(title: "Oh Snap!",message: e.toString());
+      TLoader.errorSnackBar(title: "Oh Snap!",message: e.toString());
     }
   }
 }

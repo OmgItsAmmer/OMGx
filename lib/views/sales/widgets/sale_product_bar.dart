@@ -35,10 +35,10 @@ class ProductSearchBar extends StatelessWidget {
               .firstWhere((product) => product.name == val);
 
          // salesController.selectedProductName.value = value ?? '';
-          salesController.selectedProductId.value = selectedProduct.productId;
+          salesController.selectedProductId.value = selectedProduct.productId ?? -1;
 
           //Automatic gives unit price
-          salesController.unitPrice.value.text = selectedProduct.salePrice;
+          salesController.unitPrice.value.text = selectedProduct.salePrice ?? ' ';
 
         },
 

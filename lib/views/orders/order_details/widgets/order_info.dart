@@ -8,6 +8,8 @@ import 'package:admin_dashboard_v3/utils/helpers/helper_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../common/widgets/loaders/tloaders.dart';
+
 class OrderInfo extends StatelessWidget {
   const OrderInfo({super.key, required this.orderModel});
 
@@ -86,9 +88,22 @@ class OrderInfo extends StatelessWidget {
                               ),
                             );
                           }).toList(),
-                          onChanged: (OrderStatus? newValue) {
-                            orderController.selectedStatus.value = newValue ?? OrderStatus.pending;
+                          onChanged: (OrderStatus? newValue) async {
+                            if (newValue != null) {
+                              // Await the result of updateStatus
+                              final updatedStatus = await orderController.updateStatus(orderModel.orderId, newValue.toString().split('.').last);
+                              final orderStatus = 'OrderStatus.$updatedStatus' ;
 
+                              // Convert the updatedStatus (String) back to OrderStatus
+                              final OrderStatus? status = orderController.stringToOrderStatus(orderStatus);
+
+                              // Update selectedStatus with the converted value
+                              if (status != null) {
+                                orderController.selectedStatus.value = status;
+                              } else {
+                                TLoader.errorSnackBar(title: 'Error', message: 'Invalid status: $updatedStatus');
+                              }
+                            }
                           },
                         ),
                       ),

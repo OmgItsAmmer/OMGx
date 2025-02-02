@@ -43,7 +43,7 @@ class SignUpController extends GetxController {
     } on PlatformException catch (e) {
       throw TPlatformException(e.code).message;
     } catch (e) {
-      TLoader.errorsnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
   }
 
@@ -63,7 +63,7 @@ class SignUpController extends GetxController {
       //Form validation
       if (!signupFormkey.currentState!.validate()) {
         TFullScreenLoader.stopLoading();
-        TLoader.errorsnackBar(title: "Invalid Data");
+        TLoader.errorSnackBar(title: "Invalid Data");
         return;
       }
 
@@ -95,7 +95,7 @@ class SignUpController extends GetxController {
   //    Get.to(() => VerifyEmailScreen(email: email.text.trim(),));
     } catch (e) {
       TFullScreenLoader.stopLoading();
-      TLoader.errorsnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
       print(e.toString());
     }
   }

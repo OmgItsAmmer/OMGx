@@ -72,7 +72,7 @@ class AuthenticationRepository extends GetxController {
     } catch (e) {
       print('Error during redirection: $e');
       // Optionally show an error snack bar or handle navigation errors
-      TLoader.errorsnackBar(
+      TLoader.errorSnackBar(
           title: 'Error',
           message: 'An error occurred during screen redirection.');
     }
@@ -247,7 +247,7 @@ class AuthenticationRepository extends GetxController {
 
       // Ensure the user is logged in before proceeding
       if (currentUser == null) {
-        TLoader.errorsnackBar(title: "Error", message: "User is Null");
+        TLoader.errorSnackBar(title: "Error", message: "User is Null");
         return;
       }
 

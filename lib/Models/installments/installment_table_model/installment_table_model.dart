@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 
 class InstallmentTableModel {
-  final int sequenceNo;
-  final String description;
-  final String dueDate;
-  final String? paidDate;
-  final String amountDue;
-  final String? paidAmount;
-  final String remarks;
-  final String remaining;
-  final String? status;
-  final String action;
+  int sequenceNo;
+  int planId;
+  String description;
+  String dueDate;
+  String? paidDate;
+  String amountDue;
+  String? paidAmount;
+  String remarks;
+  String remaining;
+  String? status;
+  String action;
 
   InstallmentTableModel({
     required this.sequenceNo,
+    this.planId = 0,
     this.description = "",
     required this.dueDate,
     this.paidDate,
@@ -27,21 +29,22 @@ class InstallmentTableModel {
 
   // Static function to create an empty installment model
   static InstallmentTableModel empty() => InstallmentTableModel(
-    sequenceNo: 0,
-    description: "",
-    dueDate: DateTime.now().toIso8601String(),
-    paidDate: null,
-    amountDue: "0.00",
-    paidAmount: null,
-    remarks: "",
-    remaining: "0.00",
-    status: null,
-    action: "",
-  );
+        sequenceNo: 0,
+        planId: 0,
+        description: "",
+        dueDate: DateTime.now().toIso8601String(),
+        paidDate: null,
+        amountDue: "0.00",
+        paidAmount: null,
+        remarks: "",
+        remaining: "0.00",
+        status: null,
+        action: "",
+      );
 
   // Convert model to JSON for database insertion or network requests
-  Map<String, dynamic> toJson() {
-    return {
+  Map<String, dynamic> toJson({bool includePlanId = false}) {
+    final Map<String, dynamic> json = {
       'sequence_no': sequenceNo,
       'description': description,
       'due_date': dueDate,
@@ -51,14 +54,21 @@ class InstallmentTableModel {
       'remarks': remarks,
       'balance': remaining,
       'status': status,
-      'action': action,
     };
+
+    // Conditionally include installment_plan_id
+    if (includePlanId) {
+      json['installment_plan_id'] = planId;
+    }
+
+    return json;
   }
 
   // Factory method to create an InstallmentTableModel from a JSON object
   factory InstallmentTableModel.fromJson(Map<String, dynamic> json) {
     return InstallmentTableModel(
       sequenceNo: json['sequence_no'] as int? ?? 0, // Handle null case
+      planId: json['installment_plan_id'] as int? ?? 0, // Handle null case
       description: json['description'] as String? ?? "",
       dueDate: json['due_date'] != null
           ? _formatDate(json['due_date'] as String)
@@ -83,6 +93,8 @@ class InstallmentTableModel {
 
   // Convert a list of JSON objects to a list of InstallmentTableModel
   static List<InstallmentTableModel> fromJsonList(List<dynamic> jsonList) {
-    return jsonList.map((json) => InstallmentTableModel.fromJson(json)).toList();
+    return jsonList
+        .map((json) => InstallmentTableModel.fromJson(json))
+        .toList();
   }
 }

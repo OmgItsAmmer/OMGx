@@ -74,7 +74,7 @@ class TLoader {
       maxWidth: !TDeviceUtils.isMobileScreen(Get.context!) ? 700 : null ,    );
   }
 
-  static errorsnackBar({required String title, String message = ''}) {
+  static errorSnackBar({required String title, String message = ''}) {
     Get.snackbar(
       title,
       message,

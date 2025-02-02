@@ -26,7 +26,7 @@ class _AppState extends State<App> {
         initialBinding: GeneralBindings(),
         getPages: TAppRoutes.pages,
 
-        initialRoute: TRoutes.responsiveScreenDesignScreen,
+        initialRoute: TRoutes.orders,
         unknownRoute: GetPage(
             name: '/page-not-found',
             page: () => const Scaffold(

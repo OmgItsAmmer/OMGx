@@ -82,7 +82,7 @@ class SalesSummary extends StatelessWidget {
                 salesController.discount.value = "0.0";
 
                 // Optionally show a message to the user
-                TLoader.errorsnackBar(title: "Invalid Discount", message: "Discount cannot exceed total amount.",
+                TLoader.errorSnackBar(title: "Invalid Discount", message: "Discount cannot exceed total amount.",
                   );
               } else {
                 salesController.discount.value = value;

@@ -12,11 +12,14 @@ class ProductTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-final productController = Get.put(ProductController());
+    final ProductController productController = Get.find<ProductController>();
+
     return  Obx(
           () {
 
-
+            if (productController.allProducts.isEmpty) {
+              return const Center(child: CircularProgressIndicator());
+            }
             return TPaginatedDataTable(
 
               sortAscending: true,

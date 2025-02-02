@@ -1,12 +1,8 @@
-import 'dart:ffi';
 
 import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
-import 'package:admin_dashboard_v3/Models/products/product_model.dart';
-import 'package:admin_dashboard_v3/Models/sales/sale_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
 import 'package:admin_dashboard_v3/repositories/installment/installment_repository.dart';
-import 'package:admin_dashboard_v3/repositories/products/product_repository.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
@@ -54,10 +50,94 @@ class InstallmentController extends GetxController {
       <InstallmentTableModel>[].obs;
   //final List<InstallmentTableModel> installmentPayments;
 
+
+  //Installment Table
+
+  final paidAmount = TextEditingController();
+  final remainingAmount = TextEditingController().obs;
+
   //final RxList<>
 
   //OrderDetails
   Rx<CustomerModel> selectedCustomer = CustomerModel.empty().obs;
+
+
+
+
+  Future<void> updateInstallmentPlan(int sequenceNo, int planId) async {
+    try {
+      // Step 1: Find the current installment in the local list
+      final currentInstallment = installmentPlans.firstWhere(
+            (installment) =>
+        installment.sequenceNo == sequenceNo &&
+            installment.planId == planId,
+        orElse: () => throw Exception('Current installment not found'),
+      );
+
+      // Step 2: Parse the paidAmount and remainingAmount
+      final paidAmountValue = double.tryParse(paidAmount.text) ?? 0.0;
+      final remainingAmountValue = double.tryParse(remainingAmount.value.text) ?? 0.0;
+
+      // Step 3: Update the current installment
+      currentInstallment.paidDate = DateTime.now().toIso8601String();
+      currentInstallment.status = 'paid';
+      currentInstallment.paidAmount = paidAmountValue.toString();
+      currentInstallment.remaining = (double.tryParse(currentInstallment.amountDue) ?? 0.0 - paidAmountValue).toString();
+
+      // Step 4: Find the next installment in the local list
+      final nextSequenceNo = sequenceNo + 1;
+      final nextInstallmentIndex = installmentPlans.indexWhere(
+            (installment) =>
+        installment.sequenceNo == nextSequenceNo &&
+            installment.planId == planId,
+      );
+
+      if (nextInstallmentIndex != -1) {
+        // If the next installment exists, update its amountDue
+        final nextInstallment = installmentPlans[nextInstallmentIndex];
+        final nextAmountDue = double.tryParse(nextInstallment.amountDue) ?? 0.0;
+        final updatedAmountDue = nextAmountDue + remainingAmountValue;
+
+        nextInstallment.amountDue = updatedAmountDue.toString();
+      } else {
+        // If the next installment doesn't exist, create a new one
+        final newInstallment = InstallmentTableModel(
+          sequenceNo: nextSequenceNo,
+          planId: planId,
+          description: currentInstallment.description, // Copy description from current installment
+          dueDate: DateTime.now().toIso8601String(), // Set due date as needed
+          paidDate: 'not yet',
+          amountDue: remainingAmountValue.toString(),
+          paidAmount: '0.0',
+          remarks: currentInstallment.remarks, // Copy remarks from current installment
+          remaining: remainingAmountValue.toString(),
+          status: 'pending',
+          action: currentInstallment.action, // Copy action from current installment
+        );
+        final paymentJson = newInstallment.toJson(includePlanId: true);
+        await installmentRepository.uploadInstallmentPayment(paymentJson);
+        installmentPlans.add(newInstallment);
+      }
+
+      // Step 5: Update the local state
+      installmentPlans.refresh(); // Notify listeners of changes
+
+      // Step 6: Call the repository to update the database
+      await installmentRepository.updateInstallmentPlan(
+        sequenceNo,
+        planId,
+        paidAmount.text,
+        remainingAmount.value.text,
+      );
+
+      // Optionally, show a success message
+      TLoader.successSnackBar(title: 'Success', message: 'Installment updated successfully');
+    } catch (e) {
+      // Handle errors and show a snackbar
+      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      print(e);
+    }
+  }
 
   Future<void> fetchSpecificInstallmentPayment(int orderId) async {
     try {
@@ -65,14 +145,14 @@ class InstallmentController extends GetxController {
       installmentPlans.clear();
       final planId = await installmentRepository.fetchPlanId(orderId);
       if (planId == null) {
-        TLoader.errorsnackBar(title: 'Fetch Plan Issue!');
+        TLoader.errorSnackBar(title: 'Fetch Plan Issue!');
       } else {
         final payments = await installmentRepository
             .fetchSpecifcInstallmentPlanItems(planId);
         installmentPlans.assignAll(payments);
       }
     } catch (e) {
-      TLoader.errorsnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     } finally {
       isLoading.value = false;
     }
@@ -99,7 +179,7 @@ class InstallmentController extends GetxController {
       }
     } catch (e) {
       // Handle errors
-      TLoader.errorsnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     } finally {
       // Set loading state to false
       isCustomerLoading.value = false;
@@ -108,7 +188,7 @@ class InstallmentController extends GetxController {
 
   void addProduct() {
     try {} catch (e) {
-      TLoader.errorsnackBar(title: 'Adding Data', message: e.toString());
+      TLoader.errorSnackBar(title: 'Adding Data', message: e.toString());
     }
   }
 
@@ -137,7 +217,7 @@ class InstallmentController extends GetxController {
       payableExMargin.value.text = _payableExMargin.toString();
       payableINCLMargin.value.text = _payableINCLMargin.toString();
     } catch (e) {
-      TLoader.errorsnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
   }
 
@@ -151,7 +231,7 @@ class InstallmentController extends GetxController {
       // Calculate the amount to be divided across installments
       double remainingAmount = billAmountValue - downPaymentValue;
       if (remainingAmount < 0) {
-        TLoader.errorsnackBar(
+        TLoader.errorSnackBar(
           title: 'Invalid Data',
           message: 'Down Payment cannot exceed Bill Amount.',
         );
@@ -228,7 +308,7 @@ class InstallmentController extends GetxController {
       // Log or process the generated plans as needed
       print(installmentPlans.map((plan) => plan.toJson()).toList());
     } catch (e) {
-      TLoader.errorsnackBar(
+      TLoader.errorSnackBar(
         title: 'Oh Snap!',
         message: e.toString(),
       );
@@ -239,6 +319,7 @@ class InstallmentController extends GetxController {
     try {
       int orderId = await salesController.checkOut();
       List<int> guarranteIds = await guarantorController.uploadGuarantors();
+
 
       // Now, call the uploadInstallmentPlan function to upload the generated plan
       final InstallmentPlanModel planModel = InstallmentPlanModel(
@@ -267,12 +348,13 @@ class InstallmentController extends GetxController {
       );
 
       // Call the uploadInstallmentPlan function
-      await installmentRepository.uploadInstallmentPlan(planModel, orderId);
+      await installmentRepository.uploadInstallmentPlanAndPayment(planModel, orderId);
     } catch (e) {
-      TLoader.errorsnackBar(
-        title: 'Oh Snap!',
+      TLoader.errorSnackBar(
+        title: 'Oh Snap! ya hoo',
         message: e.toString(),
       );
+      print(e);
     }
   }
 }

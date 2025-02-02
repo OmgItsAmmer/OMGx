@@ -1,5 +1,5 @@
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/views/brands/add_brand_form.dart';
+
 import 'package:admin_dashboard_v3/views/products/add_product_form.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -163,7 +163,7 @@ class CategoryScreen extends StatelessWidget {
                       width: 300,
                       child: ElevatedButton(
                         onPressed: () {
-                          Get.to(() => AddBrandForm(formTitle: 'Add Category'));
+                        //  Get.to(() => AddBrandForm(formTitle: 'Add Category'));
                         },
                         child: const Text('Add Category'),
                       ),

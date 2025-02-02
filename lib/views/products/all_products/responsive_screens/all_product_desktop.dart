@@ -2,8 +2,11 @@ import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.d
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
+import '../../../../controllers/product/product_controller.dart';
+import '../../../../routes/routes.dart';
 import '../table/product_table.dart';
 
 class AllProductDesktopScreen extends StatelessWidget {
@@ -11,6 +14,8 @@ class AllProductDesktopScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ProductController productController = Get.find<ProductController>();
+
     return   Expanded(
       child: SizedBox(
         // height: 900,
@@ -27,7 +32,7 @@ class AllProductDesktopScreen extends StatelessWidget {
 
                 //Table Body
                  TRoundedContainer(
-                  padding: EdgeInsets.all(TSizes.defaultSpace),
+                  padding: const EdgeInsets.all(TSizes.defaultSpace),
                   child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -37,7 +42,10 @@ class AllProductDesktopScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       SizedBox(width: 200,
-                      child: ElevatedButton(onPressed: (){}, child:  Text('Add Products',style: Theme.of(context).textTheme.bodyMedium!.apply(color: TColors.white) ,),),),
+                      child: ElevatedButton(onPressed: (){
+                        productController.cleanProductDetail();
+                        Get.toNamed(TRoutes.productsDetail);
+                      }, child:  Text('Add Products',style: Theme.of(context).textTheme.bodyMedium!.apply(color: TColors.white) ,),),),
                       SizedBox(width: 500 ,
                         child: TextFormField(
                           decoration: const InputDecoration(prefixIcon: Icon(Iconsax.search_normal),hintText: 'Search Anything'),

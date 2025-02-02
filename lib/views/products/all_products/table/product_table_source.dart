@@ -14,56 +14,62 @@ import '../../../orders/order_details/order_detail.dart';
 class ProductRow extends DataTableSource {
 
   ProductRow({required this.productCount});
-  final productController = Get.put(ProductController());
+  final ProductController productController = Get.find<ProductController>();
+
   final  productCount;
 
-  @override
-  DataRow? getRow(int index) {
-    final product = ProductModel.empty();
-    return DataRow2(
-        onTap: () => Get.toNamed(TRoutes.productsDetail, arguments: product),
-        selected: productController.selectedRows[index],
-        onSelectChanged: (value) {
-          productController.selectedRows[index] = value ?? false;
-         // productController.selectedRows.refresh(); // Refresh observable list
-        },
-        cells: [
-          DataCell(Text(
-            product.name.toString(),
-            style: Theme.of(Get.context!)
-                .textTheme
-                .bodyLarge!
-                .apply(color: TColors.primary),
-          )),
-          DataCell(Text(
-            product.stockQuantity.toString(),
-            style: Theme.of(Get.context!)
-                .textTheme
-                .bodyLarge!
-                .apply(color: TColors.primary),
-          )),
-          DataCell(Text(
-            product.basePrice.toString(),
-            style: Theme.of(Get.context!)
-                .textTheme
-                .bodyLarge!
-                .apply(color: TColors.primary),
-          )),
-          DataCell(Text(
-            product.brandID.toString(),
-            style: Theme.of(Get.context!)
-                .textTheme
-                .bodyLarge!
-                .apply(color: TColors.primary),
-          )), //TODO show brand names
-          DataCell(TTableActionButtons(
-            view: true,
-            edit: false,
-            onViewPressed:() => Get.toNamed(TRoutes.productsDetail, arguments: product), // TODO use get argument to send data in order detail screen
-            onDeletePressed: () {},
-          ))
-        ]);
-  }
+    @override
+    DataRow? getRow(int index) {
+      final product = productController.allProducts[index];
+      return DataRow2(
+          onTap: () {
+
+          productController.setProductDetail(product);
+
+            Get.toNamed(TRoutes.productsDetail, arguments: product);
+          },
+       //   selected: productController.selectedRows[index],
+          onSelectChanged: (value) {
+            productController.selectedRows[index] = value ?? false;
+           // productController.selectedRows.refresh(); // Refresh observable list
+          },
+          cells: [
+            DataCell(Text(
+              product.name.toString(),
+              style: Theme.of(Get.context!)
+                  .textTheme
+                  .bodyLarge!
+                  .apply(color: TColors.primary),
+            )),
+            DataCell(Text(
+              product.stockQuantity.toString(),
+              style: Theme.of(Get.context!)
+                  .textTheme
+                  .bodyLarge!
+                  .apply(color: TColors.primary),
+            )),
+            DataCell(Text(
+              product.basePrice.toString(),
+              style: Theme.of(Get.context!)
+                  .textTheme
+                  .bodyLarge!
+                  .apply(color: TColors.primary),
+            )),
+            DataCell(Text(
+              product.brandID.toString(),
+              style: Theme.of(Get.context!)
+                  .textTheme
+                  .bodyLarge!
+                  .apply(color: TColors.primary),
+            )), //TODO show brand names
+            DataCell(TTableActionButtons(
+              view: true,
+              edit: false,
+              onViewPressed:() => Get.toNamed(TRoutes.productsDetail, arguments: product), // TODO use get argument to send data in order detail screen
+              onDeletePressed: () {},
+            ))
+          ]);
+    }
 
   @override
   // TODO: implement isRowCountApproximate

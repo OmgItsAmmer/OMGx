@@ -42,5 +42,10 @@ static const productsDetail = '/ProductDetail';
   static const installment = '/installment';
 
 
+  //Brand Screens
+  static const brand = '/brands';
+  static const brandDetails = '/brandDetails';
+
+
 
 }

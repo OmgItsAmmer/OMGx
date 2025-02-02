@@ -63,7 +63,7 @@ class UserController extends GetxController {
 
       if (user == null) {
         // User is not logged in, navigate to login screen
-        TLoader.errorsnackBar(
+        TLoader.errorSnackBar(
             title: "Oh Snap!", message: "Session expired. Please log in again.");
         Get.offAll(() => const LoginScreen()); // Navigate and clear stack
         return;
@@ -84,7 +84,7 @@ class UserController extends GetxController {
 
 
     } catch (e) {
-      TLoader.errorsnackBar(title: "Oh Snap!", message: e.toString());
+      TLoader.errorSnackBar(title: "Oh Snap!", message: e.toString());
     } finally {
       profileLoading.value = false;
     }
@@ -239,7 +239,7 @@ class UserController extends GetxController {
     catch (e) {
       TFullScreenLoader.stopLoading();
 
-      TLoader.errorsnackBar(title: "Oh Snap!", message: e.toString());
+      TLoader.errorSnackBar(title: "Oh Snap!", message: e.toString());
     }
   }
 }

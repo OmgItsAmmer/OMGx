@@ -1,5 +1,6 @@
 import 'package:admin_dashboard_v3/common/widgets/icons/table_action_icon_buttons.dart';
 import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
+import 'package:admin_dashboard_v3/controllers/guarantors/guarantor_controller.dart';
 import 'package:admin_dashboard_v3/controllers/installments/installments_controller.dart';
 import 'package:admin_dashboard_v3/controllers/orders/orders_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
@@ -11,6 +12,7 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 
 import '../../../../common/widgets/containers/rounded_container.dart';
+import '../../../../common/widgets/loaders/tloaders.dart';
 import '../../../../routes/routes.dart';
 import '../../../../utils/constants/enums.dart';
 
@@ -23,6 +25,7 @@ class OrderRows extends DataTableSource {
     final OrderController orderController = Get.find<OrderController>();
     final InstallmentController installmentController = Get.find<InstallmentController>();
     final AddressController addressController = Get.find<AddressController>();
+    final GuarantorController guarantorController = Get.find<GuarantorController>();
     //order model
     final order = orderController.allOrders[index];
 
@@ -33,6 +36,7 @@ class OrderRows extends DataTableSource {
         installmentController.fetchSpecificInstallmentPayment(order.orderId);
         installmentController.fetchCustomerInfo(order.customerId ?? -1);
         addressController.fetchCustomerAddresses(order.customerId ?? -1);
+        guarantorController.fetchGuarantors(order.orderId);
 
           Get.toNamed(TRoutes.orderDetails, arguments: order);
         },
@@ -76,6 +80,7 @@ class OrderRows extends DataTableSource {
                   color: THelperFunctions.getOrderStatusColor(
                       OrderStatus.pending)),
             ),
+
           )),
            DataCell(Text(orderController.allOrders[index].totalPrice.toString(),)),
           DataCell(
@@ -88,7 +93,10 @@ class OrderRows extends DataTableSource {
                 installmentController.fetchSpecificInstallmentPayment(order.orderId);
                 Get.toNamed(TRoutes.orderDetails, arguments: order);
               },
-              onDeletePressed: (){},
+              onDeletePressed: (){
+
+
+              },
             )
           )//orderid
         ]);

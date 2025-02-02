@@ -14,6 +14,24 @@ class OrderRepository extends GetxController {
   static OrderRepository get instance => Get.find();
 
 
+  Future<void> updateStatus(int orderId, String newStatus) async {
+    try {
+      await supabase
+          .from('orders')
+          .update({ 'status': newStatus })
+          .eq('order_id', orderId);
+
+
+    TLoader.successSnackBar(title: 'Status Updated',message: 'Status is Updated to$newStatus');
+    } catch (e) {
+      // Show error if any
+      TLoader.errorSnackBar(title: 'Update Order Error', message: e.toString());
+      print(e);
+
+    }
+  }
+
+
       Future<int> uploadOrder(OrderModel order) async {
         try {
           // Insert the order into the 'orders' table
@@ -56,7 +74,7 @@ class OrderRepository extends GetxController {
 
         } catch (e) {
           // Show error if any
-          TLoader.errorsnackBar(title: 'Update Order Error', message: e.toString());
+          TLoader.errorSnackBar(title: 'Update Order Error', message: e.toString());
           print(e);
           return -1;
         }
@@ -80,7 +98,7 @@ class OrderRepository extends GetxController {
     }
     catch(e)
     {
-      TLoader.errorsnackBar(title: 'Order Fetch',message: e.toString());
+      TLoader.errorSnackBar(title: 'Order Fetch',message: e.toString());
       print(e.toString());
       return [];
     }
@@ -104,7 +122,7 @@ class OrderRepository extends GetxController {
 
       return orderItemList;
     } catch (e) {
-      TLoader.errorsnackBar(title: 'Order Item Fetch', message: e.toString());
+      TLoader.errorSnackBar(title: 'Order Item Fetch', message: e.toString());
       print(e.toString());
       return [];
     }

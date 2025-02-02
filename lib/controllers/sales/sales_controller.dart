@@ -36,7 +36,7 @@ class SalesController extends GetxController {
 
   //Variables
   Rx<String> selectedProductName = ''.obs;
-  Rx<UnitType> selectedUnit = UnitType.Unit.obs;
+  Rx<UnitType> selectedUnit = UnitType.item.obs;
   Rx<int> selectedProductId = (-1).obs;
   RxDouble netTotal = (0.0).obs;
   Rx<String> discount = ''.obs;
@@ -106,7 +106,7 @@ class SalesController extends GetxController {
    try{
      if ((!addUnitTotalKey.currentState!.validate() && !addUnitPriceAndQuantityKey.currentState!.validate()) ||
          selectedProductId == -1    ) {
-       TLoader.errorsnackBar(title: "Empty",message: 'Kindly fill all the Text fields before proceed');
+       TLoader.errorSnackBar(title: "Empty",message: 'Kindly fill all the Text fields before proceed');
        return;
      }
 
@@ -132,7 +132,7 @@ class SalesController extends GetxController {
    }
    catch(e)
     {
-      TLoader.errorsnackBar(title: 'Adding Data',message: e.toString());
+      TLoader.errorSnackBar(title: 'Adding Data',message: e.toString());
     }
   }
 
@@ -141,19 +141,19 @@ class SalesController extends GetxController {
     try {
       // Validate that there are sales to checkout
       if (allSales.isEmpty) {
-        TLoader.errorsnackBar(title: 'Checkout Error', message: 'No products added to checkout.');
+        TLoader.errorSnackBar(title: 'Checkout Error', message: 'No products added to checkout.');
         return -1;
       }
       if ((!salesmanFormKey.currentState!.validate() && !customerFormKey.currentState!.validate() && !cashierFormKey.currentState!.validate()) ||
            customerNameController.text == "" || selectedDate.value == 'Select Date' || salesmanNameController.text == ""  )  {
-        TLoader.errorsnackBar(title: 'Checkout Error', message: 'Fill all the fields.');
+        TLoader.errorSnackBar(title: 'Checkout Error', message: 'Fill all the fields.');
         return -1;
       }
 
       // Validate paid amount
       double paidAmountValue = double.tryParse(paidAmount.text.trim()) ?? 0.0;
       if (paidAmountValue < 0) {
-        TLoader.errorsnackBar(title: 'Payment Error', message: 'Enter a valid paid amount.');
+        TLoader.errorSnackBar(title: 'Payment Error', message: 'Enter a valid paid amount.');
         return -1;
       }
   //    String formattedDate = DateTime.parse(selectedDate.value).toUtc().toIso8601String();
@@ -191,7 +191,7 @@ class SalesController extends GetxController {
       remainingAmount.value = TextEditingController(); // Optional if needed
       return orderId;
     } catch (e) {
-      TLoader.errorsnackBar(title: 'Checkout Error', message: e.toString());
+      TLoader.errorSnackBar(title: 'Checkout Error', message: e.toString());
       return -1;
     }
   }
@@ -208,7 +208,7 @@ class SalesController extends GetxController {
 
   }
   catch(e) {
-    TLoader.errorsnackBar(title: 'Oh Snap!', message: e.toString());
+    TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     return '';
 
   }

@@ -36,23 +36,31 @@ class AddressController extends GetxController {
 
 
   Future<void> fetchCustomerAddresses(int customerId) async {
-    allCustomerAddresses.clear();
-    allCustomerAddressesLocation.clear();
-    final customerAddress = await addressRepository.fetchAddressTableForSpecificCustomer(customerId);
-    allCustomerAddresses.assignAll(customerAddress);
-    final locations = allCustomerAddresses.map((address) => address.location).toList();
-    allCustomerAddressesLocation.assignAll(locations);
-   print(allCustomerAddressesLocation);
-
-
 
     try {
+      if (kDebugMode) {
+        print(customerId);
+      }
+      isLoading.value = true;
+      allCustomerAddresses.clear();
+      allCustomerAddressesLocation.clear();
+      final customerAddress = await addressRepository.fetchAddressTableForSpecificCustomer(customerId);
+      allCustomerAddresses.assignAll(customerAddress);
+      final locations = allCustomerAddresses.map((address) => address.location).toList();
+      allCustomerAddressesLocation.assignAll(locations);
+      if (kDebugMode) {
+        print(allCustomerAddresses[0].location);
+      }
 
     } catch (e) {
-      TLoader.errorsnackBar(title: e.toString()); //TODO remove it
+      TLoader.errorSnackBar(title: e.toString()); //TODO remove it
       if (kDebugMode) {
         print(e);
       }
+
+    }
+    finally{
+      isLoading.value = false;
 
     }
 

@@ -32,7 +32,7 @@ class CustomerRepository extends GetxController {
       }
       return customerList;
     } catch (e) {
-      TLoader.errorsnackBar(title: 'Oh Snap', message: e.toString());
+      TLoader.errorSnackBar(title: 'Oh Snap', message: e.toString());
       return [];
     }
 

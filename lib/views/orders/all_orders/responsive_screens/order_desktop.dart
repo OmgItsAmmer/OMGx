@@ -11,22 +11,27 @@ class OrdersDesktopScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Expanded(
+    return  Expanded(
       child: SizedBox(
         // height: 760, //flexible can be used
         child: SingleChildScrollView(
           child: Padding(
-            padding: EdgeInsets.all(TSizes.defaultSpace),
+            padding: const EdgeInsets.all(TSizes.defaultSpace),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+
               children: [
                 //Bread crumbs
       
                 //Table Body
                 TRoundedContainer(
+
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      OrderTable()
+                      Text('Orders',style: Theme.of(context).textTheme.headlineMedium,),
+
+
+                      const OrderTable()
                     ],
                   ),
                 )
