@@ -1,18 +1,22 @@
 import 'package:admin_dashboard_v3/routes/routes.dart';
 import 'package:admin_dashboard_v3/routes/routes_MIDDLEWARE.dart';
 import 'package:admin_dashboard_v3/views/brands/all_brands/brands.dart';
+import 'package:admin_dashboard_v3/views/category/all_categories/category.dart';
 import 'package:admin_dashboard_v3/views/login/login.dart';
 import 'package:admin_dashboard_v3/views/orders/all_orders/orders.dart';
 import 'package:get/get.dart';
 
 import '../repsonsive_screen.dart';
 import '../views/brands/brand_details/brand_detail_screen.dart';
+import '../views/category/categories_detail/category_detail.dart';
 import '../views/customer/all_customer/customer.dart';
 import '../views/customer/customer_detail/customer_detail.dart';
 import '../views/installments/installments.dart';
+import '../views/media/media_screen.dart';
 import '../views/orders/order_details/order_detail.dart';
 import '../views/products/all_products/all_products.dart';
 import '../views/products/product_detail/product_detail.dart';
+import '../views/profile/profile/profile_screen.dart';
 import '../views/sales/sales.dart';
 import '../views/sales/widgets/cashier_info.dart';
 import '../views/salesman/all_salesman/salesman.dart';
@@ -46,9 +50,22 @@ class TAppRoutes {
     GetPage(name: TRoutes.installment, page: () => const InstallmentsScreen(),middlewares: [TRouteMiddleeare()] ),
 
 
-    //Customer Screebs
+    //Brand Screebs
     GetPage(name: TRoutes.brand, page: () => const AllBrands(),middlewares: [TRouteMiddleeare()] ),
     GetPage(name: TRoutes.brandDetails, page: () => const BrandDetailScreen(),middlewares: [TRouteMiddleeare()] ),
+
+    //Brand Screebs
+    GetPage(name: TRoutes.category, page: () => const AllCategoryScreen(),middlewares: [TRouteMiddleeare()] ),
+    GetPage(name: TRoutes.categoryDetails, page: () => const CategoryDetailScreen(),middlewares: [TRouteMiddleeare()] ),
+
+
+    //Profile
+    GetPage(name: TRoutes.profileScreen, page: () => const ProfileScreen(),middlewares: [TRouteMiddleeare()] ),
+
+
+
+    //Media Screens
+    GetPage(name: TRoutes.mediaScreen, page: () => const MediaScreen(),middlewares: [TRouteMiddleeare()] ),
 
 
   ];

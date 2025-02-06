@@ -9,7 +9,46 @@ import '../../main.dart';
 
 class CategoryRepository {
 
+  Future<void> saveOrUpdateCategoryRepo(Map<String, dynamic> json) async {
+    try {
 
+
+      if (json['category_id'] != null) {
+        // Fetch the brand with the given brandID
+        final response = await supabase
+            .from('categories')
+            .select()
+            .eq('category_id', json['category_id'])
+            .maybeSingle(); // Avoids exception if no brand is found
+
+        if (response != null) {
+          // If the brand exists, update it
+          await supabase
+              .from('categories')
+              .update(json)
+              .eq('category_id', json['category_id']);
+        } else {
+          // If no existing brand is found, insert a new one
+          // Remove the brandID to let the database auto-generate it
+          json.remove('category_id');
+          await supabase.from('categories').insert(json);
+        }
+      } else {
+        // If brandID is not provided, insert a new brand
+        // Ensure brandID is not present in the json
+        json.remove('category_id');
+        await supabase.from('categories').insert(json);
+      }
+    } on PostgrestException catch (e) {
+      // Handle Supabase-specific errors
+      TLoader.errorSnackBar(title: 'categories Repo', message: e.message);
+      rethrow;
+    } catch (e) {
+      // Handle other errors
+      TLoader.errorSnackBar(title: 'categories Repo', message: e.toString());
+      rethrow;
+    }
+  }
 
   Future<List<CategoryModel>> fetchCategories() async {
     try {

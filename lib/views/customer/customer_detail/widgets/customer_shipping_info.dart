@@ -1,15 +1,20 @@
+import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-import '../../../../utils/constants/colors.dart';
+import '../../../../controllers/address/address_controller.dart';
 import '../../../../utils/constants/sizes.dart';
-import '../../../profile/widgets/profile_menu.dart';
+import '../../../profile/old/widgets/profile_menu.dart';
 
 class CustomerShippingInfo extends StatelessWidget {
-  const CustomerShippingInfo({super.key});
+  const CustomerShippingInfo({super.key, required this.customerModel});
+  final CustomerModel customerModel;
 
   @override
   Widget build(BuildContext context) {
+    final AddressController addressController = Get.find<AddressController>();
+
     return TRoundedContainer(
       width: 400,
       padding: const EdgeInsets.all(TSizes.defaultSpace),
@@ -27,7 +32,7 @@ class CustomerShippingInfo extends StatelessWidget {
 
           TProfilemenu(
             title: "Name",
-            value: 'Ammer Saeed',
+            value: customerModel.fullName,
             onPressed: () {},
             isTap: false,
           ),
@@ -35,7 +40,7 @@ class CustomerShippingInfo extends StatelessWidget {
 
           TProfilemenu(
             title: "City",
-            value: 'Pakistan',
+            value: addressController.allCustomerAddresses[0].city,
             onPressed: () {},
             isTap: false,
           ),
@@ -43,14 +48,14 @@ class CustomerShippingInfo extends StatelessWidget {
 
           TProfilemenu(
             title: "Phone Number",
-            value: '03236508184',
+            value: customerModel.phoneNumber,
             onPressed: () {},
             isTap: false,
           ),
           const SizedBox(height: TSizes.spaceBtwItems,),
           TProfilemenu(
             title: "Address",
-            value: 'Chishtia park colony',
+            value: addressController.allCustomerAddresses[0].location,
             onPressed: () {},
             isTap: false,
           ),

@@ -1,4 +1,7 @@
 import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
+import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
+import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
+import 'package:admin_dashboard_v3/controllers/orders/orders_controller.dart';
 import 'package:admin_dashboard_v3/routes/routes.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
@@ -15,32 +18,41 @@ import '../../../../common/widgets/icons/table_action_icon_buttons.dart';
 import '../../../orders/order_details/order_detail.dart';
 
 class CustomerRow extends DataTableSource {
+  CustomerRow({required this.customerCount});
+
+  final CustomerController customerController = Get.find<CustomerController>();
+  final AddressController addressController = Get.find<AddressController>();
+  final OrderController orderController = Get.find<OrderController>();
+  final customerCount;
   @override
   DataRow? getRow(int index) {
-    final customer = CustomerModel.empty();
+    final customer = customerController.allCustomers[index];
     return DataRow2(
-        onTap: () => Get.toNamed(TRoutes.productsDetail, arguments: customer),
+        onTap: () async {
+        await  addressController.fetchCustomerAddresses(customer.customerId);
+        await orderController.fetchCustomerOrders(customer.customerId);
+        orderController.setRecentOrderDay();
+        orderController.setAverageTotalAmount();
+
+          Get.toNamed(TRoutes.customerDetails, arguments: customer);
+        },
         selected: false,
         onSelectChanged: (value) {},
         cells: [
-          DataCell(Row(
-            children: [
-              Text(
-                customer.fullName.toString(),
-                style: Theme.of(Get.context!)
-                    .textTheme
-                    .bodyLarge!
-                    .apply(color: TColors.primary),
-              ),
-              const SizedBox(width: TSizes.spaceBtwInputFields/2,),
-              const TRoundedImage(
-                width: 50,
-                height: 50,
-                imageurl: TImages.user,
-                isNetworkImage: false,
-              )
-            ],
+          const DataCell(TRoundedImage(
+          width: 50,
+          height: 50,
+          imageurl: TImages.user,
+          isNetworkImage: false,
+        )),
+          DataCell(Text(
+            customer.fullName.toString(),
+            style: Theme.of(Get.context!)
+                .textTheme
+                .bodyLarge!
+                .apply(color: TColors.primary),
           )),
+
           DataCell(Text(
             customer.email.toString(),
             style: Theme.of(Get.context!)
@@ -60,7 +72,7 @@ class CustomerRow extends DataTableSource {
             view: false,
             edit: true,
 
-            onViewPressed: () => Get.toNamed(TRoutes.productsDetail,
+            onViewPressed: () => Get.toNamed(TRoutes.customerDetails,
                 arguments:
                     customer), // TODO use get argument to send data in order detail screen
             onDeletePressed: () {},
@@ -74,7 +86,7 @@ class CustomerRow extends DataTableSource {
 
   @override
   // TODO: implement rowCount
-  int get rowCount => 10;
+  int get rowCount => customerCount;
 
   @override
   // TODO: implement selectedRowCount

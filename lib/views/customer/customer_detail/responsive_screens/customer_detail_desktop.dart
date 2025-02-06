@@ -1,14 +1,16 @@
+import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:admin_dashboard_v3/views/orders/all_orders/table/order_table.dart';
 import 'package:flutter/material.dart';
 
+import '../table/customer_order_table.dart';
 import '../widgets/customer_shipping_info.dart';
 import '../widgets/user_info.dart';
 
 class CustomerDetailDesktop extends StatelessWidget {
-  const CustomerDetailDesktop({super.key});
-
+  const CustomerDetailDesktop({super.key, required this.customerModel});
+final CustomerModel customerModel;
   @override
   Widget build(BuildContext context) {
     return Expanded(
@@ -21,7 +23,7 @@ class CustomerDetailDesktop extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Ammer Saeed',
+                  customerModel.fullName,
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 const SizedBox(
@@ -30,18 +32,18 @@ class CustomerDetailDesktop extends StatelessWidget {
                   Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Expanded(
+                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           //user Info
-                          UserInfo(),
-                          SizedBox(
+                          UserInfo(customerModel: customerModel,),
+                          const SizedBox(
                             height: TSizes.spaceBtwSections,
                           ),
 
                           //shipping info
-                          CustomerShippingInfo(),
+                           CustomerShippingInfo(customerModel: customerModel ,),
                         ],
                       ),
                     ),
@@ -51,7 +53,7 @@ class CustomerDetailDesktop extends StatelessWidget {
                     Expanded(
                         flex: 2,
                         child: TRoundedContainer(
-                            padding: EdgeInsets.all(TSizes.defaultSpace),
+                            padding: const EdgeInsets.all(TSizes.defaultSpace),
                             child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -61,7 +63,7 @@ class CustomerDetailDesktop extends StatelessWidget {
                               style: Theme.of(context).textTheme.headlineMedium,
                             ),
                             const SizedBox(height: TSizes.spaceBtwSections,),
-                            const OrderTable(),
+                            const CustomerOrderTable(),
                           ],
                         )))
                   ],

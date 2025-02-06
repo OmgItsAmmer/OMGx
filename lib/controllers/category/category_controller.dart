@@ -21,19 +21,75 @@ class CategoryController extends GetxController {
 
   // Controller for the text field to add a new brand //Product Detail
 
+
+  final TextEditingController categoryName = TextEditingController();
+  final TextEditingController productCount = TextEditingController();
+  GlobalKey<FormState> categoryDetail =
+  GlobalKey<FormState>();
+
   @override
   void onInit() {
     fetchCategories();
     super.onInit();
   }
 
-  // Add a new brand
-  // void addBrand(String newBrand) {
-  //   if (newBrand.trim().isNotEmpty && !brands.contains(newBrand.trim())) {
-  //     brands.add(newBrand.trim()); // Add the new brand
-  //     selectedBrand.value = newBrand.trim(); // Select the new brand
-  //   }
-  // }
+
+
+  Future<void> saveOrUpdate(int? categoryId) async {
+    try{
+      // Validate the form
+      if (!categoryDetail.currentState!.validate()) {
+        TLoader.errorSnackBar(
+          title: "Empty Fields",
+          message: 'Kindly fill all the fields before proceeding.',
+        );
+        return;
+      }
+
+      final categoryModel = CategoryModel(
+        categoryId: categoryId ?? -1,
+        categoryName: categoryName.text.trim(),
+
+
+      );
+      final json = categoryModel.toJson();
+      categoryRepository.saveOrUpdateCategoryRepo(json);
+      cleanCategoryDetail();
+      TLoader.successSnackBar(title: 'Brand Uploaded!');
+
+    }
+    catch(e){
+
+      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      if (kDebugMode) {
+        print(e);
+      }
+    }
+
+  }
+
+  void setCategoryDetail(CategoryModel category) {
+    try {
+      categoryName.text = category.categoryName ?? ' ';
+    //  productCount.text = category.image.toString(); //Image
+
+
+
+
+    } catch (e) {
+      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+    }
+  }
+
+
+  void cleanCategoryDetail() {
+    try {
+      categoryName.text = '';
+      productCount.text = '';
+    } catch (e) {
+      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+    }
+  }
 
 
   Future<void> fetchCategories() async {
@@ -43,7 +99,7 @@ class CategoryController extends GetxController {
 
       //Brand names
       final names = allCategories
-          .map((brand) => brand.categoryName ?? '') // Replace null with empty string
+          .map((category) => category.categoryName ?? '') // Replace null with empty string
           .toList();
 
       categoriesNames.assignAll(names);

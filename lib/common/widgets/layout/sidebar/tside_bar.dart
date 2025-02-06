@@ -49,9 +49,12 @@ class TSideBar extends StatelessWidget {
                  const TMenuItem(icon: Iconsax.people,itemName: 'Customers', route: TRoutes.customer,),
                  const TMenuItem(icon: Iconsax.people5,itemName: 'Salesman', route: TRoutes.salesman,),
                  const TMenuItem(icon: Iconsax.people5,itemName: 'Brands', route: TRoutes.brand,),
-                 const TMenuItem(icon: Iconsax.people5,itemName: 'Categories', route: TRoutes.installment,),
+                 const TMenuItem(icon: Iconsax.people5,itemName: 'Categories', route: TRoutes.category,),
 
-                  //  Text('OTHER',style: Theme.of(context).textTheme.bodySmall!.apply(letterSpacingDelta: 1.2),),
+                   Text('OTHER',style: Theme.of(context).textTheme.bodySmall!.apply(letterSpacingDelta: 1.2),),
+                    const TMenuItem(icon: Iconsax.people5,itemName: 'Profile', route: TRoutes.profileScreen,),
+                    const TMenuItem(icon: Iconsax.image,itemName: 'Media', route: TRoutes.mediaScreen,),
+
 
 
                   ],

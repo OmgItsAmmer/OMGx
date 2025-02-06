@@ -14,6 +14,27 @@ class OrderRepository extends GetxController {
   static OrderRepository get instance => Get.find();
 
 
+  //fetch
+  Future<List<OrderModel>> fetchCustomerOrders(int customerId) async {
+    try {
+      final data =  await supabase
+          .from('orders')
+          .select().eq('customer_id', customerId);
+       print(data);
+      final addressList = data.map((item) {
+        return OrderModel.fromJson(item);
+      }).toList();
+      // if (kDebugMode) {
+      //   print(addressList[1].country);
+      // }
+      return addressList;
+
+    } catch (e) {
+      TLoader.warningSnackBar(title: "Fetch Customer Orders", message: e.toString());
+      return [];
+    }
+  }
+
   Future<void> updateStatus(int orderId, String newStatus) async {
     try {
       await supabase

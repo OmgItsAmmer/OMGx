@@ -16,7 +16,7 @@ enum TextSizes { small, medium, large }
 
 enum ImageType { asset, network, memory, file }
 
-enum MediaCategory { folders, banners, brands, categories, products, users }
+enum MediaCategory { folders, brands, categories, products, users,customers,salesman,guarantees }
 
 enum OrderStatus { pending, processing, shipped, delivered, cancelled }
 

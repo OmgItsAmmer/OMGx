@@ -1,16 +1,10 @@
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
-import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
 import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
-import 'package:admin_dashboard_v3/controllers/user/user_controller.dart';
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
-import 'package:admin_dashboard_v3/views/products/all_products/table/product_table.dart';
 import 'package:admin_dashboard_v3/views/sales/widgets/sale_action_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
-import 'package:get_storage/get_storage.dart';
 
 import '../../../controllers/sales/sales_controller.dart';
 import '../table/sale_table.dart';

@@ -24,7 +24,7 @@ class BrandTable extends StatelessWidget {
             sortAscending: true,
             minWidth: 700,
             columns: const [
-              DataColumn2(label: Text('Product')),
+              DataColumn2(label: Text('Brand')),
               DataColumn2(label: Text('Products')),
               // DataColumn2(label: Text('Sold')),
               // DataColumn2(label: Text('Brand')),

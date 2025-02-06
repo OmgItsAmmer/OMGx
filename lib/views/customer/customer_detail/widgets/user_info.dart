@@ -1,17 +1,27 @@
+import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
 import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-import '../../../profile/profile_detail.dart';
-import '../../../profile/widgets/profile_menu.dart';
+import '../../../../common/widgets/tiles/user_advance_info_tile.dart';
+import '../../../../controllers/address/address_controller.dart';
+import '../../../../controllers/orders/orders_controller.dart';
+import '../../../profile/old/widgets/profile_menu.dart';
 
 class UserInfo extends StatelessWidget {
-  const UserInfo({super.key});
+  const UserInfo({super.key, required this.customerModel});
+  final CustomerModel customerModel;
 
   @override
   Widget build(BuildContext context) {
+    final AddressController addressController = Get.find<AddressController>();
+    final OrderController orderController = Get.find<OrderController>();
+
+
+
     return TRoundedContainer(
       width: 400,
       padding: const EdgeInsets.all(TSizes.defaultSpace),
@@ -39,12 +49,12 @@ class UserInfo extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Ammer Saeed',
+                    customerModel.fullName,
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: TSizes.spaceBtwItems/2,),
                   Text(
-                    'ammersaeed21@gmail.com',
+                    customerModel.email,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -55,43 +65,43 @@ class UserInfo extends StatelessWidget {
           const SizedBox(height: TSizes.spaceBtwItems,),
           TProfilemenu(
             title: "Name",
-            value: 'Ammer Saeed',
+            value: customerModel.fullName,
             onPressed: () {},
             isTap: false,
           ),
           const SizedBox(height: TSizes.spaceBtwItems,),
           TProfilemenu(
             title: "City",
-            value: 'Chishtian',
+            value: addressController.allCustomerAddresses[0].city,
             onPressed: () {},
             isTap: false,
           ),
           const SizedBox(height: TSizes.spaceBtwItems,),
           TProfilemenu(
             title: "Phone Number",
-            value: '03236508184',
+            value: customerModel.phoneNumber,
             onPressed: () {},
             isTap: false,
           ),
           const SizedBox(height: TSizes.spaceBtwItems,),
           const Divider(),
-          const Row(
+           Row(
 
            // mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Expanded(child: OUserAdvanceInfoTile(firstTile: 'Last Order', secondTile: '7 Days Ago')),
-              Expanded(child: OUserAdvanceInfoTile(firstTile: 'Average Order', secondTile: '3500')),
+              Expanded(child: OUserAdvanceInfoTile(firstTile: 'Last Order', secondTile: orderController.recentOrderDay )),
+              Expanded(child: OUserAdvanceInfoTile(firstTile: 'Average Order', secondTile: orderController.averageTotalAmount)),
             ],
           ),
           const SizedBox(height: TSizes.spaceBtwSections),
           const Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Expanded(child: OUserAdvanceInfoTile(firstTile: 'Last Order', secondTile: '7 Days Ago')),
-              Expanded(child: OUserAdvanceInfoTile(firstTile: 'Average Order', secondTile: '3500')),
+              Expanded(child: OUserAdvanceInfoTile(firstTile: ' Registered At ', secondTile: '7 Days Ago')),
+              Expanded(child: OUserAdvanceInfoTile(firstTile: 'Email Marketing', secondTile: 'UnSubscribed')),
             ],
           ),
-          
+
 
 
 

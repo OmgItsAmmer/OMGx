@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 
 import '../controllers/category/category_controller.dart';
 import '../controllers/customer/customer_controller.dart';
+import '../controllers/media/media_controller.dart';
 import '../controllers/orders/orders_controller.dart';
 import '../controllers/salesman/salesman_controller.dart';
 import '../network_manager.dart';
@@ -27,6 +28,7 @@ class GeneralBindings extends Bindings {
     Get.put(OrderController());
     Get.put(BrandController());
     Get.put(CategoryController());
+  //  Get.put(MediaController());
 
     // final UserRespository userRespository = Get.find<UserRespository>();
 

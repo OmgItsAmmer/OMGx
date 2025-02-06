@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
+import '../../../../Models/brand/brand_model.dart';
 import '../../../../controllers/product/product_controller.dart';
 import '../../../../routes/routes.dart';
 
@@ -45,7 +46,7 @@ class AllBrandsDesktopScreen extends StatelessWidget {
                           SizedBox(width: 200,
                             child: ElevatedButton(onPressed: (){
                               brandController.cleanBrandDetail();
-                              Get.toNamed(TRoutes.brandDetails);
+                              Get.toNamed(TRoutes.brandDetails,arguments: BrandModel.empty());
                             }, child:  Text('Add New Brand',style: Theme.of(context).textTheme.bodyMedium!.apply(color: TColors.white) ,),),),
                           SizedBox(width: 500 ,
                             child: TextFormField(
