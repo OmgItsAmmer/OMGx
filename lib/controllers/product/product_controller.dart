@@ -69,6 +69,7 @@ class ProductController extends GetxController {
         brandID: selectedBrandId,
         categoryId: selectedCategoryId,
 
+
       );
       final json = productModel.toJson();
 

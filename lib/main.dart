@@ -10,6 +10,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_strategy/url_strategy.dart';
+import 'package:window_manager/window_manager.dart';
 
 import 'app.dart';
 
@@ -19,6 +20,14 @@ import 'app.dart';
 final supabase = Supabase.instance.client;
 
 Future<void> main() async {
+
+  // WidgetsFlutterBinding.ensureInitialized();
+  // await windowManager.ensureInitialized();
+  //
+  // // Set the window to be fullscreen
+  // windowManager.waitUntilReadyToShow().then((_) async {
+  //   await windowManager.setFullScreen(true);
+  // });
   //Widget Binding
 
   WidgetsFlutterBinding.ensureInitialized();

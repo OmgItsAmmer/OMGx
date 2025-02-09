@@ -10,8 +10,10 @@ import '../controllers/category/category_controller.dart';
 import '../controllers/customer/customer_controller.dart';
 import '../controllers/media/media_controller.dart';
 import '../controllers/orders/orders_controller.dart';
+import '../controllers/product/product_images_controller.dart';
 import '../controllers/salesman/salesman_controller.dart';
 import '../network_manager.dart';
+import '../repositories/authentication/authicatioon_repository.dart';
 import '../repositories/user/user_repository.dart';
 
 class GeneralBindings extends Bindings {
@@ -28,7 +30,9 @@ class GeneralBindings extends Bindings {
     Get.put(OrderController());
     Get.put(BrandController());
     Get.put(CategoryController());
-  //  Get.put(MediaController());
+    Get.put(ProductImagesController());
+   Get.put(MediaController());
+   //Get.put(AuthenticationRepository());
 
     // final UserRespository userRespository = Get.find<UserRespository>();
 

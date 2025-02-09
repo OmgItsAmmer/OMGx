@@ -1,4 +1,5 @@
 
+import 'package:admin_dashboard_v3/routes/routes.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -69,7 +70,8 @@ class LoginController extends GetxController {
       TFullScreenLoader.stopLoading();
 
       //Redirect
-      AuthenticationRepository.instance.screenRedirect();
+      // AuthenticationRepository.instance.screenRedirect();
+      Get.toNamed(TRoutes.mediaScreen);
     } catch (e) {
       TFullScreenLoader.stopLoading();
       TLoader.errorSnackBar(title: 'Oh Snap', message: e.toString());

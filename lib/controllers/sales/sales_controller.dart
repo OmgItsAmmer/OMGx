@@ -1,18 +1,13 @@
-import 'dart:ffi';
 
-import 'package:admin_dashboard_v3/Models/products/product_model.dart';
 import 'package:admin_dashboard_v3/Models/sales/sale_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/controllers/user/user_controller.dart';
-import 'package:admin_dashboard_v3/repositories/products/product_repository.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
 import '../../Models/orders/order_item_model.dart';
-import '../../common/widgets/dropdown_search/drop_down_searchbar.dart';
 import '../../repositories/order/order_repository.dart';
-import '../address/address_controller.dart';
 import '../customer/customer_controller.dart';
 
 class SalesController extends GetxController {

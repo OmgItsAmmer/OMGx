@@ -59,6 +59,11 @@ dependencies:
   get: ^4.6.5
   get_storage: ^2.1.1
 
+  #reports
+  pdf: ^3.11.2
+  printing: ^5.14.0
+  path_provider: ^2.1.1
+
 
 
 
@@ -71,6 +76,7 @@ dependencies:
   js: ^0.6.5
   supabase_flutter: ^2.8.3
   vtable: ^0.4.0
+  window_manager: ^0.4.3
 
 
 

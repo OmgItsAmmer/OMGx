@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
+import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
@@ -99,12 +100,15 @@ class MediaUploader extends StatelessWidget {
                         const SizedBox(
                           width: TSizes.spaceBtwItems,
                         ),
-                        MediaFolderDropDown(
-                          onChanged: (MediaCategory? newValue) {
-                            if (newValue != null) {
-                              mediaController.selectedPath.value = newValue;
-                            }
-                          },
+                        SizedBox(
+                          width: 150,
+                          child: MediaFolderDropDown(
+                            onChanged: (MediaCategory? newValue) {
+                              if (newValue != null) {
+                                mediaController.selectedPath.value = newValue;
+                              }
+                            },
+                          ),
                         ),
                       ],
                     ),
@@ -122,7 +126,15 @@ class MediaUploader extends StatelessWidget {
                         SizedBox(
                           width: TSizes.buttonWidth,
                           child: ElevatedButton(
-                              onPressed: () {}, child: const Text('Upload')),
+                              onPressed: () {
+                                if(mediaController.droppedFiles.isNotEmpty){
+                                  mediaController.uploadImages(mediaController.selectedPath.value.toString().split('.').last);
+                                }
+                                else{
+                                  TLoader.errorSnackBar(title: 'No Image Found', message: 'Kindly add the image first');
+                                }
+
+                              }, child: const Text('Upload')),
                         )
                       ],
                     ),
@@ -131,85 +143,48 @@ class MediaUploader extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: TSizes.spaceBtwSections,),
-                const Wrap(
+                Wrap(
                   alignment: WrapAlignment.start,
-                  spacing: TSizes.spaceBtwItems/2,
-                  runSpacing: TSizes.spaceBtwItems/2,
-                  children: [
-                    TRoundedImage(imageurl: TImages.productImage1,
-                      width: 90,
-                      height: 90,
-                      padding:EdgeInsets.all( TSizes.sm),
-                      backgroundColor: TColors.primaryBackground,
+                  spacing: TSizes.spaceBtwItems / 2,
+                  runSpacing: TSizes.spaceBtwItems / 2,
+                  children: mediaController.droppedFiles
+                      .map((file) => GestureDetector(
+                    onTap: () {},
+                    child: SizedBox(
+                      width: 140,
+                      height: 180,
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: TRoundedImage(
+                           //   backgroundColor: TColors.primaryBackground,
+                                width: 150,
+                                height: 100,
+                                imageurl: file.path,
+                              isNetworkImage: false,
+                              isFileImage: true,
+                              )
+                          ),
 
-                    ),
-                      TRoundedImage(imageurl: TImages.productImage1,
-                        width: 90,
-                        height: 90,
-                        padding:EdgeInsets.all( TSizes.sm),
-                        backgroundColor: TColors.primaryBackground,
-
+                        ],
                       ),
-                      TRoundedImage(imageurl: TImages.productImage1,
-                        width: 90,
-                        height: 90,
-                        padding:EdgeInsets.all( TSizes.sm),
-                        backgroundColor: TColors.primaryBackground,
-
-                      ),
-                      TRoundedImage(imageurl: TImages.productImage1,
-                        width: 90,
-                        height: 90,
-                        padding:EdgeInsets.all( TSizes.sm),
-                        backgroundColor: TColors.primaryBackground,
-
-                      ),
-                      TRoundedImage(imageurl: TImages.productImage1,
-                        width: 90,
-                        height: 90,
-                        padding:EdgeInsets.all( TSizes.sm),
-                        backgroundColor: TColors.primaryBackground,
-
-                      ), TRoundedImage(imageurl: TImages.productImage1,
-                        width: 90,
-                        height: 90,
-                        padding:EdgeInsets.all( TSizes.sm),
-                        backgroundColor: TColors.primaryBackground,
-
-                      ), TRoundedImage(imageurl: TImages.productImage1,
-                        width: 90,
-                        height: 90,
-                        padding:EdgeInsets.all( TSizes.sm),
-                        backgroundColor: TColors.primaryBackground,
-
-                      ), TRoundedImage(imageurl: TImages.productImage1,
-                        width: 90,
-                        height: 90,
-                        padding:EdgeInsets.all( TSizes.sm),
-                        backgroundColor: TColors.primaryBackground,
-
-                      ), TRoundedImage(imageurl: TImages.productImage1,
-                      width: 90,
-                      height: 90,
-                      padding:EdgeInsets.all( TSizes.sm),
-                      backgroundColor: TColors.primaryBackground,
-
                     ),
-                    TRoundedImage(imageurl: TImages.productImage1,
-                      width: 90,
-                      height: 90,
-                      padding:EdgeInsets.all( TSizes.sm),
-                      backgroundColor: TColors.primaryBackground,
-
-                    ),
-
-
-
-
-                  ],
+                  ))
+                      .toList(),
                 ),
+
                 const SizedBox(height: TSizes.spaceBtwSections,),
-                TDeviceUtils.isMobileScreen(context) ? SizedBox(width: double.infinity,child: ElevatedButton(onPressed: (){}, child: const Text('Upload')),): const SizedBox.shrink()
+                TDeviceUtils.isMobileScreen(context) ? SizedBox(width: double.infinity,child: ElevatedButton(onPressed: (){
+                  if(mediaController.droppedFiles.isNotEmpty){
+                    mediaController.uploadImages(mediaController.selectedPath.value.toString().split('.').last);
+                  }
+                  else{
+                    TLoader.errorSnackBar(title: 'No Image Found', message: 'Kindly add the image first');
+                  }
+
+
+
+                }, child: const Text('Upload')),): const SizedBox.shrink()
               ],
             ),
           )

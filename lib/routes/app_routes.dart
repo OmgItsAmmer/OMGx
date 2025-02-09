@@ -24,8 +24,8 @@ import '../views/salesman/all_salesman/salesman.dart';
 class TAppRoutes {
   static final List<GetPage> pages = [
 
-    GetPage(name: TRoutes.login, page: () => const LoginScreen(),middlewares: [TRouteMiddleeare()] ),
-    GetPage(name: TRoutes.responsiveScreenDesignScreen, page: () => const ResponsiveDesignScreen(),middlewares: [TRouteMiddleeare()] ),
+    // GetPage(name: TRoutes.login, page: () => const LoginScreen(),middlewares: [TRouteMiddleeare()] ),
+    // GetPage(name: TRoutes.responsiveScreenDesignScreen, page: () => const ResponsiveDesignScreen(),middlewares: [TRouteMiddleeare()] ),
     GetPage(name: TRoutes.orders, page: () => const TOrderScreen(),middlewares: [TRouteMiddleeare()] ),
     GetPage(name: TRoutes.orderDetails, page: () => const OrderDetailScreen(),middlewares: [TRouteMiddleeare()] ),
 
