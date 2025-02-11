@@ -17,9 +17,11 @@ import '../views/orders/order_details/order_detail.dart';
 import '../views/products/all_products/all_products.dart';
 import '../views/products/product_detail/product_detail.dart';
 import '../views/profile/profile/profile_screen.dart';
+import '../views/reports/all_reports/all_reports.dart';
 import '../views/sales/sales.dart';
 import '../views/sales/widgets/cashier_info.dart';
 import '../views/salesman/all_salesman/salesman.dart';
+import '../views/store/store.dart';
 
 class TAppRoutes {
   static final List<GetPage> pages = [
@@ -61,11 +63,15 @@ class TAppRoutes {
 
     //Profile
     GetPage(name: TRoutes.profileScreen, page: () => const ProfileScreen(),middlewares: [TRouteMiddleeare()] ),
-
-
+   //Store
+    GetPage(name: TRoutes.storeScreen, page: () => const StoreScreen(),middlewares: [TRouteMiddleeare()] ),
 
     //Media Screens
     GetPage(name: TRoutes.mediaScreen, page: () => const MediaScreen(),middlewares: [TRouteMiddleeare()] ),
+
+    //Report Screens
+    GetPage(name: TRoutes.reportScreen, page: () => const ReportScreen(),middlewares: [TRouteMiddleeare()] ),
+
 
 
   ];

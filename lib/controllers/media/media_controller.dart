@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dropzone/flutter_dropzone.dart';
@@ -12,7 +13,6 @@ import '../../Models/image/image_model.dart';
 import '../../repositories/media/media_repository.dart';
 import '../../views/media/widgets/media_content.dart';
 import '../../views/media/widgets/media_uploader.dart';
-import 'package:path/path.dart' as p;
 
 class MediaController extends GetxController {
   static MediaController get instance => Get.find();
@@ -51,9 +51,10 @@ class MediaController extends GetxController {
   }) async {
     // List to store selected images
     final selectedImages = <ImageModel>[].obs;
+    showImagesUploaderSection.value = true;
 
     // Show the bottom sheet
-    final result = await Get.bottomSheet<List<ImageModel>>(
+     await Get.bottomSheet<List<ImageModel>>(
       isScrollControlled: true,
       backgroundColor: Colors.white,
       ClipRRect(
@@ -182,5 +183,33 @@ class MediaController extends GetxController {
       // Show error message
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
+  }
+
+  ///PICK IMAGE FROM FILE EXPLORER
+  Future<void> pickImageFromExplorer() async{
+    try{
+      // Open file explorer and allow only image selection
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.image,  // Restrict to image files
+        allowMultiple: false,  // Allow only single file selection
+      );
+
+      // Check if a file was selected
+      if (result != null) {
+        // Get the file path
+        PlatformFile file = result.files.first;
+
+        // Pass the file to the mediaController
+        addDroppedFile(File(file.path!));
+      } else {
+        // User canceled the picker
+        print('No file selected.');
+      }
+
+    }
+    catch(e){
+      TLoader.errorSnackBar(title: 'Oh Snap!',message: 'Didn\'t get the image from explorer');
+    }
+
   }
 }

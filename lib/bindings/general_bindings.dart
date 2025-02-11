@@ -3,6 +3,7 @@ import 'package:admin_dashboard_v3/controllers/brands/brand_controller.dart';
 import 'package:admin_dashboard_v3/controllers/installments/installments_controller.dart';
 import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
 import 'package:admin_dashboard_v3/controllers/sales/sales_controller.dart';
+import 'package:admin_dashboard_v3/controllers/shop/shop_controller.dart';
 import 'package:admin_dashboard_v3/controllers/user/user_controller.dart';
 import 'package:get/get.dart';
 
@@ -32,6 +33,7 @@ class GeneralBindings extends Bindings {
     Get.put(CategoryController());
     Get.put(ProductImagesController());
    Get.put(MediaController());
+   Get.put(ShopController());
    //Get.put(AuthenticationRepository());
 
     // final UserRespository userRespository = Get.find<UserRespository>();

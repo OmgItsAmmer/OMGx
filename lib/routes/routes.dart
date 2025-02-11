@@ -47,7 +47,7 @@ static const productsDetail = '/ProductDetail';
   static const brand = '/brands';
   static const brandDetails = '/brandDetails';
 
-  //Brand Screens
+  //Category Screens
   static const category = '/categories';
   static const categoryDetails = '/categoryDetails';
 
@@ -56,9 +56,15 @@ static const productsDetail = '/ProductDetail';
   static const profileScreen = '/ProfileScreen';
 
 
+  static const storeScreen = '/StoreScreen';
+
+
 
 
   static const mediaScreen = '/media';
+
+  //Report Screens
+  static const reportScreen = '/ReportScreen';
 
 
 

@@ -22,10 +22,8 @@ dependencies:
   url_launcher: ^6.1.12
   flutter_native_splash: ^2.4.1
   smooth_page_indicator: ^1.1.0
-
   connectivity_plus: ^5.0.1
   shimmer: ^3.0.0
-
   flutter_side_menu: ^0.5.3
   data_table_2: ^2.5.12
   lottie: ^3.3.1
@@ -33,7 +31,12 @@ dependencies:
   image_picker: ^0.8.5+3
   flutter_dropzone: ^4.2.1
   desktop_drop: ^0.5.0
-#date pciker
+  file_picker: ^8.3.2
+  hovering: ^1.0.4
+
+
+
+  #date picker
   datepicker_dropdown: ^0.1.6
 
   #dropdown search
@@ -63,6 +66,8 @@ dependencies:
   pdf: ^3.11.2
   printing: ^5.14.0
   path_provider: ^2.1.1
+
+
 
 
 

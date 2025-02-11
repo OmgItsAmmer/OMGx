@@ -47,13 +47,15 @@ class TSideBar extends StatelessWidget {
                  const TMenuItem(icon: Iconsax.receipt_item,itemName: 'Orders', route: TRoutes.orders,),
                  const TMenuItem(icon: Iconsax.box,itemName: 'Products', route: TRoutes.products,),
                  const TMenuItem(icon: Iconsax.people,itemName: 'Customers', route: TRoutes.customer,),
-                 const TMenuItem(icon: Iconsax.people5,itemName: 'Salesman', route: TRoutes.salesman,),
-                 const TMenuItem(icon: Iconsax.people5,itemName: 'Brands', route: TRoutes.brand,),
-                 const TMenuItem(icon: Iconsax.people5,itemName: 'Categories', route: TRoutes.category,),
+                 const TMenuItem(icon: Iconsax.profile_2user,itemName: 'Salesman', route: TRoutes.salesman,),
+                 const TMenuItem(icon: Iconsax.convert_3d_cube,itemName: 'Brands', route: TRoutes.brand,),
+                 const TMenuItem(icon: Iconsax.folder_open,itemName: 'Categories', route: TRoutes.category,),
 
                    Text('OTHER',style: Theme.of(context).textTheme.bodySmall!.apply(letterSpacingDelta: 1.2),),
-                    const TMenuItem(icon: Iconsax.people5,itemName: 'Profile', route: TRoutes.profileScreen,),
                     const TMenuItem(icon: Iconsax.image,itemName: 'Media', route: TRoutes.mediaScreen,),
+                    const TMenuItem(icon: Iconsax.note ,itemName: 'Reports', route: TRoutes.reportScreen,),
+                    const TMenuItem(icon: Iconsax.profile_circle,itemName: 'Profile', route: TRoutes.profileScreen,),
+                    const TMenuItem(icon: Iconsax.shop,itemName: 'Store', route: TRoutes.storeScreen,),
 
 
 

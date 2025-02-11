@@ -8,6 +8,7 @@ import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:get/get.dart';
@@ -62,12 +63,12 @@ class MediaUploader extends StatelessWidget {
                                 const SizedBox(height: TSizes.spaceBtwItems),
                                 const Text('Drag and Drop Images here'),
                                 const SizedBox(height: TSizes.spaceBtwItems),
-                                OutlinedButton(
-                                  onPressed: () {
-                                    // Implement file picker logic here
-                                  },
-                                  child: const Text('Select Images'),
-                                ),
+                            OutlinedButton(
+                              onPressed: () async {
+                               mediaController.pickImageFromExplorer();
+                              },
+                              child: const Text('Select Images'),
+                            ),
                               ],
                             ),
                           ),
