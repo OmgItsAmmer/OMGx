@@ -17,10 +17,10 @@ class OrderRepository extends GetxController {
   //fetch
   Future<List<OrderModel>> fetchCustomerOrders(int customerId) async {
     try {
-      final data =  await supabase
+      final data = await supabase
           .from('orders')
           .select().eq('customer_id', customerId);
-       print(data);
+      print(data);
       final addressList = data.map((item) {
         return OrderModel.fromJson(item);
       }).toList();
@@ -28,9 +28,9 @@ class OrderRepository extends GetxController {
       //   print(addressList[1].country);
       // }
       return addressList;
-
     } catch (e) {
-      TLoader.warningSnackBar(title: "Fetch Customer Orders", message: e.toString());
+      TLoader.warningSnackBar(
+          title: "Fetch Customer Orders", message: e.toString());
       return [];
     }
   }
@@ -39,73 +39,70 @@ class OrderRepository extends GetxController {
     try {
       await supabase
           .from('orders')
-          .update({ 'status': newStatus })
+          .update({ 'status': newStatus})
           .eq('order_id', orderId);
 
 
-    TLoader.successSnackBar(title: 'Status Updated',message: 'Status is Updated to$newStatus');
+      TLoader.successSnackBar(
+          title: 'Status Updated', message: 'Status is Updated to$newStatus');
     } catch (e) {
       // Show error if any
       TLoader.errorSnackBar(title: 'Update Order Error', message: e.toString());
       print(e);
-
     }
   }
 
 
-      Future<int> uploadOrder(OrderModel order) async {
-        try {
-          // Insert the order into the 'orders' table
-          final response = await Supabase.instance.client
-              .from('orders')
-              .insert({
-            'order_date': order.orderDate,
-            'total_price': order.totalPrice,
-            'status': order.status,
-            'saletype': order.saletype,
-            'address_id': order.addressId,
-            'user_id': order.userId,
-            'salesman_id': order.salesmanId,
-            'paid_amount': order.paidAmount,
-            'customer_id': order.customerId,
-          })
-              .select();
+  Future<int> uploadOrder(OrderModel order) async {
+    try {
+      // Insert the order into the 'orders' table
+      final response = await Supabase.instance.client
+          .from('orders')
+          .insert({
+        'order_date': order.orderDate,
+        'total_price': order.totalPrice,
+        'status': order.status,
+        'saletype': order.saletype,
+        'address_id': order.addressId,
+        'user_id': order.userId,
+        'salesman_id': order.salesmanId,
+        'paid_amount': order.paidAmount,
+        'customer_id': order.customerId,
+      })
+          .select();
 
-          final orderId = response[0]['order_id'];
-
-
-
-          // Insert the order items into the 'order_items' table
-          await Supabase.instance.client
-              .from('order_items')
-              .insert(order.orderItems!.map((item) {
-            return {
-              'order_id': orderId, // Assign the order_id to the order items
-              'variant_id': item.variantId,
-              'quantity': item.quantity,
-              'price': item.price,
-              'unit': item.unit,
-            };
-          }).toList());
+      final orderId = response[0]['order_id'];
 
 
+      // Insert the order items into the 'order_items' table
+      await Supabase.instance.client
+          .from('order_items')
+          .insert(order.orderItems!.map((item) {
+        return {
+          'order_id': orderId, // Assign the order_id to the order items
+          'variant_id': item.variantId,
+          'quantity': item.quantity,
+          'price': item.price,
+          'unit': item.unit,
+        };
+      }).toList());
 
-          TLoader.successSnackBar(title: 'Success', message: 'Order successfully checked out.');
-          return orderId;
 
-        } catch (e) {
-          // Show error if any
-          TLoader.errorSnackBar(title: 'Update Order Error', message: e.toString());
-          print(e);
-          return -1;
-        }
-      }
+      TLoader.successSnackBar(
+          title: 'Success', message: 'Order successfully checked out.');
+      return orderId;
+    } catch (e) {
+      // Show error if any
+      TLoader.errorSnackBar(title: 'Update Order Error', message: e.toString());
+      print(e);
+      return -1;
+    }
+  }
 
   Future<List<OrderModel>> fetchOrders() async
   {
-
-    try{
-      final data =  await supabase.from('orders').select();
+    try {
+      final data = await supabase.from('orders').select();
       //print(data);
 
       final orderList = data.map((item) {
@@ -115,22 +112,20 @@ class OrderRepository extends GetxController {
         print(orderList[1].orderId);
       }
       return orderList;
-
     }
-    catch(e)
-    {
-      TLoader.errorSnackBar(title: 'Order Fetch',message: e.toString());
+    catch (e) {
+      TLoader.errorSnackBar(title: 'Order Fetch', message: e.toString());
       print(e.toString());
       return [];
     }
-
   }
 
   Future<List<OrderItemModel>> fetchOrderItems(int orderId) async {
     try {
       final data = await supabase
           .from('order_items')
-          .select('*, product_variants(variant_id, variant_image, variant_name)') // Joining with product_variant
+          .select(
+          '*, products(product_id, name)') // Joining with product_variant
           .eq('order_id', orderId);
 
       if (kDebugMode) {
@@ -149,7 +144,12 @@ class OrderRepository extends GetxController {
     }
   }
 
+  Future<List<int>> getOrderIdsByVariantId(int variantId) async {
+    final response = await supabase
+        .from('order_items')
+        .select('order_id')
+        .eq('variant_id', variantId);
 
-
-
+    return response.map<int>((item) => item['order_id'] as int).toList();
+  }
 }

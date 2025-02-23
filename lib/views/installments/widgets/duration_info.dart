@@ -73,6 +73,7 @@ class DurationInfo extends StatelessWidget {
                   const SizedBox(height: TSizes.spaceBtwSections,),
 
                   SfDateRangePicker(
+
                     onSelectionChanged: (val) {
                       // Extract the selected date from the DateRangePickerSelectionChangedArgs
                       // For single date selection

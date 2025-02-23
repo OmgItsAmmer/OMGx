@@ -23,10 +23,10 @@ class ImageModel {
 
   /// Constructor for ImageModel.
   ImageModel({
-    required this.image_id,
-    required this.url,
+    this.image_id = -1,
+    this.url = '',
     this.folder = 'default',
-    required this.filename,
+    this.filename = '',
     this.sizeBytes,
     this.entity_id,
     this.fullPath,
@@ -36,16 +36,10 @@ class ImageModel {
     this.file,
     this.localImageToDisplay,
     this.mediaCategory = '',
-  });
+  }) : isSelected = false.obs;
 
   // Static function to create an empty image model
-  static ImageModel empty() => ImageModel(
-    image_id: -1,
-    url: '',
-    folder: '',
-    filename: '',
-    mediaCategory: '',
-  );
+  static ImageModel empty() => ImageModel();
 
   // Convert model to JSON for database insertion
   Map<String, dynamic> toJson({bool isUpdate = false}) {
@@ -54,7 +48,7 @@ class ImageModel {
       'mediacategory': mediaCategory,
       'image_url': url,
       'filename': filename,
-      'created_at': createdAt?.toIso8601String(),
+
     };
     if (!isUpdate) {
       data['image_id'] = image_id;
@@ -65,17 +59,12 @@ class ImageModel {
   // Factory method to create an ImageModel from a JSON response
   factory ImageModel.fromJson(Map<String, dynamic> json) {
     return ImageModel(
-      image_id: json['image_id'],
-      entity_id: json['entity_id'] as int?,
-      mediaCategory: json['mediacategory'] as String? ?? '',
-      url: json['image_url'] as String? ?? '',
-      filename: json['filename'] as String? ?? '',
+      image_id: json['image_id'] ?? -1,
+      entity_id: json['entity_id'],
+      mediaCategory: json['mediacategory'] ?? '',
+      url: json['image_url'] ?? '',
+      filename: json['filename'] ?? '',
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
-      // folder: json['folder'] as String? ?? '',
-      // sizeBytes: json['size_bytes'] as int?,
-      // fullPath: json['full_path'] as String?,
-      // updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
-      // contentType: json['content_type'] as String?,
     );
   }
 
@@ -86,7 +75,7 @@ class ImageModel {
 
   // Helper method to copy the model with updated fields
   ImageModel copyWith({
-    int? id,
+    int? image_id,
     String? url,
     String? folder,
     String? filename,
@@ -101,7 +90,7 @@ class ImageModel {
     bool? isSelected,
   }) {
     return ImageModel(
-      image_id: id ?? image_id,
+      image_id: image_id ?? this.image_id,
       url: url ?? this.url,
       folder: folder ?? this.folder,
       filename: filename ?? this.filename,

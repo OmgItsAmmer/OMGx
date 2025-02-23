@@ -1,6 +1,8 @@
 import 'package:admin_dashboard_v3/routes/app_routes.dart';
 import 'package:admin_dashboard_v3/routes/routes.dart';
+import 'package:admin_dashboard_v3/routes/routes_MIDDLEWARE.dart';
 import 'package:admin_dashboard_v3/utils/theme/theme.dart';
+import 'package:admin_dashboard_v3/views/unkown_route.dart';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -26,12 +28,8 @@ class _AppState extends State<App> {
         initialBinding: GeneralBindings(),
         getPages: TAppRoutes.pages,
 
-        initialRoute: TRoutes.mediaScreen,
-        unknownRoute: GetPage(
-            name: '/page-not-found',
-            page: () => const Scaffold(
-                  body: Center(child: Text('Page not found')),
-                )),
+        initialRoute: TRoutes.splashScreen,
+        unknownRoute: GetPage(name: TRoutes.UnkownRoute, page: () => const UnkownRoute(),middlewares: [TRouteMiddleware()] ),
         );
   }
 }

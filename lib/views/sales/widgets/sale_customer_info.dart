@@ -6,10 +6,14 @@ import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
 
 import '../../../common/widgets/dropdown_search/drop_down_searchbar.dart';
 import '../../../common/widgets/dropdown_search/dropdown_search.dart';
 import '../../../common/widgets/dropdown_search/searchable_text_field.dart';
+import '../../../common/widgets/shimmers/shimmer.dart';
+import '../../../controllers/media/media_controller.dart';
+import '../../../controllers/product/product_images_controller.dart';
 import '../../../controllers/sales/sales_controller.dart';
 import '../../../utils/constants/colors.dart';
 import '../../../utils/validators/validation.dart';
@@ -37,6 +41,9 @@ class SaleCustomerInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final SalesController salesController = Get.find<SalesController>();
+    final ProductImagesController productImagesController =
+        Get.find<ProductImagesController>();
+    final MediaController mediaController = Get.find<MediaController>();
 
     return Form(
       key: salesController.customerFormKey,
@@ -57,14 +64,90 @@ class SaleCustomerInfo extends StatelessWidget {
             ),
 
             Row(
-      //  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //  mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const TRoundedImage(
-                          width: 100, height: 100, imageurl: TImages.user),
+                      Stack(
+                        alignment: Alignment
+                            .bottomRight, // Align the camera icon to the bottom right
+                        children: [
+                          // Rounded Image
+                          Obx(
+                            () {
+                              if (productImagesController.selectedImage.value ==
+                                  null) {
+                                return const SizedBox(
+                                  height: 120,
+                                  width: 100,
+                                  child: Icon(Iconsax
+                                      .image), // Placeholder icon when no image is selected
+                                );
+                              }
+                              // Check if selectedImages is empty
+                              return FutureBuilder<String?>(
+                                future: mediaController.getImageFromBucket(
+                                  productImagesController
+                                          .selectedImage.value?.mediaCategory ??
+                                      '',
+                                  productImagesController
+                                          .selectedImage.value?.filename ??
+                                      '',
+                                ),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return const TShimmerEffect(
+                                        width: 350,
+                                        height:
+                                            170); // Show shimmer while loading
+                                  } else if (snapshot.hasError) {
+                                    return const Text(
+                                        'Error loading image'); // Handle error case
+                                  } else if (snapshot.hasData &&
+                                      snapshot.data != null) {
+                                    return TRoundedImage(
+                                      isNetworkImage: true,
+                                      width: 150,
+                                      height: 150,
+                                      imageurl: snapshot.data!,
+                                    );
+                                  } else {
+                                    return const Text(
+                                        'No image available'); // Handle case where no image is available
+                                  }
+                                },
+                              );
+                            },
+                          ),
+
+                          // Camera Icon
+                          Positioned(
+                            right: 0, // Adjust the position of the icon
+                            bottom: 0, // Adjust the position of the icon
+                            child: GestureDetector(
+                              onTap: () {
+                                productImagesController
+                                    .selectThumbnailImage(); // Trigger image selection
+                              },
+                              child: const TRoundedContainer(
+                                borderColor: TColors.white,
+                                backgroundColor: TColors.primary,
+                                padding: EdgeInsets.all(
+                                    6), // Add padding around the icon
+                                child: Icon(
+                                  Iconsax.camera, // Camera icon
+                                  size: 25, // Icon size
+                                  color: Colors.white, // Icon color
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: TSizes.spaceBtwSections),
                       const SizedBox(
                         height: TSizes.spaceBtwItems,
                       ),
@@ -74,14 +157,13 @@ class SaleCustomerInfo extends StatelessWidget {
                         child: AutoCompleteTextField(
                           titleText: hintText,
                           optionList: namesList,
-
                           textController: userNameTextController,
                           parameterFunc: onSelectedName,
                         ),
                       ),
-                      const SizedBox(
-                        height: TSizes.spaceBtwItems,
-                      ),
+                      // const SizedBox(
+                      //   height: TSizes.spaceBtwItems,
+                      // ),
                     ],
                   ),
                 ),
@@ -107,8 +189,8 @@ class SaleCustomerInfo extends StatelessWidget {
                               FilteringTextInputFormatter.digitsOnly
                             ], // Allow only digits
                             style: Theme.of(context).textTheme.bodyMedium,
-                            decoration:
-                                const InputDecoration(labelText: 'Phone Number'),
+                            decoration: const InputDecoration(
+                                labelText: 'Phone Number'),
                           ),
                         ),
                         const SizedBox(
@@ -119,10 +201,10 @@ class SaleCustomerInfo extends StatelessWidget {
                           // height: 80,
 
                           child: AutoCompleteTextField(
-                            titleText: 'Address',
-                               optionList: addressList,
+                              titleText: 'Address',
+                              optionList: addressList,
 
-                               // key: salesController.searchDropDownKey,
+                              // key: salesController.searchDropDownKey,
 
                               textController: addressTextController,
                               parameterFunc: onSelectedAddress),
@@ -139,7 +221,8 @@ class SaleCustomerInfo extends StatelessWidget {
                             validator: (value) =>
                                 TValidator.validateEmptyText('CNIC', value),
                             style: Theme.of(context).textTheme.bodyMedium,
-                            decoration: const InputDecoration(labelText: 'CNIC'),
+                            decoration:
+                                const InputDecoration(labelText: 'CNIC'),
                             keyboardType: TextInputType
                                 .number, // Ensure numeric keyboard is shown
                             inputFormatters: [

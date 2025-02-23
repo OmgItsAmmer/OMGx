@@ -84,4 +84,42 @@ class ProductImagesController extends GetxController {
       }
     }
   }
+
+void setDesiredImage(MediaCategory mediaCategory,int imageId) async {
+  try{
+    final mediaController = Get.put(MediaController());
+
+
+    await mediaController.getSelectedFolderImages(mediaCategory);
+
+    print(imageId);
+    print(mediaController.allImages[0].image_id);
+
+    if (mediaController.allImages.isNotEmpty && imageId != -1) {
+      final filteredValue = mediaController.allImages.firstWhere(
+            (image) => image.entity_id == imageId,
+        orElse: () => ImageModel.empty(),
+      );
+
+      selectedImage.value = filteredValue;
+      print(selectedImage.value?.image_id);
+
+      selectedThumbnailImageUrl.value = filteredValue.filename;
+    }
+
+    if (kDebugMode) {
+      print(selectedThumbnailImageUrl.value);
+    }
+
+  }
+  catch(e){
+    TLoader.errorSnackBar(title: 'Oh Snap!',message: e.toString());
+  }
+
 }
+
+
+}
+
+
+

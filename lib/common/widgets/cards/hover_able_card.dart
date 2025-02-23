@@ -36,6 +36,7 @@ class _HoverableCardState extends State<HoverableCard> {
           width: 300, // Fixed width
           height: 200, // Fixed height
           decoration: BoxDecoration(
+            border: Border.all(width: 0.2),
             color: _isHovered
                 ? TColors.primary.withOpacity(0.6) // Very light transparent purple
                 : Colors.transparent, // Default transparent color

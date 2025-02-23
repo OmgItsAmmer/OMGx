@@ -75,6 +75,8 @@ class TImages {
   static String uploadingAnimation = "assets/images/animations/uploading-document.json";
   static String uploadingCompletedAnimation = "assets/images/animations/uploading-done.json";
   static String tickCongratulationsConfettiAnimation = "assets/images/animations/tick-confetti.json";
+  static const String networkOut = "assets/images/animations/network_issue.json";
+
 
   // -- OnBoarding Texts
   static const String onBoardingImage1 = "assets/images/on_boarding_images/sammy-line-searching.gif";

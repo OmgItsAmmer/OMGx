@@ -181,4 +181,19 @@ class OrderController extends GetxController {
       print(e);
     }
   }
+
+  Future<List<int>> getOrderIdsByProductIdService(int varaintId) async {
+    try {
+
+      final orderIds = await orderRepository.getOrderIdsByVariantId(varaintId);
+      return orderIds;
+
+
+
+    } catch (e) {
+      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      print(e);
+      return [];
+    }
+  }
 }

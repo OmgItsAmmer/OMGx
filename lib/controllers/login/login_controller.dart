@@ -39,7 +39,7 @@ class LoginController extends GetxController {
       TFullScreenLoader.openLoadingDialog(
           'Logging you in...', TImages.docerAnimation);
 
-      //check internet sonnectivity
+      //check internet connectivity
       final isConnected = await NetworkManager.instance.isConnected();
       if (!isConnected) {
         TFullScreenLoader.stopLoading();
@@ -71,7 +71,7 @@ class LoginController extends GetxController {
 
       //Redirect
       // AuthenticationRepository.instance.screenRedirect();
-      Get.toNamed(TRoutes.mediaScreen);
+      Get.toNamed(TRoutes.dashboard);
     } catch (e) {
       TFullScreenLoader.stopLoading();
       TLoader.errorSnackBar(title: 'Oh Snap', message: e.toString());

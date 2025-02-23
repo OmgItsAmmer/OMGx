@@ -68,4 +68,12 @@ static const productsDetail = '/ProductDetail';
 
 
 
+  //Unknown ROutes
+  static const UnkownRoute = '/ReportScreen';
+
+
+  static const splashScreen = '/splashScreen';
+
+
+
 }

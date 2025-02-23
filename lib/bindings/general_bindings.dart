@@ -3,7 +3,6 @@ import 'package:admin_dashboard_v3/controllers/brands/brand_controller.dart';
 import 'package:admin_dashboard_v3/controllers/installments/installments_controller.dart';
 import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
 import 'package:admin_dashboard_v3/controllers/sales/sales_controller.dart';
-import 'package:admin_dashboard_v3/controllers/shop/shop_controller.dart';
 import 'package:admin_dashboard_v3/controllers/user/user_controller.dart';
 import 'package:get/get.dart';
 
@@ -14,13 +13,12 @@ import '../controllers/orders/orders_controller.dart';
 import '../controllers/product/product_images_controller.dart';
 import '../controllers/salesman/salesman_controller.dart';
 import '../network_manager.dart';
-import '../repositories/authentication/authicatioon_repository.dart';
-import '../repositories/user/user_repository.dart';
 
 class GeneralBindings extends Bindings {
   @override
   void dependencies() {
     Get.put(NetworkManager());
+
     Get.put(UserController());
     Get.put(ProductController());
     Get.put(CustomerController());
@@ -33,7 +31,8 @@ class GeneralBindings extends Bindings {
     Get.put(CategoryController());
     Get.put(ProductImagesController());
    Get.put(MediaController());
-   Get.put(ShopController());
+
+
    //Get.put(AuthenticationRepository());
 
     // final UserRespository userRespository = Get.find<UserRespository>();

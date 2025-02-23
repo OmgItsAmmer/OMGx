@@ -1,6 +1,8 @@
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
+import 'package:admin_dashboard_v3/controllers/media/media_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
+import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
@@ -9,6 +11,8 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
 import '../../../../utils/validators/validation.dart';
+import '../../../common/widgets/shimmers/shimmer.dart';
+import '../../../controllers/product/product_images_controller.dart';
 import '../../../controllers/shop/shop_controller.dart';
 
 class StoreDesktop extends StatelessWidget {
@@ -206,40 +210,78 @@ class ProfileDetails extends StatelessWidget {
 }
 
 class StoreImageInfo extends StatelessWidget {
-  const StoreImageInfo({
-    super.key,
-  });
+  const StoreImageInfo({super.key});
+
+  Future<String> _getImageUrl() async {
+    final MediaController mediaController = Get.find<MediaController>();
+    return await mediaController.getImageFromBucket(
+      mediaController.allImages[0].mediaCategory,
+      mediaController.allImages[0].filename,
+    ) ??
+        '';
+  }
 
   @override
   Widget build(BuildContext context) {
     final ShopController shopController = Get.find<ShopController>();
+    final ProductImagesController productImagesController = Get.find<ProductImagesController>();
+    final MediaController mediaController = Get.find<MediaController>();
+
     return TRoundedContainer(
+
       width: double.infinity,
-      height:   400,
+      height: 400,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        // crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Stack(
-            alignment: Alignment
-                .bottomRight, // Align the camera icon to the bottom right
+          Stack(
+            alignment: Alignment.bottomRight, // Align the camera icon to the bottom right
             children: [
               // Rounded Image
-              TRoundedImage(
-                width: 160,
-                height: 160,
-                imageurl: TImages.user,
-                isNetworkImage: true,
+              Obx(
+                    () {
+                  if(productImagesController.selectedImage.value == null){
+                    return const SizedBox(
+                        height: 120,
+                        width: 100,
+                        child: Icon(Iconsax.image));
+                  }
+                  // Check if selectedImages is empty
+                  return FutureBuilder<String?>(
+                    future: mediaController.getImageFromBucket(
+                      productImagesController.selectedImage.value?.mediaCategory ?? '',
+                      productImagesController.selectedImage.value?.filename ?? '',
+                    ),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const TShimmerEffect(width: 350, height: 170); // Show shimmer while loading
+                      } else if (snapshot.hasError) {
+                        return const Text('Error loading image'); // Handle error case
+                      } else if (snapshot.hasData && snapshot.data != null) {
+                        return TRoundedImage(
+                          isNetworkImage: true,
+                          width: 150,
+                          height: 150,
+                          imageurl: snapshot.data!,
+                        );
+                      } else {
+                        return const Text('No image available'); // Handle case where no image is available
+                      }
+                    },
+                  );
+                },
               ),
+
               // Camera Icon
-              TRoundedContainer(
+               TRoundedContainer(
+                onTap: (){
+
+                  productImagesController.selectThumbnailImage();
+                },
                 borderColor: TColors.white,
                 backgroundColor: TColors.primary,
-
-                padding:
-                EdgeInsets.all(6), // Add padding around the icon
-
-                child: Icon(
+                padding: const EdgeInsets.all(6), // Add padding around the icon
+                child: const Icon(
                   Iconsax.camera, // Camera icon
                   size: 25, // Icon size
                   color: Colors.white, // Icon color
@@ -247,9 +289,7 @@ class StoreImageInfo extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(
-            height: TSizes.spaceBtwSections,
-          ),
+          const SizedBox(height: TSizes.spaceBtwSections),
           Text(
             shopController.selectedShop?.value.shopname ?? ' ',
             style: Theme.of(context).textTheme.headlineMedium,

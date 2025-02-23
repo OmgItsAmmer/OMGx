@@ -1,6 +1,7 @@
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
 import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
+import 'package:admin_dashboard_v3/controllers/report/report_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:admin_dashboard_v3/views/sales/widgets/sale_action_buttons.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,8 @@ class SalesDesktop extends StatelessWidget {
     final SalesController salesController = Get.put(SalesController());
     final CustomerController customerController = Get.find<CustomerController>();
     final AddressController addressController = Get.find<AddressController>();
+
+
 
     return Expanded(
       child: SizedBox(
@@ -74,8 +77,8 @@ class SalesDesktop extends StatelessWidget {
                                   addressController.fetchCustomerAddresses(customerController.selectedCustomer.value.customerId );
 
                                   //Automatic gives unit price
-                                  salesController.customerPhoneNoController.value.text = customerController.selectedCustomer?.value.phoneNumber ?? '';
-                                  salesController.customerCNICController.value.text = customerController.selectedCustomer?.value.cnic ?? '';
+                                  salesController.customerPhoneNoController.value.text = customerController.selectedCustomer.value.phoneNumber ?? '';
+                                  salesController.customerCNICController.value.text = customerController.selectedCustomer.value.cnic ?? '';
                                   },
                                 addressList: addressController.allCustomerAddressesLocation,
                                 addressTextController: salesController.customerAddressController.value ,

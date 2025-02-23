@@ -17,17 +17,18 @@ class ShopRepository extends GetxController {
   Future<List<ShopModel>> fetchShopDetails() async {
     try {
       final data =  await supabase.from('shop').select();
-      //print(data);
+      print(data);
 
       final shopList = data.map((item) {
         return ShopModel.fromJson(item);
       }).toList();
       if (kDebugMode) {
-        print(shopList[1].shopname);
+        print(shopList[0].shopname);
       }
       return shopList;
     } catch (e) {
       TLoader.errorSnackBar(title: 'Oh Snap', message: e.toString());
+      print(e);
       return [];
     }
 

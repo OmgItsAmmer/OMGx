@@ -1,14 +1,10 @@
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/controllers/guarantors/guarantor_controller.dart';
-import 'package:admin_dashboard_v3/controllers/installments/installments_controller.dart';
 import 'package:admin_dashboard_v3/controllers/sales/sales_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
-import '../../../repositories/guarantors/guarantor_repository.dart';
-import '../../sales/widgets/sale_customer_info.dart';
 import '../table/installment_table.dart';
 import '../widgets/charges_form.dart';
 import '../widgets/advance_info.dart';

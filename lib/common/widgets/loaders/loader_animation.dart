@@ -11,6 +11,6 @@ class TLoaderAnimation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(child: Lottie.asset(TImages.docerAnimation, height: 200, width: 200));
+    return Center(child: Lottie.asset(TImages.networkOut, height: 200, width: 200));
   }
 }

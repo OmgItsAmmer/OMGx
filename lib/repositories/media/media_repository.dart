@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 import '../../Models/image/image_model.dart';
@@ -78,13 +79,18 @@ class MediaRepository extends GetxController {
     required List<File> files,
   }) async {
     if (files.length != jsonDataList.length) {
-      print("❌ Error: Number of files and JSON metadata entries must match.");
+      if (kDebugMode) {
+        print("❌ Error: Number of files and JSON metadata entries must match.");
+      }
       return;
     }
-
+    if (kDebugMode) {
+      print(jsonDataList);
+    }
     for (int i = 0; i < files.length; i++) {
       File file = files[i];
       Map<String, dynamic> jsonData = jsonDataList[i];
+      print(jsonData);
 
       try {
         // ✅ Step 1: Insert metadata (DO NOT pass `image_id`, it auto-increments)

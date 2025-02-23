@@ -3,19 +3,16 @@ description: "A new Flutter project."
 
 publish_to: 'none'
 
-
 version: 1.0.0+1
 
 environment:
   sdk: ^3.5.0
 
-
 dependencies:
   flutter:
     sdk: flutter
 
-
-  #Utility packages
+  # Utility packages
   http: ^1.1.0
   intl: ^0.18.1
   logger: ^2.0.1
@@ -33,46 +30,36 @@ dependencies:
   desktop_drop: ^0.5.0
   file_picker: ^8.3.2
   hovering: ^1.0.4
+  fl_chart: ^0.70.2
 
-
-
-  #date picker
+  # Date picker
   datepicker_dropdown: ^0.1.6
 
-  #dropdown search
+  # Dropdown search
   flutter_typeahead: ^5.2.0
   searchfield: ^1.2.2
   dropdown_search: ^6.0.2
 
-
-#  date picker
+  # Date picker
   syncfusion_flutter_datepicker: ^28.1.41
 
-#Web Specific
+  # Web Specific
   url_strategy: ^0.3.0
   universal_html: ^2.2.4
-
-
 
   cupertino_icons: ^1.0.8
   iconsax: ^0.0.6
 
-
-  #State Management
+  # State Management
   get: ^4.6.5
   get_storage: ^2.1.1
 
-  #reports
+  # Reports
   pdf: ^3.11.2
   printing: ^5.14.0
   path_provider: ^2.1.1
 
-
-
-
-
-
-  #Product Specific
+  # Product Specific
   readmore: ^2.2.0
   carousel_slider: ^5.0.0
   flutter_rating_bar: ^4.0.1
@@ -83,20 +70,13 @@ dependencies:
   vtable: ^0.4.0
   window_manager: ^0.4.3
 
-
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-
   flutter_lints: ^4.0.0
 
-
 flutter:
-
-
-
   uses-material-design: true
 
   assets:
@@ -122,3 +102,12 @@ flutter:
         - asset: assets/fonts/Poppins-Bold.ttf
           weight: 800
 
+# flutter_native_splash configuration (root level, not under flutter)
+flutter_native_splash:
+  color: "#FFFFFF" # Background color of the splash screen
+  image: assets/images/splash_logo.png # Path to your splash screen logo
+  android: true
+  ios: true
+  web: true
+  windows: true
+  fullscreen: false # Set to true if you want a fullscreen splash screen

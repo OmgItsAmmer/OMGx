@@ -171,4 +171,12 @@ class ProductController extends GetxController {
       TLoader.errorSnackBar(title: 'ProductController', message: e.toString());
     }
   }
+  int? findProductIdByName(String productName) {
+    try {
+      return allProducts.firstWhere((product) => product.name == productName).productId;
+    } catch (e) {
+      return null; // Return null if the product is not found
+    }
+  }
+
 }
