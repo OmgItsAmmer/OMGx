@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'dart:io';
+import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/common/widgets/shimmers/shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
@@ -39,29 +40,34 @@ class InstallmentReportPage extends StatelessWidget {
           ),
         ],
       ),
-      body: PdfPreview(
-        build: (format) => generatePdfInBackground({
-          'installmentPlans': installmentPlans,
-          'companyName': companyName,
-          'branchName': branchName,
-          'cashierName': cashierName,
-          'softwareCompanyName': softwareCompanyName,
-          'format': PdfPageFormat.a4, // Default to A4
-        }),
-        loadingWidget: const TShimmerEffect(width: 80,  height: 80) ,
-        canChangeOrientation: false,
-        canChangePageFormat: true,
-        initialPageFormat: PdfPageFormat.standard, // Default selection A4
-        allowPrinting: true, // Allow printing
-        allowSharing: true, // Disable sharing
-        pageFormats: const {
-          'A3':PdfPageFormat.a3,
-          'A4':PdfPageFormat.a4,
-          'A5':PdfPageFormat.a5,
-        },
-
-
-
+      body: Center(
+        child: TRoundedContainer(
+          width: 1000,
+          child: PdfPreview(
+            build: (format) => generatePdfInBackground({
+              'installmentPlans': installmentPlans,
+              'companyName': companyName,
+              'branchName': branchName,
+              'cashierName': cashierName,
+              'softwareCompanyName': softwareCompanyName,
+              'format': PdfPageFormat.a4, // Default to A4
+            }),
+            loadingWidget: const TShimmerEffect(width: 80,  height: 80) ,
+            canChangeOrientation: false,
+            canChangePageFormat: true,
+            initialPageFormat: PdfPageFormat.standard, // Default selection A4
+            allowPrinting: true, // Allow printing
+            allowSharing: true, // Disable sharing
+            pageFormats: const {
+              'A3':PdfPageFormat.a3,
+              'A4':PdfPageFormat.a4,
+              'A5':PdfPageFormat.a5,
+            },
+        
+        
+        
+          ),
+        ),
       ),
     );
   }

@@ -26,10 +26,13 @@ class _AutoCompleteTextFieldState extends State<AutoCompleteTextField> {
   void _showOverlay() {
     if (_overlayEntry != null) _removeOverlay();
 
-    final RenderBox renderBox = _fieldKey.currentContext!.findRenderObject() as RenderBox;
+    final RenderBox renderBox =
+        _fieldKey.currentContext!.findRenderObject() as RenderBox;
     final position = renderBox.localToGlobal(Offset.zero);
     final filteredOptions = widget.optionList
-        .where((option) => option.toLowerCase().contains(widget.textController.text.toLowerCase()))
+        .where((option) => option
+            .toLowerCase()
+            .contains(widget.textController.text.toLowerCase()))
         .toList();
 
     if (filteredOptions.isEmpty) return;
@@ -47,13 +50,13 @@ class _AutoCompleteTextFieldState extends State<AutoCompleteTextField> {
               shrinkWrap: true,
               children: filteredOptions
                   .map((option) => ListTile(
-                title: Text(option),
-                onTap: () {
-                  widget.textController.text = option;
-                  widget.parameterFunc?.call(option);
-                  _removeOverlay();
-                },
-              ))
+                        title: Text(option),
+                        onTap: () {
+                          widget.textController.text = option;
+                          widget.parameterFunc?.call(option);
+                          _removeOverlay();
+                        },
+                      ))
                   .toList(),
             ),
           ),
@@ -88,24 +91,22 @@ class _AutoCompleteTextFieldState extends State<AutoCompleteTextField> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(widget.titleText, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          SizedBox(height: 8),
-          TextFormField(
-            key: _fieldKey,
-            controller: widget.textController,
-            focusNode: _focusNode,
-            decoration: InputDecoration(
-              hintText: 'Type to search...',
-              border: OutlineInputBorder(),
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Text(widget.titleText,
+        //     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+       // SizedBox(height: 8),
+        TextFormField(
+          key: _fieldKey,
+          controller: widget.textController,
+          focusNode: _focusNode,
+          decoration: InputDecoration(
+            hintText: widget.titleText,
+            border: OutlineInputBorder(),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

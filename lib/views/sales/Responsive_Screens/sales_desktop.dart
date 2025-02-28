@@ -7,7 +7,9 @@ import 'package:admin_dashboard_v3/views/sales/widgets/sale_action_buttons.dart'
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../controllers/product/product_images_controller.dart';
 import '../../../controllers/sales/sales_controller.dart';
+import '../../../utils/constants/enums.dart';
 import '../table/sale_table.dart';
 import '../widgets/cashier_info.dart';
 import '../widgets/sale_customer_info.dart';
@@ -27,6 +29,8 @@ class SalesDesktop extends StatelessWidget {
     final SalesController salesController = Get.put(SalesController());
     final CustomerController customerController = Get.find<CustomerController>();
     final AddressController addressController = Get.find<AddressController>();
+    final ProductImagesController productImagesController = Get.find<ProductImagesController>();
+
 
 
 
@@ -65,21 +69,29 @@ class SalesDesktop extends StatelessWidget {
                               const SizedBox(
                                 width: TSizes.spaceBtwSections, // Replace TSizes.spaceBtwSections if needed
                               ),
-                                
+
                               // Customer Info
                               Expanded(flex: 2, child: SaleCustomerInfo(
                                 namesList:  customerController.allCustomerNames,
                                 hintText: 'Customer Name',
-                                userNameTextController: salesController.customerNameController ,
-                                onSelectedName: (val) {
+                                userNameTextController: salesController.customerNameController,
+
+
+                                onSelectedName: (val) async {
                                   customerController.selectedCustomer.value = customerController.allCustomers
                                       .firstWhere((user) => user.fullName == val);
                                   addressController.fetchCustomerAddresses(customerController.selectedCustomer.value.customerId );
 
+                                  //Fetch Image
+                                  await productImagesController.getSpecificImage(MediaCategory.products,customerController.selectedCustomer.value.customerId );
                                   //Automatic gives unit price
-                                  salesController.customerPhoneNoController.value.text = customerController.selectedCustomer.value.phoneNumber ?? '';
-                                  salesController.customerCNICController.value.text = customerController.selectedCustomer.value.cnic ?? '';
+                                  salesController.customerPhoneNoController.value.text = customerController.selectedCustomer.value.phoneNumber;
+                                  salesController.customerCNICController.value.text = customerController.selectedCustomer.value.cnic;
                                   },
+
+
+
+                                ///ADDRESS RELATED
                                 addressList: addressController.allCustomerAddressesLocation,
                                 addressTextController: salesController.customerAddressController.value ,
                                 onSelectedAddress: (val){
@@ -87,7 +99,7 @@ class SalesDesktop extends StatelessWidget {
                                       .firstWhere((address) => address.location == val);
 
                                   salesController.selectedAddressId = addressController.selectedCustomerAddress.value.addressId;
-                                  print(salesController.selectedAddressId);
+                                  // print(salesController.selectedAddressId);
 
                                 },
 
@@ -95,7 +107,7 @@ class SalesDesktop extends StatelessWidget {
                               const SizedBox(
                                 width: TSizes.spaceBtwSections, // Replace TSizes.spaceBtwSections if needed
                               ),
-                                
+
                               // Salesman Info
                               const Expanded(flex: 1, child: SalesSalemanInfo()),
                             ],
@@ -126,15 +138,15 @@ class SalesDesktop extends StatelessWidget {
                       const SizedBox(
                         width: TSizes.spaceBtwItems,
                       ),
-      
+
                       // Unit(Kg/etc) Total Price
                     const Expanded(child: UnitTotalPrice()),
-      
+
                       // Button
                       const SizedBox(
                         width: TSizes.spaceBtwItems,
                       ),
-      
+
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () {

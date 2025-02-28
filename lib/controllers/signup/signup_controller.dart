@@ -1,9 +1,12 @@
+import 'package:admin_dashboard_v3/repositories/signup/signup_repository.dart';
+import 'package:admin_dashboard_v3/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../main.dart';
+import '../../Models/user/user_model.dart';
 import '../../common/widgets/loaders/tloaders.dart';
 import '../../network_manager.dart';
 import '../../utils/constants/image_strings.dart';
@@ -13,6 +16,8 @@ import '../../utils/popups/full_screen_loader.dart';
 
 class SignUpController extends GetxController {
   static SignUpController get instance => Get.find();
+  final signUpRepository = Get.put(SignUpRepository());
+
 
   //Variables
   final privacyPolicy = true.obs;
@@ -28,23 +33,42 @@ class SignUpController extends GetxController {
   GlobalKey<FormState>(); // Form key for form validation
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   Future<void> saveUserRecord() async {
-    try {
-      await supabase.from('users').insert([
-        {
-          'first_name': firstName.text.trim(),
-          'last_name': lastName.text.trim(),
-          'phone_number': phoneNumber.text.trim(),
-          'email':email.text.trim()
-        }
-      ]);
-    } on FormatException catch (_) {
-      throw const TFormatException();
-    } on PlatformException catch (e) {
-      throw TPlatformException(e.code).message;
-    } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
-    }
+    // Create a UserModel object
+    UserModel user = UserModel(
+      userId: 0, // userId is excluded as it's auto-incremented by Supabase
+      firstName: firstName.text.trim(),
+      lastName: lastName.text.trim(),
+      phoneNumber: phoneNumber.text.trim(),
+      email: email.text.trim(),
+    //  cnic: cnic.text.trim(),
+      pfp: null, // Optional field, can be added later
+    );
+
+    // Convert the UserModel to JSON
+    Map<String, dynamic> userJson = user.toJson();
+
+    // Remove the 'user_id' field as it's auto-incremented by Supabase
+    userJson.remove('user_id');
+
+    //insert data
+    await signUpRepository.insertUserRecord(userJson);
+
   }
 
 
@@ -78,14 +102,13 @@ class SignUpController extends GetxController {
 
       //Register user in the Supabase Authentication & Save user data in the
 
-      final AuthResponse res = await supabase.auth.signUp(
+      await supabase.auth.signUp(
         email: email.text.trim(),
         password: password.text.trim(),
       );
-      final Session? session = res.session;
-      final User? user = res.user;
 
-      saveUserRecord();
+
+     saveUserRecord();
 
       //Show Success message
       TLoader.successSnackBar(
@@ -93,6 +116,7 @@ class SignUpController extends GetxController {
           message: "Your account has been created! verify email to continue.");
       //move to verify Email Screen
   //    Get.to(() => VerifyEmailScreen(email: email.text.trim(),));
+      Get.offAndToNamed(TRoutes.dashboard);
     } catch (e) {
       TFullScreenLoader.stopLoading();
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());

@@ -26,7 +26,7 @@ class AuthenticationRepository extends GetxController {
     // Get.put(ProductController());
     // Get.put(UserController());
     // Get.put(CheckoutController());
-    FlutterNativeSplash.remove();
+   // FlutterNativeSplash.remove();
    // screenRedirect();
   } //Called from main.dart on app launchz
 

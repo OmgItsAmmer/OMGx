@@ -40,7 +40,7 @@ class CustomerController extends GetxController {
   Future<void> fetchAllCustomers() async {
     try {
 
-      final customers = await customerRepository.fetchallCustomers();
+      final customers = await customerRepository.fetchAllCustomers();
       allCustomers.assignAll(customers);
 
       //filter names

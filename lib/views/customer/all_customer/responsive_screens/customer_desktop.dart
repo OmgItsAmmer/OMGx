@@ -1,3 +1,4 @@
+import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/routes/routes.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
@@ -39,7 +40,7 @@ class CustomerDesktop extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           SizedBox(width: 200,
-                          child: ElevatedButton(onPressed: (){ Get.toNamed( TRoutes.customerDetails);}, child: Text('Add New Customer',style: Theme.of(context).textTheme.bodyMedium!.apply(color: TColors.white),)),),
+                          child: ElevatedButton(onPressed: (){ Get.toNamed( TRoutes.customerDetails,arguments: CustomerModel.empty());}, child: Text('Add New Customer',style: Theme.of(context).textTheme.bodyMedium!.apply(color: TColors.white),)),),
                           SizedBox(width: 500,
                           child: TextFormField(
                             decoration: const InputDecoration(prefixIcon: Icon(Iconsax.search_normal),hintText: 'Search Anything'),
