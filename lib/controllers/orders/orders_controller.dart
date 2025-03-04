@@ -90,36 +90,65 @@ class OrderController extends GetxController {
     }
   }
 
+  // Future<void> fetchCustomerOrders(int customerId) async {
+  //
+  //   try {
+  //     if (kDebugMode) {
+  //       print(customerId);
+  //     }
+  //     isOrderLoading.value = true;
+  //
+  //     currentOrders.clear();
+  //
+  //
+  //     currentOrders.assignAll(orders);
+  //     print(currentOrders.length);
+  //
+  //
+  //
+  //
+  //   } catch (e) {
+  //     TLoader.errorSnackBar(title: e.toString()); //TODO remove it
+  //     if (kDebugMode) {
+  //       print(e);
+  //     }
+  //
+  //   }
+  //   finally
+  //   {
+  //     isOrderLoading.value = false;
+  //
+  //   }
+  //
+  // }
   Future<void> fetchCustomerOrders(int customerId) async {
-
     try {
       if (kDebugMode) {
-        print(customerId);
+        print("Fetching orders for customer ID: $customerId");
       }
+
       isOrderLoading.value = true;
 
+      // Clear the previous data
       currentOrders.clear();
 
-      final orders = await orderRepository.fetchCustomerOrders(customerId);
-      currentOrders.assignAll(orders);
+      // Filter orders where customerId matches
+      currentOrders.assignAll(allOrders.where((order) => order.customerId == customerId).toList());
 
-
-
-
-    } catch (e) {
-      TLoader.errorSnackBar(title: e.toString()); //TODO remove it
       if (kDebugMode) {
-        print(e);
+        print("Filtered orders count: ${currentOrders.length}");
       }
 
-    }
-    finally
-    {
+    } catch (e) {
+      TLoader.errorSnackBar(title: "Error: ${e.toString()}"); // Handle errors properly
+      if (kDebugMode) {
+        print("Error fetching customer orders: $e");
+      }
+    } finally {
       isOrderLoading.value = false;
-
     }
-
   }
+
 
 
 

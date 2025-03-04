@@ -21,7 +21,7 @@ class CustomerTable extends StatelessWidget {
         minWidth: 700,
         showCheckBox: true,
         columns: const [
-          DataColumn2(label: Text('')),
+        //    DataColumn2(label: Text('')),
           DataColumn2(label: Text('Customer')),
 
           DataColumn2(label: Text('Email')),

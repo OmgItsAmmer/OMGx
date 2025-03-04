@@ -20,7 +20,8 @@ class OrderRepository extends GetxController {
       final data = await supabase
           .from('orders')
           .select().eq('customer_id', customerId);
-      print(data);
+     // print(data.length);
+
       final addressList = data.map((item) {
         return OrderModel.fromJson(item);
       }).toList();
@@ -48,7 +49,9 @@ class OrderRepository extends GetxController {
     } catch (e) {
       // Show error if any
       TLoader.errorSnackBar(title: 'Update Order Error', message: e.toString());
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
     }
   }
 
@@ -93,8 +96,10 @@ class OrderRepository extends GetxController {
       return orderId;
     } catch (e) {
       // Show error if any
-      TLoader.errorSnackBar(title: 'Update Order Error', message: e.toString());
-      print(e);
+      if (kDebugMode) {
+        TLoader.errorSnackBar(title: 'Update Order Error', message: e.toString());
+        print(e);
+      }
       return -1;
     }
   }

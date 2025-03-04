@@ -6,6 +6,7 @@ import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../common/widgets/shimmers/shimmer.dart';
 import '../../../../common/widgets/tiles/user_advance_info_tile.dart';
@@ -118,15 +119,22 @@ class UserInfo extends StatelessWidget {
 
            // mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Expanded(child: OUserAdvanceInfoTile(firstTile: 'Last Order', secondTile: orderController.recentOrderDay )),
-              Expanded(child: OUserAdvanceInfoTile(firstTile: 'Average Order', secondTile: orderController.averageTotalAmount)),
+              Expanded(child: OUserAdvanceInfoTile(firstTile: 'Last Order', secondTile: (orderController.recentOrderDay == '0')  ? 'No Orders yet' : orderController.recentOrderDay  )),
+              Expanded(child: OUserAdvanceInfoTile(firstTile: 'Average Order', secondTile: (orderController.averageTotalAmount == '0.0') ? 'No Orders yet':orderController.averageTotalAmount)),
             ],
           ),
           const SizedBox(height: TSizes.spaceBtwSections),
-          const Row(
+           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Expanded(child: OUserAdvanceInfoTile(firstTile: ' Registered At ', secondTile: '7 Days Ago')),
+              Expanded(
+                child: OUserAdvanceInfoTile(
+                  firstTile: 'Registered At',
+                  secondTile: customerModel.createdAt != null
+                      ? DateFormat('dd MMM yyyy, hh:mm a').format(customerModel.createdAt!)
+                      : 'N/A', // Fallback text if createdAt is null
+                ),
+              ),
               Expanded(child: OUserAdvanceInfoTile(firstTile: 'Email Marketing', secondTile: 'UnSubscribed')),
             ],
           ),

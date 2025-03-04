@@ -10,14 +10,25 @@ import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import '../../../../Models/orders/order_item_model.dart';
 import '../../../../common/widgets/containers/rounded_container.dart';
 import '../../../../routes/routes.dart';
 import '../../../../utils/constants/enums.dart';
 
 
 class CustomerOrderRows extends DataTableSource {
-  CustomerOrderRows({required this.ordersCount});
+  CustomerOrderRows({
+    required this.ordersCount,
+    required this.currentOrders,
+
+  });
   int ordersCount;
+  RxList<OrderModel> currentOrders;
+
+
+  void refresh() {
+    notifyListeners(); // This triggers a UI update
+  }
   @override
   DataRow? getRow(int index) {
     final OrderController orderController = Get.find<OrderController>();
@@ -25,7 +36,7 @@ class CustomerOrderRows extends DataTableSource {
     final AddressController addressController = Get.find<AddressController>();
     final GuarantorController guarantorController = Get.find<GuarantorController>();
     //order model
-    final order = orderController.currentOrders[index];
+    final order = currentOrders[index];
 
     return DataRow2(
         onTap: () {

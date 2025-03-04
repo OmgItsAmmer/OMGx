@@ -65,4 +65,25 @@ class CustomerRepository extends GetxController {
       rethrow;
     }
   }
+
+
+  Future<void> deleteCustomerFromTable(int customerId) async {
+    try {
+
+     await supabase
+          .from('customers')
+          .delete()
+          .match({'customer_id': customerId});
+
+
+
+      TLoader.successSnackBar(title: "Success", message: "Customer deleted successfully");
+
+    } catch (e) {
+      if (kDebugMode) {
+        TLoader.errorSnackBar(title: 'Customer Repo', message: e.toString());
+        print("Error deleting customer: $e");
+      }
+    }
+  }
 }

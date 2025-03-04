@@ -30,6 +30,7 @@ class CustomerOrderTable extends StatelessWidget {
           const DataColumn2(label: Text('Action'), fixedWidth: 100),
         ],
         source: CustomerOrderRows(
+          currentOrders: orderController.currentOrders,
             ordersCount:  orderController.currentOrders.length
         ),
       ),

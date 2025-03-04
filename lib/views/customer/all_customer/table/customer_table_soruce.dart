@@ -31,6 +31,7 @@ class CustomerRow extends DataTableSource {
 
           await addressController.fetchCustomerAddresses(customer.customerId);
           await orderController.fetchCustomerOrders(customer.customerId);
+          orderController.currentOrders.refresh();
           orderController.setRecentOrderDay();
           orderController.setAverageTotalAmount();
           productImagesController.setDesiredImage(MediaCategory.customers, customer.customerId);
@@ -39,12 +40,12 @@ class CustomerRow extends DataTableSource {
         selected: false,
         onSelectChanged: (value) {},
         cells: [
-          const DataCell(TRoundedImage(
-            width: 50,
-            height: 50,
-            imageurl: TImages.user,
-            isNetworkImage: false,
-          )),
+          // const DataCell(TRoundedImage(
+          //   width: 50,
+          //   height: 50,
+          //   imageurl: TImages.user,
+          //   isNetworkImage: false,
+          // )),
           DataCell(Text(
             customer.fullName.toString(),
             style: Theme.of(Get.context!)
@@ -71,6 +72,7 @@ class CustomerRow extends DataTableSource {
           DataCell(TTableActionButtons(
             view: false,
             edit: true,
+            delete: true,
 
             onEditPressed: () async {
               await addressController.fetchCustomerAddresses(customer.customerId);
@@ -79,7 +81,9 @@ class CustomerRow extends DataTableSource {
               Get.toNamed(TRoutes.addCustomer, arguments: customer);
 
             },
-            onDeletePressed: () {},
+            onDeletePressed: () async {
+              await customerController.deleteCustomer(customer.customerId);
+            },
           ))
         ]);
   }

@@ -5,6 +5,7 @@ import 'package:admin_dashboard_v3/controllers/media/media_controller.dart';
 import 'package:admin_dashboard_v3/repositories/customer/customer_repository.dart';
 import 'package:admin_dashboard_v3/repositories/media/media_repository.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 
@@ -105,10 +106,12 @@ class CustomerController extends GetxController {
       // Call the repository function to save or update the product
       int entityId = await customerRepository.saveOrUpdateCustomerRepo(json) ?? -1;
       //Update Image Table
-      if(entityId != -1)
+      if(entityId != -1   )
       {
         customerModel.customerId = entityId;
-        await mediaController.updateEntityId(entityId, productImagesController.selectedImage.value!.image_id);
+        if(productImagesController.selectedImage.value != null){
+          await mediaController.updateEntityId(entityId, productImagesController.selectedImage.value!.image_id);
+        }
         await AddressController.instance.saveAddress(entityId, 'Customer');
         allCustomers.add(customerModel);
         allCustomerNames.add(customerModel.fullName);
@@ -123,6 +126,8 @@ class CustomerController extends GetxController {
 
       // Clear the form after saving/updating
       cleanCustomerDetails();
+      Get.back();
+      TLoader.successSnackBar(title: 'Customer Added!');
     } catch (e) {
       // Handle errors
       TLoader.errorSnackBar(
@@ -158,6 +163,39 @@ class CustomerController extends GetxController {
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
   }
+
+  Future<void> deleteCustomer(int customerId) async {
+    try {
+
+
+      // Call the repository function to delete from the database
+      await customerRepository.deleteCustomerFromTable(customerId);
+
+      // Find the customer in allCustomers to get the name
+      final customerToRemove = allCustomers.firstWhere(
+            (customer) => customer.customerId == customerId,
+        orElse: () => CustomerModel.empty(), // Default to avoid error
+      );
+
+      if (customerToRemove.customerId == -1) {
+        throw Exception("Customer not found in the list");
+      }
+
+      // Remove customer from lists
+      allCustomers.removeWhere((customer) => customer.customerId == customerId);
+      allCustomerNames.removeWhere((name) => name == customerToRemove.firstName);
+
+
+
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error deleting customer: $e");
+        TLoader.errorSnackBar(title: 'Error', message: e.toString());
+      }
+    }
+  }
+
+
 
 
 
