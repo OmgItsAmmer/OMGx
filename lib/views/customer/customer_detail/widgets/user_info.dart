@@ -5,10 +5,14 @@ import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
 
+import '../../../../common/widgets/shimmers/shimmer.dart';
 import '../../../../common/widgets/tiles/user_advance_info_tile.dart';
 import '../../../../controllers/address/address_controller.dart';
+import '../../../../controllers/media/media_controller.dart';
 import '../../../../controllers/orders/orders_controller.dart';
+import '../../../../controllers/product/product_images_controller.dart';
 import '../../../profile/old/widgets/profile_menu.dart';
 
 class UserInfo extends StatelessWidget {
@@ -17,8 +21,10 @@ class UserInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AddressController addressController = Get.find<AddressController>();
+    // final AddressController addressController = Get.find<AddressController>();
     final OrderController orderController = Get.find<OrderController>();
+    final ProductImagesController productImagesController = Get.find<ProductImagesController>();
+    final MediaController mediaController = Get.find<MediaController>();
 
 
 
@@ -40,10 +46,39 @@ class UserInfo extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const TRoundedImage(
-                  width: 80,
-                  height: 80,
-                  imageurl: TImages.user),
+              Obx(
+                    () {
+                  if(productImagesController.selectedImage.value == null){
+                    return const SizedBox(
+                        height: 120,
+                        width: 100,
+                        child: Icon(Iconsax.image));
+                  }
+                  // Check if selectedImages is empty
+                  return FutureBuilder<String?>(
+                    future: mediaController.getImageFromBucket(
+                      productImagesController.selectedImage.value?.mediaCategory ?? '',
+                      productImagesController.selectedImage.value?.filename ?? '',
+                    ),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const TShimmerEffect(width: 350, height: 170); // Show shimmer while loading
+                      } else if (snapshot.hasError) {
+                        return const Text('Error loading image'); // Handle error case
+                      } else if (snapshot.hasData && snapshot.data != null) {
+                        return TRoundedImage(
+                          isNetworkImage: true,
+                          width: 80,
+                          height: 80,
+                          imageurl: snapshot.data!,
+                        );
+                      } else {
+                        return const Text('No image available'); // Handle case where no image is available
+                      }
+                    },
+                  );
+                },
+              ),
               const SizedBox(width: TSizes.spaceBtwItems,),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,13 +104,7 @@ class UserInfo extends StatelessWidget {
             onPressed: () {},
             isTap: false,
           ),
-          const SizedBox(height: TSizes.spaceBtwItems,),
-          TProfilemenu(
-            title: "City",
-            value: addressController.allCustomerAddresses[0].city,
-            onPressed: () {},
-            isTap: false,
-          ),
+
           const SizedBox(height: TSizes.spaceBtwItems,),
           TProfilemenu(
             title: "Phone Number",

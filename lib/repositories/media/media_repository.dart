@@ -130,4 +130,23 @@ class MediaRepository extends GetxController {
       }
     }
   }
+
+  Future<void> updateEntityIdRepo(int entityId, int imageId) async {
+    try {
+      // Update the entity_id in the images table where image_id matches
+      await supabase
+          .from('images')
+          .update({'entity_id': entityId})
+          .eq('image_id', imageId);
+
+      print('Entity ID updated successfully for image ID: $imageId');
+    } catch (e) {
+      // Handle errors
+      TLoader.errorSnackBar(title: 'Error updating entity ID', message: e.toString());
+      if (kDebugMode) {
+        print('Error updating entity ID: $e');
+      }
+      rethrow; // Rethrow the error if needed
+    }
+  }
 }

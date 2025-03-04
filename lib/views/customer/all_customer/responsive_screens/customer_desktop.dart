@@ -32,7 +32,7 @@ class CustomerDesktop extends StatelessWidget {
       
                 //Table
                  TRoundedContainer(
-                  padding: EdgeInsets.all(TSizes.defaultSpace),
+                  padding: const EdgeInsets.all(TSizes.defaultSpace),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -40,7 +40,7 @@ class CustomerDesktop extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           SizedBox(width: 200,
-                          child: ElevatedButton(onPressed: (){ Get.toNamed( TRoutes.customerDetails,arguments: CustomerModel.empty());}, child: Text('Add New Customer',style: Theme.of(context).textTheme.bodyMedium!.apply(color: TColors.white),)),),
+                          child: ElevatedButton(onPressed: (){ Get.toNamed(TRoutes.addCustomer,arguments: CustomerModel.empty());}, child: Text('Add New Customer',style: Theme.of(context).textTheme.bodyMedium!.apply(color: TColors.white),)),),
                           SizedBox(width: 500,
                           child: TextFormField(
                             decoration: const InputDecoration(prefixIcon: Icon(Iconsax.search_normal),hintText: 'Search Anything'),

@@ -1,5 +1,7 @@
 
 
+import 'package:admin_dashboard_v3/Models/user/user_model.dart';
+import 'package:admin_dashboard_v3/controllers/sales/sales_controller.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -16,10 +18,14 @@ import '../../utils/constants/image_strings.dart';
 import '../../utils/constants/sizes.dart';
 import '../../utils/popups/full_screen_loader.dart';
 import '../../views/login/login.dart';
+import '../startup/startup_controller.dart';
 
 class UserController extends GetxController {
   static UserController get instance => Get.find();
   final UserRespository userRespository = Get.put(UserRespository());
+//  final StartUpController startUpController =  Get.put(StartUpController());
+ // final SalesController salesController =  Get.put(SalesController());
+
 
 
 
@@ -30,7 +36,7 @@ class UserController extends GetxController {
   final hidePassword = false.obs;
   final imageUploading = false.obs;
 
-  RxList<Map<String, dynamic>> userData = <Map<String, dynamic>>[].obs;
+  RxList<UserModel> userData = <UserModel>[].obs;
 
 
 
@@ -39,11 +45,11 @@ class UserController extends GetxController {
 
   GlobalKey<FormState> reAuthFormKey = GlobalKey<FormState>();
 
-//  final cartController = Get.put(CartController());
 
 
 
-  Rx<Map<String, dynamic>>? current_user; // to store the product Variation detail based on Size
+
+  Rx<UserModel> currentUser = UserModel.empty().obs; // to store the product Variation detail based on Size
 
 
   @override
@@ -72,15 +78,18 @@ class UserController extends GetxController {
       final userDetail = await userRespository.fetchUserDetials(user.email);
       userData.assignAll(userDetail);
 
-      // For debugging
-      current_user = Rx<Map<String, dynamic>>(userData.firstWhere(
-            (val) => val['email'] == user.email,
-        orElse: () => {},
-      ));
 
-      if (kDebugMode) {
-        print("User data: $current_user");
-      }
+      // For debugging
+      UserModel matchedUser = userData.firstWhere((value) => value.email == user.email);
+      currentUser.value = matchedUser;
+
+
+      SalesController.instance.setupUserDetails();
+
+
+      //Setting UserDetails in App
+   //   startUpController.setupUserDetails(currentUser.value);
+
 
 
     } catch (e) {

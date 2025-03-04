@@ -219,7 +219,6 @@ class MediaUploader extends StatelessWidget {
           )
         : const SizedBox.shrink());
   }
-
   void _openConfirmationDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -244,8 +243,8 @@ class MediaUploader extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-                _openNonClosableDialog(context); // Open the second popup
+                Navigator.of(context).pop(); // Close the confirmation dialog
+                _openNonClosableDialog(context); // Open the non-closable dialog
               },
               child: const Text('Confirm'),
             ),
@@ -282,6 +281,22 @@ class MediaUploader extends StatelessWidget {
           ),
         );
       },
-    );
+    ).then((_) {
+      // This block will execute when the dialog is closed
+      print("Dialog closed");
+    });
+
+    // Call your image upload function here
+    _uploadImage(context).then((_) {
+      // Close the dialog after the image is uploaded
+      Navigator.of(context).pop();
+    });
   }
+
+  Future<void> _uploadImage(BuildContext context) async {
+    // Simulate an image upload process (replace with your actual upload logic)
+    print(mediaController.selectedPath.value.toString().split('.').last);
+   mediaController.uploadImages(mediaController.selectedPath.value.toString().split('.').last);
+  }
+
 }

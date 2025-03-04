@@ -26,25 +26,25 @@ class VariationInfo extends StatelessWidget {
 
 
 
-              // Dropdown for Variation Type
-              Expanded(
-                child: DropdownButton<VariationType>(
-                  value: VariationType.Regular,
-                  items: VariationType.values.map((VariationType variant) {
-                    return DropdownMenuItem<VariationType>(
-                      value: variant,
-                      child: Text(
-                        variant.name.capitalize.toString(),
-                        style: const TextStyle(),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    // Add your onChanged logic here
-                  },
-                ),
-              ),
-              const SizedBox(width: TSizes.spaceBtwSections),
+              // // Dropdown for Variation Type
+              // Expanded(
+              //   child: DropdownButton<VariationType>(
+              //     value: VariationType.Regular,
+              //     items: VariationType.values.map((VariationType variant) {
+              //       return DropdownMenuItem<VariationType>(
+              //         value: variant,
+              //         child: Text(
+              //           variant.name.capitalize.toString(),
+              //           style: const TextStyle(),
+              //         ),
+              //       );
+              //     }).toList(),
+              //     onChanged: (value) {
+              //       // Add your onChanged logic here
+              //     },
+              //   ),
+              // ),
+              // const SizedBox(width: TSizes.spaceBtwSections),
 
               // Attribute Name TextFormField
               Expanded(

@@ -3,6 +3,7 @@
 import 'package:admin_dashboard_v3/common/widgets/chips/rounded_choice_chips.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
+import 'package:admin_dashboard_v3/controllers/shop/shop_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,9 @@ class SalesSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final SalesController salesController = Get.find<SalesController>();
+  final  shopController =  Get.put(ShopController());
+    shopController.fetchShop(fetchImage: false);
+
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -31,18 +35,53 @@ class SalesSummary extends StatelessWidget {
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    title: const Text('Profiles'),
-                    content: const Row(
+                    title: const Text('Discounts'),
+                    content: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Expanded(child: SizedBox(
-                            width: 150  ,
-                             child: TChoiceChip(text: 'Profile 1', selected: true))),
-                        const SizedBox(width: TSizes.spaceBtwItems,),
-                        Expanded(child: TChoiceChip(text: 'Profile 2', selected: false)),
-                        const SizedBox(width: TSizes.spaceBtwItems,),
+                        // Profile 1 Chip
+                        Expanded(
+                          child: SizedBox(
+                            width: 150,
+                            child: Obx(
+                                  () => TChoiceChip(
+                                text: '${shopController.profile1.text}%',
+                                selected: salesController.selectedChipIndex.value == 0,
+                                onSelected: (val) {
+                                  salesController.applyDiscount(shopController.profile1.text);
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: TSizes.spaceBtwItems),
 
-                        Expanded(child: TChoiceChip(text: 'Profile 3', selected: false)),
+                        // Profile 2 Chip
+                        Expanded(
+                          child: Obx(
+                                () => TChoiceChip(
+                              text: '${shopController.profile2.text}%',
+                              selected: salesController.selectedChipIndex.value == 1,
+                              onSelected: (val) {
+                                salesController.applyDiscount(shopController.profile2.text);
+                              },
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: TSizes.spaceBtwItems),
+
+                        // Profile 3 Chip
+                        Expanded(
+                          child: Obx(
+                                () => TChoiceChip(
+                              text: '${shopController.profile3.text}%',
+                              selected: salesController.selectedChipIndex.value == 2,
+                              onSelected: (val) {
+                                salesController.applyDiscount(shopController.profile3.text);
+                              },
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                     actions: [
@@ -73,22 +112,47 @@ class SalesSummary extends StatelessWidget {
           child: TextFormField(
             controller: salesController.discountController, // Attach the controller
             onChanged: (value) {
-              // Parse the entered value and compare with netTotal
-              double enteredValue = double.tryParse(value) ?? 0.0;
+              // Clean the input to ensure it's a valid number
+              String cleanedValue = value.replaceAll(RegExp(r'[^0-9.]'), '');
 
+              // Check for multiple decimal points
+              if (cleanedValue.split('.').length > 2) {
+                // Remove extra decimal points
+                List<String> parts = cleanedValue.split('.');
+                cleanedValue = '${parts[0]}.${parts.sublist(1).join()}';
+              }
+
+              // Parse the cleaned value
+              double enteredValue = double.tryParse(cleanedValue) ?? 0.0;
+
+              // Validate the discount
               if (enteredValue > salesController.netTotal.value) {
-                // Reset TextFormField and discount value to 0.0
+                // Reset the discount to 0.0
                 salesController.discountController.text = "0.0";
                 salesController.discount.value = "0.0";
 
-                // Optionally show a message to the user
-                TLoader.errorSnackBar(title: "Invalid Discount", message: "Discount cannot exceed total amount.",
-                  );
+                // Show an error message to the user
+                TLoader.errorSnackBar(
+                  title: "Invalid Discount",
+                  message: "Discount cannot exceed the total amount.",
+                );
               } else {
-                salesController.discount.value = value;
+                // Update the discount value
+                salesController.discount.value = cleanedValue;
               }
             },
-            validator: (value) => TValidator.validateEmptyText('Discount', value),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Discount is required';
+              }
+              if (double.tryParse(value) == null) {
+                return 'Please enter a valid number';
+              }
+              if (double.tryParse(value)! > salesController.netTotal.value) {
+                return 'Discount cannot exceed the total amount';
+              }
+              return null;
+            },
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [
               FilteringTextInputFormatter.allow(
@@ -121,7 +185,7 @@ class SalesSummary extends StatelessWidget {
                   child: Text(
                     (salesController.netTotal.value -
                         (double.tryParse(salesController.discount.value) ?? 0.0))
-                        .toString(),
+                        .toStringAsFixed(2),
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                 ),
@@ -131,5 +195,7 @@ class SalesSummary extends StatelessWidget {
         ),
       ],
     );
+
   }
+
 }

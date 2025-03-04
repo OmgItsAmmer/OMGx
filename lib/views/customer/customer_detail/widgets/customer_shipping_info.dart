@@ -32,34 +32,28 @@ class CustomerShippingInfo extends StatelessWidget {
 
           TProfilemenu(
             title: "Name",
-            value: customerModel.fullName,
+            value: customerModel.fullName ,
             onPressed: () {},
             isTap: false,
           ),
           const SizedBox(height: TSizes.spaceBtwItems,),
 
-          TProfilemenu(
-            title: "City",
-            value: addressController.allCustomerAddresses[0].city,
-            onPressed: () {},
-            isTap: false,
-          ),
-          const SizedBox(height: TSizes.spaceBtwItems,),
+
 
           TProfilemenu(
             title: "Phone Number",
-            value: customerModel.phoneNumber,
+            value: customerModel.phoneNumber ,
             onPressed: () {},
             isTap: false,
           ),
           const SizedBox(height: TSizes.spaceBtwItems,),
           TProfilemenu(
             title: "Address",
-            value: addressController.allCustomerAddresses[0].location,
+            value: addressController.allCustomerAddresses[0].location ?? '',
             onPressed: () {},
             isTap: false,
           ),
-          const SizedBox(height: TSizes.spaceBtwItems,),
+
         ],
       ),
     );

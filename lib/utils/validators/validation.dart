@@ -39,13 +39,15 @@ class TValidator {
   }
 
   /// Email Validation
+  /// Email Validation
   static String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
       return 'Email is required.';
     }
 
-    // Regular expression for email validation
-    final emailRegExp = RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$');
+    // Updated Regular Expression for better email validation
+    final emailRegExp = RegExp(
+        r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
 
     if (!emailRegExp.hasMatch(value)) {
       return 'Invalid email address.';
@@ -53,6 +55,7 @@ class TValidator {
 
     return null;
   }
+
 
   /// Password Validation
   static String? validatePassword(String? value) {

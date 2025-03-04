@@ -1,5 +1,5 @@
 class CustomerModel {
-  final int customerId;
+   int customerId;
   final String firstName;
   final String lastName;
   final String phoneNumber;

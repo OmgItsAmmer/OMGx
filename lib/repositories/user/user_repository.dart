@@ -1,6 +1,7 @@
 import 'dart:io';
 
 
+import 'package:admin_dashboard_v3/Models/user/user_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -22,17 +23,24 @@ class UserRespository extends GetxController {
 
 //
 //Function to fetch user details based on user ID.
-  Future<List<Map<String, dynamic>>> fetchUserDetials(String? email) async {
+  Future<List<UserModel>> fetchUserDetials(String? email) async {
     try {
       if (email == null) throw 'Email cannot be null';
-      return  await  Supabase.instance.client
+      final data =  await  Supabase.instance.client
           .from('users')
           .select()
           .eq('email', email);
+      final userList = data.map((item) {
+        return UserModel.fromJson(item);
+      }).toList();
+
+      return userList;
+
     } on PlatformException catch (e) {
       throw TPlatformException(e.code).message;
     } catch (e) {
       throw 'Something went wrong. Please try again';
+
     }
 
   }

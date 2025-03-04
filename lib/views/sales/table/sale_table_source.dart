@@ -67,7 +67,11 @@ class SaleRow extends DataTableSource {
             view: false,
             edit: false,
             onViewPressed:() => Get.toNamed(TRoutes.productsDetail, arguments: saleItem), // TODO use get argument to send data in order detail screen
-            onDeletePressed: () {},
+            onDeletePressed: () {
+              salesController.deleteItem(saleItem,index);
+
+
+            },
           ))
         ]);
   }

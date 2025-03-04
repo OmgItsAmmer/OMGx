@@ -97,10 +97,10 @@ class SaleActionButtons extends StatelessWidget {
                             const SizedBox(height: TSizes.spaceBtwSections,),
                             Obx(
                             () => TextFormField(
-                                onChanged: (value){
-
-                        
-                                },
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                              ],
                                 readOnly: true,
                                 controller: salesController.remainingAmount.value,
                                 validator: (value) =>
@@ -124,6 +124,7 @@ class SaleActionButtons extends StatelessWidget {
                                 const SizedBox(width: TSizes.spaceBtwInputFields  ,),
                                 Expanded(child: ElevatedButton(onPressed: () {
                                   salesController.checkOut();
+                                  Navigator.of(context).pop(); // Close the dialog
 
                                 }, child: Text('Confirm',style: Theme.of(context).textTheme.bodyMedium!.apply(color: TColors.white),))),
                               ],

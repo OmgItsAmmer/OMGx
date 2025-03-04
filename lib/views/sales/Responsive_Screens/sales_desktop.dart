@@ -26,7 +26,7 @@ class SalesDesktop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SalesController salesController = Get.put(SalesController());
+    final SalesController salesController = Get.find<SalesController>();
     final CustomerController customerController = Get.find<CustomerController>();
     final AddressController addressController = Get.find<AddressController>();
     final ProductImagesController productImagesController = Get.find<ProductImagesController>();
@@ -83,7 +83,9 @@ class SalesDesktop extends StatelessWidget {
                                   addressController.fetchCustomerAddresses(customerController.selectedCustomer.value.customerId );
 
                                   //Fetch Image
-                                  await productImagesController.getSpecificImage(MediaCategory.products,customerController.selectedCustomer.value.customerId );
+                                  print(customerController.selectedCustomer.value.customerId);
+
+                                  await productImagesController.getSpecificImage(MediaCategory.customers,customerController.selectedCustomer.value.customerId );
                                   //Automatic gives unit price
                                   salesController.customerPhoneNoController.value.text = customerController.selectedCustomer.value.phoneNumber;
                                   salesController.customerCNICController.value.text = customerController.selectedCustomer.value.cnic;

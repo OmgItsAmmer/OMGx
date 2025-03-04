@@ -1,7 +1,6 @@
 import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
-import 'package:admin_dashboard_v3/views/orders/all_orders/table/order_table.dart';
 import 'package:flutter/material.dart';
 
 import '../table/customer_order_table.dart';
@@ -22,8 +21,9 @@ final CustomerModel customerModel;
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+
                 Text(
-                  customerModel.fullName,
+                  "Customer Detail",
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 const SizedBox(

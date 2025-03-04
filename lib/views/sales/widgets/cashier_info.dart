@@ -1,13 +1,9 @@
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
-import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/controllers/sales/sales_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
-import 'package:datepicker_dropdown/datepicker_dropdown.dart';
-import 'package:datepicker_dropdown/order_format.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
@@ -42,19 +38,21 @@ class SalesCashierInfo extends StatelessWidget {
             //Admin Name
             SizedBox(
               width: double.infinity,
-              child: TextFormField(
-                  onChanged: (value){
+              child: Obx(
+                  () => TextFormField(
+                    onChanged: (value){
 
-                  },
-                  readOnly: true,
-                // initialValue: 'Ammer',
-                  controller: salesController.adminNameController,
-                  validator: (value) =>
-                      TValidator.validateEmptyText('Admin Name', value),
-                  decoration: const InputDecoration(labelText: 'Admin'),
-                  style: Theme.of(context).textTheme.bodyMedium,
+                    },
+                    readOnly: true,
+                  // initialValue: 'Ammer',
+                    controller: salesController.cashierNameController.value,
+                    validator: (value) =>
+                        TValidator.validateEmptyText('Admin Name', value),
+                    decoration: const InputDecoration(labelText: 'Admin'),
+                    style: Theme.of(context).textTheme.bodyMedium,
 
-                ),
+                  ),
+              ),
             ),
 
             const SizedBox(height: TSizes.spaceBtwItems,),

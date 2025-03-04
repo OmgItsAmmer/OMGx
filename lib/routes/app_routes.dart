@@ -8,6 +8,8 @@ import 'package:get/get.dart';
 
 import '../views/brands/brand_details/brand_detail_screen.dart';
 import '../views/category/categories_detail/category_detail.dart';
+import '../views/customer/add_customer/add_customer.dart';
+import '../views/customer/add_customer/resposive_screens/add_customer_desktop.dart';
 import '../views/customer/all_customer/customer.dart';
 import '../views/customer/customer_detail/customer_detail.dart';
 import '../views/dashboard/dashboard.dart';
@@ -43,6 +45,7 @@ class TAppRoutes {
     //Customer Screens
     GetPage(name: TRoutes.customer, page: () => const CustomerScreen(),middlewares: [TRouteMiddleware()] ),
     GetPage(name: TRoutes.customerDetails, page: () => const CustomerDetailScreen(),middlewares: [TRouteMiddleware()] ),
+    GetPage(name: TRoutes.addCustomer, page: () => const AddCustomerScreen(),middlewares: [TRouteMiddleware()] ),
     //Salesman Screens
     GetPage(name: TRoutes.salesman, page: () => const SalesmanScreen(),middlewares: [TRouteMiddleware()] ),
     GetPage(name: TRoutes.salesmanDetails, page: () => const CustomerDetailScreen(),middlewares: [TRouteMiddleware()] ),

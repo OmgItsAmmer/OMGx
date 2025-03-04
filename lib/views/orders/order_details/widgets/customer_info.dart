@@ -79,11 +79,12 @@ class CustomerInfo extends StatelessWidget {
                           //   }
 
                           return Text(
-                            addressController.allCustomerAddresses.length >= 1
-                                ? addressController.allCustomerAddresses[0].location
+                            addressController.allCustomerAddresses.isNotEmpty
+                                ? addressController.allCustomerAddresses[0].location ?? 'No Address Found'
                                 : 'No Address Found',
                             style: Theme.of(context).textTheme.titleSmall,
                           );
+
                         }),
 
                       ],

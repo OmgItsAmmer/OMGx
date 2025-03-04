@@ -85,7 +85,10 @@ class AddressRepository extends GetxController {
           .insert(singleAddressMap);
 
     } catch (e) {
-      TLoader.warningSnackBar(title: "Update Address", message: e.toString());
+      if (kDebugMode) {
+        TLoader.warningSnackBar(title: "Address Repo", message: e.toString());
+        print(e);
+      }
 
     }
   }

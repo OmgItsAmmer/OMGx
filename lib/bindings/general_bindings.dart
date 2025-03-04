@@ -12,6 +12,7 @@ import '../controllers/media/media_controller.dart';
 import '../controllers/orders/orders_controller.dart';
 import '../controllers/product/product_images_controller.dart';
 import '../controllers/salesman/salesman_controller.dart';
+import '../controllers/startup/startup_controller.dart';
 import '../network_manager.dart';
 
 class GeneralBindings extends Bindings {

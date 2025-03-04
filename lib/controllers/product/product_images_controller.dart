@@ -93,7 +93,7 @@ void setDesiredImage(MediaCategory mediaCategory,int imageId) async {
     await mediaController.getSelectedFolderImages(mediaCategory);
 
     print(imageId);
-    print(mediaController.allImages[0].image_id);
+    print(mediaController.allImages[1]);
 
     if (mediaController.allImages.isNotEmpty && imageId != -1) {
       final filteredValue = mediaController.allImages.firstWhere(

@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
@@ -18,22 +17,25 @@ class MediaController extends GetxController {
   static MediaController get instance => Get.find();
   final MediaRepository mediaRepository = Get.put(MediaRepository());
 
+  // Reactive variables
   var droppedFiles = <File>[].obs;
   RxList<ImageModel> allImages = <ImageModel>[].obs;
   Rx<ImageModel>? currentImage = ImageModel.empty().obs;
-
-  late DropzoneViewController dropzoneViewController;
+  RxList<ImageModel> selectedImages = <ImageModel>[].obs; // Checkboxed images
   final Rx<MediaCategory> selectedPath = MediaCategory.folders.obs;
   final RxBool showMediaUploaderSection = false.obs;
   final RxBool showImagesUploaderSection = false.obs;
   final RxBool isLoading = false.obs;
 
-  //chcekboxed images
-  RxList<ImageModel> selectedImages = <ImageModel>[].obs;
-
-  //pagination(lazy loading)
+  // Pagination (lazy loading)
   int offset = 0;
   final int limit = 10;
+
+  late DropzoneViewController dropzoneViewController;
+
+  //==========================================================================
+  // FILE DROPZONE AND SELECTION FUNCTIONS
+  //==========================================================================
 
   void addDroppedFile(File file) {
     droppedFiles.add(file);
@@ -43,7 +45,36 @@ class MediaController extends GetxController {
     droppedFiles.clear();
   }
 
-  // Function to display a bottom sheet for image selection
+  /// Pick image from file explorer
+  Future<void> pickImageFromExplorer() async {
+    try {
+      // Open file explorer and allow only image selection
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.image, // Restrict to image files
+        allowMultiple: false, // Allow only single file selection
+      );
+
+      // Check if a file was selected
+      if (result != null) {
+        // Get the file path
+        PlatformFile file = result.files.first;
+
+        // Pass the file to the mediaController
+        addDroppedFile(File(file.path!));
+      } else {
+        // User canceled the picker
+        print('No file selected.');
+      }
+    } catch (e) {
+      TLoader.errorSnackBar(title: 'Oh Snap!', message: 'Didn\'t get the image from explorer');
+    }
+  }
+
+  //==========================================================================
+  // IMAGE SELECTION AND MEDIA CONTENT FUNCTIONS
+  //==========================================================================
+
+  /// Function to display a bottom sheet for image selection
   Future<List<ImageModel>> selectImagesFromMedia({
     List<String>? selectedUrls,
     bool allowSelection = true,
@@ -54,7 +85,7 @@ class MediaController extends GetxController {
     showImagesUploaderSection.value = true;
 
     // Show the bottom sheet
-     await Get.bottomSheet<List<ImageModel>>(
+    await Get.bottomSheet<List<ImageModel>>(
       isScrollControlled: true,
       backgroundColor: Colors.white,
       ClipRRect(
@@ -96,8 +127,11 @@ class MediaController extends GetxController {
     return selectedImages;
   }
 
+  //==========================================================================
+  // IMAGE FETCHING AND PAGINATION FUNCTIONS
+  //==========================================================================
 
-
+  /// Fetch images for the selected folder
   Future<void> getSelectedFolderImages(MediaCategory folder) async {
     if (isLoading.value) return;
 
@@ -106,10 +140,7 @@ class MediaController extends GetxController {
 
     try {
       final images = await mediaRepository.fetchImagesTable(
-        folder: folder
-            .toString()
-            .split('.')
-            .last,
+        folder: folder.toString().split('.').last,
         offset: offset,
         limit: limit,
       );
@@ -127,39 +158,27 @@ class MediaController extends GetxController {
     }
   }
 
+  /// Clear all images and reset pagination
   void clearImages() {
     allImages.clear();
     offset = 0; // Reset offset when changing folders
   }
 
-  Future<String?> getImageFromBucket(String bucketName, String fileName) async {
-    try {
-      // print(bucketName);
-      // print(fileName);
-      final response = mediaRepository.fetchImageFromBucket(
-          fileName, bucketName);
-      return response;
-    }
-    catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
-    }
-    return null;
-  }
+  //==========================================================================
+  // IMAGE UPLOAD FUNCTIONS
+  //==========================================================================
 
-
-  ///////////////////////UPLOAD SECTION//////////////////////////////
-
+  /// Upload images to the specified bucket
   Future<void> uploadImages(String bucketName) async {
     try {
       // Change to your table name
       List<Map<String, dynamic>> jsonData = [];
+
       // Loop through each dropped file
       for (var file in droppedFiles) {
-
-
         // Create ImageModel instance (filename is null initially)
         ImageModel imageModel = ImageModel(
-          image_id: -1, //not uploading
+          image_id: -1, // Not uploading
           url: file.path,
           filename: '',
           file: file,
@@ -167,49 +186,48 @@ class MediaController extends GetxController {
         );
 
         // Convert model to JSON (without filename)
-
         jsonData.add(imageModel.toJson(isUpdate: true));
-       // jsonData['filename'] = null;
-
-
-        // print("✅ File uploaded successfully: $newFileName");
       }
-      await mediaRepository.uploadImagesWithMetadata(bucketName: bucketName, jsonDataList: jsonData, files: droppedFiles);
+
+      await mediaRepository.uploadImagesWithMetadata(
+        bucketName: bucketName,
+        jsonDataList: jsonData,
+        files: droppedFiles,
+      );
 
       // Show success message
-      TLoader.successSnackBar(
-          title: 'Success', message: 'All files uploaded successfully!');
+      TLoader.successSnackBar(title: 'Success', message: 'All files uploaded successfully!');
     } catch (e) {
       // Show error message
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
   }
 
-  ///PICK IMAGE FROM FILE EXPLORER
-  Future<void> pickImageFromExplorer() async{
-    try{
-      // Open file explorer and allow only image selection
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.image,  // Restrict to image files
-        allowMultiple: false,  // Allow only single file selection
-      );
+  //==========================================================================
+  // IMAGE BUCKET AND ENTITY ID FUNCTIONS
+  //==========================================================================
 
-      // Check if a file was selected
-      if (result != null) {
-        // Get the file path
-        PlatformFile file = result.files.first;
+  /// Fetch image URL from the bucket
+  Future<String?> getImageFromBucket(String bucketName, String fileName) async {
+    try {
+      final response = mediaRepository.fetchImageFromBucket(fileName, bucketName);
+      return response;
+    } catch (e) {
+      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+    }
+    return null;
+  }
 
-        // Pass the file to the mediaController
-        addDroppedFile(File(file.path!));
-      } else {
-        // User canceled the picker
-        print('No file selected.');
+  /// Update entity ID for a specific image
+  Future<void> updateEntityId(int entityId, int imageId) async {
+    try {
+      await mediaRepository.updateEntityIdRepo(entityId, imageId);
+      TLoader.successSnackBar(title: 'Entity Id Added', message: 'Media Controller updateEntityId');
+    } catch (e) {
+      TLoader.errorSnackBar(title: e.toString());
+      if (kDebugMode) {
+        print(e);
       }
-
     }
-    catch(e){
-      TLoader.errorSnackBar(title: 'Oh Snap!',message: 'Didn\'t get the image from explorer');
-    }
-
   }
 }
