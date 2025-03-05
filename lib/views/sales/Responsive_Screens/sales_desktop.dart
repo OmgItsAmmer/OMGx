@@ -80,7 +80,7 @@ class SalesDesktop extends StatelessWidget {
                                 onSelectedName: (val) async {
                                   customerController.selectedCustomer.value = customerController.allCustomers
                                       .firstWhere((user) => user.fullName == val);
-                                  addressController.fetchCustomerAddresses(customerController.selectedCustomer.value.customerId );
+                                  addressController.fetchEntityAddresses(customerController.selectedCustomer.value.customerId ,'Customer');
 
                                   //Fetch Image
                                   print(customerController.selectedCustomer.value.customerId);

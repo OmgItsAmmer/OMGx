@@ -121,10 +121,10 @@ class OrderController extends GetxController {
   //   }
   //
   // }
-  Future<void> fetchCustomerOrders(int customerId) async {
+  Future<void> fetchEntityOrders(int entityId, String entityName) async {
     try {
       if (kDebugMode) {
-        print("Fetching orders for customer ID: $customerId");
+        print("Fetching orders for $entityName ID: $entityId");
       }
 
       isOrderLoading.value = true;
@@ -132,17 +132,29 @@ class OrderController extends GetxController {
       // Clear the previous data
       currentOrders.clear();
 
-      // Filter orders where customerId matches
-      currentOrders.assignAll(allOrders.where((order) => order.customerId == customerId).toList());
-
-      if (kDebugMode) {
-        print("Filtered orders count: ${currentOrders.length}");
+      if (entityName == 'Customer') {
+        // Fetch and filter orders for Customer
+        final customerOrders = allOrders.where((order) => order.customerId == entityId).toList();
+        currentOrders.assignAll(customerOrders);
+      } else if (entityName == 'User') {
+        // Fetch and filter orders for User
+        final userOrders = allOrders.where((order) => order.userId == entityId).toList();
+        currentOrders.assignAll(userOrders);
+      } else if (entityName == 'Salesman') {
+        // Fetch and filter orders for Salesman
+        final salesmanOrders = allOrders.where((order) => order.salesmanId == entityId).toList();
+        currentOrders.assignAll(salesmanOrders);
+      } else {
+        throw Exception('Invalid entity name: $entityName');
       }
 
+      if (kDebugMode) {
+        print("Filtered orders count for $entityName: ${currentOrders.length}");
+      }
     } catch (e) {
       TLoader.errorSnackBar(title: "Error: ${e.toString()}"); // Handle errors properly
       if (kDebugMode) {
-        print("Error fetching customer orders: $e");
+        print("Error fetching $entityName orders: $e");
       }
     } finally {
       isOrderLoading.value = false;

@@ -1,5 +1,5 @@
 class SalesmanModel {
-  final int salesmanId;
+  int salesmanId;
   final String firstName;
   final String lastName;
   final String phoneNumber;
@@ -8,6 +8,8 @@ class SalesmanModel {
   final String area;
   final String city;
   final String? pfp; // Optional profile picture field
+  final DateTime? createdAt; // Optional created_at field
+  final int? comission; // Optional commission field
 
   SalesmanModel({
     required this.salesmanId,
@@ -19,6 +21,8 @@ class SalesmanModel {
     required this.area,
     required this.city,
     this.pfp,
+    this.createdAt,
+    this.comission, // Optional commission
   });
 
   // Static function to create an empty salesman model
@@ -32,6 +36,8 @@ class SalesmanModel {
     area: "",
     city: "",
     pfp: null,
+    createdAt: null,
+    comission: null, // Default to null
   );
 
   // Function to get the full name
@@ -49,6 +55,8 @@ class SalesmanModel {
       'area': area,
       'city': city,
       'pfp': pfp,
+      'created_at': createdAt?.toIso8601String(),
+      'comission': comission, // Include commission in JSON
     };
   }
 
@@ -57,13 +65,15 @@ class SalesmanModel {
     return SalesmanModel(
       salesmanId: json['salesman_id'] as int,
       firstName: json['first_name'] as String,
-      lastName: json['last_name'] as String,
-      phoneNumber: json['phone_number'] as String,
+      lastName: json['last_name'] as String? ?? "",
+      phoneNumber: json['phone_number'] as String? ?? "",
       email: json['email'] as String,
       cnic: json['cnic'] as String,
       area: json['area'] as String,
       city: json['city'] as String,
       pfp: json['pfp'] as String?,
+      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
+      comission: json['comission'] as int?, // Parse commission
     );
   }
 

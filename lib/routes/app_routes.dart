@@ -21,7 +21,10 @@ import '../views/products/product_detail/product_detail.dart';
 import '../views/profile/profile/profile_screen.dart';
 import '../views/reports/all_reports/all_reports.dart';
 import '../views/sales/sales.dart';
+import '../views/salesman/add_salesman/add_salesman.dart';
 import '../views/salesman/all_salesman/salesman.dart';
+import '../views/salesman/salesman_detail/responsive_screens/salesman_detail_desktop.dart';
+import '../views/salesman/salesman_detail/saleman_details.dart';
 import '../views/splashScreen/splash_screen.dart';
 import '../views/store/store.dart';
 
@@ -48,7 +51,8 @@ class TAppRoutes {
     GetPage(name: TRoutes.addCustomer, page: () => const AddCustomerScreen(),middlewares: [TRouteMiddleware()] ),
     //Salesman Screens
     GetPage(name: TRoutes.salesman, page: () => const SalesmanScreen(),middlewares: [TRouteMiddleware()] ),
-    GetPage(name: TRoutes.salesmanDetails, page: () => const CustomerDetailScreen(),middlewares: [TRouteMiddleware()] ),
+    GetPage(name: TRoutes.salesmanDetails, page: () => const SalesmanDetailScreen(),middlewares: [TRouteMiddleware()] ),
+    GetPage(name: TRoutes.addSalesman, page: () => const AddSalesmanScreen(),middlewares: [TRouteMiddleware()] ),
 
 
     //installment Screens

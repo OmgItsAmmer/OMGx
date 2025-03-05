@@ -35,7 +35,7 @@ class OrderRows extends DataTableSource {
         order.orderItems = orderController.orderItems;
         installmentController.fetchSpecificInstallmentPayment(order.orderId);
         installmentController.fetchCustomerInfo(order.customerId ?? -1);
-        addressController.fetchCustomerAddresses(order.customerId ?? -1);
+        addressController.fetchEntityAddresses(order.customerId ?? -1,'Customer');
         guarantorController.fetchGuarantors(order.orderId);
 
           Get.toNamed(TRoutes.orderDetails, arguments: order);

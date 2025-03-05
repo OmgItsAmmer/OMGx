@@ -3,6 +3,7 @@
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../main.dart';
 
@@ -12,7 +13,43 @@ class SalesmanRepository extends GetxController {
   static SalesmanRepository get instance => Get.find();
 
 
+  Future<int?> saveOrUpdateSalesmanRepo(Map<String, dynamic> json) async {
+    try {
+      int? salesmanId = json['salesman_id'];
 
+      if (salesmanId != null) {
+        // Fetch the salesman with the given salesman_id
+        final response = await supabase
+            .from('salesman')
+            .select()
+            .eq('salesman_id', salesmanId)
+            .maybeSingle();
+
+        if (response != null) {
+          // If the salesman exists, update it
+          await supabase.from('salesman').update(json).eq('salesman_id', salesmanId);
+        } else {
+          // If no existing salesman is found, insert a new one
+          json.remove('salesman_id');
+          final insertResponse = await supabase.from('salesman').insert(json).select('salesman_id').single();
+          salesmanId = insertResponse['salesman_id'];
+        }
+      } else {
+        // If salesman_id is not provided, insert a new salesman
+        json.remove('salesman_id');
+        final insertResponse = await supabase.from('salesman').insert(json).select('salesman_id').single();
+        salesmanId = insertResponse['salesman_id'];
+      }
+
+      return salesmanId;
+    } on PostgrestException catch (e) {
+      TLoader.errorSnackBar(title: 'Salesman Repo', message: e.message);
+      rethrow;
+    } catch (e) {
+      TLoader.errorSnackBar(title: 'Salesman Repo', message: e.toString());
+      rethrow;
+    }
+  }
   Future<List<SalesmanModel>> fetchAllSalesman() async {
     try {
       final data =  await supabase.from('salesman').select();

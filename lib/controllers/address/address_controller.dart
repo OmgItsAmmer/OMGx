@@ -32,30 +32,43 @@ class AddressController extends GetxController {
 
   final address = TextEditingController();
 
-  Future<void> fetchCustomerAddresses(int customerId) async {
+  Future<void> fetchEntityAddresses(int entityId, String entityName) async {
     try {
-      if (kDebugMode) {
-        print(customerId);
-      }
       isLoading.value = true;
       allCustomerAddresses.clear();
       allCustomerAddressesLocation.clear();
-      final customerAddress = await addressRepository
-          .fetchAddressTableForSpecificCustomer(customerId);
-      allCustomerAddresses.assignAll(customerAddress);
-      final locations = allCustomerAddresses
-          .map((address) => address.location)
-          .whereType<String>() // This removes null values
-          .toList();
 
-      allCustomerAddressesLocation.assignAll(locations);
+      if (entityName == 'Customer') {
+        // Fetch addresses for Customer
+        final customerAddress = await addressRepository
+            .fetchAddressTableForSpecificEntity(entityId,entityName);
+        allCustomerAddresses.assignAll(customerAddress);
 
-      if (kDebugMode) {
-        print(allCustomerAddresses[0].location);
+        // Extract locations and filter out null values
+        final locations = allCustomerAddresses
+            .map((address) => address.location)
+            .whereType<String>() // This removes null values
+            .toList();
+
+        allCustomerAddressesLocation.assignAll(locations);
+      } else if (entityName == 'User') {
+        // TODO: Fetch addresses for User
+        // Logic will be similar to Customer but tailored for User entity
+        // Example:
+        // final userAddress = await addressRepository.fetchAddressTableForUser(entityId);
+        // allCustomerAddresses.assignAll(userAddress);
+        // final locations = allCustomerAddresses.map((address) => address.location).whereType<String>().toList();
+        // allCustomerAddressesLocation.assignAll(locations);
+      } else if (entityName == 'Salesman') {
+        final salesmanAddress = await addressRepository
+            .fetchAddressTableForSpecificEntity(entityId,entityName);
+        allSalesmanAddresses.assignAll(salesmanAddress);
+      } else {
+        throw Exception('Invalid entity name: $entityName');
       }
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(title: e.toString()); //TODO remove it
+        TLoader.errorSnackBar(title: e.toString()); // TODO: Remove it
         print(e);
       }
     } finally {
@@ -63,14 +76,14 @@ class AddressController extends GetxController {
     }
   }
 
-  Future<void> saveAddress(int entitiyId,String entityName) async {
+  Future<void> saveAddress(int entityId,String entityName) async {
     try {
       AddressModel addressModel = AddressModel.empty();
      if(entityName == 'Customer'){
         addressModel = AddressModel(
           // addressId: 0,
            location: address.text,
-           customerId: entitiyId,
+           customerId: entityId,
            phoneNumber: '',
            street: '',
            postalCode: '',
@@ -83,7 +96,7 @@ class AddressController extends GetxController {
          addressModel = AddressModel(
            //  addressId: 0,
              location: address.text,
-             userId: entitiyId,
+             userId: entityId,
              phoneNumber: '',
              street: '',
              postalCode: '',
@@ -95,7 +108,7 @@ class AddressController extends GetxController {
        addressModel = AddressModel(
          //  addressId: 0,
            location: address.text,
-           salesmanId: entitiyId,
+           salesmanId: entityId,
            phoneNumber: '',
            street: '',
            postalCode: '',

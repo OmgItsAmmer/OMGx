@@ -1,69 +1,90 @@
-import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
+import 'package:admin_dashboard_v3/Models/salesman/salesman_model.dart';
+import 'package:admin_dashboard_v3/controllers/salesman/salesman_controller.dart';
 import 'package:admin_dashboard_v3/routes/routes.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
-import 'package:get_storage/get_storage.dart';
-
-import '../../../../Models/customer/customer_model.dart';
-import '../../../../Models/products/product_model.dart';
 import '../../../../common/widgets/icons/table_action_icon_buttons.dart';
-import '../../../orders/order_details/order_detail.dart';
+import '../../../../controllers/address/address_controller.dart';
+import '../../../../controllers/orders/orders_controller.dart';
+import '../../../../controllers/product/product_images_controller.dart';
+import '../../../../utils/constants/enums.dart';
 
 class SalesmanRow extends DataTableSource {
+  SalesmanRow({required this.itemCount});
+  final itemCount;
+  final AddressController addressController = Get.find<AddressController>();
+  final OrderController orderController = Get.find<OrderController>();
+  final ProductImagesController productImagesController = Get.find<ProductImagesController>();
+  final SalesmanController salesmanController = Get.find<SalesmanController>();
+
   @override
   DataRow? getRow(int index) {
-    final customer = CustomerModel.empty();
+    final SalesmanModel salesman = salesmanController.allSalesman[index];
     return DataRow2(
-        onTap: () => Get.toNamed(TRoutes.productsDetail, arguments: customer),
+
+        onTap: () async {
+
+          await addressController.fetchEntityAddresses(salesman.salesmanId,'Salesman');
+          await orderController.fetchEntityOrders(salesman.salesmanId,'Salesman');
+          orderController.setRecentOrderDay();
+         // orderController.setAverageTotalAmount();
+          productImagesController.setDesiredImage(MediaCategory.salesman, salesman.salesmanId);
+          Get.toNamed(TRoutes.salesmanDetails, arguments: salesman);
+        },
         selected: false,
         onSelectChanged: (value) {},
         cells: [
           DataCell(Row(
             children: [
               Text(
-                customer.fullName.toString(),
+                salesman.fullName.toString(),
                 style: Theme.of(Get.context!)
                     .textTheme
                     .bodyLarge!
                     .apply(color: TColors.primary),
               ),
-              const SizedBox(width: TSizes.spaceBtwInputFields/2,),
-              const TRoundedImage(
-                width: 50,
-                height: 50,
-                imageurl: TImages.user,
-                isNetworkImage: false,
-              )
+              // const SizedBox(width: TSizes.spaceBtwInputFields/2,),
+              // const TRoundedImage(
+              //   width: 50,
+              //   height: 50,
+              //   imageurl: TImages.user,
+              //   isNetworkImage: false,
+              // )
             ],
           )),
           DataCell(Text(
-            customer.email.toString(),
+            salesman.email.toString(),
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
                 .apply(color: TColors.primary),
           )),
           DataCell(Text(
-            customer.phoneNumber.toString(),
+            salesman.phoneNumber.toString(),
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
                 .apply(color: TColors.primary),
           )),
-          //TODO show brand names
+
           DataCell(TTableActionButtons(
             view: false,
             edit: true,
+            delete: true,
 
-            onViewPressed: () => Get.toNamed(TRoutes.productsDetail,
-                arguments:
-                customer), // TODO use get argument to send data in order detail screen
-            onDeletePressed: () {},
+            onEditPressed: () async {
+             // await addressController.fetchEntityAddresses(salesman.salesmanId,'Salesman');
+              salesmanController.setSalesmanDetail(salesman);
+              productImagesController.setDesiredImage(MediaCategory.salesman, salesman.salesmanId);
+              Get.toNamed(TRoutes.addSalesman, arguments: salesman);
+
+            },
+            onDeletePressed: () async {
+            //  await salesman.deleteCustomer(salesman.salesmanId);
+            },
           ))
         ]);
   }
@@ -74,7 +95,7 @@ class SalesmanRow extends DataTableSource {
 
   @override
   // TODO: implement rowCount
-  int get rowCount => 10;
+  int get rowCount => itemCount;
 
   @override
   // TODO: implement selectedRowCount

@@ -34,20 +34,37 @@ class AddressRepository extends GetxController {
   }
 
   //fetch
-  Future<List<AddressModel>> fetchAddressTableForSpecificCustomer(int customerId) async {
+  Future<List<AddressModel>> fetchAddressTableForSpecificEntity(int entityId, String entityName) async {
     try {
-      final data =  await supabase
-          .from('addresses')
-          .select().eq('customer_id', customerId);
+      final String columnName;
 
+      // Determine the column name based on the entityName
+      switch (entityName) {
+        case 'Customer':
+          columnName = 'customer_id';
+          break;
+        case 'User':
+          columnName = 'user_id';
+          break;
+        case 'Salesman':
+          columnName = 'salesmanId';
+          break;
+        default:
+          throw Exception('Invalid entity name: $entityName');
+      }
+
+      // Fetch data from the 'addresses' table using the appropriate column name
+      final data = await supabase
+          .from('addresses')
+          .select()
+          .eq(columnName, entityId); // Filter by the appropriate column
+
+      // Convert the fetched data into a list of AddressModel objects
       final addressList = data.map((item) {
         return AddressModel.fromJson(item);
       }).toList();
-      // if (kDebugMode) {
-      //   print(addressList[1].country);
-      // }
-      return addressList;
 
+      return addressList;
     } catch (e) {
       TLoader.warningSnackBar(title: "Fetch Address", message: e.toString());
       return [];

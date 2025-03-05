@@ -37,6 +37,7 @@ static const productsDetail = '/ProductDetail';
   //Salesman Screens
   static const salesman = '/salesman';
   static const salesmanDetails = '/salesmanDetails';
+  static const addSalesman = '/addSalesman';
 
 
 

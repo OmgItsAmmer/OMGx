@@ -1,14 +1,10 @@
-
-
+import 'package:admin_dashboard_v3/Models/address/address_model.dart';
 import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
 import 'package:admin_dashboard_v3/controllers/media/media_controller.dart';
 import 'package:admin_dashboard_v3/repositories/customer/customer_repository.dart';
-import 'package:admin_dashboard_v3/repositories/media/media_repository.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
-
-
 import '../../Models/customer/customer_model.dart';
 import '../../common/widgets/loaders/tloaders.dart';
 import '../product/product_images_controller.dart';
@@ -155,7 +151,16 @@ class CustomerController extends GetxController {
       lastName.text = customer.lastName ;
       email.text = customer.email ;
       cnic.text = customer.cnic.toString();
+
       phoneNumber.text = customer.phoneNumber.toString();
+      final matchingAddress = AddressController.instance.allCustomerAddresses.firstWhere(
+            (address) => address.customerId == customer.customerId,
+        orElse: () => AddressModel.empty(), // Return null if no matching address is found
+      );
+
+      // Set the address text if a match is found
+      AddressController.instance.address.text = matchingAddress.location ?? ''; // Assuming `addressText` is the property holding the address as a String
+
 
 
 

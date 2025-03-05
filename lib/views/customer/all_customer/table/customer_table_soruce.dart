@@ -29,8 +29,8 @@ class CustomerRow extends DataTableSource {
     return DataRow2(
         onTap: () async {
 
-          await addressController.fetchCustomerAddresses(customer.customerId);
-          await orderController.fetchCustomerOrders(customer.customerId);
+          await addressController.fetchEntityAddresses(customer.customerId,'Customer');
+          await orderController.fetchEntityOrders(customer.customerId,'Customer');
           orderController.currentOrders.refresh();
           orderController.setRecentOrderDay();
           orderController.setAverageTotalAmount();
@@ -75,7 +75,7 @@ class CustomerRow extends DataTableSource {
             delete: true,
 
             onEditPressed: () async {
-              await addressController.fetchCustomerAddresses(customer.customerId);
+              await addressController.fetchEntityAddresses(customer.customerId,'Customer');
               customerController.setCustomerDetail(customer);
               productImagesController.setDesiredImage(MediaCategory.customers, customer.customerId);
               Get.toNamed(TRoutes.addCustomer, arguments: customer);

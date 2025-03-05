@@ -16,8 +16,8 @@ import '../../../../routes/routes.dart';
 import '../../../../utils/constants/enums.dart';
 
 
-class CustomerOrderRows extends DataTableSource {
-  CustomerOrderRows({
+class SalesmanOrderRows extends DataTableSource {
+  SalesmanOrderRows({
     required this.ordersCount,
     required this.currentOrders,
 
