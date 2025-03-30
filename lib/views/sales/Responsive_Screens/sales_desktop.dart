@@ -4,6 +4,7 @@ import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart
 import 'package:admin_dashboard_v3/controllers/report/report_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:admin_dashboard_v3/views/sales/widgets/sale_action_buttons.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -19,20 +20,17 @@ import '../widgets/sales_summary.dart';
 import '../widgets/unit_price_quantity.dart';
 import '../widgets/unit_total_price.dart';
 
-
-
 class SalesDesktop extends StatelessWidget {
   const SalesDesktop({super.key});
 
   @override
   Widget build(BuildContext context) {
     final SalesController salesController = Get.find<SalesController>();
-    final CustomerController customerController = Get.find<CustomerController>();
+    final CustomerController customerController =
+        Get.find<CustomerController>();
     final AddressController addressController = Get.find<AddressController>();
-    final ProductImagesController productImagesController = Get.find<ProductImagesController>();
-
-
-
+    final ProductImagesController productImagesController =
+        Get.find<ProductImagesController>();
 
     return Expanded(
       child: SizedBox(
@@ -43,87 +41,114 @@ class SalesDesktop extends StatelessWidget {
             child: Column(
               children: [
                 ExpansionTile(
-                    title: const Text(
-                      "Sales Details",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  title: const Text(
+                    "Sales Details",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
-                    // Bind the expansion state to the controller's observable
-                    initiallyExpanded: salesController.isExpanded.value,
-                    onExpansionChanged: (value) {
-                      salesController.toggleExpanded(); // Update the state
-                    },
-                    children:  [
-                      Padding(
+                  ),
+                  // Bind the expansion state to the controller's observable
+                  initiallyExpanded: salesController.isExpanded.value,
+                  onExpansionChanged: (value) {
+                    salesController.toggleExpanded(); // Update the state
+                  },
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(TSizes.defaultSpace),
+                      child: TRoundedContainer(
                         padding: const EdgeInsets.all(TSizes.defaultSpace),
-                        child: TRoundedContainer(
-                          padding: const EdgeInsets.all(TSizes.defaultSpace),
-                          //backgroundColor: TColors.primary,
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Cashier Info
-                              const Expanded(flex: 1, child: SalesCashierInfo()),
-                              const SizedBox(
-                                width: TSizes.spaceBtwSections, // Replace TSizes.spaceBtwSections if needed
-                              ),
+                        //backgroundColor: TColors.primary,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Cashier Info
+                            const Expanded(flex: 1, child: SalesCashierInfo()),
+                            const SizedBox(
+                              width: TSizes
+                                  .spaceBtwSections, // Replace TSizes.spaceBtwSections if needed
+                            ),
 
-                              // Customer Info
-                              Expanded(flex: 2, child: SaleCustomerInfo(
-                                namesList:  customerController.allCustomerNames,
-                                hintText: 'Customer Name',
-                                userNameTextController: salesController.customerNameController,
+                            // Customer Info
+                            Expanded(
+                                flex: 2,
+                                child: SaleCustomerInfo(
+                                  namesList:
+                                      customerController.allCustomerNames,
+                                  hintText: 'Customer Name',
+                                  userNameTextController:
+                                      salesController.customerNameController,
 
+                                  onSelectedName: (val) async {
+                                    customerController.selectedCustomer.value =
+                                        customerController.allCustomers
+                                            .firstWhere(
+                                                (user) => user.fullName == val);
+                                    addressController.fetchEntityAddresses(
+                                        customerController
+                                            .selectedCustomer.value.customerId,
+                                        'Customer');
 
-                                onSelectedName: (val) async {
-                                  customerController.selectedCustomer.value = customerController.allCustomers
-                                      .firstWhere((user) => user.fullName == val);
-                                  addressController.fetchEntityAddresses(customerController.selectedCustomer.value.customerId ,'Customer');
+                                    //Fetch Image
+                                    if (kDebugMode) {
+                                      print(customerController
+                                          .selectedCustomer.value.customerId);
+                                    }
 
-                                  //Fetch Image
-                                  print(customerController.selectedCustomer.value.customerId);
-
-                                  await productImagesController.getSpecificImage(MediaCategory.customers,customerController.selectedCustomer.value.customerId );
-                                  //Automatic gives unit price
-                                  salesController.customerPhoneNoController.value.text = customerController.selectedCustomer.value.phoneNumber;
-                                  salesController.customerCNICController.value.text = customerController.selectedCustomer.value.cnic;
+                                    await productImagesController
+                                        .getSpecificImage(
+                                            MediaCategory.customers,
+                                            customerController.selectedCustomer
+                                                .value.customerId);
+                                    //Automatic gives unit price
+                                    salesController.customerPhoneNoController
+                                            .value.text =
+                                        customerController
+                                            .selectedCustomer.value.phoneNumber;
+                                    salesController
+                                            .customerCNICController.value.text =
+                                        customerController
+                                            .selectedCustomer.value.cnic;
                                   },
 
+                                  ///ADDRESS RELATED
+                                  addressList: addressController
+                                      .allCustomerAddressesLocation,
+                                  addressTextController: salesController
+                                      .customerAddressController.value,
+                                  onSelectedAddress: (val) {
+                                    addressController
+                                            .selectedCustomerAddress.value =
+                                        addressController.allCustomerAddresses
+                                            .firstWhere((address) =>
+                                                address.location == val);
 
+                                    salesController.selectedAddressId =
+                                        addressController
+                                            .selectedCustomerAddress
+                                            .value
+                                            .addressId;
+                                    // print(salesController.selectedAddressId);
+                                  },
+                                )),
+                            const SizedBox(
+                              width: TSizes
+                                  .spaceBtwSections, // Replace TSizes.spaceBtwSections if needed
+                            ),
 
-                                ///ADDRESS RELATED
-                                addressList: addressController.allCustomerAddressesLocation,
-                                addressTextController: salesController.customerAddressController.value ,
-                                onSelectedAddress: (val){
-                                  addressController.selectedCustomerAddress.value = addressController.allCustomerAddresses
-                                      .firstWhere((address) => address.location == val);
-
-                                  salesController.selectedAddressId = addressController.selectedCustomerAddress.value.addressId;
-                                  // print(salesController.selectedAddressId);
-
-                                },
-
-                              )),
-                              const SizedBox(
-                                width: TSizes.spaceBtwSections, // Replace TSizes.spaceBtwSections if needed
-                              ),
-
-                              // Salesman Info
-                              const Expanded(flex: 1, child: SalesSalemanInfo()),
-                            ],
-                          ),
+                            // Salesman Info
+                            const Expanded(flex: 1, child: SalesSalemanInfo()),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
+                ),
 
                 const SizedBox(
                   height: TSizes.spaceBtwSections,
                 ),
                 TRoundedContainer(
-
                   padding: const EdgeInsets.all(TSizes.defaultSpace),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -135,14 +160,14 @@ class SalesDesktop extends StatelessWidget {
                       ),
 
                       // Unit Price Quantity
-                     const Expanded(child: UnitPriceQuantity()),
+                      const Expanded(child: UnitPriceQuantity()),
 
                       const SizedBox(
                         width: TSizes.spaceBtwItems,
                       ),
 
                       // Unit(Kg/etc) Total Price
-                    const Expanded(child: UnitTotalPrice()),
+                      const Expanded(child: UnitTotalPrice()),
 
                       // Button
                       const SizedBox(
@@ -153,7 +178,6 @@ class SalesDesktop extends StatelessWidget {
                         child: ElevatedButton(
                           onPressed: () {
                             salesController.addProduct();
-
                           },
                           child: const Text('Add'),
                         ),
@@ -170,7 +194,7 @@ class SalesDesktop extends StatelessWidget {
                   height: TSizes.spaceBtwSections / 2,
                 ),
                 const TRoundedContainer(
-                  padding: EdgeInsets.all(TSizes.defaultSpace/2),
+                  padding: EdgeInsets.all(TSizes.defaultSpace / 2),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,

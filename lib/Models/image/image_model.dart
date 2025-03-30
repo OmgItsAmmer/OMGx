@@ -9,7 +9,7 @@ class ImageModel {
   String folder;
   final String filename;
   final int? sizeBytes;
-  final int? entity_id;
+  int? entity_id;
   final String? fullPath;
   final DateTime? createdAt;
   final DateTime? updatedAt;

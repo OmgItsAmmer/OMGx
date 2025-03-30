@@ -35,9 +35,8 @@ class CustomerModel {
   String get fullName => "$firstName $lastName".trim();
 
   // Convert model to JSON for database insertion
-  Map<String, dynamic> toJson() {
-    return {
-      'customer_id': customerId,
+  Map<String, dynamic> toJson({bool isUpdate = false}) {
+    final Map<String, dynamic> data = {
       'first_name': firstName,
       'last_name': lastName,
       'phone_number': phoneNumber,
@@ -46,7 +45,14 @@ class CustomerModel {
       'pfp': pfp,
       'created_at': createdAt?.toIso8601String(), // Convert DateTime to ISO string
     };
+
+    if (!isUpdate) {
+      data['customer_id'] = customerId; // Include `customer_id` only if it's not an update
+    }
+
+    return data;
   }
+
 
   // Factory method to create a CustomerModel from Supabase response
   factory CustomerModel.fromJson(Map<String, dynamic> json) {

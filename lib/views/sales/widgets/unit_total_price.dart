@@ -30,7 +30,7 @@ class UnitTotalPrice extends StatelessWidget {
                   child: DropdownButton<UnitType>(
                     padding: EdgeInsets.zero, // Remove all padding
                     value: UnitType.item,
-                    underline: SizedBox.shrink(), // Remove the default underline
+                    underline: const SizedBox.shrink(), // Remove the default underline
                     isExpanded: true, // Ensures proper alignment and resizing
                     isDense: true, // Makes the dropdown less tall vertically
                     items: UnitType.values.map((UnitType unit) {

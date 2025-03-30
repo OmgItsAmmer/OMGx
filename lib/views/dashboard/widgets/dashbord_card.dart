@@ -11,12 +11,13 @@ class TDashBoardCard extends StatelessWidget {
     super.key,
     required this.title,
     required this.subTitle,
+    required this.value,
      this.icon=  Iconsax.arrow_up_3,
      this.color = TColors.success,
     required this.stats,
     this.onTap,
   });
-  final String title, subTitle;
+  final String title, subTitle,value;
   final IconData icon;
   final Color color;
   final int stats;
@@ -41,7 +42,7 @@ class TDashBoardCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                subTitle,
+                value,
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
               Column(
@@ -64,7 +65,7 @@ class TDashBoardCard extends StatelessWidget {
                   SizedBox(
                       width: 135,
                       child: Text(
-                        'Compared to Dec 2025',
+                        subTitle,
                         style: Theme.of(context).textTheme.labelMedium,
                         overflow: TextOverflow.ellipsis,
                       )),

@@ -100,10 +100,7 @@ class SalesController extends GetxController {
 
   void setupUserDetails() {
     try{
-      print(userController.currentUser.value.firstName);
      cashierNameController.value.text = userController.currentUser.value.firstName;
-      print(cashierNameController.value.text);
-
     }
     catch(e){
       if(kDebugMode)

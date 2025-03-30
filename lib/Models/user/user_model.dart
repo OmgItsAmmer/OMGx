@@ -32,17 +32,23 @@ class UserModel {
   String get fullName => "$firstName $lastName".trim();
 
   // Convert model to JSON for database insertion
-  Map<String, dynamic> toJson() {
-    return {
-      'user_id': userId,
+  Map<String, dynamic> toJson({bool isUpdate = false}) {
+    final Map<String, dynamic> data = {
+
       'first_name': firstName,
       'last_name': lastName,
       'phone_number': phoneNumber,
       'email': email,
-    //  'cnic': cnic,
       'pfp': pfp,
     };
+
+    if (!isUpdate) {
+      data['user_id']  =  userId;
+    }
+
+    return data;
   }
+
 
   // Factory method to create a UserModel from Supabase response
   factory UserModel.fromJson(Map<String, dynamic> json) {

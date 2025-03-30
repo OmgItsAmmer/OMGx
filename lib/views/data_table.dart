@@ -100,7 +100,7 @@ class MyData extends DataTableSource {
       Get.put(DashboardController());
   @override
   DataRow? getRow(int index) {
-    final data = dashboardController.DataList[index];
+    final data = dashboardController.dataList[index];
     return DataRow2(cells: [
       DataCell(
         Text(data['Column 1'] ?? ''),
@@ -123,7 +123,7 @@ class MyData extends DataTableSource {
 
   @override
   // TODO: implement rowCount
-  int get rowCount => dashboardController.DataList.length;
+  int get rowCount => dashboardController.dataList.length;
 
   @override
   // TODO: implement selectedRowCount

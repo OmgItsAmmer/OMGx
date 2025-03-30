@@ -1,3 +1,4 @@
+import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
 import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -6,8 +7,9 @@ import '../../../../utils/constants/sizes.dart';
 import '../../../../utils/device/device_utility.dart';
 
 class AddCustomerBottomBar extends StatelessWidget {
-  const AddCustomerBottomBar({
+   const AddCustomerBottomBar({
     super.key,
+
   });
 
   @override
@@ -43,7 +45,7 @@ class AddCustomerBottomBar extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () {
                   // Handle Save action
-                  customerController.saveOrUpdateCustomer();
+                  customerController.saveOrUpdateCustomer(customerController.customerId);
                 },
                 child: const Text('Save'),
               ),

@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../Models/customer/customer_model.dart';
 import '../../common/widgets/loaders/tloaders.dart';
+import '../../utils/constants/enums.dart';
 import '../product/product_images_controller.dart';
 
 class CustomerController extends GetxController {
@@ -34,10 +35,12 @@ class CustomerController extends GetxController {
   final email = TextEditingController();
   final cnic = TextEditingController();
   final phoneNumber = TextEditingController();
+   int customerId = -1;
   GlobalKey<FormState> addCustomerKey =
   GlobalKey<FormState>();
   // final alertStock = TextEditingController();
   // final brandName = TextEditingController();
+  
 
 
 
@@ -50,6 +53,7 @@ class CustomerController extends GetxController {
 
     fetchAllCustomers();
   }
+
 
 
 
@@ -72,7 +76,7 @@ class CustomerController extends GetxController {
 
 
 
-  Future<void> saveOrUpdateCustomer() async {
+  Future<void> saveOrUpdateCustomer(int customerId) async {
     try {
       // Validate the form
       if (!addCustomerKey.currentState!.validate()) {
@@ -86,7 +90,7 @@ class CustomerController extends GetxController {
 
 
       final customerModel = CustomerModel(
-        customerId: -1, //not uploading
+        customerId: customerId, //not uploading
         firstName: firstName.text ,
         lastName: lastName.text,
         phoneNumber: phoneNumber.text,
@@ -95,22 +99,27 @@ class CustomerController extends GetxController {
 
 
       );
-      final json = customerModel.toJson();
+      final json = customerModel.toJson(isUpdate: false); // we need id for updating
 
 
 
       // Call the repository function to save or update the product
-      int entityId = await customerRepository.saveOrUpdateCustomerRepo(json) ?? -1;
+      final result = await customerRepository.saveOrUpdateCustomerRepo(json);
+      int entityId = result['customer_id'];
+      bool isUpdate = result['is_update'];
       //Update Image Table
       if(entityId != -1   )
       {
         customerModel.customerId = entityId;
         if(productImagesController.selectedImage.value != null){
-          await mediaController.updateEntityId(entityId, productImagesController.selectedImage.value!.image_id);
+          await mediaController.updateEntityId(entityId, productImagesController.selectedImage.value!.image_id,MediaCategory.customers.toString().split('.').last);
         }
         await AddressController.instance.saveAddress(entityId, 'Customer');
-        allCustomers.add(customerModel);
-        allCustomerNames.add(customerModel.fullName);
+        if(!isUpdate){
+          allCustomers.add(customerModel);
+          allCustomerNames.add(customerModel.fullName);
+        }
+
       }
       else
         {
@@ -123,7 +132,7 @@ class CustomerController extends GetxController {
       // Clear the form after saving/updating
       cleanCustomerDetails();
       Get.back();
-      TLoader.successSnackBar(title: 'Customer Added!');
+     // TLoader.successSnackBar(title: 'Customer Added!');
     } catch (e) {
       // Handle errors
       TLoader.errorSnackBar(
@@ -147,11 +156,11 @@ class CustomerController extends GetxController {
   }
   void setCustomerDetail(CustomerModel customer) {
     try {
+      customerId = customer.customerId;
       firstName.text = customer.firstName ;
       lastName.text = customer.lastName ;
       email.text = customer.email ;
       cnic.text = customer.cnic.toString();
-
       phoneNumber.text = customer.phoneNumber.toString();
       final matchingAddress = AddressController.instance.allCustomerAddresses.firstWhere(
             (address) => address.customerId == customer.customerId,

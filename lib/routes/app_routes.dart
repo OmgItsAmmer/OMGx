@@ -2,6 +2,7 @@ import 'package:admin_dashboard_v3/routes/routes.dart';
 import 'package:admin_dashboard_v3/routes/routes_MIDDLEWARE.dart';
 import 'package:admin_dashboard_v3/views/brands/all_brands/brands.dart';
 import 'package:admin_dashboard_v3/views/category/all_categories/category.dart';
+import 'package:admin_dashboard_v3/views/expenses/expenses.dart';
 import 'package:admin_dashboard_v3/views/login/login.dart';
 import 'package:admin_dashboard_v3/views/orders/all_orders/orders.dart';
 import 'package:get/get.dart';
@@ -69,7 +70,7 @@ class TAppRoutes {
 
 
     //Profile
-    GetPage(name: TRoutes.profileScreen, page: () => const ProfileScreen(),middlewares: [TRouteMiddleware()] ),
+    GetPage(name: TRoutes.profileScreen, page: () => const ProfileScreen(),middlewares: [TRouteMiddleware()]),
    //Store
     GetPage(name: TRoutes.storeScreen, page: () => const StoreScreen(),middlewares: [TRouteMiddleware()] ),
 
@@ -86,6 +87,9 @@ class TAppRoutes {
 
 
     GetPage(name: TRoutes.splashScreen, page: () => const SplashScreen(),middlewares: [TRouteMiddleware()] ),
+
+
+    GetPage(name: TRoutes.expenseScreen, page: () => const ExpenseScreen(),middlewares: [TRouteMiddleware()] ),
 
 
 

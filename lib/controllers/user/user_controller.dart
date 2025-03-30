@@ -1,5 +1,3 @@
-
-
 import 'package:admin_dashboard_v3/Models/user/user_model.dart';
 import 'package:admin_dashboard_v3/controllers/sales/sales_controller.dart';
 import 'package:flutter/cupertino.dart';
@@ -14,21 +12,22 @@ import '../../Models/customer/customer_model.dart';
 import '../../common/widgets/loaders/tloaders.dart';
 import '../../repositories/authentication/authicatioon_repository.dart';
 import '../../repositories/user/user_repository.dart';
+import '../../utils/constants/enums.dart';
 import '../../utils/constants/image_strings.dart';
 import '../../utils/constants/sizes.dart';
 import '../../utils/popups/full_screen_loader.dart';
 import '../../views/login/login.dart';
+import '../media/media_controller.dart';
+import '../product/product_images_controller.dart';
 import '../startup/startup_controller.dart';
 
 class UserController extends GetxController {
   static UserController get instance => Get.find();
   final UserRespository userRespository = Get.put(UserRespository());
 //  final StartUpController startUpController =  Get.put(StartUpController());
- // final SalesController salesController =  Get.put(SalesController());
-
-
-
-
+  // final SalesController salesController =  Get.put(SalesController());
+  final MediaController mediaController = Get.put(MediaController());
+  final ProductImagesController productImagesController = Get.put(ProductImagesController());
 
   final profileLoading = false.obs;
 
@@ -38,25 +37,25 @@ class UserController extends GetxController {
 
   RxList<UserModel> userData = <UserModel>[].obs;
 
-
-
   final verifyEmail = TextEditingController();
   final verifyPassword = TextEditingController();
 
   GlobalKey<FormState> reAuthFormKey = GlobalKey<FormState>();
 
+  Rx<UserModel> currentUser = UserModel.empty()
+      .obs; // to store the product Variation detail based on Size
 
-
-
-
-  Rx<UserModel> currentUser = UserModel.empty().obs; // to store the product Variation detail based on Size
-
+  ///Profile Screen
+  final firstName = TextEditingController();
+  final lastName = TextEditingController();
+  final email = TextEditingController();
+  final phoneNumber = TextEditingController();
+  RxBool isUpdating = false.obs;
 
   @override
   void onInit() {
     super.onInit();
     fetchUserRecord();
-
   }
 
   Future<void> fetchUserRecord() async {
@@ -70,7 +69,8 @@ class UserController extends GetxController {
       if (user == null) {
         // User is not logged in, navigate to login screen
         TLoader.errorSnackBar(
-            title: "Oh Snap!", message: "Session expired. Please log in again.");
+            title: "Oh Snap!",
+            message: "Session expired. Please log in again.");
         Get.offAll(() => const LoginScreen()); // Navigate and clear stack
         return;
       }
@@ -78,20 +78,17 @@ class UserController extends GetxController {
       final userDetail = await userRespository.fetchUserDetials(user.email);
       userData.assignAll(userDetail);
 
-
       // For debugging
-      UserModel matchedUser = userData.firstWhere((value) => value.email == user.email);
+      UserModel matchedUser =
+          userData.firstWhere((value) => value.email == user.email);
       currentUser.value = matchedUser;
-
 
       SalesController.instance.setupUserDetails();
 
+      setupProfileDetails();
 
       //Setting UserDetails in App
-   //   startUpController.setupUserDetails(currentUser.value);
-
-
-
+      //   startUpController.setupUserDetails(currentUser.value);
     } catch (e) {
       TLoader.errorSnackBar(title: "Oh Snap!", message: e.toString());
     } finally {
@@ -99,12 +96,48 @@ class UserController extends GetxController {
     }
   }
 
+  void setupProfileDetails() {
+    try {
+      firstName.text = currentUser.value.firstName;
+      lastName.text = currentUser.value.lastName;
+      email.text = currentUser.value.email;
+      phoneNumber.text = currentUser.value.phoneNumber;
+    } catch (e) {
+      if (kDebugMode) {
+        TLoader.errorSnackBar(title: e.toString());
+        print(e);
+      }
+    }
+  }
 
+  Future<void> updateProfile() async {
+    try {
+      isUpdating.value = true;
+      final userModel = UserModel(
+         userId: currentUser.value.userId,
+          firstName: firstName.text,
+          lastName: lastName.text,
+          phoneNumber: phoneNumber.text,
+          email: email.text
+      );
 
+      final json = userModel.toJson(isUpdate: true);
 
+      await userRespository.updateProfileData(json, currentUser.value.userId);
 
+      await mediaController.updateEntityId(currentUser.value.userId, productImagesController.selectedImage.value!.image_id,MediaCategory.users.toString().split('.').last);
 
+    } catch (e) {
+      if (kDebugMode) {
+        TLoader.errorSnackBar(title: e.toString());
+        print(e);
+      }
+    }
+    finally {
+      isUpdating.value = false;
 
+    }
+  }
 
   // Future<void> saveUserRecord(UserCredential? userCredentials) async {
   //
@@ -124,7 +157,7 @@ class UserController extends GetxController {
         contentPadding: const EdgeInsets.all(TSizes.md),
         title: 'Delete Account',
         middleText:
-        'Are you sure you want to delete your account permanently? This action is not reversible and all of your data will be removed permanently.',
+            'Are you sure you want to delete your account permanently? This action is not reversible and all of your data will be removed permanently.',
         confirm: ElevatedButton(
             onPressed: () async => deleteUserAccount(),
             style: ElevatedButton.styleFrom(
@@ -244,13 +277,10 @@ class UserController extends GetxController {
       await supabase.auth.signOut();
       TFullScreenLoader.stopLoading();
       Get.to(() => const LoginScreen());
-    }
-    catch (e) {
+    } catch (e) {
       TFullScreenLoader.stopLoading();
 
       TLoader.errorSnackBar(title: "Oh Snap!", message: e.toString());
     }
   }
 }
-
-

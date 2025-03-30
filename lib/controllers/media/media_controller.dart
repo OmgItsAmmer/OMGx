@@ -133,7 +133,7 @@ class MediaController extends GetxController {
 
   /// Fetch images for the selected folder
   Future<void> getSelectedFolderImages(MediaCategory folder) async {
-    if (isLoading.value) return;
+   // if (isLoading.value) return;
 
     isLoading.value = true;
     selectedPath.value = folder;
@@ -219,15 +219,44 @@ class MediaController extends GetxController {
   }
 
   /// Update entity ID for a specific image
-  Future<void> updateEntityId(int entityId, int imageId) async {
+  Future<void> updateEntityId(int entityId, int imageId, String mediaCategory) async {
     try {
-      await mediaRepository.updateEntityIdRepo(entityId, imageId);
-      TLoader.successSnackBar(title: 'Entity Id Added', message: 'Media Controller updateEntityId');
-    } catch (e) {
-      TLoader.errorSnackBar(title: e.toString());
-      if (kDebugMode) {
-        print(e);
+      // Step 1: Call the repository function to update the database
+      await mediaRepository.updateEntityIdRepo(entityId, imageId, mediaCategory);
+
+      // Step 2: Update the local allImages array
+      // Find the previous image with the same entityId and mediaCategory
+      final previousImage = allImages.firstWhere(
+            (image) => image.entity_id == entityId && image.mediaCategory == mediaCategory,
+        orElse: () => ImageModel.empty(), // Return null if no matching image is found
+      );
+
+      if (previousImage != ImageModel.empty()) {
+        // Set the previous image's entityId to null
+        previousImage.entity_id = null;
       }
+
+      // Find the new image by imageId and update its entityId
+      final newImage = allImages.firstWhere(
+            (image) => image.image_id == imageId,
+        orElse: () => ImageModel.empty(), // Return null if no matching image is found
+      );
+
+      if (newImage != ImageModel.empty()) {
+        newImage.entity_id = entityId;
+      }
+
+
+      if (kDebugMode) {
+        print('Entity ID updated successfully for image ID: $imageId');
+      }
+    } catch (e) {
+      // Handle errors
+      if (kDebugMode) {
+        TLoader.errorSnackBar(title: 'Error updating entity ID', message: e.toString());
+        print('Error updating entity ID: $e');
+      }
+      rethrow; // Rethrow the error if needed
     }
   }
 }

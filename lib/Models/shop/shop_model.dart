@@ -1,7 +1,6 @@
 class ShopModel {
   final int shopId;
   final String shopname;
-  final int pfp_id;
   final double taxrate;
   final double shippingPrice;
   final double? thresholdFreeShipping; // Optional field
@@ -12,7 +11,6 @@ class ShopModel {
   ShopModel({
     required this.shopId,
     required this.shopname,
-    required this.pfp_id,
     required this.taxrate,
     required this.shippingPrice,
     this.thresholdFreeShipping,
@@ -25,7 +23,6 @@ class ShopModel {
   static ShopModel empty() => ShopModel(
     shopId: 0,
     shopname: "",
-    pfp_id: 0,
     taxrate: 0.0,
     shippingPrice: 0.0,
     thresholdFreeShipping: null,
@@ -39,7 +36,6 @@ class ShopModel {
     return {
       'shop_id': shopId,
       'shopname': shopname,
-      'pfp_id': pfp_id,
       'taxrate': taxrate,
       'shipping_price': shippingPrice,
       'threshold_free_shipping': thresholdFreeShipping,
@@ -53,17 +49,17 @@ class ShopModel {
   factory ShopModel.fromJson(Map<String, dynamic> json) {
     return ShopModel(
       shopId: json['shop_id'] as int,
-      pfp_id: json['pfp_id'] as int,
       shopname: json['shopname'] as String,
       taxrate: (json['taxrate'] as num).toDouble(), // Convert num to double
       shippingPrice: (json['shipping_price'] as num).toDouble(),
-      thresholdFreeShipping: json['threshold_free_shipping'] != null ? (json['threshold_free_shipping'] as num).toDouble() : null,
+      thresholdFreeShipping: json['threshold_free_shipping'] != null
+          ? (json['threshold_free_shipping'] as num).toDouble()
+          : null,
       profile1: json['profile1'] != null ? (json['profile1'] as num).toDouble() : null,
       profile2: json['profile2'] != null ? (json['profile2'] as num).toDouble() : null,
       profile3: json['profile3'] != null ? (json['profile3'] as num).toDouble() : null,
     );
   }
-
 
   // Static method to create a list of ShopModel from a JSON list
   static List<ShopModel> fromJsonList(List<dynamic> jsonList) {

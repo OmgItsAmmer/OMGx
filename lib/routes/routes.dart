@@ -68,6 +68,9 @@ static const productsDetail = '/ProductDetail';
   //Report Screens
   static const reportScreen = '/ReportScreen';
 
+  //Report Screens
+  static const expenseScreen = '/ExpenseScreen';
+
 
 
   //Unknown ROutes

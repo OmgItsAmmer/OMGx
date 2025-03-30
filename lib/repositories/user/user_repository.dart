@@ -45,6 +45,18 @@ class UserRespository extends GetxController {
 
   }
 
+  Future<void> updateProfileData(Map<String, dynamic> json, int userId)  async {
+    try {
+      await supabase.from('users').update(json).eq('user_id', userId);
+      TLoader.successSnackBar(title: 'Profile Updated',message: 'your profile is updated Successfully');
+    } on PlatformException catch (e) {
+      throw TPlatformException(e.code).message;
+    } catch (e) {
+      throw 'Something went wrong. Please try again';
+
+    }
+  }
+
 
 //Function to update user details in Firestore
 // Future<void> updateUserDetails(UserModel updateUser) async {

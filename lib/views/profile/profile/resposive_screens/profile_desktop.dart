@@ -1,11 +1,16 @@
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
+import 'package:admin_dashboard_v3/controllers/user/user_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
+import '../../../../common/widgets/shimmers/shimmer.dart';
+import '../../../../controllers/media/media_controller.dart';
+import '../../../../controllers/product/product_images_controller.dart';
 import '../../../../utils/validators/validation.dart';
 
 class ProfileDesktop extends StatelessWidget {
@@ -13,6 +18,7 @@ class ProfileDesktop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return Expanded(
         child: Scaffold(
       body: SingleChildScrollView(
@@ -35,7 +41,7 @@ class ProfileDesktop extends StatelessWidget {
                 children: [
                   //Image card
                   Expanded(child: ProfileImageInfo()),
-                  const SizedBox(
+                  SizedBox(
                     width: TSizes.spaceBtwSections,
                   ),
                   //info card
@@ -63,6 +69,8 @@ class ProfileDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final UserController userController =
+    Get.find<UserController>();
     return TRoundedContainer(
       padding: const EdgeInsets.all(TSizes.defaultSpace),
       child: Column(
@@ -89,7 +97,7 @@ class ProfileDetails extends StatelessWidget {
                   width: double.infinity,
                   //     height: 80,
                   child: TextFormField(
-                    // controller:
+                    controller: userController.firstName,
                     // salesController.customerCNICController.value,
                     validator: (value) =>
                         TValidator.validateEmptyText('First Name', value),
@@ -108,12 +116,13 @@ class ProfileDetails extends StatelessWidget {
                   width: double.infinity,
                   //     height: 80,
                   child: TextFormField(
-                    // controller:
+                    controller: userController.lastName,
+
                     // salesController.customerCNICController.value,
                     validator: (value) =>
                         TValidator.validateEmptyText('Last Name', value),
                     style: Theme.of(context).textTheme.bodyMedium,
-                    decoration: const InputDecoration(labelText: 'Last   Name'),
+                    decoration: const InputDecoration(labelText: 'Last Name'),
                 
                 
                   ),
@@ -133,7 +142,8 @@ class ProfileDetails extends StatelessWidget {
                   width: double.infinity,
                   //     height: 80,
                   child: TextFormField(
-                    // controller:
+                    controller: userController.email,
+
                     // salesController.customerCNICController.value,
                     validator: (value) =>
                         TValidator.validateEmptyText('Email', value),
@@ -152,7 +162,7 @@ class ProfileDetails extends StatelessWidget {
                   width: double.infinity,
                   //     height: 80,
                   child: TextFormField(
-                    // controller:
+                    controller: userController.phoneNumber,
                     // salesController.customerCNICController.value,
                     validator: (value) =>
                         TValidator.validateEmptyText('Phone Number', value),
@@ -172,7 +182,12 @@ class ProfileDetails extends StatelessWidget {
           //save button
           Row(
             children: [
-              Expanded(child: ElevatedButton(onPressed: (){}, child: Text('Update Profile',style: Theme.of(context).textTheme.bodyMedium!.apply(color: TColors.white),))),
+              Expanded(child: Obx(
+                () => ElevatedButton(onPressed: (){
+                userController.updateProfile();
+
+                }, child: (userController.isUpdating.value) ? const CircularProgressIndicator(color: TColors.white,)  : Text('Update Profile',style: Theme.of(context).textTheme.bodyMedium!.apply(color: TColors.white),)),
+              )),
             ],
           )
         ],
@@ -188,6 +203,8 @@ class ProfileImageInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ProductImagesController productImagesController = Get.find<ProductImagesController>();
+    final MediaController mediaController = Get.find<MediaController>();
     return TRoundedContainer(
       width: double.infinity,
       height:   400,
@@ -195,25 +212,56 @@ class ProfileImageInfo extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         // crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Stack(
+           Stack(
             alignment: Alignment
                 .bottomRight, // Align the camera icon to the bottom right
             children: [
               // Rounded Image
-              TRoundedImage(
-                width: 160,
-                height: 160,
-                imageurl: TImages.user,
+              Obx(
+                    () {
+                  if(productImagesController.selectedImage.value == null){
+                    return const SizedBox(
+                        height: 120,
+                        width: 100,
+                        child: Icon(Iconsax.image));
+                  }
+                  // Check if selectedImages is empty
+                  return FutureBuilder<String?>(
+                    future: mediaController.getImageFromBucket(
+                      productImagesController.selectedImage.value?.mediaCategory ?? '',
+                      productImagesController.selectedImage.value?.filename ?? '',
+                    ),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const TShimmerEffect(width: 350, height: 170); // Show shimmer while loading
+                      } else if (snapshot.hasError) {
+                        return const Text('Error loading image'); // Handle error case
+                      } else if (snapshot.hasData && snapshot.data != null) {
+                        return TRoundedImage(
+                          isNetworkImage: true,
+                          width: 150,
+                          height: 150,
+                          imageurl: snapshot.data!,
+                        );
+                      } else {
+                        return const Text('No image available'); // Handle case where no image is available
+                      }
+                    },
+                  );
+                },
               ),
               // Camera Icon
-              TRoundedContainer(
+               TRoundedContainer(
+                onTap: () {
+                  productImagesController.selectThumbnailImage();
+                },
                 borderColor: TColors.white,
                 backgroundColor: TColors.primary,
 
                 padding:
-                    EdgeInsets.all(6), // Add padding around the icon
+                    const EdgeInsets.all(6), // Add padding around the icon
 
-                child: Icon(
+                child: const Icon(
                   Iconsax.camera, // Camera icon
                   size: 25, // Icon size
                   color: Colors.white, // Icon color

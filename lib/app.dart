@@ -1,4 +1,5 @@
 import 'package:admin_dashboard_v3/routes/app_routes.dart';
+import 'package:admin_dashboard_v3/routes/route_observer.dart';
 import 'package:admin_dashboard_v3/routes/routes.dart';
 import 'package:admin_dashboard_v3/routes/routes_MIDDLEWARE.dart';
 import 'package:admin_dashboard_v3/utils/theme/theme.dart';
@@ -21,6 +22,7 @@ class App extends StatefulWidget {
 class _AppState extends State<App> {
   @override
   Widget build(BuildContext context) {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
     return GetMaterialApp(
         themeMode: ThemeMode.system,
         theme: TAppTheme.lightTheme,
@@ -28,8 +30,10 @@ class _AppState extends State<App> {
         initialBinding: GeneralBindings(),
         getPages: TAppRoutes.pages,
 
-        initialRoute: TRoutes.splashScreen,
-        unknownRoute: GetPage(name: TRoutes.UnkownRoute, page: () => const UnkownRoute(),middlewares: [TRouteMiddleware()] ),
+      initialRoute: TRoutes.splashScreen,
+      navigatorKey: navigatorKey,
+      navigatorObservers: [TRouteObserver()],
+      unknownRoute: GetPage(name: TRoutes.UnkownRoute, page: () => const UnkownRoute(),middlewares: [TRouteMiddleware()] ),
         );
   }
 }

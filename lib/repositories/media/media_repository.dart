@@ -66,7 +66,9 @@ class MediaRepository extends GetxController {
       return supabase.storage.from(bucketName).getPublicUrl(filePath);
       //return response; // response is of type Uint8List
     } catch (e) {
-      print("Error fetching image: $e");
+      if (kDebugMode) {
+        print("Error fetching image: $e");
+      }
       return null; // Return null in case of an error
     }
   }
@@ -90,7 +92,9 @@ class MediaRepository extends GetxController {
     for (int i = 0; i < files.length; i++) {
       File file = files[i];
       Map<String, dynamic> jsonData = jsonDataList[i];
-      print(jsonData);
+      if (kDebugMode) {
+        print(jsonData);
+      }
 
       try {
         // ✅ Step 1: Insert metadata (DO NOT pass `image_id`, it auto-increments)
@@ -101,7 +105,9 @@ class MediaRepository extends GetxController {
             .single(); // Fetch the newly created image_id
 
         int imageId = response['image_id']; // Fetch auto-generated image_id
-        print("✅ Inserted into DB with image_id: $imageId");
+        if (kDebugMode) {
+          print("✅ Inserted into DB with image_id: $imageId");
+        }
 
         // ✅ Step 2: Generate a unique filename using image_id
         String fileExtension = p.extension(file.path);
@@ -111,35 +117,61 @@ class MediaRepository extends GetxController {
         await supabase.from('images').update({
           'filename': newFileName,
         }).eq('image_id', imageId);
-        print("✅ Updated DB with filename: $newFileName");
+        if (kDebugMode) {
+          print("✅ Updated DB with filename: $newFileName");
+        }
 
         final user = supabase.auth.currentUser;
 
         if (user == null) {
-          print("❌ User is not authenticated.");
+          if (kDebugMode) {
+            print("❌ User is not authenticated.");
+          }
           return;
         }
 
         // ✅ Step 4: Upload the file to Supabase Storage
         await supabase.storage.from(bucketName).upload(newFileName, file);
-        print("✅ File uploaded successfully: $newFileName");
+        if (kDebugMode) {
+          print("✅ File uploaded successfully: $newFileName");
+        }
       } catch (e) {
-        print("❌ Error in upload process: $e");
+        if (kDebugMode) {
+          print("❌ Error in upload process: $e");
+        }
         TLoader.errorSnackBar(
             title: 'Image Upload Failed', message: e.toString());
       }
     }
   }
 
-  Future<void> updateEntityIdRepo(int entityId, int imageId) async {
+  Future<void> updateEntityIdRepo(int entityId, int imageId, String mediaCategory) async {
     try {
-      // Update the entity_id in the images table where image_id matches
+      // Step 1: Find the previous image associated with the same entityId
+      final previousImageResponse = await supabase
+          .from('images')
+          .select('image_id')
+          .eq('entity_id', entityId)
+          .eq('mediacategory', mediaCategory)
+          .maybeSingle(); // Use maybeSingle to handle cases where no row is found
+
+      if (previousImageResponse != null) {
+        // Step 2: Set the previous image's entity_id to null
+        await supabase
+            .from('images')
+            .update({'entity_id': null})
+            .eq('image_id', previousImageResponse['image_id']);
+      }
+
+      // Step 3: Update the new image with the entityId
       await supabase
           .from('images')
           .update({'entity_id': entityId})
           .eq('image_id', imageId);
 
-      print('Entity ID updated successfully for image ID: $imageId');
+      if (kDebugMode) {
+        print('Entity ID updated successfully for image ID: $imageId');
+      }
     } catch (e) {
       // Handle errors
       TLoader.errorSnackBar(title: 'Error updating entity ID', message: e.toString());

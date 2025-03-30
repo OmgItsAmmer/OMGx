@@ -28,9 +28,10 @@ class CustomerRepository extends GetxController {
     }
   }
 
-  Future<int?> saveOrUpdateCustomerRepo(Map<String, dynamic> json) async {
+  Future<Map<String, dynamic>> saveOrUpdateCustomerRepo(Map<String, dynamic> json) async {
     try {
       int? customerId = json['customer_id'];
+      bool isUpdate = false; // Flag to track if an update occurred
 
       if (customerId != null) {
         // Fetch the customer with the given customer_id
@@ -43,6 +44,7 @@ class CustomerRepository extends GetxController {
         if (response != null) {
           // If the customer exists, update it
           await supabase.from('customers').update(json).eq('customer_id', customerId);
+          isUpdate = true; // Set the flag to true since it's an update
         } else {
           // If no existing customer is found, insert a new one
           json.remove('customer_id');
@@ -56,7 +58,11 @@ class CustomerRepository extends GetxController {
         customerId = insertResponse['customer_id'];
       }
 
-      return customerId;
+      // Return both the customerId and the isUpdate flag
+      return {
+        'customer_id': customerId,
+        'is_update': isUpdate,
+      };
     } on PostgrestException catch (e) {
       TLoader.errorSnackBar(title: 'Customer Repo', message: e.message);
       rethrow;

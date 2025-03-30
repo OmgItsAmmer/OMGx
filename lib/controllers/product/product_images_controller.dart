@@ -85,14 +85,16 @@ class ProductImagesController extends GetxController {
     }
   }
 
-void setDesiredImage(MediaCategory mediaCategory,int imageId) async {
+Future<void> setDesiredImage(MediaCategory mediaCategory,int imageId) async {
   try{
     final mediaController = Get.put(MediaController());
 
 
     await mediaController.getSelectedFolderImages(mediaCategory);
 
-    print(imageId);
+    if (kDebugMode) {
+      print(imageId);
+    }
    // print(mediaController.allImages[1]);
 
     if (mediaController.allImages.isNotEmpty && imageId != -1) {
@@ -102,7 +104,9 @@ void setDesiredImage(MediaCategory mediaCategory,int imageId) async {
       );
 
       selectedImage.value = filteredValue;
-      print(selectedImage.value?.image_id);
+      if (kDebugMode) {
+        print(selectedImage.value?.image_id);
+      }
 
       selectedThumbnailImageUrl.value = filteredValue.filename;
     }

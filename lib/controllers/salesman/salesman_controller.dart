@@ -2,6 +2,7 @@
 
 import 'package:admin_dashboard_v3/repositories/customer/customer_repository.dart';
 import 'package:admin_dashboard_v3/repositories/salesman/salesman_repository.dart';
+import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -155,7 +156,7 @@ class SalesmanController extends GetxController {
       {
         salesmanModel.salesmanId = entityId;
         if(productImagesController.selectedImage.value != null){
-          await mediaController.updateEntityId(entityId, productImagesController.selectedImage.value!.image_id);
+          await mediaController.updateEntityId(entityId, productImagesController.selectedImage.value!.image_id,MediaCategory.salesman.toString().split('.').last);
         }
         await AddressController.instance.saveAddress(entityId, 'Salesman');
         allSalesman.add(salesmanModel);

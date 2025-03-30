@@ -2,8 +2,6 @@ import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.d
 import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
 import 'package:admin_dashboard_v3/controllers/media/media_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/utils/constants/enums.dart';
-import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
 import 'package:flutter/material.dart';
@@ -24,44 +22,42 @@ class StoreDesktop extends StatelessWidget {
 
     return Expanded(
         child: Scaffold(
-          body: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(TSizes.defaultSpace),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(TSizes.defaultSpace),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              //Heading
+              Text(
+                'Store',
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              const SizedBox(
+                height: TSizes.spaceBtwSections,
+              ),
+              //BRead Crumbs
+
+              const Row(
                 children: [
-                  //Heading
-                  Text(
-                    'Store',
-                    style: Theme.of(context).textTheme.headlineMedium,
+                  //Image card
+                  Expanded(child: StoreImageInfo()),
+                  SizedBox(
+                    width: TSizes.spaceBtwSections,
                   ),
-                  const SizedBox(
-                    height: TSizes.spaceBtwSections,
-                  ),
-                  //BRead Crumbs
-
-                  const Row(
-                    children: [
-                      //Image card
-                      Expanded(child: StoreImageInfo()),
-                      SizedBox(
-                        width: TSizes.spaceBtwSections,
-                      ),
-                      //info card
-                      Expanded(
-                          flex: 2,
-                          child: ProfileDetails()),
-
-                    ],
-                  ),
-                  const SizedBox(height: TSizes.spaceBtwSections,),
-                  //
-
+                  //info card
+                  Expanded(flex: 2, child: ProfileDetails()),
                 ],
               ),
-            ),
+              const SizedBox(
+                height: TSizes.spaceBtwSections,
+              ),
+              //
+            ],
           ),
-        ));
+        ),
+      ),
+    ));
   }
 }
 
@@ -85,13 +81,9 @@ class ProfileDetails extends StatelessWidget {
             style: Theme.of(context).textTheme.headlineMedium,
           ),
 
-
           const SizedBox(
             height: TSizes.spaceBtwSections,
           ),
-
-
-
 
           //fields row
           Row(
@@ -101,18 +93,15 @@ class ProfileDetails extends StatelessWidget {
                   width: double.infinity,
                   //     height: 80,
                   child: TextFormField(
-                    // controller:
+                    controller: shopController.shopName.value,
                     // salesController.customerCNICController.value,
                     validator: (value) =>
                         TValidator.validateEmptyText('Store Name', value),
                     style: Theme.of(context).textTheme.bodyMedium,
                     decoration: const InputDecoration(labelText: 'Store Name'),
-
-
                   ),
                 ),
               ),
-
             ],
           ),
           const SizedBox(
@@ -120,13 +109,17 @@ class ProfileDetails extends StatelessWidget {
           ),
 
           Wrap(
-            spacing: TSizes.spaceBtwSections, // Horizontal space between children
+            spacing:
+                TSizes.spaceBtwSections, // Horizontal space between children
             runSpacing: TSizes.spaceBtwItems, // Vertical space between lines
             children: [
               SizedBox(
-                width: TDeviceUtils.isDesktopScreen(context) ? 250 : 200, // Set a fixed width or use `double.infinity` for flexibility
+                width: TDeviceUtils.isDesktopScreen(context)
+                    ? 250
+                    : 200, // Set a fixed width or use `double.infinity` for flexibility
 
                 child: TextFormField(
+                  controller: shopController.taxRate,
                   validator: (value) =>
                       TValidator.validateEmptyText('Tax Rate(%)', value),
                   style: Theme.of(context).textTheme.bodyMedium,
@@ -134,38 +127,50 @@ class ProfileDetails extends StatelessWidget {
                 ),
               ),
               SizedBox(
-                width: TDeviceUtils.isDesktopScreen(context) ? 250 : 200, // Set a fixed width or use `double.infinity` for flexibility
+                width: TDeviceUtils.isDesktopScreen(context)
+                    ? 250
+                    : 200, // Set a fixed width or use `double.infinity` for flexibility
 
                 child: TextFormField(
+                  controller: shopController.shippingFee,
                   validator: (value) =>
-                      TValidator.validateEmptyText('Shipping Cost(🚵)', value),
+                      TValidator.validateEmptyText('Shipping Fee(🚵)', value),
                   style: Theme.of(context).textTheme.bodyMedium,
-                  decoration: const InputDecoration(labelText: 'Shipping Cost(🚵)'),
+                  decoration:
+                      const InputDecoration(labelText: 'Shipping Fee(🚵)'),
                 ),
               ),
               SizedBox(
-                width: TDeviceUtils.isDesktopScreen(context) ? 250 : 200, // Set a fixed width or use `double.infinity` for flexibility
+                width: TDeviceUtils.isDesktopScreen(context)
+                    ? 250
+                    : 200, // Set a fixed width or use `double.infinity` for flexibility
 
                 child: TextFormField(
-                  validator: (value) =>
-                      TValidator.validateEmptyText('Free Shipping Threshold(🚵)', value),
+                  controller: shopController.shippingThreshold,
+                  validator: (value) => TValidator.validateEmptyText(
+                      'Free Shipping Threshold(🚵)', value),
                   style: Theme.of(context).textTheme.bodyMedium,
-                  decoration: const InputDecoration(labelText: 'Free Shipping Threshold(🚵)'),
+                  decoration: const InputDecoration(
+                      labelText: 'Free Shipping Threshold(🚵)'),
                 ),
               ),
             ],
           ),
           const SizedBox(
-            height    : TSizes.spaceBtwSections,
+            height: TSizes.spaceBtwSections,
           ),
           //Prifles
           Wrap(
-            spacing: TSizes.spaceBtwSections, // Horizontal space between children
+            spacing:
+                TSizes.spaceBtwSections, // Horizontal space between children
             runSpacing: TSizes.spaceBtwItems, // Vertical space between lines
             children: [
               SizedBox(
-                width: TDeviceUtils.isDesktopScreen(context) ? 250 : 200, // Set a fixed width or use `double.infinity` for flexibility
+                width: TDeviceUtils.isDesktopScreen(context)
+                    ? 250
+                    : 200, // Set a fixed width or use `double.infinity` for flexibility
                 child: TextFormField(
+                  controller: shopController.profile1,
                   validator: (value) =>
                       TValidator.validateEmptyText('Profile 1', value),
                   style: Theme.of(context).textTheme.bodyMedium,
@@ -173,9 +178,12 @@ class ProfileDetails extends StatelessWidget {
                 ),
               ),
               SizedBox(
-                width: TDeviceUtils.isDesktopScreen(context) ? 250 : 200, // Set a fixed width or use `double.infinity` for flexibility
+                width: TDeviceUtils.isDesktopScreen(context)
+                    ? 250
+                    : 200, // Set a fixed width or use `double.infinity` for flexibility
 
                 child: TextFormField(
+                  controller: shopController.profile2,
                   validator: (value) =>
                       TValidator.validateEmptyText('Profile 2', value),
                   style: Theme.of(context).textTheme.bodyMedium,
@@ -183,9 +191,12 @@ class ProfileDetails extends StatelessWidget {
                 ),
               ),
               SizedBox(
-                width: TDeviceUtils.isDesktopScreen(context) ? 250 : 200, // Set a fixed width or use `double.infinity` for flexibility
+                width: TDeviceUtils.isDesktopScreen(context)
+                    ? 250
+                    : 200, // Set a fixed width or use `double.infinity` for flexibility
 
                 child: TextFormField(
+                  controller: shopController.profile3,
                   validator: (value) =>
                       TValidator.validateEmptyText('Profile 3', value),
                   style: Theme.of(context).textTheme.bodyMedium,
@@ -195,14 +206,31 @@ class ProfileDetails extends StatelessWidget {
             ],
           ),
           const SizedBox(
-            height    : TSizes.spaceBtwSections,
+            height: TSizes.spaceBtwSections,
           ),
           //save button
           Row(
             children: [
-              Expanded(child: ElevatedButton(onPressed: (){}, child: Text('Update Store Details',style: Theme.of(context).textTheme.bodyMedium!.apply(color: TColors.white),))),
+              Expanded(
+                child: Obx(
+              () => ElevatedButton(
+                    onPressed: () {
+                    shopController.updateStore();
+                    },
+                    child: shopController.isUpdating.value
+                        ? const CircularProgressIndicator(color: TColors.white)
+                        : Text(
+                      'Update Store',
+                      style: Theme.of(context).textTheme.bodyMedium!.apply(
+                        color: TColors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ],
           )
+
         ],
       ),
     );
@@ -215,48 +243,53 @@ class StoreImageInfo extends StatelessWidget {
   Future<String> _getImageUrl() async {
     final MediaController mediaController = Get.find<MediaController>();
     return await mediaController.getImageFromBucket(
-      mediaController.allImages[0].mediaCategory,
-      mediaController.allImages[0].filename,
-    ) ??
+          mediaController.allImages[0].mediaCategory,
+          mediaController.allImages[0].filename,
+        ) ??
         '';
   }
 
   @override
   Widget build(BuildContext context) {
     final ShopController shopController = Get.find<ShopController>();
-    final ProductImagesController productImagesController = Get.find<ProductImagesController>();
+    final ProductImagesController productImagesController =
+        Get.find<ProductImagesController>();
     final MediaController mediaController = Get.find<MediaController>();
 
     return TRoundedContainer(
-
       width: double.infinity,
       height: 400,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Stack(
-            alignment: Alignment.bottomRight, // Align the camera icon to the bottom right
+            alignment: Alignment
+                .bottomRight, // Align the camera icon to the bottom right
             children: [
               // Rounded Image
               Obx(
-                    () {
-                  if(productImagesController.selectedImage.value == null){
+                () {
+                  if (productImagesController.selectedImage.value == null) {
                     return const SizedBox(
-                        height: 120,
-                        width: 100,
-                        child: Icon(Iconsax.image));
+                        height: 120, width: 100, child: Icon(Iconsax.image));
                   }
                   // Check if selectedImages is empty
                   return FutureBuilder<String?>(
                     future: mediaController.getImageFromBucket(
-                      productImagesController.selectedImage.value?.mediaCategory ?? '',
-                      productImagesController.selectedImage.value?.filename ?? '',
+                      productImagesController
+                              .selectedImage.value?.mediaCategory ??
+                          '',
+                      productImagesController.selectedImage.value?.filename ??
+                          '',
                     ),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const TShimmerEffect(width: 350, height: 170); // Show shimmer while loading
+                        return const TShimmerEffect(
+                            width: 350,
+                            height: 170); // Show shimmer while loading
                       } else if (snapshot.hasError) {
-                        return const Text('Error loading image'); // Handle error case
+                        return const Text(
+                            'Error loading image'); // Handle error case
                       } else if (snapshot.hasData && snapshot.data != null) {
                         return TRoundedImage(
                           isNetworkImage: true,
@@ -265,7 +298,8 @@ class StoreImageInfo extends StatelessWidget {
                           imageurl: snapshot.data!,
                         );
                       } else {
-                        return const Text('No image available'); // Handle case where no image is available
+                        return const Text(
+                            'No image available'); // Handle case where no image is available
                       }
                     },
                   );
@@ -273,9 +307,8 @@ class StoreImageInfo extends StatelessWidget {
               ),
 
               // Camera Icon
-               TRoundedContainer(
-                onTap: (){
-
+              TRoundedContainer(
+                onTap: () {
                   productImagesController.selectThumbnailImage();
                 },
                 borderColor: TColors.white,
@@ -290,9 +323,11 @@ class StoreImageInfo extends StatelessWidget {
             ],
           ),
           const SizedBox(height: TSizes.spaceBtwSections),
-          Text(
-            shopController.selectedShop?.value.shopname ?? ' ',
-            style: Theme.of(context).textTheme.headlineMedium,
+          Obx(
+            () => Text(
+              shopController.shopName.value.text,
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
           ),
         ],
       ),

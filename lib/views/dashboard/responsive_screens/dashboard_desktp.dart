@@ -6,6 +6,7 @@ import 'package:admin_dashboard_v3/views/orders/all_orders/table/order_table.dar
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
 
 import '../../../controllers/dashboard/dashboard_controoler.dart';
 import '../widgets/dashbord_card.dart';
@@ -36,39 +37,52 @@ class DashboardDesktop extends StatelessWidget {
                 ),
 
                 //Cards
-                const Row(
+                 Row(
                   children: [
                     Expanded(
                         child: TDashBoardCard(
-                      stats: 25,
+                          value: 'Rs ${dashboardController.currentMonthSales.value}',
+                      stats: dashboardController.card1Percentage.value ,
                       title: 'Sales Total',
-                      subTitle: '\$365.6',
+                      subTitle: 'Compared to ${dashboardController.lastMonth.value}' ,
+                          icon: (dashboardController.isCard1Profit.value ) ? Iconsax.arrow_up_3 : Iconsax.arrow_down,
+                          color:(dashboardController.isCard1Profit.value) ? Colors.green : Colors.red ,
                     )),
                     const SizedBox(
                       width: TSizes.spaceBtwItems,
                     ),
                     Expanded(
                         child: TDashBoardCard(
+                          value: '',
+
                       stats: 25,
-                      title: 'Sales Total',
+                      title: 'Average Order Value',
                       subTitle: '\$365.6',
+                          color: (dashboardController.isCard1Profit.value ?? false)?Colors.green:Colors.red ,
+                          icon: (dashboardController.isCard1Profit.value ?? false  ) ? Iconsax.arrow_up_3 : Iconsax.arrow_down,
                     )),
                     const SizedBox(
                       width: TSizes.spaceBtwItems,
                     ),
-                    Expanded(
-                        child: TDashBoardCard(
-                      stats: 25,
-                      title: 'Sales Total',
-                      subTitle: '\$365.6',
-                    )),
+                     Expanded(
+                        child:TDashBoardCard(
+                          value: 'Rs ${dashboardController.currentMonthSales.value}',
+                          stats: dashboardController.card1Percentage.value ,
+                          title: 'Profit',
+                          subTitle: 'Compared to ${dashboardController.lastMonth.value}' ,
+                          icon: (dashboardController.isCard1Profit.value ) ? Iconsax.arrow_up_3 : Iconsax.arrow_down,
+                          color:(dashboardController.isCard1Profit.value) ? Colors.green : Colors.red ,
+                        )
+                    ),
                     const SizedBox(
                       width: TSizes.spaceBtwItems,
                     ),
-                    Expanded(
+                    const Expanded(
                         child: TDashBoardCard(
+                          value: '',
+
                       stats: 25,
-                      title: 'Sales Total',
+                      title: 'Customers',
                       subTitle: '\$365.6',
                     )),
                     const SizedBox(
