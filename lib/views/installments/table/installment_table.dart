@@ -21,19 +21,11 @@ class InstallmentTable extends StatelessWidget {
 
     return Obx(
             () {
-              if(installmentController.isLoading.value){
-                return const TShimmerEffect(width: 100, height: 100);
-              }
-              if(installmentController.installmentPlans.isEmpty)
-                {
-                  return const Text('No Installment Plan!!',);
-                }
-
           return TPaginatedDataTable(
             showCheckBox: false,
             sortAscending: true,
             minWidth: 700,
-            rowsperPage: 10,
+            rowsperPage: 5,
 
             columns: const [
               DataColumn2(label: Text('#')),
@@ -45,10 +37,10 @@ class InstallmentTable extends StatelessWidget {
               DataColumn2(label: Text('Remarks')),
               DataColumn2(label: Text('Balance')),
               DataColumn2(label: Text('Status')),
-              DataColumn2(label: Text('Action'), fixedWidth: 100),
+              DataColumn2(label: Text('Action'), fixedWidth: 100,),
             ],
             source: InstallmentRow(
-                installmentCount: installmentController.installmentPlans.length
+                installmentCount: installmentController.currentInstallmentPayments.length
 
             ),
           );

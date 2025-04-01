@@ -15,100 +15,95 @@ class AdvanceInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     final InstallmentController installmentController = Get.find<InstallmentController>();
 
-    return  TRoundedContainer(
+    return TRoundedContainer(
       backgroundColor: TColors.primaryBackground,
-      padding: const EdgeInsets.all(TSizes.defaultSpace),
+      padding: const EdgeInsets.all(TSizes.defaultSpace), // Add const for optimization
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const SizedBox(height: TSizes.spaceBtwItems),
 
-
-          const SizedBox(height: TSizes.spaceBtwItems,),
-          // bill amount
-          SizedBox(
-            width: double.infinity,
-            // height: 80,
-            child: TextFormField(
-              style: Theme.of(context).textTheme.bodyMedium,
-              decoration: const InputDecoration(labelText: 'Frequency in month'),
-              maxLines: 1,
-              controller: installmentController.frequencyInMonth ,
-              validator: (value) =>
-                  TValidator.validateEmptyText('Frequency in month', value),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(
-                  RegExp(r'^\d*\.?\d{0,2}'), // Allows numbers with up to 2 decimal places
-                ),
-              ],
-              onChanged: (val){
-                installmentController.updateINCLExMargin();
-
-
-              },
-            ),
+          // Frequency in month
+          _buildInputField(
+            context: context,
+            label: 'Frequency in month',
+            controller: installmentController.frequencyInMonth,
+            onChanged: (_) => installmentController.updateINCLExMargin(),
           ),
-          const SizedBox(height: TSizes.spaceBtwInputFields,),
-          SizedBox(
-            width: double.infinity,
-            // height: 80,
-            child: TextFormField(
-              style: Theme.of(context).textTheme.bodyMedium,
-              decoration: const InputDecoration(labelText: 'Other Charges'),
-              maxLines: 1,
-              controller: installmentController.otherCharges ,
-              validator: (value) =>
-                  TValidator.validateEmptyText('Other Charges', value),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(
-                  RegExp(r'^\d*\.?\d{0,2}'), // Allows numbers with up to 2 decimal places
-                ),
-              ],
-              onChanged: (val){
-                installmentController.updateINCLExMargin();
 
+          const SizedBox(height: TSizes.spaceBtwInputFields),
 
-              },
-            ),
+          // Other Charges
+          _buildInputField(
+            context: context,
+            label: 'Other Charges',
+            controller: installmentController.otherCharges,
+            onChanged: (_) => installmentController.updateINCLExMargin(),
           ),
-          const SizedBox(height: TSizes.spaceBtwInputFields,),
-          SizedBox(
-            width: double.infinity,
-            // height: 80,
-            child: Obx(
-                () => TextFormField(
-                style: Theme.of(context).textTheme.bodyMedium,
-                decoration: const InputDecoration(labelText: 'Payable Ex-Margin'),
-                maxLines: 1,
-                readOnly: true,
-                  controller: installmentController.payableExMargin.value ,
 
-              ),
-            ),
+          const SizedBox(height: TSizes.spaceBtwInputFields),
+
+          // Payable Ex-Margin (Read-Only)
+          _buildReadOnlyField(
+            context: context,
+            label: 'Payable Ex-Margin',
+            controller: installmentController.payableExMargin.value,
           ),
-          const SizedBox(height: TSizes.spaceBtwInputFields,),
-          SizedBox(
-            width: double.infinity,
-            // height: 80,
-            child: Obx(
-                () => TextFormField(
-                style: Theme.of(context).textTheme.bodyMedium,
-                decoration: const InputDecoration(labelText: 'Payable INCL-Margin'),
-                maxLines: 1,
-                controller: installmentController.payableINCLMargin.value ,
 
-                readOnly: true,
-              ),
-            ),
+          const SizedBox(height: TSizes.spaceBtwInputFields),
+
+          // Payable INCL-Margin (Read-Only)
+          _buildReadOnlyField(
+            context: context,
+            label: 'Payable INCL-Margin',
+            controller: installmentController.payableINCLMargin.value,
           ),
-          const SizedBox(height: TSizes.spaceBtwInputFields,),
 
-
+          const SizedBox(height: TSizes.spaceBtwInputFields),
         ],
-
       ),
+    );
+  }
 
+  // Helper for standard text fields
+  Widget _buildInputField({
+    required BuildContext context,
+    required String label,
+    required TextEditingController controller,
+    required Function(String) onChanged,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      child: TextFormField(
+        style: Theme.of(context).textTheme.bodyMedium,
+        decoration: InputDecoration(labelText: label),
+        maxLines: 1,
+        controller: controller,
+        validator: (value) => TValidator.validateEmptyText(label, value),
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'^\d+(\.\d{0,2})?$')),
+        ],
+        onChanged: onChanged,
+      ),
+    );
+  }
+
+  // Helper for read-only fields
+  Widget _buildReadOnlyField({
+    required BuildContext context,
+    required String label,
+    required TextEditingController controller,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      child: TextFormField(
+        style: Theme.of(context).textTheme.bodyMedium,
+        decoration: InputDecoration(labelText: label),
+        maxLines: 1,
+        controller: controller,
+        readOnly: true,
+      ),
     );
   }
 }

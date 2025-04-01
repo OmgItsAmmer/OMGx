@@ -15,158 +15,129 @@ class ChargesForm extends StatelessWidget {
   Widget build(BuildContext context) {
     final InstallmentController installmentController = Get.find<InstallmentController>();
 
-    return  TRoundedContainer(
+    return TRoundedContainer(
       backgroundColor: TColors.primaryBackground,
-      padding: EdgeInsets.all(TSizes.defaultSpace),
+      padding: const EdgeInsets.all(TSizes.defaultSpace), // Added const for optimization
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const SizedBox(height: TSizes.spaceBtwItems),
 
-
-          const SizedBox(height: TSizes.spaceBtwItems,),
-          // bill amount
-          SizedBox(
-            width: double.infinity,
-            // height: 80,
-            child: Obx(
-                () => TextFormField(
-                style: Theme.of(context).textTheme.bodyMedium,
-                decoration: const InputDecoration(labelText: 'Bill Amount'),
-                readOnly: true,
-                maxLines: 1,
-                controller: installmentController.billAmount.value ,
-                validator: (value) =>
-                    TValidator.validateEmptyText('Bill Amount', value),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(
-                    RegExp(r'^\d*\.?\d{0,2}'), // Allows numbers with up to 2 decimal places
-                  ),
-                ],
-                onChanged: (val){
-                  installmentController.updateINCLExMargin();
-
-
-                },
-
-              ),
-            ),
-          ),
-          const SizedBox(height: TSizes.spaceBtwInputFields,),
-          SizedBox(
-            width: double.infinity,
-            // height: 80,
-            child: TextFormField(
-              style: Theme.of(context).textTheme.bodyMedium,
-              decoration: const InputDecoration(labelText: 'No of Installments'),
-              maxLines: 1,
-              controller: installmentController.NoOfInstallments ,
-              validator: (value) =>
-                  TValidator.validateEmptyText('No of Installments', value),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(
-                  RegExp(r'^\d*\.?\d{0,2}'), // Allows numbers with up to 2 decimal places
-                ),
-              ],
-              onChanged: (val){
-                //installmentController.updateINCLExMargin();
-
-
-              },
-            ),
-          ),
-          const SizedBox(height: TSizes.spaceBtwInputFields,),
-          SizedBox(
-            width: double.infinity,
-            // height: 80,
-            child: TextFormField(
-              style: Theme.of(context).textTheme.bodyMedium,
-              decoration: const InputDecoration(labelText: 'ADV/Down Payment'),
-              maxLines: 1,
-              controller: installmentController.DownPayment ,
-              validator: (value) =>
-                  TValidator.validateEmptyText('Down Payment', value),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(
-                  RegExp(r'^\d*\.?\d{0,2}'), // Allows numbers with up to 2 decimal places
-                ),
-              ],
-              onChanged: (val){
-                installmentController.updateINCLExMargin();
-
-
-              },
-            ),
-          ),
-          const SizedBox(height: TSizes.spaceBtwInputFields,),
-          SizedBox(
-            width: double.infinity,
-            // height: 80,
-            child: TextFormField(
-              style: Theme.of(context).textTheme.bodyMedium,
-              decoration: const InputDecoration(labelText: 'Document Charges'),
-              maxLines: 1,
-              controller: installmentController.DocumentCharges ,
-              validator: (value) =>
-                  TValidator.validateEmptyText('Document Charges', value),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(
-                  RegExp(r'^\d*\.?\d{0,2}'), // Allows numbers with up to 2 decimal places
-                ),
-              ],
-              onChanged: (val){
-                installmentController.updateINCLExMargin();
-
-
-              },
-            ),
-
+          // Bill Amount (Read-Only)
+          _buildReadOnlyField(
+            context: context,
+            label: 'Bill Amount',
+            controller: installmentController.billAmount.value,
           ),
 
-          const SizedBox(height: TSizes.spaceBtwInputFields,),
-          SizedBox(
-            width: double.infinity,
-            // height: 80,
-            child: TextFormField(
-              style: Theme.of(context).textTheme.bodyMedium,
-              decoration: const InputDecoration(labelText: 'MARGIN-%'),
-              maxLines: 1,
-              controller: installmentController.margin ,
-              validator: (value) =>
-                  TValidator.validateEmptyText('Margin', value),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(
-                  RegExp(r'^\d*\.?\d{0,2}'), // Allows numbers with up to 2 decimal places
-                ),
-              ],
-              onChanged: (val){
-                installmentController.updateINCLExMargin();
+          const SizedBox(height: TSizes.spaceBtwInputFields),
 
-
-              },
-            ),
+          // No of Installments
+          _buildInputField(
+            context: context,
+            label: 'No of Installments',
+            controller: installmentController.NoOfInstallments,
           ),
 
-          const SizedBox(height: TSizes.spaceBtwInputFields,),
-          SizedBox(
-            width: double.infinity,
-            // height: 80,
-            child: TextFormField(
-              style: Theme.of(context).textTheme.bodyMedium,
-              decoration: const InputDecoration(labelText: 'NOTE (Optional)'),
-              maxLines: 5,
-              controller: installmentController.note ,
-            ),
+          const SizedBox(height: TSizes.spaceBtwInputFields),
+
+          // ADV/Down Payment
+          _buildInputField(
+            context: context,
+            label: 'ADV/Down Payment',
+            controller: installmentController.DownPayment,
+            onChanged: (_) => installmentController.updateINCLExMargin(),
           ),
 
+          const SizedBox(height: TSizes.spaceBtwInputFields),
+
+          // Document Charges
+          _buildInputField(
+            context: context,
+            label: 'Document Charges',
+            controller: installmentController.DocumentCharges,
+            onChanged: (_) => installmentController.updateINCLExMargin(),
+          ),
+
+          const SizedBox(height: TSizes.spaceBtwInputFields),
+
+          // MARGIN-%
+          _buildInputField(
+            context: context,
+            label: 'MARGIN-%',
+            controller: installmentController.margin,
+            onChanged: (_) => installmentController.updateINCLExMargin(),
+          ),
+
+          const SizedBox(height: TSizes.spaceBtwInputFields),
+
+          // NOTE (Optional)
+          _buildMultilineField(
+            context: context,
+            label: 'NOTE (Optional)',
+            controller: installmentController.note,
+          ),
         ],
-
       ),
+    );
+  }
 
+  // Helper for input fields
+  Widget _buildInputField({
+    required BuildContext context,
+    required String label,
+    required TextEditingController controller,
+    Function(String)? onChanged,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      child: TextFormField(
+        style: Theme.of(context).textTheme.bodyMedium,
+        decoration: InputDecoration(labelText: label),
+        maxLines: 1,
+        controller: controller,
+        validator: (value) => TValidator.validateEmptyText(label, value),
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'^\d+(\.\d{0,2})?$')),
+        ],
+        onChanged: onChanged,
+      ),
+    );
+  }
+
+  // Helper for read-only fields
+  Widget _buildReadOnlyField({
+    required BuildContext context,
+    required String label,
+    required TextEditingController controller,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      child: TextFormField(
+        style: Theme.of(context).textTheme.bodyMedium,
+        decoration: InputDecoration(labelText: label),
+        maxLines: 1,
+        controller: controller,
+        readOnly: true,
+      ),
+    );
+  }
+
+  // Helper for multiline fields
+  Widget _buildMultilineField({
+    required BuildContext context,
+    required String label,
+    required TextEditingController controller,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      child: TextFormField(
+        style: Theme.of(context).textTheme.bodyMedium,
+        decoration: InputDecoration(labelText: label),
+        maxLines: 5,
+        controller: controller,
+      ),
     );
   }
 }

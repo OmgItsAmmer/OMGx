@@ -5,15 +5,12 @@ import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 
 import '../../../common/widgets/dropdown_search/searchable_text_field.dart';
-import '../../../controllers/sales/sales_controller.dart';
-import '../../../repositories/guarantors/guarantor_repository.dart';
 import '../../../utils/constants/colors.dart';
 import '../../../utils/validators/validation.dart';
 
-class UserInfoCard extends StatelessWidget {
+class GuarrantorCard extends StatelessWidget {
   final String hintText;
 
   final cardTitle;
@@ -25,10 +22,10 @@ class UserInfoCard extends StatelessWidget {
   final cnicTextController;
   final phoneNoTextController;
   final readOnly;
-  final formKey;
+  final GlobalKey<FormState>? formKey;
 
 
-  const UserInfoCard(
+  const GuarrantorCard(
       {super.key,
         required this.cardTitle,
         required this.hintText,
@@ -39,7 +36,7 @@ class UserInfoCard extends StatelessWidget {
         required this.cnicTextController,
         required this.phoneNoTextController,
         required this.addressList,
-        required this.formKey,
+        this.formKey,
         required this.addressTextController});
 
   @override
@@ -78,18 +75,18 @@ class UserInfoCard extends StatelessWidget {
                         height: TSizes.spaceBtwItems,
                       ),
                       SizedBox(
-                        width: 300,
-                        //  height: 60,
-                        child: AutoCompleteTextField(
-                          titleText: hintText,
-                          optionList: namesList,
+                        width: double.infinity,
+                        // height: 80,
+                        child: TextFormField(
+                          controller:
+                          userNameTextController,
+                          validator: (value) => TValidator.validateEmptyText(
+                              'Name', value),
 
-                          textController: userNameTextController,
-                          parameterFunc: onSelectedName,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          decoration:
+                          const InputDecoration(labelText: 'Name'),
                         ),
-                      ),
-                      const SizedBox(
-                        height: TSizes.spaceBtwItems,
                       ),
                     ],
                   ),

@@ -40,6 +40,10 @@ class ProductSearchBar extends StatelessWidget {
           //Automatic gives unit price
           salesController.unitPrice.value.text = selectedProduct.salePrice ?? ' ';
 
+
+          salesController.buyingPriceIndividual = double.parse(selectedProduct.basePrice ?? "0.0");
+
+
         },
 
 

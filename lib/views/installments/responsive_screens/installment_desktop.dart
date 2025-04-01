@@ -8,10 +8,11 @@ import 'package:get/get.dart';
 import '../table/installment_table.dart';
 import '../widgets/charges_form.dart';
 import '../widgets/advance_info.dart';
+import '../widgets/customer_card.dart';
 import '../widgets/duration_info.dart';
 import '../widgets/installment_action_buttons.dart';
 import '../widgets/installment_footer_buttons.dart';
-import '../widgets/user_info_card.dart';
+import '../widgets/guarantor_card.dart';
 
 class InstallmentDesktop extends StatelessWidget {
   const InstallmentDesktop({super.key});
@@ -39,28 +40,26 @@ class InstallmentDesktop extends StatelessWidget {
 
                       Expanded(
                         flex: 1,
-                        child: UserInfoCard(
+                        child: CustomerCard(
                           cardTitle: 'Customer Info',
                           hintText: 'Customer Name',
-                          namesList: const ['empty'],
-                          addressList: const ['empty'],
                           readOnly: true,
-                          onSelectedName: (val){},
                           userNameTextController: salesController.customerNameController,
                           addressTextController: salesController.customerAddressController.value,
                           cnicTextController: salesController.customerCNICController.value,
                           phoneNoTextController: salesController.customerPhoneNoController.value,
-                          formKey: salesController.customerFormKey,
-
 
                         ),
+
                       ),
+
+
                       const SizedBox(
                         width: TSizes.spaceBtwSections, // Replace TSizes.spaceBtwSections if needed
                       ),
                       Expanded(
-                        flex: 1,
-                        child: UserInfoCard(
+                        flex: 2,
+                        child: GuarrantorCard(
                           cardTitle: 'Guarantee 1 Info',
                           hintText: 'Guarantee Name',
                           namesList: const ['empty'],
@@ -79,8 +78,8 @@ class InstallmentDesktop extends StatelessWidget {
                         width: TSizes.spaceBtwSections, // Replace TSizes.spaceBtwSections if needed
                       ),
                       Expanded(
-                        flex: 1,
-                        child: UserInfoCard(
+                        flex: 2,
+                        child: GuarrantorCard(
 
                           cardTitle: 'Guarantee 2 Info',
                           hintText: 'Guarantee Name',

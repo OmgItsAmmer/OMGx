@@ -33,7 +33,10 @@ class InstallmentActionButtons extends StatelessWidget {
           SizedBox(
             height: 60,
             width: double.infinity,
-            child: OutlinedButton(onPressed: (){}, child: Text('Reset',style: Theme.of(context).textTheme.bodyLarge!.apply(color: TColors.black    ),)),
+            child: OutlinedButton(onPressed: (){
+
+              installmentController.clearAllFields();
+            }, child: Text('Reset',style: Theme.of(context).textTheme.bodyLarge!.apply(color: TColors.black    ),)),
 
           )
 

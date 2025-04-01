@@ -26,18 +26,16 @@ class InstallmentFooterButtons extends StatelessWidget {
               child: const SizedBox()),
 
           //Buttons confirm print cancel
-          Expanded(child: SizedBox(width: 150, child: OutlinedButton(onPressed: (){}, child: const Text('Discard')),)),
+          Expanded(child: SizedBox(width: 150, child: OutlinedButton(onPressed: (){
+            Get.back();
+          }, child: const Text('Discard')),)),
           const SizedBox(width: TSizes.spaceBtwSections,),
-          Expanded(child: SizedBox(width: 150, child: ElevatedButton(onPressed: (){}, child: const Text('Print')),)),
-          const SizedBox(width: TSizes.spaceBtwSections,),
-
-          Expanded(child: SizedBox(width: 150, child: ElevatedButton(onPressed: (){}, child: const Text('Draft')),)),
-
+          Expanded(child: SizedBox(width: 150, child: ElevatedButton(onPressed: (){}, child: const Text('Print only')),)),
           const SizedBox(width: TSizes.spaceBtwSections,),
           Expanded(child: SizedBox(width: 150, child: ElevatedButton(onPressed: (){
             installmentController.savePlan();
 
-          }, child: const Text('Confirm')),)),
+          }, child: const Text('Confirm&Print')),)),
 
         ],
       ),

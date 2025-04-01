@@ -1,7 +1,6 @@
 import 'package:admin_dashboard_v3/Models/products/product_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/repositories/products/product_repository.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -24,7 +23,8 @@ class ProductController extends GetxController {
   //Product Detail Controllers
   final productName = TextEditingController();
   final productDescription = TextEditingController();
-  final unitPrice = TextEditingController();
+  final basePrice = TextEditingController();
+  final salePrice = TextEditingController();
   final stock = TextEditingController();
   final alertStock = TextEditingController();
   final brandName = TextEditingController();
@@ -43,7 +43,23 @@ class ProductController extends GetxController {
     super.onInit();
   }
 
-  // Save or update product
+
+  @override
+  void onClose() {
+    productName.dispose();
+    productDescription.dispose();
+    basePrice.dispose();
+    stock.dispose();
+    alertStock.dispose();
+    brandName.dispose();
+    selectedBrandNameController.dispose();
+    selectedCategoryNameController.dispose();
+    salePrice.dispose();
+
+    super.onClose();
+  } // Save or update product
+
+  // Function to save or update product
   Future<void> saveOrUpdateProduct() async {
     try {
       // Validate the form
@@ -63,7 +79,8 @@ class ProductController extends GetxController {
         productId: await productRepository.getProductId(productName.text),
         name: productName.text.trim(),
         description: productDescription.text.trim(),
-        basePrice: unitPrice.text.trim(),
+        basePrice: basePrice.text.trim(),
+        salePrice: salePrice.text.trim(),
         stockQuantity: int.tryParse(stock.text.trim()) ?? 0,
         alertStock: int.tryParse(alertStock.text.trim()) ?? 0,
         brandID: selectedBrandId,
@@ -117,7 +134,7 @@ class ProductController extends GetxController {
     try {
       productName.text = product.name ?? ' ';
       productDescription.text = product.description ?? ' ';
-      unitPrice.text = product.basePrice ?? ' ';
+      basePrice.text = product.basePrice ?? ' ';
       stock.text = product.stockQuantity.toString();
       alertStock.text = product.alertStock.toString() ?? '';
 
@@ -132,7 +149,7 @@ class ProductController extends GetxController {
     try {
       productName.clear();
       productDescription.clear();
-      unitPrice.clear();
+      basePrice.clear();
       stock.clear();
       alertStock.clear();
       brandName.clear();
@@ -178,5 +195,7 @@ class ProductController extends GetxController {
       return null; // Return null if the product is not found
     }
   }
+
+
 
 }

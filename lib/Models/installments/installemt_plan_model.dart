@@ -4,7 +4,7 @@ import 'installment_table_model/installment_table_model.dart';
 
 class InstallmentPlanModel {
   final int installmentPlanId;
-  final int orderId;
+  int? orderId;
   final String totalAmount;
   final String downPayment;
   final String numberOfInstallments; // Changed from int to String
@@ -17,12 +17,12 @@ class InstallmentPlanModel {
   final DateTime? firstInstallmentDate;
   final String? note;
   final List<InstallmentTableModel>? installemtPaymentList;
-  final int guarantor1_id;
-  final int guarantor2_id;
+  int? guarantor1_id;
+  int? guarantor2_id;
 
   InstallmentPlanModel({
     required this.installmentPlanId,
-    required this.orderId,
+    this.orderId,
     required this.totalAmount,
     required this.downPayment,
     required this.numberOfInstallments,
@@ -35,29 +35,28 @@ class InstallmentPlanModel {
     this.firstInstallmentDate,
     this.note,
     this.installemtPaymentList,
-    required this.guarantor1_id,
-    required this.guarantor2_id,
+    this.guarantor1_id,
+    this.guarantor2_id,
   });
 
   // Static function to create an empty installment plan model
   static InstallmentPlanModel empty() => InstallmentPlanModel(
-    installmentPlanId: 0,
-    orderId: 0,
-    totalAmount: "",
-    downPayment: "",
-    numberOfInstallments: "",
-    createdAt: null,
-    documentCharges: null,
-    margin: null,
-    frequencyInMonth: null,
-    otherCharges: null,
-    duration: null,
-    firstInstallmentDate: null,
-    note: null,
-    guarantor1_id: 0,
-    guarantor2_id: 0,
-
-  );
+        installmentPlanId: 0,
+        orderId: 0,
+        totalAmount: "",
+        downPayment: "",
+        numberOfInstallments: "",
+        createdAt: null,
+        documentCharges: null,
+        margin: null,
+        frequencyInMonth: null,
+        otherCharges: null,
+        duration: null,
+        firstInstallmentDate: null,
+        note: null,
+        guarantor1_id: 0,
+        guarantor2_id: 0,
+      );
 
   // Convert model to JSON for database insertion
   Map<String, dynamic> toJson({bool isUpdate = false}) {
@@ -80,7 +79,8 @@ class InstallmentPlanModel {
       'guarantor2_id': guarantor2_id,
     };
     if (!isUpdate) {
-      data['installment_plans_id'] = installmentPlanId; // Only include `order_id` if it's not an update
+      data['installment_plans_id'] =
+          installmentPlanId; // Only include `order_id` if it's not an update
     }
     return data;
   }
@@ -105,14 +105,12 @@ class InstallmentPlanModel {
           ? DateTime.parse(json['first_installment_date'] as String)
           : null,
       note: json['note'] as String?,
-      installemtPaymentList: json['installemtPaymentList'] != null //TODO might be a issue
-          ? InstallmentTableModel.fromJsonList(json['order_items'] as List)
-          : null,
+      installemtPaymentList:
+          json['installemtPaymentList'] != null //TODO might be a issue
+              ? InstallmentTableModel.fromJsonList(json['order_items'] as List)
+              : null,
       guarantor1_id: json['guarantor1_id'] as int,
       guarantor2_id: json['guarantor2_id'] as int,
     );
   }
 }
-
-
-

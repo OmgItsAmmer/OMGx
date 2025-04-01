@@ -35,8 +35,8 @@ class GuarantorsModel {
   String get fullName => "$firstName $lastName".trim();
 
   // Convert model to JSON for database insertion (exclude guarantor_id)
-  Map<String, dynamic> toJson() {
-    return {
+  Map<String, dynamic> toJson({bool isUpdate = false}) {
+    final Map<String, dynamic> data = {
       'first_name': firstName,
       'last_name': lastName,
       'phone_number': phoneNumber,
@@ -45,7 +45,14 @@ class GuarantorsModel {
       'pfp': pfp,
       'address': address,
     };
+
+    if (!isUpdate) {
+      data['created_at'] = DateTime.now().toIso8601String();
+    }
+
+    return data;
   }
+
 
   // Factory method to create a GuarantorsModel from Supabase response
   factory GuarantorsModel.fromJson(Map<String, dynamic> json) {

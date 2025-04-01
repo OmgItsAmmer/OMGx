@@ -112,34 +112,7 @@ class SalesSummary extends StatelessWidget {
           child: TextFormField(
             controller: salesController.discountController, // Attach the controller
             onChanged: (value) {
-              // Clean the input to ensure it's a valid number
-              String cleanedValue = value.replaceAll(RegExp(r'[^0-9.]'), '');
-
-              // Check for multiple decimal points
-              if (cleanedValue.split('.').length > 2) {
-                // Remove extra decimal points
-                List<String> parts = cleanedValue.split('.');
-                cleanedValue = '${parts[0]}.${parts.sublist(1).join()}';
-              }
-
-              // Parse the cleaned value
-              double enteredValue = double.tryParse(cleanedValue) ?? 0.0;
-
-              // Validate the discount
-              if (enteredValue > salesController.netTotal.value) {
-                // Reset the discount to 0.0
-                salesController.discountController.text = "0.0";
-                salesController.discount.value = "0.0";
-
-                // Show an error message to the user
-                TLoader.errorSnackBar(
-                  title: "Invalid Discount",
-                  message: "Discount cannot exceed the total amount.",
-                );
-              } else {
-                // Update the discount value
-                salesController.discount.value = cleanedValue;
-              }
+              salesController.applyDiscount(value);
             },
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -183,8 +156,7 @@ class SalesSummary extends StatelessWidget {
                   width: 150,
                   height: 50,
                   child: Text(
-                    (salesController.netTotal.value -
-                        (double.tryParse(salesController.discount.value) ?? 0.0))
+                    (salesController.netTotal.value)
                         .toStringAsFixed(2),
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),

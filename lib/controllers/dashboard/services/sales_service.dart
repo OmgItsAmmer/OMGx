@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import '../../../Models/expense/expense_model.dart';
 import '../../../Models/orders/order_item_model.dart';
 import '../../../utils/helpers/helper_functions.dart';
 
@@ -20,6 +21,7 @@ class SalesData {
 }
 
 class SalesService {
+
   final DateFormat dateFormat = DateFormat('yyyy-MM-dd');
   final DateFormat monthYearFormat = DateFormat('MMM yy');
 
@@ -77,4 +79,78 @@ class SalesService {
         }
     return weeklySales;
   }
+
+  SalesData calculateProfit(List<OrderModel> allOrders, List<ExpenseModel> expenses) {
+    DateTime now = DateTime.now();
+    DateTime firstDayOfCurrentMonth = DateTime(now.year, now.month, 1);
+    DateTime firstDayOfPreviousMonth = DateTime(now.year, now.month - 1, 1);
+    DateTime lastDayOfPreviousMonth = firstDayOfCurrentMonth.subtract(const Duration(days: 1));
+
+    // ✅ Calculate current month's sales, buying price, and expenses
+    double currentMonthSales = 0.0;
+    double currentMonthBuyingPrice = 0.0;
+    double currentMonthExpenses = 0.0;
+
+    for (var order in allOrders) {
+      DateTime orderDate = DateTime.parse(order.orderDate);
+      if (orderDate.isAfter(firstDayOfCurrentMonth)) {
+        currentMonthSales += order.totalPrice;
+        currentMonthBuyingPrice += (order.buyingPrice ?? 0.0);
+      }
+    }
+
+    for (var expense in expenses) {
+      if (expense.createdAt != null && expense.createdAt!.isAfter(firstDayOfCurrentMonth)) {
+        currentMonthExpenses += expense.amount;
+      }
+    }
+
+    // ✅ Calculate previous month's sales, buying price, and expenses
+    double previousMonthSales = 0.0;
+    double previousMonthBuyingPrice = 0.0;
+    double previousMonthExpenses = 0.0;
+
+    for (var order in allOrders) {
+      DateTime orderDate = DateTime.parse(order.orderDate);
+      if (orderDate.isAfter(firstDayOfPreviousMonth) && orderDate.isBefore(lastDayOfPreviousMonth)) {
+        previousMonthSales += order.totalPrice;
+        previousMonthBuyingPrice += (order.buyingPrice ?? 0.0);
+      }
+    }
+
+
+    for (var expense in expenses) {
+      if (expense.createdAt != null &&
+          expense.createdAt!.isAfter(firstDayOfPreviousMonth) &&
+          expense.createdAt!.isBefore(lastDayOfPreviousMonth)) {
+        previousMonthExpenses += expense.amount;
+      }
+    }
+
+    // ✅ Calculate net profit
+    double currentMonthProfit = (currentMonthSales - currentMonthBuyingPrice) - currentMonthExpenses;
+    double previousMonthProfit = (previousMonthSales - previousMonthBuyingPrice) - previousMonthExpenses;
+
+    // ✅ Calculate percentage change in profit
+    int percentageChange = previousMonthProfit == 0
+        ? (currentMonthProfit > 0 ? 100 : 0) // Avoid division by zero
+        : (((currentMonthProfit - previousMonthProfit) / previousMonthProfit) * 100).round();
+
+    // ✅ Determine profit or loss
+    bool isProfit = currentMonthProfit >= 0;
+
+    // ✅ Format month & year
+    String monthYear = "${now.year}-${now.month.toString().padLeft(2, '0')}"; // Example: "2025-03"
+
+    return SalesData(
+      currentMonthSales: currentMonthProfit,
+      previousMonthSales: previousMonthSales,
+      percentageChange: percentageChange,
+      isProfit: isProfit,
+      monthYear: monthYear,
+    );
+  }
+
+
+
 }

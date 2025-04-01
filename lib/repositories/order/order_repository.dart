@@ -56,46 +56,37 @@ class OrderRepository extends GetxController {
   }
 
 
-  Future<int> uploadOrder(OrderModel order) async {
+  Future<int> uploadOrder(Map<String, dynamic> json) async {
     try {
-      // Insert the order into the 'orders' table
+      // ✅ Parse orderItems from JSON
+      List<OrderItemModel> orderItems = json['order_items'] != null
+          ? OrderItemModel.fromJsonList(json['order_items'] as List)
+          : [];
+
+      // ✅ Insert the order into the 'orders' table
       final response = await Supabase.instance.client
           .from('orders')
-          .insert({
-        'order_date': order.orderDate,
-        'total_price': order.totalPrice,
-        'status': order.status,
-        'saletype': order.saletype,
-        'address_id': order.addressId,
-        'user_id': order.userId,
-        'salesman_id': order.salesmanId,
-        'paid_amount': order.paidAmount,
-        'customer_id': order.customerId,
-      })
+          .insert(json)
           .select();
 
       final orderId = response[0]['order_id'];
 
-
-      // Insert the order items into the 'order_items' table
-      await Supabase.instance.client
-          .from('order_items')
-          .insert(order.orderItems!.map((item) {
-        return {
-          'order_id': orderId, // Assign the order_id to the order items
-          'variant_id': item.variantId,
-          'quantity': item.quantity,
-          'price': item.price,
-          'unit': item.unit,
-        };
-      }).toList());
-
+      // ✅ Insert the order items using `toJson()`
+      if (orderItems.isNotEmpty) {
+        await Supabase.instance.client.from('order_items').insert(
+          orderItems.map((item) {
+            var itemJson = item.toJson();
+            itemJson['order_id'] = orderId; // Assign the order_id
+            return itemJson;
+          }).toList(),
+        );
+      }
 
       TLoader.successSnackBar(
           title: 'Success', message: 'Order successfully checked out.');
       return orderId;
     } catch (e) {
-      // Show error if any
+      // ❌ Handle errors
       if (kDebugMode) {
         TLoader.errorSnackBar(title: 'Update Order Error', message: e.toString());
         print(e);
@@ -103,6 +94,8 @@ class OrderRepository extends GetxController {
       return -1;
     }
   }
+
+
 
   Future<List<OrderModel>> fetchOrders() async
   {

@@ -5,9 +5,12 @@ import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart
 import 'package:admin_dashboard_v3/repositories/installment/installment_repository.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../Models/installments/installemt_plan_model.dart';
+import '../../Models/installments/installment_payment_model.dart';
 import '../../Models/installments/installment_table_model/installment_table_model.dart';
+import '../../views/reports/specific_reports/installment_plans/installment_plan_report.dart';
 import '../guarantors/guarantor_controller.dart';
 import '../sales/sales_controller.dart';
 
@@ -46,7 +49,8 @@ class InstallmentController extends GetxController {
   DateTime? selectedDate;
 
   //Installment table (Global)
-  RxList<InstallmentTableModel> installmentPlans =
+  Rx<InstallmentPlanModel> currentInstallmentPlan = InstallmentPlanModel.empty().obs;
+  RxList<InstallmentTableModel> currentInstallmentPayments =
       <InstallmentTableModel>[].obs;
   //final List<InstallmentTableModel> installmentPayments;
 
@@ -61,16 +65,27 @@ class InstallmentController extends GetxController {
   //OrderDetails
   Rx<CustomerModel> selectedCustomer = CustomerModel.empty().obs;
 
+void resetFormFields() {
+  try{
+    paidAmount.clear();
+    remainingAmount.value.clear();
+  }
+  catch(e)
+  {
+    if (kDebugMode) {
+      TLoader.errorSnackBar(title: 'Oh Snap!',message: e.toString());
+      print(e);
+    }
+  }
+
+  }
 
 
-
-  Future<void> updateInstallmentPlan(int sequenceNo, int planId) async {
+  Future<void> updateInstallmentPayments(int sequenceNo, int planId) async {
     try {
       // Step 1: Find the current installment in the local list
-      final currentInstallment = installmentPlans.firstWhere(
-            (installment) =>
-        installment.sequenceNo == sequenceNo &&
-            installment.planId == planId,
+      final currentInstallment = currentInstallmentPayments.firstWhere(
+            (installment) => installment.sequenceNo == sequenceNo && installment.planId == planId,
         orElse: () => throw Exception('Current installment not found'),
       );
 
@@ -80,76 +95,109 @@ class InstallmentController extends GetxController {
 
       // Step 3: Update the current installment
       currentInstallment.paidDate = DateTime.now().toIso8601String();
-      currentInstallment.status = 'paid';
+      currentInstallment.status = InstallmentStatus.paid.toString().split('.').last;
       currentInstallment.paidAmount = paidAmountValue.toString();
       currentInstallment.remaining = (double.tryParse(currentInstallment.amountDue) ?? 0.0 - paidAmountValue).toString();
 
       // Step 4: Find the next installment in the local list
       final nextSequenceNo = sequenceNo + 1;
-      final nextInstallmentIndex = installmentPlans.indexWhere(
-            (installment) =>
-        installment.sequenceNo == nextSequenceNo &&
-            installment.planId == planId,
+      final nextInstallmentIndex = currentInstallmentPayments.indexWhere(
+            (installment) => installment.sequenceNo == nextSequenceNo && installment.planId == planId,
       );
 
       if (nextInstallmentIndex != -1) {
         // If the next installment exists, update its amountDue
-        final nextInstallment = installmentPlans[nextInstallmentIndex];
+        final nextInstallment = currentInstallmentPayments[nextInstallmentIndex];
         final nextAmountDue = double.tryParse(nextInstallment.amountDue) ?? 0.0;
         final updatedAmountDue = nextAmountDue + remainingAmountValue;
-
         nextInstallment.amountDue = updatedAmountDue.toString();
       } else {
+        // If no next installment exists
+        if (planId == 0) {
+          TLoader.errorSnackBar(title: 'Plan Error', message: 'Reset and generate the plan again.');
+          return; // Stop execution here
+        }
+
+        // Calculate the new due date based on previous installments' pattern
+        DateTime newDueDate;
+        final previousInstallments = currentInstallmentPayments
+            .where((i) => i.planId == planId)
+            .toList()
+          ..sort((a, b) => a.sequenceNo.compareTo(b.sequenceNo));
+
+        if (previousInstallments.length >= 2) {
+          final lastDate = DateTime.parse(previousInstallments.last.dueDate);
+          final secondLastDate = DateTime.parse(previousInstallments[previousInstallments.length - 2].dueDate);
+          final averageInterval = lastDate.difference(secondLastDate);
+          newDueDate = lastDate.add(averageInterval);
+        } else if (previousInstallments.length == 1) {
+          newDueDate = DateTime.parse(currentInstallment.dueDate).add(const Duration(days: 30));
+        } else {
+          newDueDate = DateTime.now().add(const Duration(days: 30));
+        }
+
         // If the next installment doesn't exist, create a new one
-        final newInstallment = InstallmentTableModel(
+        final newInstallment = InstallmentPayment(
+          sequenceNo: nextSequenceNo,
+          installmentPlanId: planId,
+          dueDate: newDueDate.toIso8601String(),
+          amountDue: remainingAmountValue.toString(),
+          paidAmount: '0.0',
+          status: InstallmentStatus.pending.toString().split('.').last,
+        );
+
+        final paymentJson = newInstallment.toJson();
+        await installmentRepository.insertInstallmentPayment(paymentJson);
+        TLoader.successSnackBar(title: 'Success', message: 'New Installment Data Added!');
+
+        final newInstallmentPayment = InstallmentTableModel(
           sequenceNo: nextSequenceNo,
           planId: planId,
-          description: currentInstallment.description, // Copy description from current installment
-          dueDate: DateTime.now().toIso8601String(), // Set due date as needed
+          description: 'Installment $nextSequenceNo',
+          dueDate: newDueDate.toIso8601String(),
           paidDate: 'not yet',
           amountDue: remainingAmountValue.toString(),
           paidAmount: '0.0',
-          remarks: currentInstallment.remarks, // Copy remarks from current installment
+          remarks: currentInstallment.remarks,
           remaining: remainingAmountValue.toString(),
-          status: 'pending',
-          action: currentInstallment.action, // Copy action from current installment
+          status: InstallmentStatus.pending.toString().split('.').last,
+          action: currentInstallment.action,
         );
-        final paymentJson = newInstallment.toJson(includePlanId: true);
-        await installmentRepository.uploadInstallmentPayment(paymentJson);
-        installmentPlans.add(newInstallment);
+
+        currentInstallmentPayments.add(newInstallmentPayment);
       }
 
       // Step 5: Update the local state
-      installmentPlans.refresh(); // Notify listeners of changes
+      currentInstallmentPayments.refresh();
 
       // Step 6: Call the repository to update the database
-      await installmentRepository.updateInstallmentPlan(
+      await installmentRepository.updateInstallmentPayment(
         sequenceNo,
         planId,
         paidAmount.text,
         remainingAmount.value.text,
       );
 
-      // Optionally, show a success message
-      TLoader.successSnackBar(title: 'Success', message: 'Installment updated successfully');
     } catch (e) {
-      // Handle errors and show a snackbar
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
-      print(e);
+      if (kDebugMode) {
+        TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+        print(e);
+      }
     }
   }
+
 
   Future<void> fetchSpecificInstallmentPayment(int orderId) async {
     try {
       isLoading.value = true;
-      installmentPlans.clear();
+      currentInstallmentPayments.clear();
       final planId = await installmentRepository.fetchPlanId(orderId);
       if (planId == null) {
         TLoader.errorSnackBar(title: 'Fetch Plan Issue!');
       } else {
         final payments = await installmentRepository
             .fetchSpecifcInstallmentPlanItems(planId);
-        installmentPlans.assignAll(payments);
+        currentInstallmentPayments.assignAll(payments);
       }
     } catch (e) {
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
@@ -223,109 +271,51 @@ class InstallmentController extends GetxController {
 
   void generatePlan() {
     try {
-      // Parse the required inputs
+      // Clear existing plans
+      currentInstallmentPayments.clear();
+
+      // Parse inputs with validation
       int numberOfInstallments = int.tryParse(NoOfInstallments.text) ?? 0;
       double billAmountValue = double.tryParse(billAmount.value.text) ?? 0.0;
       double downPaymentValue = double.tryParse(DownPayment.text) ?? 0.0;
 
-      // Calculate the amount to be divided across installments
-      double remainingAmount = billAmountValue - downPaymentValue;
-      if (remainingAmount < 0) {
+
+
+      // Validate inputs
+      if (billAmountValue <= 0) {
+        TLoader.errorSnackBar(
+          title: 'Invalid Data',
+          message: 'Bill Amount must be greater than zero.',
+        );
+        return;
+      }
+      if (downPaymentValue < 0) {
+        TLoader.errorSnackBar(
+          title: 'Invalid Data',
+          message: 'Down Payment cannot be negative.',
+        );
+        return;
+      }
+      if (downPaymentValue > billAmountValue) {
         TLoader.errorSnackBar(
           title: 'Invalid Data',
           message: 'Down Payment cannot exceed Bill Amount.',
         );
         return;
       }
-
-      double installmentAmount = remainingAmount / numberOfInstallments;
-
-      // Generate installment plans
-      DateTime currentDate = selectedDate ?? DateTime.now();
-
-      // Determine the duration in days based on the selected DurationType
-      final DurationType selectedDuration = durationController.value;
-      int installmentDurationInDays;
-
-      switch (selectedDuration) {
-        case DurationType.Monthly:
-          installmentDurationInDays =
-              30; // Approximate number of days in a month
-          break;
-        case DurationType.Quarterly:
-          installmentDurationInDays =
-              90; // Approximate number of days in a quarter
-          break;
-        case DurationType.Yearly:
-          installmentDurationInDays =
-              365; // Approximate number of days in a year
-          break;
-        default:
-          installmentDurationInDays =
-              30; // Default to monthly if Duration is selected
-      }
-
-      // Add advance payment info at index 0
-      installmentPlans.insert(
-        0,
-        InstallmentTableModel(
-          sequenceNo: 0,
-          description: "Advance Payment",
-          dueDate:
-              currentDate.toIso8601String(), // Current date for advance payment
-          paidDate: currentDate.toIso8601String(), // Paid on current date
-          paidAmount: downPaymentValue.toStringAsFixed(2),
-          remarks: note.text,
-          remaining: "0", // No remaining amount for advance
-          status: "Paid",
-          action: "N/A", // No action needed
-          amountDue:
-              downPaymentValue.toStringAsFixed(2), // Set the amount as advance
-        ),
-      );
-
-      // Generate installment plans
-      for (int i = 1; i <= numberOfInstallments; i++) {
-        DateTime dueDate = currentDate.add(Duration(
-            days: i * installmentDurationInDays)); // Using dynamic duration
-
-        installmentPlans.add(
-          InstallmentTableModel(
-            sequenceNo: i,
-            description: "Installment $i",
-            dueDate: dueDate.toIso8601String(), // Only date part
-            paidDate: null, // Initially empty
-            paidAmount: "0", // Initially unpaid
-            remarks: "",
-            remaining: installmentAmount.toStringAsFixed(2),
-            status: "Pending",
-            action: "Pay Now",
-            amountDue: installmentAmount.toStringAsFixed(2), // Added the amount
-          ),
+      if (numberOfInstallments <= 0) {
+        TLoader.errorSnackBar(
+          title: 'Invalid Data',
+          message: 'Number of Installments must be at least 1.',
         );
+        return;
       }
 
-      // Log or process the generated plans as needed
-      print(installmentPlans.map((plan) => plan.toJson()).toList());
-    } catch (e) {
-      TLoader.errorSnackBar(
-        title: 'Oh Snap!',
-        message: e.toString(),
-      );
-    }
-  }
-
-  Future<void> savePlan() async {
-    try {
-      int orderId = await salesController.checkOut();
-      List<int> guarranteIds = await guarantorController.uploadGuarantors();
-
-
-      // Now, call the uploadInstallmentPlan function to upload the generated plan
-      final InstallmentPlanModel planModel = InstallmentPlanModel(
+      //generate installment plan before installment payments
+      currentInstallmentPlan.value = InstallmentPlanModel(
         // Example values; you need to populate this properly
         installmentPlanId: -1, // not count
-        orderId: orderId,
+        //orderId: orderId, will be added at saving time
         totalAmount: billAmount.value.text,
         documentCharges: DocumentCharges.text,
         margin: margin.text,
@@ -338,23 +328,151 @@ class InstallmentController extends GetxController {
         frequencyInMonth: durationController == DurationType.Monthly
             ? "1"
             : durationController == DurationType.Quarterly
-                ? "3"
-                : "12",
+            ? "3"
+            : "12",
         installemtPaymentList:
-            installmentPlans, // Converts RxList to a standard List
-        guarantor1_id: guarranteIds[0],
-        guarantor2_id: guarranteIds[1],
+        currentInstallmentPayments, // Converts RxList to a standard List
+       // guarantor1_id: guarranteIds[0],
+      //  guarantor2_id: guarranteIds[1],
         // Pass the generated installment plans
       );
 
-      // Call the uploadInstallmentPlan function
-      await installmentRepository.uploadInstallmentPlanAndPayment(planModel, orderId);
-    } catch (e) {
-      TLoader.errorSnackBar(
-        title: 'Oh Snap! ya hoo',
-        message: e.toString(),
+      double remainingAmount = billAmountValue - downPaymentValue;
+
+      // If no remaining amount, add only advance payment
+      if (remainingAmount <= 0) {
+        currentInstallmentPayments.add(
+          InstallmentTableModel(
+            sequenceNo: 0,
+            description: "Advance Payment",
+            dueDate: DateTime.now().toIso8601String(),
+            paidDate: DateTime.now().toIso8601String(),
+            paidAmount: downPaymentValue.toStringAsFixed(2),
+            remarks: note.text,
+            remaining: "0",
+            status: InstallmentStatus.paid.toString().split('.').last,
+            action: "N/A",
+            amountDue: downPaymentValue.toStringAsFixed(2),
+          ),
+        );
+        return;
+      }
+
+      // Calculate installments with remainder adjustment
+      double installmentAmount = remainingAmount / numberOfInstallments;
+      double roundedInstallment = double.parse(installmentAmount.toStringAsFixed(2));
+      double totalRounded = roundedInstallment * (numberOfInstallments - 1);
+      double lastInstallment = remainingAmount - totalRounded;
+
+      // Add advance payment
+      currentInstallmentPayments.add(
+        InstallmentTableModel(
+          sequenceNo: 0,
+          description: "Advance Payment",
+          dueDate: DateTime.now().toIso8601String(),
+          paidDate: DateTime.now().toIso8601String(),
+          paidAmount: downPaymentValue.toStringAsFixed(2),
+          remarks: note.text,
+          remaining: "0",
+          status: InstallmentStatus.paid.toString().split('.').last,
+          action: "N/A",
+          amountDue: downPaymentValue.toStringAsFixed(2),
+        ),
       );
-      print(e);
+
+      DateTime currentDate = selectedDate ?? DateTime.now();
+
+      // Generate installments with correct dates and amounts
+      for (int i = 1; i <= numberOfInstallments; i++) {
+        DateTime dueDate;
+        switch (durationController.value) {
+          case DurationType.Monthly:
+            dueDate = DateTime(currentDate.year, currentDate.month + i, currentDate.day);
+            break;
+          case DurationType.Quarterly:
+            dueDate = DateTime(currentDate.year, currentDate.month + (i * 3), currentDate.day);
+            break;
+          case DurationType.Yearly:
+            dueDate = DateTime(currentDate.year + i, currentDate.month, currentDate.day);
+            break;
+          default:
+            dueDate = currentDate.add(Duration(days: 30 * i));
+        }
+
+        // Handle end-of-month edge cases (e.g., adding months to a day that doesn't exist in the target month)
+        if (dueDate.month != currentDate.month + i && durationController.value == DurationType.Monthly) {
+          dueDate = DateTime(dueDate.year, dueDate.month + 1, 0);
+        }
+
+        double amount = (i == numberOfInstallments) ? lastInstallment : roundedInstallment;
+
+        currentInstallmentPayments.add(
+          InstallmentTableModel(
+            sequenceNo: i,
+            description: "Installment $i",
+            dueDate: dueDate.toIso8601String(),
+            paidDate: null,
+            paidAmount: "0.00",
+            remarks: "",
+            remaining: amount.toStringAsFixed(2),
+            status: InstallmentStatus.pending.toString().split('.').last,
+            action: "Pay Now",
+            amountDue: amount.toStringAsFixed(2),
+          ),
+        );
+      }
+
+    } catch (e) {
+      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
   }
+
+  Future<void> savePlan() async {
+    try {
+      int orderId = await salesController.checkOut();
+      List<int> guarranteIds = await guarantorController.uploadGuarantors();
+
+      currentInstallmentPlan.value.orderId = orderId;
+      currentInstallmentPlan.value.guarantor1_id = guarranteIds[0];
+      currentInstallmentPlan.value.guarantor2_id = guarranteIds[1];
+      // Now, call the uploadInstallmentPlan function to upload the generated plan
+
+
+      // Call the uploadInstallmentPlan function
+      await installmentRepository.uploadInstallmentPlanAndPayment(currentInstallmentPlan.value, orderId);
+      Get.to(() => InstallmentReportPage(
+        installmentPlans: currentInstallmentPayments,
+        cashierName: 'Ammer',
+        companyName: 'OMGz',
+        branchName: 'MAIN',
+      ));
+    } catch (e) {
+
+      if (kDebugMode) {
+        print(e);
+        TLoader.errorSnackBar(
+          title: 'Oh Snap! ya hoo',
+          message: e.toString(),
+        );
+      }
+    }
+  }
+
+
+  void clearAllFields() {
+    billAmount.value.clear();
+    NoOfInstallments.clear();
+    DownPayment.clear();
+    DocumentCharges.clear();
+    margin.clear();
+    note.clear();
+    frequencyInMonth.clear();
+    otherCharges.clear();
+    payableExMargin.value.clear();
+    payableINCLMargin.value.clear();
+    durationController.value = DurationType.Duration; // Reset to default
+    currentInstallmentPlan.value = InstallmentPlanModel.empty();
+    currentInstallmentPayments.clear();
+  }
+
 }

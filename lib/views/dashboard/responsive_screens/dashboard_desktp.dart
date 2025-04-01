@@ -7,7 +7,6 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-
 import '../../../controllers/dashboard/dashboard_controoler.dart';
 import '../widgets/dashbord_card.dart';
 
@@ -41,7 +40,7 @@ class DashboardDesktop extends StatelessWidget {
                   children: [
                     Expanded(
                         child: TDashBoardCard(
-                          value: 'Rs ${dashboardController.currentMonthSales.value}',
+                          value: 'Rs ${dashboardController.currentMonthSales.value.toStringAsFixed(2)}',
                       stats: dashboardController.card1Percentage.value ,
                       title: 'Sales Total',
                       subTitle: 'Compared to ${dashboardController.lastMonth.value}' ,
@@ -58,32 +57,34 @@ class DashboardDesktop extends StatelessWidget {
                       stats: 25,
                       title: 'Average Order Value',
                       subTitle: '\$365.6',
-                          color: (dashboardController.isCard1Profit.value ?? false)?Colors.green:Colors.red ,
-                          icon: (dashboardController.isCard1Profit.value ?? false  ) ? Iconsax.arrow_up_3 : Iconsax.arrow_down,
+                          color: (dashboardController.isCard1Profit.value )?Colors.green:Colors.red ,
+                          icon: (dashboardController.isCard1Profit.value  ) ? Iconsax.arrow_up_3 : Iconsax.arrow_down,
                     )),
                     const SizedBox(
                       width: TSizes.spaceBtwItems,
                     ),
-                     Expanded(
-                        child:TDashBoardCard(
-                          value: 'Rs ${dashboardController.currentMonthSales.value}',
-                          stats: dashboardController.card1Percentage.value ,
-                          title: 'Profit',
-                          subTitle: 'Compared to ${dashboardController.lastMonth.value}' ,
-                          icon: (dashboardController.isCard1Profit.value ) ? Iconsax.arrow_up_3 : Iconsax.arrow_down,
-                          color:(dashboardController.isCard1Profit.value) ? Colors.green : Colors.red ,
-                        )
+                    Expanded(
+                      child: TDashBoardCard(
+                        value: 'Rs ${dashboardController.currentMonthProfit.value.toStringAsFixed(2)}', // ✅ Two decimal places
+                        stats: dashboardController.card2Percentage.value,
+                        title: 'Profit',
+                        subTitle: 'Compared to ${dashboardController.lastMonth.value}',
+                        icon: (dashboardController.isCard2Profit.value) ? Iconsax.arrow_up_3 : Iconsax.arrow_down,
+                        color: (dashboardController.isCard2Profit.value) ? Colors.green : Colors.red,
+                      ),
                     ),
+
                     const SizedBox(
                       width: TSizes.spaceBtwItems,
                     ),
-                    const Expanded(
+                     Expanded(
                         child: TDashBoardCard(
-                          value: '',
-
-                      stats: 25,
+                      value: dashboardController.customerCount.value.toString(),
+                      stats: dashboardController.card4Percentage.value,
                       title: 'Customers',
-                      subTitle: '\$365.6',
+                      subTitle: 'Compared to ${dashboardController.lastMonth.value}',
+                          icon: (dashboardController.isCustomerIncrease.value) ? Iconsax.arrow_up_3 : Iconsax.arrow_down,
+                          color: (dashboardController.isCustomerIncrease.value) ? Colors.green : Colors.red,
                     )),
                     const SizedBox(
                       width: TSizes.spaceBtwItems,

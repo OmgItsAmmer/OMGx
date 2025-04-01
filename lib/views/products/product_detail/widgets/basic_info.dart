@@ -48,8 +48,8 @@ class BasicInfo extends StatelessWidget {
 
             TextFormField(
               validator: (value) =>
-                  TValidator.validateEmptyText('Unit Price', value),
-              controller: productController.unitPrice,
+                  TValidator.validateEmptyText('Base Price(Buying Price)', value),
+              controller: productController.basePrice,
               keyboardType: TextInputType
                   .number, // Ensure numeric keyboard is shown
               inputFormatters: [
@@ -57,7 +57,20 @@ class BasicInfo extends StatelessWidget {
               ], // Allow only digits
               maxLines: 1,
               style: Theme.of(context).textTheme.bodyLarge,
-              decoration: const InputDecoration(labelText: 'Unit Price'),
+              decoration: const InputDecoration(labelText: 'Base Price(Buying Price)'),
+            ),
+            TextFormField(
+              validator: (value) =>
+                  TValidator.validateEmptyText('Sale Price(Selling Price)', value),
+              controller: productController.salePrice,
+              keyboardType: TextInputType
+                  .number, // Ensure numeric keyboard is shown
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly
+              ], // Allow only digits
+              maxLines: 1,
+              style: Theme.of(context).textTheme.bodyLarge,
+              decoration: const InputDecoration(labelText: 'Sale Price(Selling Price)'),
             ),
 
             const SizedBox(height: TSizes.spaceBtwSections,),

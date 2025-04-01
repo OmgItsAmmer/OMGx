@@ -2,6 +2,7 @@ import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/routes/routes.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:data_table_2/data_table_2.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -11,6 +12,7 @@ import '../../../../common/widgets/icons/table_action_icon_buttons.dart';
 import '../../../common/widgets/containers/rounded_container.dart';
 import '../../../controllers/installments/installments_controller.dart';
 import '../../../controllers/sales/sales_controller.dart';
+import '../../../utils/constants/enums.dart';
 import '../../../utils/constants/sizes.dart';
 import '../../../utils/device/device_utility.dart';
 import '../../../utils/validators/validation.dart';
@@ -24,7 +26,7 @@ class InstallmentRow extends DataTableSource {
 
   @override
   DataRow? getRow(int index) {
-    final saleItem = installmentController.installmentPlans[index];
+    final installmentItem = installmentController.currentInstallmentPayments[index];
     return DataRow2(
         onTap: () {
           TLoader.successSnackBar(title: index);
@@ -33,65 +35,65 @@ class InstallmentRow extends DataTableSource {
         onSelectChanged: (value) {},
         cells: [
           DataCell(Text(
-            saleItem.sequenceNo.toString(), //Dummy
+            installmentItem.sequenceNo.toString(), //Dummy
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
                 .apply(color: TColors.primary),
           )),
           DataCell(Text(
-            saleItem.description == ''
-                ? 'Installment No${saleItem.sequenceNo}'
-                : saleItem.description,
+            installmentItem.description == ''
+                ? 'Installment No${installmentItem.sequenceNo}'
+                : installmentItem.description,
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
                 .apply(color: TColors.primary),
           )),
           DataCell(Text(
-            saleItem.dueDate.toString(),
+            installmentItem.dueDate.toString(),
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
                 .apply(color: TColors.primary),
           )),
           DataCell(Text(
-            saleItem.paidDate.toString(),
+            installmentItem.paidDate.toString(),
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
                 .apply(color: TColors.primary),
           )),
           DataCell(Text(
-            saleItem.amountDue,
+            installmentItem.amountDue,
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
                 .apply(color: TColors.primary),
           )),
           DataCell(Text(
-            saleItem.paidAmount.toString(),
+            installmentItem.paidAmount.toString(),
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
                 .apply(color: TColors.primary),
           )),
           DataCell(Text(
-            saleItem.remarks,
+            installmentItem.remarks,
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
                 .apply(color: TColors.primary),
           )),
           DataCell(Text(
-            saleItem.remaining,
+            installmentItem.remaining,
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
                 .apply(color: TColors.primary),
           )),
           DataCell(Text(
-            saleItem.status.toString(),
+            installmentItem.status.toString(),
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
@@ -106,12 +108,12 @@ class InstallmentRow extends DataTableSource {
             onEditPressed: () {
 
               Get.defaultDialog(
-                title: 'Installment No ${saleItem.sequenceNo}',
+                title: 'Installment No ${installmentItem.sequenceNo}',
                 content: TRoundedContainer(
                   width: 400,
                   backgroundColor: Colors.transparent,
-                  padding: EdgeInsets.all(TSizes.defaultSpace),
-                  child: saleItem.status == 'paid'
+                  padding: const EdgeInsets.all(TSizes.defaultSpace),
+                  child: installmentItem.status == InstallmentStatus.paid.toString().split('.').last
                       ? Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -138,7 +140,7 @@ class InstallmentRow extends DataTableSource {
                         onChanged: (value) {
                           try {
                             double paidAmount = double.tryParse(installmentController.paidAmount.value.text) ?? 0.0;
-                            double amountDue = double.tryParse(saleItem.amountDue) ?? 0.0;
+                            double amountDue = double.tryParse(installmentItem.amountDue) ?? 0.0;
 
                             if (paidAmount > amountDue) {
                               installmentController.paidAmount.text = "0.0";
@@ -151,7 +153,9 @@ class InstallmentRow extends DataTableSource {
                               installmentController.remainingAmount.value.text = (amountDue - paidAmount).toStringAsFixed(2);
                             }
                           } catch (e) {
-                            print("Error parsing double: $e");
+                            if (kDebugMode) {
+                              print("Error parsing double: $e");
+                            }
                             installmentController.remainingAmount.value.text = "0.00";
                           }
                         },
@@ -194,8 +198,10 @@ class InstallmentRow extends DataTableSource {
                             child: ElevatedButton(
                               onPressed: () {
                                 // Handle payment confirmation logic
-                                installmentController.updateInstallmentPlan(saleItem.sequenceNo,saleItem.planId);
-                                Navigator.of(Get.context!).pop();
+                                installmentController.updateInstallmentPayments(installmentItem.sequenceNo,installmentItem.planId);
+                                installmentController.resetFormFields();
+                                // Navigator.of(Get.context!).pop();
+                                Get.back();
                               },
                               child: Text(
                                 'Confirm',

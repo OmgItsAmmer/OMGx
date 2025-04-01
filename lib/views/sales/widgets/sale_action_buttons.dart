@@ -38,9 +38,16 @@ class SaleActionButtons extends StatelessWidget {
             child: ElevatedButton(
                 onPressed: () {
                   if (salesController.selectedSaleType == SaleType.Installment) {
-                    installmentController.billAmount.value.text = salesController.netTotal.value.toString();
-                    installmentController.installmentPlans.clear();
-                    Get.toNamed(TRoutes.installment );
+                   //final isValid =  salesController.SalesValidator();
+                   if(true)
+                     {
+                       installmentController.billAmount.value.text = salesController.netTotal.value.toString();
+                       installmentController.currentInstallmentPayments.clear();
+                       Get.toNamed(TRoutes.installment );
+                     }
+
+
+
                   } else {
                     Get.defaultDialog(
                       title: "CheckOut Details",
@@ -48,7 +55,7 @@ class SaleActionButtons extends StatelessWidget {
                         width: 400,
                        // height: 400,
                         backgroundColor: Colors.transparent,
-                        padding: EdgeInsets.all(TSizes.defaultSpace),
+                        padding: const EdgeInsets.all(TSizes.defaultSpace),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [

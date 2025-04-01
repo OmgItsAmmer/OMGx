@@ -1,75 +1,78 @@
-import 'package:admin_dashboard_v3/Models/installments/installemt_plan_model.dart';
 
-class InstallmentPaymentModel {
-  final int installmentPlanId;
-  final String installmentNumber;
-  final String amountDue;
-  final DateTime dueDate;
-  final bool? isPaid;
-  final DateTime? paidDate;
-  final DateTime? createdAt;
-  final String? paidAmount;
-  final String? status;
+class InstallmentPayment {
+  int sequenceNo;
+  int installmentPlanId;
+  String dueDate;
+  String amountDue;
+  String? paidDate;
+  String? paidAmount;
+  String? status;
+  bool isPaid;
+  DateTime createdAt;
 
-  InstallmentPaymentModel({
+  InstallmentPayment({
+    required this.sequenceNo,
     required this.installmentPlanId,
-    required this.installmentNumber,
-    required this.amountDue,
     required this.dueDate,
-    this.isPaid,
+    required this.amountDue,
     this.paidDate,
-    this.createdAt,
     this.paidAmount,
     this.status,
-  });
+    this.isPaid = false,
+    DateTime? createdAt,
+  }) : createdAt = createdAt ?? DateTime.now();
 
-  // Static function to create an empty installment payment model
-  static InstallmentPaymentModel empty() => InstallmentPaymentModel(
-    installmentPlanId: 0,
-    installmentNumber: '',
-    amountDue: '',
-    dueDate: DateTime.now(),
-    isPaid: false,
-    paidDate: null,
-    createdAt: null,
-    paidAmount: null,
-    status: null,
-  );
-
-  // Convert model to JSON for database insertion
-  Map<String, dynamic> toJson() {
-    return {
-      'installment_plan_id': installmentPlanId,
-      'installment_number': installmentNumber,
-      'amount_due': amountDue,
-      'due_date': dueDate.toIso8601String(),
-      'is_paid': isPaid,
-      'paid_date': paidDate?.toIso8601String(),
-      'created_at': createdAt?.toIso8601String(),
-      'paid_amount': paidAmount,
-      'status': status,
-    };
-  }
-
-  // Factory method to create an InstallmentPaymentModel from JSON
-  factory InstallmentPaymentModel.fromJson(Map<String, dynamic> json) {
-    return InstallmentPaymentModel(
-      installmentPlanId: json['installment_plan_id'] as int,
-      installmentNumber: json['installment_number'] as String,
-      amountDue: json['amount_due'] as String,
-      dueDate: DateTime.parse(json['due_date'] as String),
-      isPaid: json['is_paid'] as bool?,
-      paidDate: json['paid_date'] != null
-          ? DateTime.parse(json['paid_date'] as String)
-          : null,
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
-          : null,
+  // Factory method to create an InstallmentPayment from a JSON object
+  factory InstallmentPayment.fromJson(Map<String, dynamic> json) {
+    return InstallmentPayment(
+      sequenceNo: json['sequence_no'] as int? ?? 0,
+      installmentPlanId: json['installment_plan_id'] as int? ?? 0,
+      dueDate: json['due_date'] as String? ?? DateTime.now().toIso8601String(),
+      amountDue: json['amount_due'] as String? ?? "0.00",
+      paidDate: json['paid_date'] as String?,
       paidAmount: json['paid_amount'] as String?,
       status: json['status'] as String?,
+      isPaid: json['is_paid'] as bool? ?? false,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : DateTime.now(),
     );
   }
-  static List<InstallmentPaymentModel> fromJsonList(List<dynamic> jsonList) {
-    return jsonList.map((json) => InstallmentPaymentModel.fromJson(json)).toList();
+
+  // Convert model to JSON for database insertion or network requests
+  Map<String, dynamic> toJson({bool isUpdate = false}) {
+    final Map<String, dynamic> json = {
+      'sequence_no': sequenceNo,
+      'due_date': dueDate,
+      'paid_date': paidDate,
+      'amount_due': amountDue,
+      'paid_amount': paidAmount,
+      'status': status,
+      'is_paid': isPaid,
+      'created_at': createdAt.toIso8601String(),
+    };
+
+    // Conditionally include installment_plan_id
+    if (isUpdate) {
+      json['installment_plan_id'] = installmentPlanId;
+    }
+
+    return json;
+  }
+
+
+  // Static function to create an empty installment model
+  static InstallmentPayment empty() => InstallmentPayment(
+    sequenceNo: 0,
+    installmentPlanId: 0,
+    dueDate: DateTime.now().toIso8601String(),
+    amountDue: "0.00",
+    isPaid: false,
+    createdAt: DateTime.now(),
+  );
+
+  // Convert a list of JSON objects to a list of InstallmentPayment
+  static List<InstallmentPayment> fromJsonList(List<dynamic> jsonList) {
+    return jsonList.map((json) => InstallmentPayment.fromJson(json)).toList();
   }
 }

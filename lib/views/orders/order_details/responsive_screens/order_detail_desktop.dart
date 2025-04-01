@@ -79,7 +79,7 @@ class OrderDetailDesktopScreen extends StatelessWidget {
                 ),
                   Obx(
                     () {
-                      if(installmentController.installmentPlans.isNotEmpty)
+                      if(installmentController.currentInstallmentPayments.isNotEmpty)
                       {
                         return TRoundedContainer(
 

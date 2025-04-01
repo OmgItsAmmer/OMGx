@@ -13,7 +13,7 @@ class InstallmentRepository extends GetxController {
 
 
 
-  Future<void> updateInstallmentPlan(
+  Future<void> updateInstallmentPayment(
       int sequenceNo,
       int planId,
       String paidAmount,
@@ -46,53 +46,53 @@ class InstallmentRepository extends GetxController {
   Future<void> uploadInstallmentPlanAndPayment(
       InstallmentPlanModel plan, int orderId) async {
     try {
-      // Insert the installment plan into the 'installment_plans' table
-      final response =
-          await Supabase.instance.client.from('installment_plans').insert({
-        'order_id': orderId,
-        'total_amount': plan.totalAmount,
-        'down_payment': plan.downPayment,
-        'number_of_installments': plan.numberOfInstallments,
-        'document_charges': plan.documentCharges,
-        'margin': plan.margin,
-        'frequency_in_month': plan.frequencyInMonth,
-        'other_charges': plan.otherCharges,
-        'duration': plan.duration,
-        'first_installment_date': plan.firstInstallmentDate?.toIso8601String(),
-        'note': plan.note,
-        'guarantor1_id': plan.guarantor1_id,
-        'guarantor2_id': plan.guarantor2_id,
-      }).select();
+      // Convert plan to JSON using the model's toJson method
+      final planJson = plan.toJson(isUpdate: true);
+
+      // Add order_id which isn't part of the model's default toJson
+      planJson['order_id'] = orderId;
+
+      // Format the firstInstallmentDate if it exists
+      if (plan.firstInstallmentDate != null) {
+        planJson['first_installment_date'] = plan.firstInstallmentDate!.toIso8601String();
+      }
+
+      // Insert the installment plan
+      final response = await Supabase.instance.client
+          .from('installment_plans')
+          .insert(planJson)
+          .select();
 
       final installmentPlanId = response[0]['installment_plans_id'];
 
-      // Insert the order items into the 'order_items' table
+      // Convert payment list to JSON using the model's methods
+      final paymentJsons = plan.installemtPaymentList!.map((payment) {
+        // Convert to JSON using the payment model's method
+        final paymentJson = payment.toJson();
+
+        // Add additional fields needed for the insert
+        paymentJson['installment_plan_id'] = installmentPlanId;
+        paymentJson['is_paid'] = false;
+        paymentJson['status'] = (payment.sequenceNo == 0) ? 'paid' : 'pending';
+
+        return paymentJson;
+      }).toList();
+
+      // Insert all payments in a single batch
       await Supabase.instance.client
           .from('installment_payments')
-          .insert(plan.installemtPaymentList!.map((item) {
-            return {
-              'installment_plan_id':
-                  installmentPlanId, // Assign the order_id to the order items
-              'sequence_no': item.sequenceNo,
-              'due_date': item.dueDate,
-              'paid_date': item.paidDate,
-              'amount_due': item.amountDue,
-              'paid_amount': item.paidAmount,
-              'is_paid': false, //initially
-              'status': (item.sequenceNo == 0) ? 'paid': 'pending', //initially
-            };
-          }).toList());
+          .insert(paymentJsons);
 
-      // TLoader.successSnackBar(
-      //     title: 'Success', message: 'Order successfully checked out.');
     } catch (e) {
       TLoader.errorSnackBar(
-          title: 'Plan didn\'t upload', message: e.toString());
-      print(e);
+          title: 'Plan didn\'t upload',
+          message: e.toString()
+      );
+      if (kDebugMode) print(e);
     }
   }
 
-  Future<void> uploadInstallmentPayment(
+  Future<void> insertInstallmentPayment(
       Map<String, dynamic> paymentJson) async {
     try {
 

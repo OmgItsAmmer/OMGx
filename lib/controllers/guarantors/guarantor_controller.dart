@@ -116,7 +116,7 @@ class GuarantorController extends GetxController {
 
       // Upload guarantors
       final ids = await guarantorRepository
-          .uploadGuarantors([guarantor1.toJson(), guarantor2.toJson()]);
+          .uploadGuarantors([guarantor1.toJson(isUpdate: true ), guarantor2.toJson(isUpdate: true)]);
 
       // Success Message
       return ids;

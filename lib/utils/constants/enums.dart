@@ -36,3 +36,5 @@ enum DurationType { Duration,Monthly , Quarterly  , Yearly   }
 
 
 enum UnitType { item, dozen   }
+
+enum InstallmentStatus { duration ,paid, pending , overdue }
