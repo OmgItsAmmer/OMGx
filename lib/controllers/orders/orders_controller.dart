@@ -6,6 +6,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
+import '../../routes/routes.dart';
+import '../address/address_controller.dart';
+import '../customer/customer_controller.dart';
+import '../guarantors/guarantor_controller.dart';
+import '../installments/installments_controller.dart';
+import '../salesman/salesman_controller.dart';
+
 class OrderController extends GetxController {
   static OrderController get instance => Get.find();
   final OrderRepository orderRepository = Get.put(OrderRepository());
@@ -99,6 +106,64 @@ class OrderController extends GetxController {
       }
     }
   }
+
+  Future<void> setUpOrderDetails(OrderModel order) async {
+    try {
+      // Convert the saleType and orderStatus based on the order values
+      SaleType? saleTypeFromOrder = SaleType.values.firstWhere(
+            (e) => e.name == order.saletype,
+        orElse: () => SaleType.cash,
+      );
+
+      OrderStatus? orderStatus = OrderStatus.values.firstWhere(
+            (e) => e.name == order.status,
+        orElse: () => OrderStatus.pending,
+      );
+
+      // Fetch controllers
+      final OrderController orderController = Get.find<OrderController>();
+      final InstallmentController installmentController = Get.find<InstallmentController>();
+      final AddressController addressController = Get.find<AddressController>();
+      final GuarantorController guarantorController = Get.find<GuarantorController>();
+      final CustomerController customerController = Get.find<CustomerController>();
+      final SalesmanController salesmanController = Get.find<SalesmanController>();
+
+      // Fetch order items for the given order
+      order.orderItems = await orderController.fetchOrderItems(order.orderId);
+
+      // Handle installment-specific operations
+      if (saleTypeFromOrder == SaleType.installment) {
+        installmentController.fetchSpecificInstallmentPayment(order.orderId);
+        guarantorController.fetchGuarantors(order.orderId);
+      }
+
+      // Set the selected order status
+      orderController.selectedStatus.value = orderStatus;
+
+      // Fetch customer info based on the order's customer ID
+      customerController.fetchCustomerInfo(order.customerId ?? -1);
+
+      // Fetch salesman info based on the order's salesman ID
+      salesmanController.fetchSalesmanInfo(order.salesmanId ?? -1);
+
+      // Fetch customer addresses
+      addressController.fetchEntityAddresses(order.customerId ?? -1, 'Customer');
+
+      // Set remaining amount for the order
+      orderController.setRemainingAmount(order);
+
+      // Navigate to the order details page
+      Get.toNamed(TRoutes.orderDetails, arguments: order);
+
+    } catch (e) {
+      TLoader.errorSnackBar(
+        title: 'Error',
+        message: 'An error occurred while processing the order: $e',
+      );
+    }
+  }
+
+
 
   // Future<void> fetchCustomerOrders(int customerId) async {
   //

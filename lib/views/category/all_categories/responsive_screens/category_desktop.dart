@@ -1,16 +1,12 @@
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
-import 'package:admin_dashboard_v3/controllers/brands/brand_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
-import 'package:admin_dashboard_v3/views/brands/all_brands/table/brand_table.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
 import '../../../../Models/category/category_model.dart';
-import '../../../../Models/category/category_model.dart';
 import '../../../../controllers/category/category_controller.dart';
-import '../../../../controllers/product/product_controller.dart';
 import '../../../../routes/routes.dart';
 import '../table/category_table.dart';
 

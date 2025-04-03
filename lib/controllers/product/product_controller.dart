@@ -1,8 +1,13 @@
+import 'package:admin_dashboard_v3/Models/orders/order_item_model.dart';
 import 'package:admin_dashboard_v3/Models/products/product_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
+import 'package:admin_dashboard_v3/controllers/product/product_images_controller.dart';
 import 'package:admin_dashboard_v3/repositories/products/product_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import '../../routes/routes.dart';
+import '../../utils/constants/enums.dart';
 
 class ProductController extends GetxController {
   static ProductController get instance => Get.find();
@@ -34,7 +39,7 @@ class ProductController extends GetxController {
   int selectedBrandId = -1;
   int selectedCategoryId = -1;
   GlobalKey<FormState> productDetail =
-      GlobalKey<FormState>(); // Form key for form validation
+  GlobalKey<FormState>(); // Form key for form validation
 
   @override
   void onInit() {
@@ -73,10 +78,11 @@ class ProductController extends GetxController {
         return;
       }
 
-
+      // Fetch product ID (if it exists)
+      int productId = await productRepository.getProductId(productName.text);
 
       final productModel = ProductModel(
-        productId: await productRepository.getProductId(productName.text),
+        productId: productId,
         name: productName.text.trim(),
         description: productDescription.text.trim(),
         basePrice: basePrice.text.trim(),
@@ -85,15 +91,39 @@ class ProductController extends GetxController {
         alertStock: int.tryParse(alertStock.text.trim()) ?? 0,
         brandID: selectedBrandId,
         categoryId: selectedCategoryId,
-
-
       );
+
       final json = productModel.toJson();
 
-
-
-      // Call the repository function to save or update the product
+      // Save or update the product in the repository
       await productRepository.saveOrUpdateProductRepo(json);
+
+      // Update stock in the allProducts list
+      bool productFound = false;
+      for (int i = 0; i < allProducts.length; i++) {
+        if (allProducts[i].productId == productId) {
+          // Update the stock and other relevant fields
+          allProducts[i].stockQuantity = productModel.stockQuantity;
+          allProducts[i].alertStock = productModel.alertStock;
+          allProducts[i].basePrice = productModel.basePrice;
+          allProducts[i].salePrice = productModel.salePrice;
+          allProducts[i].name = productModel.name;
+          allProducts[i].description = productModel.description;
+          allProducts[i].brandID = productModel.brandID;
+          allProducts[i].categoryId = productModel.categoryId;
+
+          productFound = true;
+          break;
+        }
+      }
+
+      // If the product wasn't found in the list, add it
+      if (!productFound) {
+        allProducts.add(productModel);
+      }
+
+      // Check for low stock after update
+      await checkLowStock([productId]);
 
       // Show success message
       TLoader.successSnackBar(
@@ -114,6 +144,7 @@ class ProductController extends GetxController {
 
 
 
+
   // // Clear the form fields
   // void clearForm() {
   //   productName.clear();
@@ -129,7 +160,6 @@ class ProductController extends GetxController {
   // }
 
 
-
   void setProductDetail(ProductModel product) {
     try {
       productName.text = product.name ?? ' ';
@@ -137,9 +167,6 @@ class ProductController extends GetxController {
       basePrice.text = product.basePrice ?? ' ';
       stock.text = product.stockQuantity.toString();
       alertStock.text = product.alertStock.toString() ?? '';
-
-
-
     } catch (e) {
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
@@ -153,6 +180,7 @@ class ProductController extends GetxController {
       stock.clear();
       alertStock.clear();
       brandName.clear();
+      salePrice.clear();
       selectedBrandId = -1;
       selectedCategoryId = -1;
       selectedCategoryNameController.clear();
@@ -188,14 +216,49 @@ class ProductController extends GetxController {
       TLoader.errorSnackBar(title: 'ProductController', message: e.toString());
     }
   }
+
   int? findProductIdByName(String productName) {
     try {
-      return allProducts.firstWhere((product) => product.name == productName).productId;
+      return allProducts
+          .firstWhere((product) => product.name == productName)
+          .productId;
     } catch (e) {
       return null; // Return null if the product is not found
     }
   }
 
+// Method to update stock quantity
+  Future<void> updateStockQuantities(List<OrderItemModel>? orderItems) async {
+    if (orderItems == null || orderItems.isEmpty) return;
 
+    for (var item in orderItems) {
+      await productRepository.updateStockQuantity(
+        productId: item.productId,
+        quantitySold: item.quantity,
+      );
+    }
+  }
+
+  Future<void> checkLowStock(List<int> productIds)  async {
+    try{
+      await productRepository.checkLowStock(productIds);
+
+    }
+    catch(e)
+    {
+      TLoader.errorSnackBar(title: 'Low Stock Error',message: e.toString());
+    }
+
+  }
+
+  void onProductTap(ProductModel product) async {
+    final ProductImagesController productImagesController = Get.find<ProductImagesController>();
+
+    setProductDetail(product);
+    await productImagesController.getSpecificImage(
+        MediaCategory.products, product.productId ?? -1);
+
+    Get.toNamed(TRoutes.productsDetail, arguments: product);
+  }
 
 }

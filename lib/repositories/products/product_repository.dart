@@ -101,6 +101,51 @@ class ProductRepository {
     }
   }
 
+  Future<void> updateStockQuantity({required int productId, required int quantitySold}) async {
+    try {
+      final response = await supabase
+          .from('products')
+          .update({
+        'stock_quantity': supabase.rpc('decrease_stock', params: {
+          'p_id': productId,
+          'qty_sold': quantitySold,
+        })
+      })
+          .eq('product_id', productId);
+
+      if (response.error != null) {
+        if (kDebugMode) {
+          print('Stock Update Error: ${response.error!.message}');
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Stock Update Exception: $e');
+      }
+    }
+  }
+
+  Future<void> checkLowStock(List<int> productIds) async {
+
+
+    try {
+      final response = await supabase.rpc('notify_low_stock', params: {
+        'product_ids': productIds,
+      });
+
+      if (kDebugMode) {
+        print("Low stock check response: $response");
+      }
+    } catch (error) {
+      if (kDebugMode) {
+        TLoader.errorSnackBar(title: 'Alert Stock Error',message: error.toString());
+        print("Error checking low stock: $error");
+      }
+    }
+  }
+
+
+
 
 
 

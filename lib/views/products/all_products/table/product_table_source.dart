@@ -29,12 +29,7 @@ class ProductRow extends DataTableSource {
       return DataRow2(
           onTap: () async {
 
-          productController.setProductDetail(product);
-          await productImagesController.getSpecificImage(MediaCategory.products,product.productId ?? -1);
-
-
-
-            Get.toNamed(TRoutes.productsDetail, arguments: product);
+         productController.onProductTap(product);
           },
        //   selected: productController.selectedRows[index],
           onSelectChanged: (value) {
@@ -73,7 +68,9 @@ class ProductRow extends DataTableSource {
             DataCell(TTableActionButtons(
               view: true,
               edit: false,
-              onViewPressed:() => Get.toNamed(TRoutes.productsDetail, arguments: product), // TODO use get argument to send data in order detail screen
+              onViewPressed:() {
+                productController.onProductTap(product);
+              },
               onDeletePressed: () {},
             ))
           ]);

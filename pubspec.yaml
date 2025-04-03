@@ -31,6 +31,7 @@ dependencies:
   file_picker: ^8.3.2
   hovering: ^1.0.4
   fl_chart: ^0.70.2
+  flutter_thermal_printer: ^1.2.0
 
   # Date picker
   datepicker_dropdown: ^0.1.6
@@ -69,6 +70,9 @@ dependencies:
   supabase_flutter: ^2.8.3
   vtable: ^0.4.0
   window_manager: ^0.4.3
+
+
+
 
 dev_dependencies:
   flutter_test:

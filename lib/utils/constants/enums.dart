@@ -40,4 +40,22 @@ enum UnitType { item, dozen   }
 enum InstallmentStatus { duration ,paid, pending , overdue }
 
 
-enum NotificationType { installment , alertStock, company }
+enum NotificationType {
+  installment,
+  alertStock,
+  company,
+  unknown,
+}
+
+extension NotificationTypeExtension on String {
+  NotificationType toNotificationType() {
+    switch (this) {
+      case 'installment':
+        return NotificationType.installment;
+      case 'alertStock':
+        return NotificationType.alertStock;
+      default:
+        return NotificationType.unknown;
+    }
+  }
+}

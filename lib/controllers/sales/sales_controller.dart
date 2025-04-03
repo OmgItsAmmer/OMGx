@@ -1,6 +1,7 @@
 import 'package:admin_dashboard_v3/Models/image/image_model.dart';
 import 'package:admin_dashboard_v3/Models/sales/sale_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
+import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
 import 'package:admin_dashboard_v3/controllers/user/user_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:flutter/cupertino.dart';
@@ -168,23 +169,31 @@ class SalesController extends GetxController {
       // Validate that there are sales to checkout
       if (allSales.isEmpty) {
         TLoader.errorSnackBar(
-            title: 'Checkout Error', message: 'No products added to checkout.');
-        return -1;
-      }
-      if ((!salesmanFormKey.currentState!.validate() &&
-              !customerFormKey.currentState!.validate() &&
-              !cashierFormKey.currentState!.validate()) ||
-          customerNameController.text == "" ||
-          selectedDate.value == 'Select Date' ||
-          salesmanNameController.text == "") {
-        TLoader.errorSnackBar(
-            title: 'Checkout Error', message: 'Fill all the fields.');
+            title: 'Checkout Error',
+            message: 'No products added to checkout.'
+        );
         return -1;
       }
 
-      if(selectedAddressId == -1){
+      // Validate required fields
+      if ((!salesmanFormKey.currentState!.validate() ||
+          !customerFormKey.currentState!.validate() ||
+          !cashierFormKey.currentState!.validate()) ||
+          customerNameController.text.isEmpty ||
+          selectedDate.value == 'Select Date' ||
+          salesmanNameController.text.isEmpty) {
         TLoader.errorSnackBar(
-            title: 'Address Error', message: 'Select Valid Address.');
+            title: 'Checkout Error',
+            message: 'Fill all the fields.'
+        );
+        return -1;
+      }
+
+      if (selectedAddressId == null || selectedAddressId == -1) {
+        TLoader.errorSnackBar(
+            title: 'Address Error',
+            message: 'Select a valid address.'
+        );
         return -1;
       }
 
@@ -192,54 +201,71 @@ class SalesController extends GetxController {
       double paidAmountValue = double.tryParse(paidAmount.text.trim()) ?? 0.0;
       if (paidAmountValue < 0) {
         TLoader.errorSnackBar(
-            title: 'Payment Error', message: 'Enter a valid paid amount.');
+            title: 'Payment Error',
+            message: 'Enter a valid paid amount.'
+        );
         return -1;
       }
-      //    String formattedDate = DateTime.parse(selectedDate.value).toUtc().toIso8601String();
 
       // Create an OrderModel instance
       OrderModel order = OrderModel(
-        orderId: -1,
-        // will not count
-        orderDate: selectedDate.value.toIso8601String(),
+        orderId: -1, // Placeholder, will be updated later
+        orderDate: (selectedDate.value is DateTime)
+            ? selectedDate.value.toIso8601String()
+            : DateTime.now().toIso8601String(),
         totalPrice: netTotal.value,
         buyingPrice: buyingPriceTotal,
         status: statusCheck(),
-        // Default status
         saletype: selectedSaleType.value.toString().split('.').last,
-        // Convert enum to string
         addressId: selectedAddressId,
-        // Add as needed
-        userId: 1,
-        // Add as needed userController.current_user?.value['user_id']
+        userId: 1, // Modify as needed
         salesmanId: selectedSalesmanId,
-        // Add as needed
         paidAmount: paidAmountValue,
         customerId: customerController.selectedCustomer.value.customerId,
-        // Add as needed
-        orderItems: allSales
-            .map((sale) => OrderItemModel(
-                  productId: sale.productId,
-                  orderId: -1, //will update in repository
-                  quantity: int.tryParse(sale.quantity) ?? 0,
-                  price: double.tryParse(sale.totalPrice) ?? 0.0,
-                  unit: sale.unit.toString().split('.').last,
-                ))
-            .toList(),
+        orderItems: allSales.map((sale) => OrderItemModel(
+          productId: sale.productId,
+          orderId: -1, // Will be updated later
+          quantity: int.tryParse(sale.quantity) ?? 0,
+          price: double.tryParse(sale.totalPrice) ?? 0.0,
+          unit: sale.unit.toString().split('.').last,
+        )).toList(),
       );
 
-    print(order.orderItems);
+      // Upload order to repository
+      int orderId = await orderRepository.uploadOrder(
+          order.toJson(isUpdate: true),
+          order.orderItems ?? []
+      );
 
-      int orderId = await orderRepository.uploadOrder(order.toJson(isUpdate: true),order.orderItems ?? []);
+      // Ensure orderId is valid before proceeding
+      if (orderId > 0) {
+        // Assign actual orderId to each order item
+        for (var item in order.orderItems ?? []) {
+          item.orderId = orderId;
+        }
 
-      // Reset fields after checkout
-      resetField();
-      return orderId;
+        final ProductController productController = Get.find<ProductController>();
+
+        // Update stock quantities
+        await productController.updateStockQuantities(order.orderItems);
+
+        // Check for low stock notifications
+        List<int> productIds = allSales.map((sale) => sale.productId).toList();
+        await productController.checkLowStock(productIds);
+
+        // Reset fields after successful checkout
+        resetField();
+        return orderId;
+      } else {
+        throw Exception("Order upload failed, checkout aborted.");
+      }
     } catch (e) {
       TLoader.errorSnackBar(title: 'Checkout Error', message: e.toString());
       return -1;
     }
   }
+
+
 
   void resetField() {
     allSales.clear();

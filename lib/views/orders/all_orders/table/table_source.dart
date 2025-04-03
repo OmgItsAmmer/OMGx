@@ -44,21 +44,9 @@ class OrderRows extends DataTableSource {
     );
     return DataRow2(
         onTap: () async  {
-          order.orderItems =  await orderController.fetchOrderItems(order.orderId);
+         orderController.setUpOrderDetails(order);
 
-        // = orderController.orderItems;
-        if(saleTypeFromOrder == SaleType.installment){
-          installmentController.fetchSpecificInstallmentPayment(order.orderId);
-          guarantorController.fetchGuarantors(order.orderId);
 
-        }
-        orderController.selectedStatus.value = orderStatus;
-        customerController.fetchCustomerInfo(order.customerId ?? -1);
-        salesmanController.fetchSalesmanInfo(order.salesmanId ?? -1);
-        addressController.fetchEntityAddresses(order.customerId ?? -1,'Customer');
-        orderController.setRemainingAmount(order);
-
-        Get.toNamed(TRoutes.orderDetails, arguments: order);
         },
         selected: false,
         onSelectChanged: (value) {},
@@ -104,22 +92,7 @@ class OrderRows extends DataTableSource {
               view: true,
               edit: false,
               onViewPressed: () async {
-                order.orderItems =  await orderController.fetchOrderItems(order.orderId);
-
-                // = orderController.orderItems;
-                if(saleTypeFromOrder == SaleType.installment){
-                  installmentController.fetchSpecificInstallmentPayment(order.orderId);
-                  guarantorController.fetchGuarantors(order.orderId);
-
-                }
-                orderController.selectedStatus.value = orderStatus;
-                customerController.fetchCustomerInfo(order.customerId ?? -1);
-                salesmanController.fetchSalesmanInfo(order.salesmanId ?? -1);
-                addressController.fetchEntityAddresses(order.customerId ?? -1,'Customer');
-                orderController.setRemainingAmount(order);
-
-
-                Get.toNamed(TRoutes.orderDetails, arguments: order);
+                orderController.setUpOrderDetails(order);
               },
 
             )

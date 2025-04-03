@@ -31,6 +31,8 @@ class ProductDetailBottomBar extends StatelessWidget {
               child: OutlinedButton(
                 onPressed: () {
                   // Handle Discard action
+                  productController.cleanProductDetail();
+                  Get.back();
                 },
                 child: const Text('Discard'),
               ),
@@ -44,9 +46,10 @@ class ProductDetailBottomBar extends StatelessWidget {
                 onPressed: () {
                   // Handle Save action
                   productController.saveOrUpdateProduct();
+                  Get.back();
 
                 },
-                child: const Text('Save'),
+                child: const Text('Save/Update'),
               ),
             ),
           ),

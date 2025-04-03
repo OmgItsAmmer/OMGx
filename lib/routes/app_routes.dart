@@ -90,7 +90,7 @@ class TAppRoutes {
     GetPage(name: TRoutes.splashScreen, page: () => const SplashScreen(),middlewares: [TRouteMiddleware()] ),
 
 
-    GetPage(name: TRoutes.expenseScreen, page: () => const NotificationDesktop(),middlewares: [TRouteMiddleware()] ),
+    GetPage(name: TRoutes.expenseScreen, page: () => const ExpenseScreen(),middlewares: [TRouteMiddleware()] ),
 
 
 

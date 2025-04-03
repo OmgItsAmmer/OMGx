@@ -36,7 +36,9 @@ class THelperFunctions {
       case NotificationType.alertStock:
         return Colors.red;
       case NotificationType.installment:
-        return TColors.primary;
+      return TColors.primary;
+      case NotificationType.unknown:
+        return TColors.grey;
       }
   }
 
@@ -47,6 +49,8 @@ class THelperFunctions {
       case NotificationType.alertStock:
         return Iconsax.warning_2;
       case NotificationType.company:
+        return Iconsax.shop;
+      case NotificationType.unknown:
         return Iconsax.shop;
       // Default icon
     }
