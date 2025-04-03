@@ -1,8 +1,10 @@
+import 'package:admin_dashboard_v3/controllers/notification/notification_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
 import '../../images/t_rounded_image.dart';
@@ -12,6 +14,8 @@ class THeader extends StatelessWidget implements PreferredSizeWidget {
 final GlobalKey<ScaffoldState>? scaffoldKey;
   @override
   Widget build(BuildContext context) {
+    final NotificationController notificationController = Get.find<NotificationController>();
+
     return Container(
       decoration: const BoxDecoration(
         color: TColors.white,
@@ -28,7 +32,9 @@ final GlobalKey<ScaffoldState>? scaffoldKey;
         ) : null,
 actions: [
       if(!TDeviceUtils.isDesktopScreen(context)) IconButton(onPressed: (){}, icon: const Icon(Iconsax.search_normal)),
-      IconButton(onPressed: (){}, icon: const Icon(Iconsax.notification  )),
+      IconButton(onPressed: (){
+        notificationController.showNotificationsBottomSheet();
+      }, icon: const Icon(Iconsax.notification  )),
       const SizedBox(width: TSizes.spaceBtwItems/2,),
       //User Data
        Row(

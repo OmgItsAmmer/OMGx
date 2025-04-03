@@ -16,7 +16,7 @@ class InstallmentPlanModel {
   final String? duration;
   final DateTime? firstInstallmentDate;
   final String? note;
-  final List<InstallmentTableModel>? installemtPaymentList;
+   List<InstallmentPayment>? installmentPaymentList;
   int? guarantor1_id;
   int? guarantor2_id;
 
@@ -34,7 +34,7 @@ class InstallmentPlanModel {
     this.duration,
     this.firstInstallmentDate,
     this.note,
-    this.installemtPaymentList,
+    this.installmentPaymentList,
     this.guarantor1_id,
     this.guarantor2_id,
   });
@@ -74,13 +74,13 @@ class InstallmentPlanModel {
       'duration': duration,
       'first_installment_date': firstInstallmentDate?.toIso8601String(),
       'note': note,
-      'installemtPaymentList': [],
       'guarantor1_id': guarantor1_id,
       'guarantor2_id': guarantor2_id,
     };
     if (!isUpdate) {
       data['installment_plans_id'] =
           installmentPlanId; // Only include `order_id` if it's not an update
+      data['installemtPaymentList'] = [];
     }
     return data;
   }
@@ -105,9 +105,9 @@ class InstallmentPlanModel {
           ? DateTime.parse(json['first_installment_date'] as String)
           : null,
       note: json['note'] as String?,
-      installemtPaymentList:
+      installmentPaymentList:
           json['installemtPaymentList'] != null //TODO might be a issue
-              ? InstallmentTableModel.fromJsonList(json['order_items'] as List)
+              ? InstallmentPayment.fromJsonList(json['order_items'] as List)
               : null,
       guarantor1_id: json['guarantor1_id'] as int,
       guarantor2_id: json['guarantor2_id'] as int,

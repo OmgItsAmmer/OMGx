@@ -1,4 +1,6 @@
 
+import 'package:admin_dashboard_v3/Models/installments/installment_table_model/installment_table_model.dart';
+
 class InstallmentPayment {
   int sequenceNo;
   int installmentPlanId;
@@ -75,4 +77,22 @@ class InstallmentPayment {
   static List<InstallmentPayment> fromJsonList(List<dynamic> jsonList) {
     return jsonList.map((json) => InstallmentPayment.fromJson(json)).toList();
   }
+
+ static  List<InstallmentPayment> getInstallmentPaymentsFromTable(List<InstallmentTableModel> installmentTableList) {
+    return installmentTableList.map((installment) {
+      return InstallmentPayment(
+        sequenceNo: installment.sequenceNo,
+        installmentPlanId: installment.planId,
+        dueDate: installment.dueDate,
+        amountDue: installment.amountDue,
+        paidDate: installment.paidDate,
+        paidAmount: installment.paidAmount,
+        status: installment.status,
+        isPaid: installment.paidDate != null, // If paidDate is not null, isPaid = true
+        createdAt: DateTime.now(), // Replace with actual date if available
+      );
+    }).toList();
+  }
+
+
 }

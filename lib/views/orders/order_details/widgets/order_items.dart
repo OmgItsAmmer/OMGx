@@ -1,26 +1,34 @@
-import 'package:admin_dashboard_v3/Models/orders/order_model.dart';
+import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
+import 'package:flutter/material.dart';
+
 import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
-import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
-import 'package:admin_dashboard_v3/utils/helpers/pricing_calculator.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+
 import '../../../../Models/orders/order_item_model.dart';
+import '../../../../Models/products/product_model.dart';
 import '../../../../common/widgets/containers/rounded_container.dart';
 import '../../../../utils/constants/sizes.dart';
 
 class OrderItems extends StatelessWidget {
   const OrderItems({super.key, required this.order});
   final OrderModel order;
+
   @override
   Widget build(BuildContext context) {
+    final ProductController productController = Get.find<ProductController>();
+
     final subTotal = order.orderItems?.fold(
       0.0,
-          (previousValue, element) =>
-      previousValue + (element.price * element.quantity), // Multiply price by quantity
-    ).obs;
+          (previousValue, element) => previousValue + (element.price * element.quantity),
+    ) ?? 0.0; // Ensure it's never null
+
+    final subTotalValue = subTotal + (order.discount);
+    final total = subTotal + (order.tax) + (order.shippingFee) - (order.discount);
+
+
     return TRoundedContainer(
       padding: const EdgeInsets.all(TSizes.defaultSpace),
       child: Column(
@@ -30,117 +38,119 @@ class OrderItems extends StatelessWidget {
             'Items',
             style: Theme.of(context).textTheme.headlineMedium,
           ),
-          const SizedBox(
-            height: TSizes.spaceBtwSections,
+          const SizedBox(height: TSizes.spaceBtwSections),
+
+          // Flutter Table
+          Table(
+            border: TableBorder.all(color: Colors.grey),
+            columnWidths: const {
+              0: FixedColumnWidth(65), // Image
+              1: FlexColumnWidth(), // Name
+              2: FixedColumnWidth(80), // Price
+              3: FixedColumnWidth(80), // Quantity
+              4: FixedColumnWidth(100), // Total
+            },
+            children: [
+              // Table Header
+              TableRow(
+                decoration: const BoxDecoration(color: TColors.primaryBackground),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text('Image', style: Theme.of(context).textTheme.titleMedium),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text('Item', style: Theme.of(context).textTheme.titleMedium),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text('Price', style: Theme.of(context).textTheme.titleMedium),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text('Qty', style: Theme.of(context).textTheme.titleMedium),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text('Total', style: Theme.of(context).textTheme.titleMedium),
+                  ),
+                ],
+              ),
+
+              // Table Data Rows
+              ...order.orderItems?.map((item) {
+                return TableRow(
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: TRoundedImage(
+                        height: 60,
+                        width: 60,
+                        imageurl: TImages.productImage1,
+                        backgroundColor: TColors.primaryBackground,
+                        isNetworkImage: false,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        productController.allProducts.firstWhere(
+                                (product) => product.productId == item.productId,
+                            orElse: () => ProductModel(name: 'Not Found') // Handle missing cases
+                        ).name ?? 'Not Found',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                    ),
+
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text((item.price/item.quantity).toStringAsFixed(2), style: Theme.of(context).textTheme.bodyLarge),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(item.quantity.toString(), style: Theme.of(context).textTheme.bodyLarge),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text((item.price).toStringAsFixed(2), style: Theme.of(context).textTheme.bodyLarge),
+                    ),
+                  ],
+                );
+              }) ?? [],
+            ],
           ),
 
-          //Items
-          Obx(
-            (){
+          const SizedBox(height: TSizes.spaceBtwSections),
 
-
-              return ListView.separated(
-                shrinkWrap: true,
-
-                separatorBuilder: (_, __) => const SizedBox(
-                  height: TSizes.spaceBtwItems,
-
-                ),
-                itemCount: order.orderItems?.length ?? 0,
-                physics: const NeverScrollableScrollPhysics(),
-                itemBuilder: (_, index) {
-                  final item = order.orderItems?[index];
-                  return  Row(
-                    children: [
-                      Expanded(
-                          child: Row(
-                            children: [
-                              //TODO add image using variant model
-                              const TRoundedImage(
-                                height: 60,
-                                width: 60,
-                                imageurl: TImages.productImage1,
-                                backgroundColor: TColors.primaryBackground,
-                                isNetworkImage: false,
-                              ),
-                              const SizedBox(
-                                width: TSizes.spaceBtwItems,
-                              ),
-                              Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(item!.variantName ?? '',style: Theme.of(context).textTheme.titleMedium,overflow: TextOverflow.ellipsis,maxLines: 1,),
-                                      //TODO Variantion Description
-                                    ],
-                                  ))
-                            ],
-                          )),
-                      const SizedBox(width: TSizes.spaceBtwItems,),
-                      SizedBox(width: TSizes.xl*2,
-                        child: Text(item.price.toString(),style: Theme.of(context).textTheme.bodyLarge,),),
-                      SizedBox(width: TDeviceUtils.isMobileScreen(context) ? TSizes.xl*1.4 : TSizes.xl*2,
-                        child: Text(item.quantity.toString(),style: Theme.of(context).textTheme.bodyLarge,),),
-                      SizedBox(width: TDeviceUtils.isMobileScreen(context) ? TSizes.xl*1.4 : TSizes.xl*2,
-                        child: Text((item.price * item.quantity ).toString(),style: Theme.of(context).textTheme.bodyLarge,),)
-                    ],
-                  );
-                },
-              );
-
-            }
-          ),
-          const SizedBox(height: TSizes.spaceBtwSections,),
+          // Summary Section
           TRoundedContainer(
-            padding: EdgeInsets.all(TSizes.defaultSpace),
+            padding: const EdgeInsets.all(TSizes.defaultSpace),
             backgroundColor: TColors.primaryBackground,
             child: Column(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('SubTotal' , style: Theme.of(context).textTheme.titleLarge,),
-                    Obx(() => Text(subTotal?.value.toString() ?? ' ',style: Theme.of(context).textTheme.titleLarge,))
-                  ],
-                ),
-                const SizedBox(height: TSizes.spaceBtwItems,),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Discount' , style: Theme.of(context).textTheme.titleLarge,),
-                    Text('0.00',style: Theme.of(context).textTheme.titleLarge,)
-                  ],
-                ),
-                const SizedBox(height: TSizes.spaceBtwItems,),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Shipping' , style: Theme.of(context).textTheme.titleLarge,),
-                    Text('143',style: Theme.of(context).textTheme.titleLarge,)
-                  ],
-                ),
-                const SizedBox(height: TSizes.spaceBtwItems,),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Tax' , style: Theme.of(context).textTheme.titleLarge,),
-                    Text('32',style: Theme.of(context).textTheme.titleLarge,)
-                  ],
-                ),
-                const SizedBox(height: TSizes.spaceBtwItems,),
+                _buildSummaryRow(context, 'SubTotal',  Text(subTotalValue.toStringAsFixed(2))),
+                _buildSummaryRow(context, 'Discount',  Text(order.discount.toStringAsFixed(2))),
+                _buildSummaryRow(context, 'Shipping',  Text(order.shippingFee.toStringAsFixed(2))),
+                _buildSummaryRow(context, 'Tax',  Text(order.tax.toStringAsFixed(2))),
                 const Divider(),
-                const SizedBox(height: TSizes.spaceBtwItems,),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Total' , style: Theme.of(context).textTheme.titleLarge,),
-                    Text('use calc',style: Theme.of(context).textTheme.titleLarge,)
-                    // /TPricingCalculator.calculateTotalPrice(subTotal, '')
-                  ],
-                ),
+                _buildSummaryRow(context, 'Total',  Text(total.toStringAsFixed(2))),
               ],
             ),
-          )
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryRow(BuildContext context, String label, Widget value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: Theme.of(context).textTheme.titleLarge),
+          value,
         ],
       ),
     );

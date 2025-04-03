@@ -1,29 +1,24 @@
 class OrderItemModel {
   final int quantity;
   final double price;
-  final int variantId;
-  final String unit;
-  final int? orderId;
-  final String? variantName;
-  final String? image;
+  final int productId;  // Changed from variantId to productId
+  final String? unit;
+  final int orderId;
 
   OrderItemModel({
     required this.quantity,
     required this.price,
-    required this.variantId,
-    required this.unit,
-    this.orderId,
-    this.variantName,
-    this.image,
+    required this.productId,  // Updated field name
+    this.unit,
+    required this.orderId,
   });
 
   // Static function to create an empty order item model
   static OrderItemModel empty() => OrderItemModel(
     quantity: 0,
     price: 0.0,
-    variantId: 0,
-    unit: "",
-    orderId: null,
+    productId: 0,  // Default value for productId
+    orderId: 0,    // Default value for orderId
   );
 
   // Convert model to JSON for database insertion
@@ -31,32 +26,43 @@ class OrderItemModel {
     return {
       'quantity': quantity,
       'price': price,
-      'variant_id': variantId,
+      'product_id': productId,  // Updated field name
       'order_id': orderId,
       'unit': unit,
-      'variationDescription': variantName,
-      'variant_image': image,
     };
   }
 
-  // Factory method to create an OrderItemModel from Supabase response
+  // Factory method to create an OrderItemModel from JSON response
   factory OrderItemModel.fromJson(Map<String, dynamic> json) {
-    final productVariants = json['product_variants'] as Map<String, dynamic>?;
-
     return OrderItemModel(
       quantity: json['quantity'] as int,
       price: (json['price'] as num).toDouble(),
-      variantId: json['variant_id'] as int,
-      orderId: json['order_id'] as int?,
-      unit: json['unit'] as String,
-      variantName:
-      productVariants != null ? productVariants['variant_name'] as String? : null,
-      image: productVariants != null ? productVariants['variant_image'] as String? : null,
+      productId: json['product_id'] as int,  // Updated field name
+      orderId: json['order_id'] as int,
+      unit: json['unit'] as String?,
     );
   }
 
+  // Method to handle a list of OrderItemModel from JSON
   static List<OrderItemModel> fromJsonList(List<dynamic> jsonList) {
     return jsonList.map((json) => OrderItemModel.fromJson(json)).toList();
+  }
+
+  // CopyWith method
+  OrderItemModel copyWith({
+    int? quantity,
+    double? price,
+    int? productId,
+    String? unit,
+    int? orderId,
+  }) {
+    return OrderItemModel(
+      quantity: quantity ?? this.quantity,
+      price: price ?? this.price,
+      productId: productId ?? this.productId,
+      unit: unit ?? this.unit,
+      orderId: orderId ?? this.orderId,
+    );
   }
 }
 
@@ -71,7 +77,11 @@ class OrderModel {
   final int? salesmanId;
   final double? paidAmount;
   final int? customerId;
-  final double? buyingPrice; // New field
+  final double? buyingPrice;
+  final double discount;
+  final double tax;
+  final double shippingFee;
+  final int salesmanComission;  // Added salesman_comission field
   List<OrderItemModel>? orderItems;
 
   OrderModel({
@@ -86,6 +96,10 @@ class OrderModel {
     this.paidAmount,
     this.customerId,
     this.buyingPrice,
+    this.discount = 0.0,
+    this.tax = 0.0,
+    this.shippingFee = 0.0,
+    this.salesmanComission = 0,  // Default value for salesman_comission
     this.orderItems,
   });
 
@@ -102,6 +116,10 @@ class OrderModel {
     paidAmount: null,
     customerId: null,
     buyingPrice: null,
+    discount: 0.0,
+    tax: 0.0,
+    shippingFee: 0.0,
+    salesmanComission: 0,  // Default value
     orderItems: [],
   );
 
@@ -118,6 +136,11 @@ class OrderModel {
       'paid_amount': paidAmount,
       'customer_id': customerId,
       'buying_price': buyingPrice,
+      'discount': discount,
+      'tax': tax,
+      'shipping_fee': shippingFee,
+      'salesman_comission': salesmanComission,  // Added salesman_comission
+
     };
 
     if (!isUpdate) {
@@ -129,14 +152,13 @@ class OrderModel {
 
   // Factory method to create an OrderModel from Supabase response
   factory OrderModel.fromJson(Map<String, dynamic> json) {
-    // ✅ **Keeping your original orderDate logic**
     DateTime fullDate = DateTime.parse(json['order_date']);
     String formattedDate =
         "${fullDate.year.toString().padLeft(4, '0')}-${fullDate.month.toString().padLeft(2, '0')}-${fullDate.day.toString().padLeft(2, '0')}";
 
     return OrderModel(
       orderId: json['order_id'] as int,
-      orderDate: formattedDate, // ✅ **Unchanged orderDate logic**
+      orderDate: formattedDate,
       totalPrice: (json['total_price'] as num).toDouble(),
       status: json['status'] as String,
       saletype: json['saletype'] as String?,
@@ -145,10 +167,55 @@ class OrderModel {
       salesmanId: json['salesman_id'] as int?,
       paidAmount: (json['paid_amount'] as num?)?.toDouble(),
       customerId: json['customer_id'] as int?,
-      buyingPrice: (json['buying_price'] as num?)?.toDouble(), // ✅ **New field handled properly**
+      buyingPrice: (json['buying_price'] as num?)?.toDouble(),
+      discount: (json['discount'] as num?)?.toDouble() ?? 0.0,
+      tax: (json['tax'] as num?)?.toDouble() ?? 0.0,
+      shippingFee: (json['shipping_fee'] as num?)?.toDouble() ?? 0.0,
+      salesmanComission: json['salesman_comission'] as int? ?? 0,  // Added salesman_comission
       orderItems: json['order_items'] != null
           ? OrderItemModel.fromJsonList(json['order_items'] as List)
           : null,
     );
   }
+
+  // CopyWith method
+  OrderModel copyWith({
+    int? orderId,
+    String? orderDate,
+    double? totalPrice,
+    String? status,
+    String? saletype,
+    int? addressId,
+    int? userId,
+    int? salesmanId,
+    double? paidAmount,
+    int? customerId,
+    double? buyingPrice,
+    double? discount,
+    double? tax,
+    double? shippingFee,
+    int? salesmanComission,
+    List<OrderItemModel>? orderItems,
+  }) {
+    return OrderModel(
+      orderId: orderId ?? this.orderId,
+      orderDate: orderDate ?? this.orderDate,
+      totalPrice: totalPrice ?? this.totalPrice,
+      status: status ?? this.status,
+      saletype: saletype ?? this.saletype,
+      addressId: addressId ?? this.addressId,
+      userId: userId ?? this.userId,
+      salesmanId: salesmanId ?? this.salesmanId,
+      paidAmount: paidAmount ?? this.paidAmount,
+      customerId: customerId ?? this.customerId,
+      buyingPrice: buyingPrice ?? this.buyingPrice,
+      discount: discount ?? this.discount,
+      tax: tax ?? this.tax,
+      shippingFee: shippingFee ?? this.shippingFee,
+      salesmanComission: salesmanComission ?? this.salesmanComission,
+      orderItems: orderItems ?? this.orderItems,
+    );
+  }
 }
+
+

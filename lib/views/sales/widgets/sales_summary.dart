@@ -48,7 +48,7 @@ class SalesSummary extends StatelessWidget {
                                 text: '${shopController.profile1.text}%',
                                 selected: salesController.selectedChipIndex.value == 0,
                                 onSelected: (val) {
-                                  salesController.applyDiscount(shopController.profile1.text);
+                                  salesController.applyDiscountInChips(shopController.profile1.text);
                                 },
                               ),
                             ),
@@ -63,7 +63,7 @@ class SalesSummary extends StatelessWidget {
                               text: '${shopController.profile2.text}%',
                               selected: salesController.selectedChipIndex.value == 1,
                               onSelected: (val) {
-                                salesController.applyDiscount(shopController.profile2.text);
+                                salesController.applyDiscountInChips(shopController.profile2.text);
                               },
                             ),
                           ),
@@ -77,7 +77,7 @@ class SalesSummary extends StatelessWidget {
                               text: '${shopController.profile3.text}%',
                               selected: salesController.selectedChipIndex.value == 2,
                               onSelected: (val) {
-                                salesController.applyDiscount(shopController.profile3.text);
+                                salesController.applyDiscountInChips(shopController.profile3.text);
                               },
                             ),
                           ),
@@ -112,7 +112,7 @@ class SalesSummary extends StatelessWidget {
           child: TextFormField(
             controller: salesController.discountController, // Attach the controller
             onChanged: (value) {
-              salesController.applyDiscount(value);
+              salesController.applyDiscountInField(value);
             },
             validator: (value) {
               if (value == null || value.isEmpty) {

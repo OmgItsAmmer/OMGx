@@ -66,7 +66,7 @@ class InstallmentRepository extends GetxController {
       final installmentPlanId = response[0]['installment_plans_id'];
 
       // Convert payment list to JSON using the model's methods
-      final paymentJsons = plan.installemtPaymentList!.map((payment) {
+      final  paymentJsons = plan.installmentPaymentList!.map((payment) {
         // Convert to JSON using the payment model's method
         final paymentJson = payment.toJson();
 

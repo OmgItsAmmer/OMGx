@@ -67,7 +67,7 @@ class SalesController extends GetxController {
 
   //Cashier Info
   final cashierNameController = TextEditingController().obs;
-  final selectedSaleType = SaleType.Cash.obs;
+  final selectedSaleType = SaleType.cash.obs;
   final Rx<DateTime> selectedDate = DateTime.now().obs;
 
   //Salesman Info
@@ -219,7 +219,8 @@ class SalesController extends GetxController {
         // Add as needed
         orderItems: allSales
             .map((sale) => OrderItemModel(
-                  variantId: 1,
+                  productId: sale.productId,
+                  orderId: -1, //will update in repository
                   quantity: int.tryParse(sale.quantity) ?? 0,
                   price: double.tryParse(sale.totalPrice) ?? 0.0,
                   unit: sale.unit.toString().split('.').last,
@@ -227,9 +228,9 @@ class SalesController extends GetxController {
             .toList(),
       );
 
+    print(order.orderItems);
 
-
-      int orderId = await orderRepository.uploadOrder(order.toJson(isUpdate: true));
+      int orderId = await orderRepository.uploadOrder(order.toJson(isUpdate: true),order.orderItems ?? []);
 
       // Reset fields after checkout
       resetField();
@@ -286,11 +287,79 @@ class SalesController extends GetxController {
     isExpanded.value = !isExpanded.value;
   }
 
+  void deleteItem(SaleModel saleItem, int index) {
+    try {
+      // Ensure totalPrice is a valid number
+      double? totalPrice = double.tryParse(
+          saleItem.totalPrice.replaceAll(RegExp(r'[^0-9.]'), ''));
+
+      // Clean the remainingAmount string to ensure it's a valid number
+      String cleanedRemaining =
+      remainingAmount.value.text.replaceAll(RegExp(r'[^0-9.]'), '');
+
+      // Extract only the first valid number (up to the first decimal point)
+      if (cleanedRemaining.contains('.')) {
+        List<String> parts = cleanedRemaining.split('.');
+        if (parts.length > 1) {
+          // Take the integer part and the first two decimal places
+          cleanedRemaining =
+          '${parts[0]}.${parts[1].substring(0, parts[1].length > 2 ? 2 : parts[1].length)}';
+        }
+      }
+
+      // Parse the cleaned remaining amount
+      double? remaining = double.tryParse(cleanedRemaining);
+
+      if (totalPrice == null) {
+        throw Exception("Invalid totalPrice: ${saleItem.totalPrice}");
+      }
+
+      if (remaining == null) {
+        throw Exception(
+            "Invalid remainingAmount: ${remainingAmount.value.text}");
+      }
+
+      // Update netTotal and remainingAmount
+      double currentOriginalTotal = originalNetTotal.value;
+      netTotal.value = (netTotal.value - totalPrice).abs() < 1e-10
+          ? 0
+          : netTotal.value - totalPrice;
+      remainingAmount.value.text = (remaining - totalPrice)
+          .toStringAsFixed(2); // Format to 2 decimal places
+
+      // Update original total to reflect item removal
+      originalNetTotal.value = currentOriginalTotal - totalPrice;
+
+      // Remove the item from the list
+      allSales.removeAt(index);
+    } catch (e) {
+      print("Error: $e"); // Debugging
+      TLoader.errorSnackBar(title: e.toString());
+    }
+  }
 
 
+  void restoreDiscount() {
+    try {
+      // If no discount is selected, do nothing
+      if (selectedChipIndex.value == -1 || selectedChipValue.value.isEmpty) return;
 
+      // Reset netTotal to the original value
+      netTotal.value = originalNetTotal.value;
 
+      // Clear the selected chip value and index
+      selectedChipValue.value = '';
+      selectedChipIndex.value = -1;
 
+      // Show success message
+      // TLoader.successSnackBar(
+      //   title: "Discount Restored",
+      //   message: 'Discount restored successfully.',
+      // );
+    } catch (e) {
+      TLoader.errorSnackBar(title: e.toString());
+    }
+  }
   int _getChipIndex(String discountText) {
 
     // Helper function to get the chip index based on the discount text
@@ -338,129 +407,94 @@ class SalesController extends GetxController {
 
     }
   }
-
-  void deleteItem(SaleModel saleItem, int index) {
+  void applyDiscountInChips(String discountText) {
     try {
-      // Clean and parse totalPrice
-      double? totalPrice = double.tryParse(
-          saleItem.totalPrice.replaceAll(RegExp(r'[^0-9.]'), ''));
-
-      // Clean and parse remainingAmount
-      String cleanedRemaining = remainingAmount.value.text.replaceAll(RegExp(r'[^0-9.]'), '');
-      if (cleanedRemaining.contains('.')) {
-        List<String> parts = cleanedRemaining.split('.');
-        if (parts.length > 1) {
-          cleanedRemaining = '${parts[0]}.${parts[1].substring(0, parts[1].length > 2 ? 2 : parts[1].length)}';
-        }
-      }
-      double? remaining = double.tryParse(cleanedRemaining);
-
-      if (totalPrice == null) throw Exception("Invalid totalPrice: ${saleItem.totalPrice}");
-      if (remaining == null) throw Exception("Invalid remainingAmount: ${remainingAmount.value.text}");
-
-      // Update values
-      double currentOriginalTotal = originalNetTotal.value;
-      netTotal.value = (netTotal.value - totalPrice).abs() < 1e-10 ? 0 : netTotal.value - totalPrice;
-      remainingAmount.value.text = (remaining - totalPrice).toStringAsFixed(2);
-      originalNetTotal.value = currentOriginalTotal - totalPrice;
-
-      // Remove item
-      allSales.removeAt(index);
-    } catch (e) {
-      print("Error: $e");
-      TLoader.errorSnackBar(title: e.toString());
-    }
-  }
-
-  void applyDiscount(String discountValue, {bool isPercentage = true}) {
-    try {
-      // If chip is clicked again, restore original
-      if (isPercentage &&
-          selectedChipIndex.value != -1 &&
-          selectedChipValue.value == discountValue) {
+      // If the same chip is clicked again, deselect it and restore the original value
+      if (selectedChipIndex.value != -1 && selectedChipValue.value == discountText) {
         restoreDiscount();
         return;
       }
 
-      // Clean the input
-      String cleanedValue = discountValue.replaceAll(RegExp(r'[^0-9.]'), '');
-
-      // Handle multiple decimal points
-      if (cleanedValue.split('.').length > 2) {
-        List<String> parts = cleanedValue.split('.');
-        cleanedValue = '${parts[0]}.${parts.sublist(1).join()}';
+      // Reset any existing discount from the field
+      if (discount.value.isNotEmpty) {
+        restoreDiscount();
+        discountController.clear(); // Clear the text field
       }
 
-      // Parse the value
-      double discountAmount = double.tryParse(cleanedValue) ?? 0.0;
+      // Extract the numeric value from discountText (e.g., "10%" -> 10)
+      String percentageString = discountText.replaceAll('%', '');
+      double? discountPercentage = double.tryParse(percentageString);
 
-      // For percentage discounts, convert to absolute value
-      if (isPercentage) {
-        // Validate percentage range
-        if (discountAmount < 0 || discountAmount > 100) {
-          TLoader.errorSnackBar(
-            title: "Invalid Discount",
-            message: 'Please enter a valid percentage (0% to 100%).',
-          );
-          return;
-        }
-        discountAmount = (originalNetTotal.value * discountAmount) / 100;
-
-        // Update chip selection
-        selectedChipValue.value = discountValue;
-        selectedChipIndex.value = _getChipIndex(discountValue);
-      }
-
-      // Validate discount doesn't exceed total
-      if (discountAmount > originalNetTotal.value) {
+      // Validate the discount percentage
+      if (discountPercentage == null || discountPercentage < 0 || discountPercentage > 100) {
         TLoader.errorSnackBar(
           title: "Invalid Discount",
-          message: "Discount cannot exceed the total amount.",
+          message: 'Please select a valid discount percentage (0% to 100%).',
         );
-        restoreDiscount();
         return;
       }
 
-      // Apply the discount
+      // Calculate the discount amount based on the original net total
+      double discountAmount = (originalNetTotal.value * discountPercentage) / 100;
+
+      // Apply discount
       netTotal.value = originalNetTotal.value - discountAmount;
 
-      // Update discount field if this was a manual entry
-      if (!isPercentage) {
-        discount.value = cleanedValue;
-      }
+      // Update the selected chip value and index
+      selectedChipValue.value = discountText;
+      selectedChipIndex.value = _getChipIndex(discountText);
+
     } catch (e) {
       TLoader.errorSnackBar(title: e.toString());
     }
   }
 
-  void restoreDiscount() {
-    netTotal.value = originalNetTotal.value;
-    selectedChipIndex.value = -1;
-    selectedChipValue.value = '';
-    discount.value = "0.0";
-    discountController.text = "0.0";
+  void applyDiscountInField(String value) {
+    // Reset any existing discount from chips
+    if (selectedChipIndex.value != -1) {
+      restoreDiscount();
+    }
+
+    // Clean the input to extract only numbers and decimals
+    String cleanedValue = value.replaceAll(RegExp(r'[^0-9.]'), '');
+
+    // Ensure only one decimal point exists
+    if (cleanedValue.split('.').length > 2) {
+      List<String> parts = cleanedValue.split('.');
+      cleanedValue = '${parts[0]}.${parts.sublist(1).join()}';
+    }
+
+    // Parse the cleaned value as a percentage
+    double enteredPercentage = double.tryParse(cleanedValue) ?? 0.0;
+
+    // Reset net total to original before applying a new discount
+    double currentOriginalTotal = originalNetTotal.value;
+
+    // Calculate discount amount
+    double discountAmount = (enteredPercentage / 100) * currentOriginalTotal;
+
+    // Validate the discount percentage (should not exceed 100%)
+    if (enteredPercentage > 100) {
+      discountController.text = "0.0";
+      discount.value = "0.0";
+      netTotal.value = currentOriginalTotal;
+
+      TLoader.errorSnackBar(
+        title: "Invalid Discount",
+        message: "Discount cannot exceed 100%.",
+      );
+    } else {
+      discount.value = "$cleanedValue%"; // Ensure percentage format
+      netTotal.value = currentOriginalTotal - discountAmount;
+    }
   }
-  // void restoreDiscount() {
-  //   try {
-  //     // If no discount is selected, do nothing
-  //     if (selectedChipIndex.value == -1 || selectedChipValue.value.isEmpty) return;
-  //
-  //     // Reset netTotal to the original value
-  //     netTotal.value = originalNetTotal.value;
-  //
-  //     // Clear the selected chip value and index
-  //     selectedChipValue.value = '';
-  //     selectedChipIndex.value = -1;
-  //
-  //     // Show success message
-  //     // TLoader.successSnackBar(
-  //     //   title: "Discount Restored",
-  //     //   message: 'Discount restored successfully.',
-  //     // );
-  //   } catch (e) {
-  //     TLoader.errorSnackBar(title: e.toString());
-  //   }
-  // }
+
+
+
+
+
+
+
 
 
 

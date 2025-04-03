@@ -27,7 +27,7 @@ class InstallmentController extends GetxController {
 
   // Loading state
   final isLoading = false.obs;
-  final isCustomerLoading = false.obs;
+
   final isGuarantorLoading = false.obs;
 
   //Installment Info
@@ -63,7 +63,7 @@ class InstallmentController extends GetxController {
   //final RxList<>
 
   //OrderDetails
-  Rx<CustomerModel> selectedCustomer = CustomerModel.empty().obs;
+ // Rx<CustomerModel> selectedCustomer = CustomerModel.empty().obs;
 
 void resetFormFields() {
   try{
@@ -206,33 +206,7 @@ void resetFormFields() {
     }
   }
 
-  void fetchCustomerInfo(int customerId) {
-    try {
-      // Set loading state to true
-      isCustomerLoading.value = true;
 
-      // Fetch customer data based on orderId
-      final customerData = customerController.allCustomers.firstWhere(
-        (customer) => customer.customerId == customerId,
-        orElse: () => CustomerModel.empty(), // Fallback if no customer is found
-      );
-
-      // If customer data is found, process it
-      if (customerData != CustomerModel.empty()) {
-        selectedCustomer.value = customerData;
-      } else {
-        TLoader.warningSnackBar(
-            title: 'Not Found',
-            message: 'No customer found for the given order ID.');
-      }
-    } catch (e) {
-      // Handle errors
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
-    } finally {
-      // Set loading state to false
-      isCustomerLoading.value = false;
-    }
-  }
 
   void addProduct() {
     try {} catch (e) {
@@ -330,8 +304,7 @@ void resetFormFields() {
             : durationController == DurationType.Quarterly
             ? "3"
             : "12",
-        installemtPaymentList:
-        currentInstallmentPayments, // Converts RxList to a standard List
+
        // guarantor1_id: guarranteIds[0],
       //  guarantor2_id: guarranteIds[1],
         // Pass the generated installment plans
@@ -432,6 +405,8 @@ void resetFormFields() {
       int orderId = await salesController.checkOut();
       List<int> guarranteIds = await guarantorController.uploadGuarantors();
 
+      final installmentPaymentList = InstallmentPayment.getInstallmentPaymentsFromTable(currentInstallmentPayments);
+      currentInstallmentPlan.value.installmentPaymentList = installmentPaymentList;
       currentInstallmentPlan.value.orderId = orderId;
       currentInstallmentPlan.value.guarantor1_id = guarranteIds[0];
       currentInstallmentPlan.value.guarantor2_id = guarranteIds[1];

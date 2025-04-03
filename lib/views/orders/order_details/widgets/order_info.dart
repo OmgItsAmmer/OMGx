@@ -7,6 +7,7 @@ import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
 import 'package:admin_dashboard_v3/utils/helpers/helper_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../common/widgets/loaders/tloaders.dart';
 
@@ -28,9 +29,7 @@ class OrderInfo extends StatelessWidget {
             'Order Information',
             style: Theme.of(context).textTheme.headlineMedium,
           ),
-          const SizedBox(
-            height: TSizes.spaceBtwSections,
-          ),
+          const SizedBox(height: TSizes.spaceBtwSections),
           Row(
             children: [
               Expanded(
@@ -39,7 +38,7 @@ class OrderInfo extends StatelessWidget {
                   children: [
                     const Text('Date'),
                     Text(
-                      orderModel.orderDate,
+                      DateFormat('dd-MM-yyyy').format(DateTime.parse(orderModel.orderDate)),
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                   ],
@@ -69,10 +68,10 @@ class OrderInfo extends StatelessWidget {
                         horizontal: TSizes.sm,
                       ),
                       backgroundColor: THelperFunctions
-                          .getOrderStatusColor(OrderStatus.pending)
-                          .withOpacity(0.1),
+                          .getOrderStatusColor(orderController.selectedStatus.value)
+                          .withValues(alpha: 0.1), // FIXED: Used selectedStatus.value
                       child: Obx(
-                        () => DropdownButton<OrderStatus>(
+                            () => DropdownButton<OrderStatus>(
                           padding: const EdgeInsets.symmetric(vertical: 0),
                           value: orderController.selectedStatus.value,
                           items: OrderStatus.values.map((OrderStatus status) {
@@ -81,30 +80,34 @@ class OrderInfo extends StatelessWidget {
                               child: Text(
                                 status.name.capitalize.toString(),
                                 style: TextStyle(
-                                  color: THelperFunctions.getOrderStatusColor(
-                                    OrderStatus.pending,
-                                  ),
+                                  color: THelperFunctions.getOrderStatusColor(status), // FIXED: Use correct status color
                                 ),
                               ),
                             );
                           }).toList(),
-                          onChanged: (OrderStatus? newValue) async {
-                            if (newValue != null) {
-                              // Await the result of updateStatus
-                              final updatedStatus = await orderController.updateStatus(orderModel.orderId, newValue.toString().split('.').last);
-                              final orderStatus = 'OrderStatus.$updatedStatus' ;
+                                onChanged: (OrderStatus? newValue) async {
+                                  if (newValue != null) {
+                                    final updatedStatus = await orderController.updateStatus(
+                                      orderModel.orderId,
+                                      newValue.toString().split('.').last,
+                                    );
 
-                              // Convert the updatedStatus (String) back to OrderStatus
-                              final OrderStatus? status = orderController.stringToOrderStatus(orderStatus);
+                                    final orderStatusString = 'OrderStatus.$updatedStatus';
+                                    final OrderStatus? status = orderController.stringToOrderStatus(orderStatusString);
 
-                              // Update selectedStatus with the converted value
-                              if (status != null) {
-                                orderController.selectedStatus.value = status;
-                              } else {
-                                TLoader.errorSnackBar(title: 'Error', message: 'Invalid status: $updatedStatus');
-                              }
-                            }
-                          },
+                                    if (status != null) {
+                                      orderController.selectedStatus.value = status;
+
+                                      if (orderModel.status == 'cancelled' && status != OrderStatus.cancelled) {
+                                        orderController.addBackQuantity(orderModel.orderItems);
+                                      } else if (status == OrderStatus.cancelled) {
+                                        orderController.restoreQuantity(orderModel.orderItems);
+                                      }
+                                    } else {
+                                      TLoader.errorSnackBar(title: 'Error', message: 'Invalid status: $updatedStatus');
+                                    }
+                                  }
+                                },
                         ),
                       ),
                     ),
@@ -115,9 +118,9 @@ class OrderInfo extends StatelessWidget {
                 flex: TDeviceUtils.isMobileScreen(context) ? 2 : 1,
                 child: Column(
                   children: [
-                    const Text('Total'),
+                    const Text('Salesman Commission'),
                     Text(
-                      orderModel.totalPrice.toString(),
+                      '${orderModel.salesmanComission}%',
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                   ],

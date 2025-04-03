@@ -8,10 +8,13 @@ import 'package:admin_dashboard_v3/views/orders/order_details/widgets/order_info
 import 'package:admin_dashboard_v3/views/orders/order_details/widgets/order_items.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 
 import '../../../../Models/orders/order_item_model.dart';
+import '../../../../controllers/customer/customer_controller.dart';
 import '../../../../controllers/installments/installments_controller.dart';
+import '../../../../controllers/salesman/salesman_controller.dart';
+import '../../../../utils/constants/enums.dart';
+import '../widgets/guarrantor_card.dart';
 
 class OrderDetailDesktopScreen extends StatelessWidget {
   const OrderDetailDesktopScreen({super.key, required this.orderModel});
@@ -20,84 +23,97 @@ class OrderDetailDesktopScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
- //   OrderModel order = OrderModel.empty();
-    final InstallmentController installmentController = Get.find<InstallmentController>();
+    SaleType? saleTypeFromOrder = SaleType.values.firstWhere(
+          (e) => e.name == orderModel.saletype,
+      orElse: () => SaleType.cash,
+    );
 
-    return  Expanded(
+
+    final CustomerController customerController =
+    Get.find<CustomerController>();
+    final SalesmanController salesmanController =
+    Get.find<SalesmanController>();
+
+    return Expanded(
       child: SizedBox(
-        //height: 1000,
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(TSizes.defaultSpace),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                //Bread Crumbs
-                //Sizedbox
-                //Body
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                        flex: 2,
-                        child: Column(
-                          children: [
-                            //Order Info
-                               OrderInfo(orderModel: orderModel ,),
-                            const SizedBox(
-                              height: TSizes.spaceBtwSections,
-                            ),
-      
-                            //Items
-                            OrderItems(order: orderModel),
-                            const SizedBox(
-                              height: TSizes.spaceBtwSections,
-                            ),
-                            //Installment table
-                            OrderTransaction(orderModel: orderModel,),
-                           
-                            const SizedBox(height: TSizes.spaceBtwSections,),
-
-                            //Transactions
-                          ],
-                        )),
-                    const SizedBox(
-                      width: TSizes.spaceBtwSections,
+                      flex: 2,
+                      child: Column(
+                        children: [
+                          OrderInfo(orderModel: orderModel),
+                          const SizedBox(height: TSizes.spaceBtwSections),
+                          OrderItems(order: orderModel),
+                          const SizedBox(height: TSizes.spaceBtwSections),
+                          OrderTransaction(orderModel: orderModel),
+                          const SizedBox(height: TSizes.spaceBtwSections),
+                        ],
+                      ),
                     ),
-                    // Right Side Order Orders
-                    const Expanded(
-                        child: Column(
-                      children: [
-                        //Customer Info
-                        CustomerInfo(),
-                        SizedBox(
-                          height: TSizes.spaceBtwSections,
-                        )
-                      ],
-                    ))
+                    const SizedBox(width: TSizes.spaceBtwSections),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          UserInfo(
+                            title: 'Customer',
+                            showAddress: true,
+                            fullName:
+                            customerController.selectedCustomer.value.fullName,
+                            email:
+                            customerController.selectedCustomer.value.email,
+                            phoneNumber: customerController
+                                .selectedCustomer.value.phoneNumber,
+                            isLoading: customerController.isLoading.value,
+                          ),
+                          const SizedBox(height: TSizes.spaceBtwSections),
+                          UserInfo(
+                            title: 'Salesman',
+                            showAddress: false,
+                            fullName: salesmanController
+                                .selectedSalesman?.value.fullName ??
+                                'Not Found',
+                            email: salesmanController
+                                .selectedSalesman?.value.email ??
+                                'Not Found',
+                            phoneNumber: salesmanController
+                                .selectedSalesman?.value.phoneNumber ??
+                                'Not Found',
+                            isLoading: salesmanController.isLoading.value,
+                          ),
+                          const SizedBox(height: TSizes.spaceBtwSections),
+                          if (saleTypeFromOrder == SaleType.installment) ...[
+                            const GuarantorCard(
+                                title: 'Guarantor 1', guarantorIndex: 0),
+                            const SizedBox(height: TSizes.spaceBtwSections),
+                            const GuarantorCard(
+                                title: 'Guarantor 2', guarantorIndex: 1),
+                          ],
+                        ],
+                      ),
+                    ),
                   ],
                 ),
-                  Obx(
-                    () {
-                      if(installmentController.currentInstallmentPayments.isNotEmpty)
-                      {
-                        return TRoundedContainer(
-
-                          // height: 600,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start ,
-                              children: [
-                                Text('Installment Plans',style: Theme.of(context).textTheme.headlineMedium,),
-                                const SizedBox(height: TSizes.spaceBtwSections,),
-                                const InstallmentTable(),
-                              ],
-                            ));
-                      }
-                      else {
-                        return SizedBox();
-                      }
-
-                    }
+                if (saleTypeFromOrder == SaleType.installment)
+                  TRoundedContainer(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Installment Plans',
+                          style: Theme.of(context).textTheme.headlineMedium,
+                        ),
+                        const SizedBox(height: TSizes.spaceBtwSections),
+                        const InstallmentTable(),
+                      ],
+                    ),
                   ),
               ],
             ),

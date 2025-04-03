@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 
+import '../constants/colors.dart';
 import '../constants/enums.dart';
 
 class THelperFunctions {
@@ -27,6 +29,30 @@ class THelperFunctions {
       return Colors.grey;
     }
   }
+  static Color getNotificationColor(NotificationType type) {
+    switch (type) {
+      case NotificationType.company:
+        return const Color(0xFFFFD700); // Yellowish Gold
+      case NotificationType.alertStock:
+        return Colors.red;
+      case NotificationType.installment:
+        return TColors.primary;
+      }
+  }
+
+  static IconData getNotificationIcon(NotificationType type) {
+    switch (type) {
+      case NotificationType.installment:
+        return Iconsax.box;
+      case NotificationType.alertStock:
+        return Iconsax.warning_2;
+      case NotificationType.company:
+        return Iconsax.shop;
+      // Default icon
+    }
+  }
+
+
 
   static Color? getColor(String value) {
     /// Define your product specific colors here and it will match the attribute colors and show specific 🟠🟡🟢🔵🟣🟤

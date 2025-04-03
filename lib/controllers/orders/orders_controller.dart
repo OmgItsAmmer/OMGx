@@ -2,6 +2,7 @@ import 'package:admin_dashboard_v3/Models/orders/order_item_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/repositories/order/order_repository.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
@@ -12,7 +13,7 @@ class OrderController extends GetxController {
   RxList<OrderModel> allOrders = <OrderModel>[].obs;
 
 
-  final Rx<OrderStatus> selectedStatus = OrderStatus.pending.obs;
+   Rx<OrderStatus> selectedStatus = OrderStatus.pending.obs;
 
   RxList<OrderItemModel> orderItems = <OrderItemModel>[].obs;
 
@@ -25,12 +26,19 @@ class OrderController extends GetxController {
   String  averageTotalAmount= '';
 
 
+  TextEditingController newPaidAmount = TextEditingController();
+  RxDouble remainingAmount = (0.0).obs;
+
 
 
   @override
   void onInit() {
     fetchOrders();
     super.onInit();
+  }
+
+  void setRemainingAmount(OrderModel order) {
+    remainingAmount.value =(order.totalPrice) - (order.paidAmount ?? 0.0);
   }
 
   // Function to set the most recent order day with orderId
@@ -40,6 +48,8 @@ class OrderController extends GetxController {
       recentOrderDay = "0"; // Reset difference if no orders
       return;
     }
+
+
 
     // Find the most recent order
     OrderModel recentOrder = currentOrders.reduce((curr, next) =>
@@ -108,7 +118,7 @@ class OrderController extends GetxController {
   //
   //
   //   } catch (e) {
-  //     TLoader.errorSnackBar(title: e.toString()); //TODO remove it
+  //     TLoader.errorSnackBar(title: e.toString());
   //     if (kDebugMode) {
   //       print(e);
   //     }
@@ -165,28 +175,31 @@ class OrderController extends GetxController {
 
 
 
-  Future<String> updateStatus(int orderId , String status) async {
-    try{
+  Future<String> updateStatus(int orderId, String status) async {
+    try {
       isStatusLoading.value = true;
-      await orderRepository.updateStatus(orderId,status);
+
+      await orderRepository.updateStatus(orderId, status);
+
+      // Update the status in allOrders list
+      int index = allOrders.indexWhere((order) => order.orderId == orderId);
+      if (index != -1) {
+        allOrders[index] = allOrders[index].copyWith(status: status);
+        allOrders.refresh(); // Notify UI about the update
+      }
 
       return status;
-
-    }
-    catch(e)
-    {
+    } catch (e) {
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
       if (kDebugMode) {
         print(e);
       }
-
       return '';
-    }
-    finally{
+    } finally {
       isStatusLoading.value = false;
-
     }
   }
+
   OrderStatus? stringToOrderStatus(String status) {
     try {
       return OrderStatus.values.firstWhere((e) => e.toString() == status);
@@ -205,21 +218,26 @@ class OrderController extends GetxController {
 
 
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
-      print(e);
+      if (kDebugMode) {
+        TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+        print(e);
+      }
     }
   }
 
 
-  Future<void> fetchOrderItems(int orderId) async {
+  Future<List<OrderItemModel>> fetchOrderItems(int orderId) async {
     try {
-      print(orderId);
-      final orderItems1 = await orderRepository.fetchOrderItems(orderId);
-      orderItems.assignAll(orderItems1);
+
+      final orderItems = await orderRepository.fetchOrderItems(orderId);
+      return orderItems;
 
     } catch (e) {
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
+      return [];
     }
   }
 
@@ -237,4 +255,97 @@ class OrderController extends GetxController {
       return [];
     }
   }
+
+  Future<void> restoreQuantity(List<OrderItemModel>? orderItems) async {
+    try {
+
+
+      if (orderItems != null) {
+        for (var item in orderItems) {
+          await orderRepository.restoreQuantity(item);
+        }
+        TLoader.successSnackBar(title: 'Product Quantity Restored!',message: 'stock is placed back, this order will not considered in Profit Analysis');
+      } else {
+        TLoader.errorSnackBar(title: 'Oh Snap!', message: 'Order items are null');
+      }
+
+
+
+    } catch (e) {
+      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+
+    }
+
+  }
+  // Future<String> updateStatus(int orderId, String status) async {
+  //   try {
+  //     isStatusLoading.value = true;
+  //
+  //     // Get the old status before updating
+  //     final order = allOrders.firstWhere((o) => o.orderId == orderId);
+  //     final String oldStatus = order.status;
+  //
+  //     await orderRepository.updateStatus(orderId, status);
+  //
+  //     // Update order in RxList
+  //     final index = allOrders.indexWhere((o) => o.orderId == orderId);
+  //     if (index != -1) {
+  //       allOrders[index] = allOrders[index].copyWith(status: status);
+  //     }
+  //
+  //     // Check if status changed from "cancelled" to something else
+  //     if (oldStatus == 'cancelled' && status != 'cancelled') {
+  //       addBackQuantity(order.orderItems);
+  //     }
+  //     // If changed to "cancelled", restore quantity
+  //     else if (status == 'cancelled') {
+  //       restoreQuantity(order.orderItems);
+  //     }
+  //
+  //     return status;
+  //   } catch (e) {
+  //     TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+  //     if (kDebugMode) {
+  //       print(e);
+  //     }
+  //     return '';
+  //   } finally {
+  //     isStatusLoading.value = false;
+  //   }
+  // }
+
+  Future<void> addBackQuantity(List<OrderItemModel>? orderItems) async {
+    if (orderItems != null) {
+      for (var item in orderItems) {
+        await orderRepository.subtractQuantity(item);
+      }
+      TLoader.successSnackBar(
+          title: 'Stock Updated!', message: 'Products have been removed from stock.');
+    } else {
+      TLoader.errorSnackBar(title: 'Oh Snap!', message: 'Order items are null');
+    }
+  }
+
+  Future<void> updateOrderPaidAmount(int orderId, double newAmount) async {
+    try {
+      bool success = await orderRepository.updatePaidAmount(orderId, newAmount);
+
+      if (success) {
+        remainingAmount.value -= newAmount; // Update remaining amount in UI
+        TLoader.successSnackBar(title: 'Success!', message: 'paid amount updated.');
+
+      } else {
+
+        TLoader.errorSnackBar(title: 'Oh Snap!', message: 'update failed!');
+
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Controller Error: $e');
+      }
+    }
+  }
+
+
+
 }

@@ -56,12 +56,9 @@ class OrderRepository extends GetxController {
   }
 
 
-  Future<int> uploadOrder(Map<String, dynamic> json) async {
+  Future<int> uploadOrder(Map<String, dynamic> json, List<OrderItemModel> orderItems) async {
     try {
-      // ✅ Parse orderItems from JSON
-      List<OrderItemModel> orderItems = json['order_items'] != null
-          ? OrderItemModel.fromJsonList(json['order_items'] as List)
-          : [];
+
 
       // ✅ Insert the order into the 'orders' table
       final response = await Supabase.instance.client
@@ -73,10 +70,11 @@ class OrderRepository extends GetxController {
 
       // ✅ Insert the order items using `toJson()`
       if (orderItems.isNotEmpty) {
+        // Make sure to add the order_id to each item before inserting
         await Supabase.instance.client.from('order_items').insert(
           orderItems.map((item) {
             var itemJson = item.toJson();
-            itemJson['order_id'] = orderId; // Assign the order_id
+            itemJson['order_id'] = orderId; // Assign the order_id here
             return itemJson;
           }).toList(),
         );
@@ -94,6 +92,7 @@ class OrderRepository extends GetxController {
       return -1;
     }
   }
+
 
 
 
@@ -150,4 +149,91 @@ class OrderRepository extends GetxController {
 
     return response.map<int>((item) => item['order_id'] as int).toList();
   }
+
+  Future<void> restoreQuantity(OrderItemModel item) async {
+    try {
+      // Step 1: Fetch the current stock quantity
+      final response = await supabase
+          .from('products')
+          .select('stock_quantity')
+          .eq('product_id', item.productId)
+          .single(); // Ensures we get a single row
+
+      // Directly access the stock quantity from the response
+      final int currentStock = response['stock_quantity'] as int;
+      final int newStock = currentStock + item.quantity;
+
+      // Step 2: Update the stock quantity
+      final updateResponse = await supabase
+          .from('products')
+          .update({'stock_quantity': newStock})
+          .eq('product_id', item.productId);
+
+      if (updateResponse.error != null) {
+        TLoader.errorSnackBar(
+            title: 'Restore Quantity Error', message: updateResponse.error!.message);
+      } else {
+        TLoader.successSnackBar(
+            title: 'Success', message: 'Quantity restored successfully');
+      }
+    } catch (e) {
+      TLoader.errorSnackBar(title: 'Restore Quantity Error', message: e.toString());
+    }
+  }
+  Future<void> subtractQuantity(OrderItemModel item) async {
+    try {
+      // Step 1: Fetch the current stock quantity
+      final response = await supabase
+          .from('products')
+          .select('stock_quantity')
+          .eq('product_id', item.productId)
+          .single(); // Ensures we get a single row
+
+      // Directly access the stock quantity from the response
+      final int currentStock = response['stock_quantity'] as int;
+      final int newStock = currentStock - item.quantity; // Subtract quantity
+
+      // Step 2: Update the stock quantity
+      final updateResponse = await supabase
+          .from('products')
+          .update({'stock_quantity': newStock})
+          .eq('product_id', item.productId);
+
+      if (updateResponse.error != null) {
+        TLoader.errorSnackBar(
+            title: 'Subtract Quantity Error', message: updateResponse.error!.message);
+      }
+    } catch (e) {
+      TLoader.errorSnackBar(title: 'Subtract Quantity Error', message: e.toString());
+    }
+  }
+
+  Future<bool> updatePaidAmount(int orderId, double newAmount) async {
+    try {
+      // Fetch existing paid amount
+      final response = await supabase
+          .from('orders')
+          .select('paid_amount')
+          .eq('order_id', orderId)
+          .single();
+
+      double existingAmount = (response['paid_amount'] as num?)?.toDouble() ?? 0.0;
+      double updatedAmount = existingAmount + newAmount;
+
+      // Update order with new paid amount
+      await supabase.from('orders').update({
+        'paid_amount': updatedAmount,
+      }).eq('order_id', orderId);
+
+      return true;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error updating paid amount: $e');
+        TLoader.errorSnackBar(title: 'Order Repo', message: e.toString());
+      }
+      return false;
+    }
+  }
+
+
 }

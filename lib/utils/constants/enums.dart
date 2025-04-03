@@ -29,7 +29,7 @@ enum StockLocation { Shop , Garage1 , Garage2  } // temporary
 
 
 
-enum SaleType { Cash  , CreditSale  , Installment }
+enum SaleType { cash  , creditSale  , installment }
 
 
 enum DurationType { Duration,Monthly , Quarterly  , Yearly   }
@@ -38,3 +38,6 @@ enum DurationType { Duration,Monthly , Quarterly  , Yearly   }
 enum UnitType { item, dozen   }
 
 enum InstallmentStatus { duration ,paid, pending , overdue }
+
+
+enum NotificationType { installment , alertStock, company }

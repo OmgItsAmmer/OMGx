@@ -122,7 +122,9 @@ class MediaController extends GetxController {
       ),
     );
 
-    print(selectedImages);
+    if (kDebugMode) {
+      print(selectedImages);
+    }
     // Return the selected images
     return selectedImages;
   }

@@ -37,7 +37,7 @@ class SaleActionButtons extends StatelessWidget {
             width: 100,
             child: ElevatedButton(
                 onPressed: () {
-                  if (salesController.selectedSaleType == SaleType.Installment) {
+                  if (salesController.selectedSaleType == SaleType.installment) {
                    //final isValid =  salesController.SalesValidator();
                    if(true)
                      {

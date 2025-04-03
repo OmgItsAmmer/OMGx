@@ -12,6 +12,7 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import '../../../../Models/orders/order_item_model.dart';
 import '../../../../common/widgets/containers/rounded_container.dart';
+import '../../../../controllers/customer/customer_controller.dart';
 import '../../../../routes/routes.dart';
 import '../../../../utils/constants/enums.dart';
 
@@ -35,6 +36,7 @@ class SalesmanOrderRows extends DataTableSource {
     final InstallmentController installmentController = Get.find<InstallmentController>();
     final AddressController addressController = Get.find<AddressController>();
     final GuarantorController guarantorController = Get.find<GuarantorController>();
+    final CustomerController customerController = Get.find<CustomerController>();
     //order model
     final order = currentOrders[index];
 
@@ -43,7 +45,7 @@ class SalesmanOrderRows extends DataTableSource {
           orderController.fetchOrderItems(order.orderId);
           order.orderItems = orderController.orderItems;
           installmentController.fetchSpecificInstallmentPayment(order.orderId);
-          installmentController.fetchCustomerInfo(order.customerId ?? -1);
+          customerController.fetchCustomerInfo(order.customerId ?? -1);
           addressController.fetchEntityAddresses(order.customerId ?? -1,'Customer');
           guarantorController.fetchGuarantors(order.orderId);
 

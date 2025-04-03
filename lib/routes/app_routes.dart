@@ -16,6 +16,7 @@ import '../views/customer/customer_detail/customer_detail.dart';
 import '../views/dashboard/dashboard.dart';
 import '../views/installments/installments.dart';
 import '../views/media/media_screen.dart';
+import '../views/notifications/notifcaation_desktop.dart';
 import '../views/orders/order_details/order_detail.dart';
 import '../views/products/all_products/all_products.dart';
 import '../views/products/product_detail/product_detail.dart';
@@ -89,7 +90,7 @@ class TAppRoutes {
     GetPage(name: TRoutes.splashScreen, page: () => const SplashScreen(),middlewares: [TRouteMiddleware()] ),
 
 
-    GetPage(name: TRoutes.expenseScreen, page: () => const ExpenseScreen(),middlewares: [TRouteMiddleware()] ),
+    GetPage(name: TRoutes.expenseScreen, page: () => const NotificationDesktop(),middlewares: [TRouteMiddleware()] ),
 
 
 

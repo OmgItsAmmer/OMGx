@@ -1,8 +1,10 @@
 import 'package:admin_dashboard_v3/common/widgets/icons/table_action_icon_buttons.dart';
 import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
+import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
 import 'package:admin_dashboard_v3/controllers/guarantors/guarantor_controller.dart';
 import 'package:admin_dashboard_v3/controllers/installments/installments_controller.dart';
 import 'package:admin_dashboard_v3/controllers/orders/orders_controller.dart';
+import 'package:admin_dashboard_v3/controllers/salesman/salesman_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:admin_dashboard_v3/utils/helpers/helper_functions.dart';
@@ -10,6 +12,7 @@ import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../common/widgets/containers/rounded_container.dart';
 import '../../../../common/widgets/loaders/tloaders.dart';
@@ -26,19 +29,36 @@ class OrderRows extends DataTableSource {
     final InstallmentController installmentController = Get.find<InstallmentController>();
     final AddressController addressController = Get.find<AddressController>();
     final GuarantorController guarantorController = Get.find<GuarantorController>();
+    final CustomerController customerController = Get.find<CustomerController>();
+    final SalesmanController salesmanController = Get.find<SalesmanController>();
     //order model
     final order = orderController.allOrders[index];
+    SaleType? saleTypeFromOrder = SaleType.values.firstWhere(
+          (e) => e.name == order.saletype,
+      orElse: () => SaleType.cash,
+    );
 
+    OrderStatus? orderStatus = OrderStatus.values.firstWhere(
+          (e) => e.name == order.status,
+      orElse: () => OrderStatus.pending,
+    );
     return DataRow2(
-        onTap: () {
-        orderController.fetchOrderItems(order.orderId);
-        order.orderItems = orderController.orderItems;
-        installmentController.fetchSpecificInstallmentPayment(order.orderId);
-        installmentController.fetchCustomerInfo(order.customerId ?? -1);
-        addressController.fetchEntityAddresses(order.customerId ?? -1,'Customer');
-        guarantorController.fetchGuarantors(order.orderId);
+        onTap: () async  {
+          order.orderItems =  await orderController.fetchOrderItems(order.orderId);
 
-          Get.toNamed(TRoutes.orderDetails, arguments: order);
+        // = orderController.orderItems;
+        if(saleTypeFromOrder == SaleType.installment){
+          installmentController.fetchSpecificInstallmentPayment(order.orderId);
+          guarantorController.fetchGuarantors(order.orderId);
+
+        }
+        orderController.selectedStatus.value = orderStatus;
+        customerController.fetchCustomerInfo(order.customerId ?? -1);
+        salesmanController.fetchSalesmanInfo(order.salesmanId ?? -1);
+        addressController.fetchEntityAddresses(order.customerId ?? -1,'Customer');
+        orderController.setRemainingAmount(order);
+
+        Get.toNamed(TRoutes.orderDetails, arguments: order);
         },
         selected: false,
         onSelectChanged: (value) {},
@@ -52,15 +72,10 @@ class OrderRows extends DataTableSource {
                   .apply(color: TColors.primary),
             ),
           ),
-           DataCell(
-
-
-              Text(
-                orderController.allOrders[index].orderDate.toString(),
-
-              ),
-
-
+          DataCell(
+            Text(
+              DateFormat('dd-MM-yyyy').format(DateTime.parse(orderController.allOrders[index].orderDate)),
+            ),
           ),
           //  DataCell(
           //
@@ -72,31 +87,41 @@ class OrderRows extends DataTableSource {
             padding: const EdgeInsets.symmetric(
                 vertical: TSizes.sm, horizontal: TSizes.md),
             backgroundColor:
-                THelperFunctions.getOrderStatusColor(OrderStatus.pending)
-                    .withOpacity(0.1),
+                THelperFunctions.getOrderStatusColor(orderStatus)
+                    .withValues(alpha: 0.1),
             child: Text(
                orderController.allOrders[index].status.toString(),
               style: TextStyle(
                   color: THelperFunctions.getOrderStatusColor(
-                      OrderStatus.pending)),
+                      orderStatus)),
             ),
 
           )),
            DataCell(Text(orderController.allOrders[index].totalPrice.toString(),)),
           DataCell(
             TTableActionButtons(
+              delete: false,
               view: true,
               edit: false,
-              onViewPressed: () {
-                orderController.fetchOrderItems(order.orderId);
-                order.orderItems = orderController.orderItems;
-                installmentController.fetchSpecificInstallmentPayment(order.orderId);
+              onViewPressed: () async {
+                order.orderItems =  await orderController.fetchOrderItems(order.orderId);
+
+                // = orderController.orderItems;
+                if(saleTypeFromOrder == SaleType.installment){
+                  installmentController.fetchSpecificInstallmentPayment(order.orderId);
+                  guarantorController.fetchGuarantors(order.orderId);
+
+                }
+                orderController.selectedStatus.value = orderStatus;
+                customerController.fetchCustomerInfo(order.customerId ?? -1);
+                salesmanController.fetchSalesmanInfo(order.salesmanId ?? -1);
+                addressController.fetchEntityAddresses(order.customerId ?? -1,'Customer');
+                orderController.setRemainingAmount(order);
+
+
                 Get.toNamed(TRoutes.orderDetails, arguments: order);
               },
-              onDeletePressed: (){
 
-
-              },
             )
           )//orderid
         ]);

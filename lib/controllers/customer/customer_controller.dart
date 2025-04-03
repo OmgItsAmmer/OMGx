@@ -22,7 +22,7 @@ class CustomerController extends GetxController {
 
 
   final profileLoading = false.obs;
-
+  final isLoading = false.obs;
   RxList<CustomerModel> allCustomers = <CustomerModel>[].obs;
   RxList<String> allCustomerNames = <String>[].obs;
 
@@ -209,7 +209,33 @@ class CustomerController extends GetxController {
     }
   }
 
+  void fetchCustomerInfo(int customerId) {
+    try {
+      // Set loading state to true
+      isLoading.value = true;
 
+      // Fetch customer data based on orderId
+      final customerData = allCustomers.firstWhere(
+            (customer) => customer.customerId == customerId,
+        orElse: () => CustomerModel.empty(), // Fallback if no customer is found
+      );
+
+      // If customer data is found, process it
+      if (customerData != CustomerModel.empty()) {
+        selectedCustomer.value = customerData;
+      } else {
+        TLoader.warningSnackBar(
+            title: 'Not Found',
+            message: 'No customer found for the given order ID.');
+      }
+    } catch (e) {
+      // Handle errors
+      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+    } finally {
+      // Set loading state to false
+      isLoading.value = false;
+    }
+  }
 
 
 

@@ -27,11 +27,12 @@ class SalesmanController extends GetxController {
 
 
   final profileLoading = false.obs;
+  final isLoading = false.obs;
 
   RxList<SalesmanModel> allSalesman = <SalesmanModel>[].obs;
   RxList<String> allSalesmanNames = <String>[].obs;
 
-  Rx<SalesmanModel>? selectedSalesman;
+  Rx<SalesmanModel>? selectedSalesman = SalesmanModel.empty().obs;
 
 
   //Add Customer
@@ -182,6 +183,37 @@ class SalesmanController extends GetxController {
       );
     }
   }
+  void fetchSalesmanInfo(int salesmanId) {
+    try {
+      // Set loading state to true
+      isLoading.value = true;
+print(allSalesman);
+      // Fetch salesman data based on salesmanId
+      final salesmanData = allSalesman.firstWhere(
+            (salesman) => salesman.salesmanId == salesmanId,
+        orElse: () => SalesmanModel.empty(), // Fallback if no salesman is found
+      );
+
+      // If salesman data is found, process it
+      if (salesmanData != SalesmanModel.empty()) {
+        selectedSalesman?.value = salesmanData;
+        print(salesmanData);
+        print(selectedSalesman?.value);
+      } else {
+        TLoader.warningSnackBar(
+          title: 'Not Found',
+          message: 'No salesman found for the given ID.',
+        );
+      }
+    } catch (e) {
+      // Handle errors
+      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+    } finally {
+      // Set loading state to false
+      isLoading.value = false;
+    }
+  }
+
   // Future<void> deleteCustomer(int customerId) async {
   //   try {
   //
