@@ -1,11 +1,18 @@
 import 'package:admin_dashboard_v3/common/widgets/images/t_circular_image.dart';
+import 'package:admin_dashboard_v3/common/widgets/shimmers/shimmer.dart';
 import 'package:admin_dashboard_v3/routes/routes.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:iconsax/iconsax.dart';
 
+import '../../../../controllers/media/media_controller.dart';
+import '../../../../controllers/shop/shop_controller.dart';
+import '../../../../utils/constants/enums.dart';
+import '../../images/t_rounded_image.dart';
 import 'menu/menu_item.dart';
 
 class TSideBar extends StatelessWidget {
@@ -13,6 +20,10 @@ class TSideBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ShopController shopController = Get.find<ShopController>();
+    final MediaController mediaController = Get.find<MediaController>();
+
+
     return Drawer(
       shape:  const BeveledRectangleBorder(),
       child: Container(
@@ -22,11 +33,84 @@ class TSideBar extends StatelessWidget {
         child:   SingleChildScrollView(
           child: Column(
             children: [
-              const TCircularImage(
-                width: 100,
-                height: 100,
-                image: TImages.darkAppLogo,
-                isNetworkImage: false,
+
+              const SizedBox(height: TSizes.spaceBtwSections,),
+               Row(
+                // crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+
+                  Obx(() {
+                    final image = mediaController.displayImage.value;
+
+                    if (image != null) {
+                      return FutureBuilder<String?>(
+                        future: mediaController.getImageFromBucket(
+                          MediaCategory.shop.toString().split('.').last,
+                          image.filename ?? '',
+                        ),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const TShimmerEffect(width: 80, height: 80);
+                          } else if (snapshot.hasError || snapshot.data == null) {
+                            return const Icon(Icons.error);
+                          } else {
+                            return TRoundedImage(
+                              isNetworkImage: true,
+                              width: 80,
+                              height: 80,
+                              imageurl: snapshot.data!,
+                            );
+                          }
+                        },
+                      );
+                    }
+
+                    /// ✅ Use cached sidebar image if available
+                    return Obx(() {
+                      if (mediaController.cachedSidebarImage.value != null) {
+                        return TRoundedImage(
+                          isNetworkImage: true,
+                          width: 80,
+                          height: 80,
+                          imageurl: mediaController.cachedSidebarImage.value!,
+                        );
+                      }
+
+                      return FutureBuilder<String?>(
+                        future: mediaController.fetchAndCacheSidebarImage(
+                          shopController.selectedShop?.value.shopId ?? -1,
+                          MediaCategory.shop.toString().split('.').last,
+                        ),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const TShimmerEffect(width: 80, height: 80);
+                          } else if (snapshot.hasError || snapshot.data == null) {
+                            return const Text('No image available');
+                          } else {
+                            return TCircularImage(
+                              isNetworkImage: true,
+                              width: 80,
+                              height: 80,
+                              image: snapshot.data!,
+                            );
+                          }
+                        },
+                      );
+                    });
+                  }),
+
+                  const SizedBox(width: TSizes.spaceBtwItems,),
+                  Obx((){
+
+                    if(shopController.isLoading.value){
+                      return const TShimmerEffect(width: 80, height: 80);
+                    }
+
+                    return Text(shopController.selectedShop?.value.shopname ?? '',style: Theme.of(context).textTheme.headlineLarge,);
+
+                  })
+                ],
               ),
               const SizedBox(
                 height: TSizes.spaceBtwSections,

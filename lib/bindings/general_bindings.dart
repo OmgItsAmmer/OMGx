@@ -5,6 +5,7 @@ import 'package:admin_dashboard_v3/controllers/installments/installments_control
 import 'package:admin_dashboard_v3/controllers/notification/notification_controller.dart';
 import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
 import 'package:admin_dashboard_v3/controllers/sales/sales_controller.dart';
+import 'package:admin_dashboard_v3/controllers/shop/shop_controller.dart';
 import 'package:admin_dashboard_v3/controllers/user/user_controller.dart';
 import 'package:get/get.dart';
 
@@ -36,6 +37,7 @@ class GeneralBindings extends Bindings {
    Get.put(MediaController());
    Get.put(ExpenseController());
    Get.put(NotificationController());
+   Get.put(ShopController());
 
 
    //Get.put(AuthenticationRepository());

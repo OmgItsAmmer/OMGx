@@ -52,6 +52,8 @@ class UserController extends GetxController {
   final phoneNumber = TextEditingController();
   RxBool isUpdating = false.obs;
 
+  // final RxBool isLoading = false.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -120,12 +122,13 @@ class UserController extends GetxController {
           phoneNumber: phoneNumber.text,
           email: email.text
       );
+      mediaController.clearProfileImageCache();
+      await mediaController.imageAssigner(userModel.userId, MediaCategory.users.toString().split('.').last, true);
 
       final json = userModel.toJson(isUpdate: true);
-
       await userRespository.updateProfileData(json, currentUser.value.userId);
 
-      await mediaController.updateEntityId(currentUser.value.userId, productImagesController.selectedImage.value!.image_id,MediaCategory.users.toString().split('.').last);
+
 
     } catch (e) {
       if (kDebugMode) {

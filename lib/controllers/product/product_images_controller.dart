@@ -1,3 +1,4 @@
+import 'package:admin_dashboard_v3/Models/image/combined_image_model.dart';
 import 'package:admin_dashboard_v3/Models/image/image_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/controllers/media/media_controller.dart';
@@ -23,8 +24,9 @@ class ProductImagesController extends GetxController {
   void selectThumbnailImage() async {
     try{
       final mediaController = Get.put(MediaController());
-      List<ImageModel>? selectedImages =
       await mediaController.selectImagesFromMedia();
+      List<ImageModel>? selectedImages = mediaController.selectedImages;
+
 
       if (selectedImages.isNotEmpty) {
         //Set the selected image to the main image or perform any other action
@@ -32,7 +34,7 @@ class ProductImagesController extends GetxController {
 
         selectedThumbnailImageUrl.value = selectedImage.value?.filename;
       }
-      print(selectedThumbnailImageUrl.value);
+
 
     }
     catch(e){
@@ -45,9 +47,10 @@ class ProductImagesController extends GetxController {
   void selectMultipleProductImages() async {
     try{
       final mediaController = Get.put(MediaController());
-      List<ImageModel>? selectedImages =
       await mediaController.selectImagesFromMedia(
           multipleSelection: true, selectedUrls: additionalProductImagesUrls);
+      List<ImageModel>? selectedImages = mediaController.selectedImages;
+
 
       if (selectedImages.isNotEmpty) {
         additionalProductImagesUrls.assignAll(selectedImages.map((e) => e.url));
@@ -87,33 +90,33 @@ class ProductImagesController extends GetxController {
 
 Future<void> setDesiredImage(MediaCategory mediaCategory,int imageId) async {
   try{
-    final mediaController = Get.put(MediaController());
-
-
-    await mediaController.getSelectedFolderImages(mediaCategory);
-
-    if (kDebugMode) {
-      print(imageId);
-    }
-   // print(mediaController.allImages[1]);
-
-    if (mediaController.allImages.isNotEmpty && imageId != -1) {
-      final filteredValue = mediaController.allImages.firstWhere(
-            (image) => image.entity_id == imageId,
-        orElse: () => ImageModel.empty(),
-      );
-
-      selectedImage.value = filteredValue;
-      if (kDebugMode) {
-        print(selectedImage.value?.image_id);
-      }
-
-      selectedThumbnailImageUrl.value = filteredValue.filename;
-    }
-
-    if (kDebugMode) {
-      print(selectedThumbnailImageUrl.value);
-    }
+   //  final mediaController = Get.put(MediaController());
+   //
+   //
+   //  await mediaController.getSelectedFolderImages(mediaCategory);
+   //
+   //  if (kDebugMode) {
+   //    print(imageId);
+   //  }
+   // // print(mediaController.allImages[1]);
+   //
+   //  if (mediaController.allImages.isNotEmpty && imageId != -1) {
+   //    final filteredValue = mediaController.allImages.firstWhere(
+   //          (image) => image.entityId == imageId,
+   //      orElse: () => CombinedImageEntityModel.empty(),
+   //    );
+   //
+   //    selectedImage.value = filteredValue;
+   //    if (kDebugMode) {
+   //      print(selectedImage.value?.imageId);
+   //    }
+   //
+   //    selectedThumbnailImageUrl.value = filteredValue.filename;
+   //  }
+   //
+   //  if (kDebugMode) {
+   //    print(selectedThumbnailImageUrl.value);
+   //  }
 
   }
   catch(e){

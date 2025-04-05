@@ -112,7 +112,7 @@ class CustomerController extends GetxController {
       {
         customerModel.customerId = entityId;
         if(productImagesController.selectedImage.value != null){
-          await mediaController.updateEntityId(entityId, productImagesController.selectedImage.value!.image_id,MediaCategory.customers.toString().split('.').last);
+        //  await mediaController.updateEntityId(entityId, productImagesController.selectedImage.value!.imageId,MediaCategory.customers.toString().split('.').last);
         }
         await AddressController.instance.saveAddress(entityId, 'Customer');
         if(!isUpdate){

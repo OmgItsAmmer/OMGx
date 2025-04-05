@@ -16,6 +16,7 @@ import '../../../controllers/media/media_controller.dart';
 import '../../../controllers/product/product_images_controller.dart';
 import '../../../controllers/sales/sales_controller.dart';
 import '../../../utils/constants/colors.dart';
+import '../../../utils/constants/enums.dart';
 import '../../../utils/validators/validation.dart';
 
 class SaleCustomerInfo extends StatelessWidget {
@@ -28,6 +29,7 @@ class SaleCustomerInfo extends StatelessWidget {
   final userNameTextController;
   final addressTextController;
 
+
   const SaleCustomerInfo(
       {super.key,
       required this.hintText,
@@ -36,7 +38,8 @@ class SaleCustomerInfo extends StatelessWidget {
       required this.userNameTextController,
       required this.onSelectedAddress,
       required this.addressList,
-      required this.addressTextController});
+      required this.addressTextController,
+      });
 
   @override
   Widget build(BuildContext context) {
@@ -77,8 +80,7 @@ class SaleCustomerInfo extends StatelessWidget {
                           // Rounded Image
                           Obx(
                             () {
-                              if (productImagesController.selectedImage.value ==
-                                  null) {
+                              if (salesController.entityId.value == -1) {
                                 return const SizedBox(
                                   height: 120,
                                   width: 100,
@@ -88,14 +90,10 @@ class SaleCustomerInfo extends StatelessWidget {
                               }
                               // Check if selectedImages is empty
                               return FutureBuilder<String?>(
-                                future: mediaController.getImageFromBucket(
-                                  productImagesController
-                                          .selectedImage.value?.mediaCategory ??
-                                      '',
-                                  productImagesController
-                                          .selectedImage.value?.filename ??
-                                      '',
-                                ),
+                                future: mediaController.fetchMainImage(
+                                salesController.entityId.value ,
+                                MediaCategory.customers.toString().split('.').last
+                              ),
                                 builder: (context, snapshot) {
                                   if (snapshot.connectionState ==
                                       ConnectionState.waiting) {

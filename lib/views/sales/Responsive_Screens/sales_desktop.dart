@@ -1,13 +1,13 @@
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
 import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
-import 'package:admin_dashboard_v3/controllers/report/report_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:admin_dashboard_v3/views/sales/widgets/sale_action_buttons.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../controllers/media/media_controller.dart';
 import '../../../controllers/product/product_images_controller.dart';
 import '../../../controllers/sales/sales_controller.dart';
 import '../../../utils/constants/enums.dart';
@@ -31,6 +31,8 @@ class SalesDesktop extends StatelessWidget {
     final AddressController addressController = Get.find<AddressController>();
     final ProductImagesController productImagesController =
         Get.find<ProductImagesController>();
+    final MediaController mediaController = Get.find<MediaController>();
+
 
     return Expanded(
       child: SizedBox(
@@ -90,16 +92,15 @@ class SalesDesktop extends StatelessWidget {
                                         'Customer');
 
                                     //Fetch Image
-                                    if (kDebugMode) {
-                                      print(customerController
-                                          .selectedCustomer.value.customerId);
-                                    }
+                                    salesController.entityId.value = customerController.selectedCustomer.value.customerId;
 
-                                    await productImagesController
-                                        .getSpecificImage(
-                                            MediaCategory.customers,
-                                            customerController.selectedCustomer
-                                                .value.customerId);
+
+
+                                    // await productImagesController
+                                    //     .getSpecificImage(
+                                    //         MediaCategory.customers,
+                                    //         customerController.selectedCustomer
+                                    //             .value.customerId);
                                     //Automatic gives unit price
                                     salesController.customerPhoneNoController
                                             .value.text =
@@ -130,7 +131,9 @@ class SalesDesktop extends StatelessWidget {
                                             .addressId;
                                     // print(salesController.selectedAddressId);
                                   },
+
                                 )),
+
                             const SizedBox(
                               width: TSizes
                                   .spaceBtwSections, // Replace TSizes.spaceBtwSections if needed

@@ -10,8 +10,8 @@ class StoreScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final  shopController = Get.put(ShopController());
-    shopController.fetchShop();
+ //   final  shopController = Get.put(ShopController());
+   // shopController.fetchShop();
     return const TSiteTemplate(
       desktop: StoreDesktop(),
     );

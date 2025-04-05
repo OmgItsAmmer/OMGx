@@ -2,6 +2,7 @@ import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.d
 import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/common/widgets/shimmers/shimmer.dart';
+import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
@@ -11,6 +12,7 @@ import 'package:iconsax/iconsax.dart';
 
 import '../../../../controllers/media/media_controller.dart';
 import '../../../../controllers/product/product_images_controller.dart';
+import '../../../../utils/constants/enums.dart';
 
 class CustomerThumbnailInfo extends StatelessWidget {
   const CustomerThumbnailInfo({super.key});
@@ -19,6 +21,7 @@ class CustomerThumbnailInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     final ProductImagesController productImagesController = Get.find<ProductImagesController>();
     final MediaController mediaController = Get.find<MediaController>();
+    final CustomerController customerController = Get.find<CustomerController>();
 
     return Row(
       children: [
@@ -33,7 +36,7 @@ class CustomerThumbnailInfo extends StatelessWidget {
                 children: [
                   Obx(
                         () {
-                      if(productImagesController.selectedImage.value == null){
+                      if(customerController.customerId == -1){
                         return const SizedBox(
                             height: 120,
                             width: 100,
@@ -41,10 +44,8 @@ class CustomerThumbnailInfo extends StatelessWidget {
                       }
                       // Check if selectedImages is empty
                       return FutureBuilder<String?>(
-                        future: mediaController.getImageFromBucket(
-                          productImagesController.selectedImage.value?.mediaCategory ?? '',
-                          productImagesController.selectedImage.value?.filename ?? '',
-                        ),
+                        future: mediaController.fetchMainImage(customerController.customerId, MediaCategory.customers.toString().split('.').last),
+
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
                             return const TShimmerEffect(width: 350, height: 170); // Show shimmer while loading

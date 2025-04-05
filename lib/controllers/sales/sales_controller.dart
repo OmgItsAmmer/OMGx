@@ -6,6 +6,7 @@ import 'package:admin_dashboard_v3/controllers/user/user_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_thermal_printer/flutter_thermal_printer.dart';
 import 'package:get/get.dart';
 
 import '../../Models/orders/order_item_model.dart';
@@ -63,6 +64,8 @@ class SalesController extends GetxController {
   final customerAddressController = TextEditingController().obs;
   int? selectedAddressId = -1;
   final customerCNICController = TextEditingController().obs;
+  RxInt entityId = (-1).obs;
+
 
   // final customerCNICController = TextEditingController().obs;
 
@@ -97,6 +100,7 @@ class SalesController extends GetxController {
 //Choice Chip logic
   RxInt selectedChipIndex = (-1).obs;
   RxString selectedChipValue = ''.obs;
+
 
 
   // @override
@@ -163,6 +167,8 @@ class SalesController extends GetxController {
       TLoader.errorSnackBar(title: 'Adding Data', message: e.toString());
     }
   }
+
+
 
   Future<int> checkOut() async {
     try {
@@ -253,6 +259,9 @@ class SalesController extends GetxController {
         List<int> productIds = allSales.map((sale) => sale.productId).toList();
         await productController.checkLowStock(productIds);
 
+        // Print thermal invoice
+     //   await _generateReceipt(order);
+
         // Reset fields after successful checkout
         resetField();
         return orderId;
@@ -264,6 +273,86 @@ class SalesController extends GetxController {
       return -1;
     }
   }
+
+  // Future<List<int>> _generateReceipt(OrderModel order) async {
+  //   final profile = await CapabilityProfile.load();
+  //   final generator = Generator(PaperSize.mm80, profile);
+  //   List<int> bytes = [];
+  //
+  //   // Header Section
+  //   bytes += generator.text(
+  //     "Test Network Print",
+  //     styles: const PosStyles(
+  //       bold: true,
+  //       height: PosTextSize.size3,
+  //       width: PosTextSize.size3,
+  //     ),
+  //   );
+  //
+  //   // Order Information
+  //   bytes += generator.text("Order ID: ${order.orderId}");
+  //   bytes += generator.text("Date: ${order.orderDate}");
+  //   if (order.saletype != null) {
+  //     bytes += generator.text("Sale Type: ${order.saletype!}");
+  //   }
+  //   bytes += generator.text("--------------------------------");
+  //
+  //   // Order Items
+  //   if (order.orderItems != null && order.orderItems!.isNotEmpty) {
+  //     for (var item in order.orderItems!) {
+  //       final itemTotal = item.quantity * item.price;
+  //       final productLine = item..padRight(20);
+  //       final priceLine = "x${item.quantity}".padLeft(5) +
+  //           "\$${itemTotal.toStringAsFixed(2)}".padLeft(10);
+  //       bytes += generator.text("$productLine$priceLine");
+  //     }
+  //   } else {
+  //     bytes += generator.text("No items in this order");
+  //   }
+  //
+  //   bytes += generator.text("--------------------------------");
+  //
+  //   // Calculations
+  //   final subtotal = order.orderItems?.fold<double>(
+  //       0.0,
+  //           (sum, item) => sum + (item.quantity * item.price)
+  //   ) ?? 0.0;
+  //
+  //   // Payment Summary
+  //   bytes += _buildRightAlignedText(generator, "Subtotal:", subtotal);
+  //
+  //   if (order.discount > 0) {
+  //     bytes += _buildRightAlignedText(generator, "Discount:", -order.discount);
+  //   }
+  //
+  //   bytes += _buildRightAlignedText(generator, "Tax:", order.tax);
+  //   bytes += _buildRightAlignedText(generator, "Shipping:", order.shippingFee);
+  //
+  //   if (order.salesmanComission > 0) {
+  //     bytes += _buildRightAlignedText(
+  //         generator,
+  //         "Commission:",
+  //         order.salesmanComission.toDouble()
+  //     );
+  //   }
+  //
+  //   bytes += generator.text(
+  //     "Total: \$${order.totalPrice.toStringAsFixed(2)}",
+  //     styles: const PosStyles(bold: true, align: PosAlign.right),
+  //   );
+  //
+  //   bytes += generator.cut();
+  //   return bytes;
+  // }
+
+  List<int> _buildRightAlignedText(Generator generator, String label, double value) {
+    return generator.text(
+      "$label \$${value.toStringAsFixed(2)}",
+      styles: const PosStyles(align: PosAlign.right),
+    );
+  }
+
+
 
 
 

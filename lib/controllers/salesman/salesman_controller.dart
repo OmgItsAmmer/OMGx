@@ -44,6 +44,7 @@ class SalesmanController extends GetxController {
   final commission = TextEditingController();
   final area = TextEditingController();
   final city = TextEditingController();
+  RxInt entityId = (-1).obs;
   GlobalKey<FormState> addSalesmanKey =
   GlobalKey<FormState>();
 
@@ -157,7 +158,7 @@ class SalesmanController extends GetxController {
       {
         salesmanModel.salesmanId = entityId;
         if(productImagesController.selectedImage.value != null){
-          await mediaController.updateEntityId(entityId, productImagesController.selectedImage.value!.image_id,MediaCategory.salesman.toString().split('.').last);
+         // await mediaController.updateEntityId(entityId, productImagesController.selectedImage.value!.imageId,MediaCategory.salesman.toString().split('.').last);
         }
         await AddressController.instance.saveAddress(entityId, 'Salesman');
         allSalesman.add(salesmanModel);

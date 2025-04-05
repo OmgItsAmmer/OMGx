@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:admin_dashboard_v3/controllers/media/media_controller.dart';
 import 'package:admin_dashboard_v3/routes/routes.dart';
 import 'package:admin_dashboard_v3/views/login/login.dart';
 import 'package:flutter/cupertino.dart';
@@ -16,24 +17,30 @@ class   TRouteMiddleware extends GetMiddleware {
 
   @override
   RouteSettings? redirect(String? route) {
-    final ProductImagesController productImagesController =
-      Get.find<ProductImagesController>();
-    productImagesController.selectedImage.value = null;
-    const isAuthenticated = true;
+    // final ProductImagesController productImagesController =
+    //   Get.find<ProductImagesController>();
+    final MediaController mediaController =
+    Get.find<MediaController>();
+
+    mediaController.displayImage.value = null;
+    //
+    // productImagesController.selectedImage.value = null;
+   // const isAuthenticated = true;
     // return isAuthenticated
     //     ? null
     //     : const RouteSettings(name: TRoutes.firstScreen);
 
 
+
     // Run function when navigating to ProfileScreen
     if (route != null) {
       // Run function when navigating to ProfileScreen
-      if (route == TRoutes.profileScreen) {
-        fetchProfileImage();
-      }
-      if (route == TRoutes.profileScreen) {
-        fetchStoreImage();
-      }
+      // if (route == TRoutes.profileScreen) {
+      //   fetchProfileImage();
+      // }
+      // if (route == TRoutes.profileScreen) {
+      //   fetchStoreImage();
+      // }
     }
 
     return null;
@@ -42,9 +49,13 @@ class   TRouteMiddleware extends GetMiddleware {
   void fetchProfileImage()  async {
     try {
       //TLoader.successSnackBar(title: 'Pushed  by jynx');
+      final ProductImagesController productImagesController =
+      Get.find<ProductImagesController>();
+      final MediaController mediaController =
+      Get.find<MediaController>();
 
-
-      await  ProductImagesController.instance.setDesiredImage(MediaCategory.users,
+      mediaController.selectedPath.value  = MediaCategory.users;
+      await  productImagesController.setDesiredImage(MediaCategory.users,
           UserController.instance.currentUser.value.userId);
 
     }
@@ -58,6 +69,12 @@ class   TRouteMiddleware extends GetMiddleware {
 
   void fetchStoreImage() {
     try {
+
+
+      final MediaController mediaController =
+      Get.find<MediaController>();
+
+      mediaController.selectedPath.value  = MediaCategory.shop;
       ProductImagesController.instance.setDesiredImage(
           MediaCategory.shop, UserController.instance.currentUser.value.userId);
     }

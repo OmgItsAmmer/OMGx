@@ -196,7 +196,7 @@ class MediaUploader extends StatelessWidget {
                                       onPressed: () {
                                         if (mediaController.selectedPath !=
                                             MediaCategory.folders) {
-                                          mediaController.uploadImages(
+                                          mediaController.insertImagesInTableAndBucket(
                                               mediaController.selectedPath.value
                                                   .toString()
                                                   .split('.')
@@ -296,7 +296,7 @@ class MediaUploader extends StatelessWidget {
   Future<void> _uploadImage(BuildContext context) async {
     // Simulate an image upload process (replace with your actual upload logic)
     print(mediaController.selectedPath.value.toString().split('.').last);
-   mediaController.uploadImages(mediaController.selectedPath.value.toString().split('.').last);
+   mediaController.insertImagesInTableAndBucket(mediaController.selectedPath.value.toString().split('.').last);
   }
 
 }

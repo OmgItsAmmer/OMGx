@@ -27,27 +27,29 @@ class ShopController extends GetxController {
   final profile3 = TextEditingController();
 
   RxBool isUpdating = false.obs;
+  RxBool isLoading = false.obs;
 
-  // @override
-  // void onInit() {
-  //   fetchShop();
-  //
-  //   super.onInit();
-  // }
+  @override
+  void onInit() {
+    fetchShop();
 
-  Future<void> fetchShop({bool fetchImage = true}) async {
+    super.onInit();
+  }
+
+  Future<void> fetchShop() async {
     try {
+     isLoading.value = true;
       final shopData = await shopRepository.fetchShopDetails();
       selectedShop?.value = shopData;
       setShopDetail();
 
 
-      if (fetchImage == true) {
-        productImagesController.setDesiredImage(
-            MediaCategory.shop, shopData.shopId);
-      }
+
     } catch (e) {
       TLoader.errorSnackBar(title: 'Oh Snap', message: e.toString());
+    }
+    finally {
+      isLoading.value = false;
     }
   }
 
@@ -63,10 +65,6 @@ class ShopController extends GetxController {
       profile3.text = selectedShop?.value.profile3.toString() ?? ' ';
     //  productImagesController.setDesiredImage(MediaCategory.shop);
 
-
-
-
-
     } catch (e) {
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
@@ -75,6 +73,7 @@ class ShopController extends GetxController {
   Future<void> updateStore() async {
     try {
       isUpdating.value = true;
+
       final shopModel = ShopModel(
         shopId: selectedShop?.value.shopId ?? -1,
         shopname: shopName.value.text,
@@ -89,8 +88,9 @@ class ShopController extends GetxController {
       final json = shopModel.toJson();
 
 
-      await mediaController.updateEntityId(selectedShop?.value.shopId ?? -1, productImagesController.selectedImage.value!.image_id,MediaCategory.shop.toString().split('.').last);
-
+     /// await mediaController.updateEntityId(selectedShop?.value.shopId ?? -1, productImagesController.selectedImage.value!.imageId,MediaCategory.shop.toString().split('.').last);
+      await mediaController.imageAssigner(shopModel.shopId,MediaCategory.shop.toString().split('.').last,true);
+      mediaController.clearSidebarImageCache();
       await shopRepository.updateShopData(json, selectedShop?.value.shopId ?? -1);
 
 

@@ -20,7 +20,7 @@ class SalesSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     final SalesController salesController = Get.find<SalesController>();
   final  shopController =  Get.put(ShopController());
-    shopController.fetchShop(fetchImage: false);
+    shopController.fetchShop();
 
 
     return Row(

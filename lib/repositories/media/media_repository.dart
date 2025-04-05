@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:admin_dashboard_v3/Models/image/combined_image_model.dart';
+import 'package:admin_dashboard_v3/Models/image/image_entity_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -7,34 +9,76 @@ import 'package:get/get.dart';
 import '../../Models/image/image_model.dart';
 import '../../main.dart';
 
-import 'package:path/path.dart' as p;
 
 class MediaRepository extends GetxController {
   static MediaRepository get instance => Get.find();
 
-  Future<List<ImageModel>> fetchImagesTable({
-    required String folder,
+  Future<List<ImageModel>> fetchFolderImagesFromImagesTable({
+    required String folderType,
     required int offset,
     required int limit,
   }) async {
     try {
-      List<Map<String, dynamic>>? data;
-      data = await supabase
-          .from("images") // Replace with your table name
+      // Step 1: Fetch image-entity table data
+      // final List<Map<String, dynamic>> entityJsonList = await supabase
+      //     .from("image_entity")
+      //     .select()
+      //     .eq('entity_category', folderType)
+      //     .range(offset, offset + limit - 1);
+
+      // // Step 2: Extract image IDs
+      // final List<int> imageIds = entityJsonList
+      //     .map((json) => json['image_id'])
+      //     .whereType<int>()
+      //     .toList();
+      //
+      // if (imageIds.isEmpty) return [];
+
+      // Step 3: Fetch corresponding images using image IDs
+      final List<Map<String, dynamic>> imageJsonList = await supabase
+          .from('images')
           .select()
-          .eq('mediacategory', folder)
-          .range(offset, offset + limit - 1); // Pagination
+          .eq('folderType', folderType);
 
-      final imageList = data.map((item) {
-        return ImageModel.fromJson(item);
-      }).toList();
+      final List<ImageModel> imageModels = imageJsonList
+          .map((json) => ImageModel.fromJson(json))
+          .toList();
 
-      return imageList;
+
+
+
+      // // Step 4: Build a map for faster lookup
+      // final Map<int, Map<String, dynamic>> imageJsonMap = {
+      //   for (var img in imageJsonList) img['image_id'] as int: img
+      // };
+
+
+
+      // Step 5: Combine using factory method
+      // final List<CombinedImageEntityModel> combinedList = entityJsonList.map((entityJson) {
+      //   final int imageId = entityJson['image_id'];
+      //   final imageJson = imageJsonMap[imageId];
+      //
+      //   if (imageJson != null) {
+      //     return CombinedImageEntityModel.fromJson(
+      //       imageJson: imageJson,
+      //       entityJson: entityJson,
+      //     );
+      //   } else {
+      //     throw Exception("Image not found for image_id: $imageId");
+      //   }
+      // }).toList();
+
+      return imageModels;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Media Repo', message: e.toString());
+      TLoader.errorSnackBar(
+        title: 'fetchFolderImagesFromImagesTable',
+        message: e.toString(),
+      );
       return [];
     }
   }
+
 
   Future<ImageModel> fetchSpecificImageRow({
     required String folder,
@@ -59,8 +103,8 @@ class MediaRepository extends GetxController {
     }
   }
 
-  Future<String?> fetchImageFromBucket(
-      String filePath, String bucketName) async {
+  Future<String?>   fetchImageFromBucket(String filePath,
+      String bucketName) async {
     try {
       // return await supabase.storage.from(bucketName).download(filePath);
       return supabase.storage.from(bucketName).getPublicUrl(filePath);
@@ -73,79 +117,70 @@ class MediaRepository extends GetxController {
     }
   }
 
-///////////////////////UPLOAD SECTION//////////////////////////////
+///////////////////////INSERTION SECTION//////////////////////////////
 
-  Future<void> uploadImagesWithMetadata({
+  Future<void> insertImagesTableAndBucket({
     required String bucketName,
     required List<Map<String, dynamic>> jsonDataList,
     required List<File> files,
   }) async {
     if (files.length != jsonDataList.length) {
       if (kDebugMode) {
-        print("❌ Error: Number of files and JSON metadata entries must match.");
+        print("❌ Mismatch: files and metadata count must match.");
       }
       return;
     }
-    if (kDebugMode) {
-      print(jsonDataList);
-    }
+
     for (int i = 0; i < files.length; i++) {
-      File file = files[i];
-      Map<String, dynamic> jsonData = jsonDataList[i];
-      if (kDebugMode) {
-        print(jsonData);
-      }
+      final file = files[i];
+      final jsonData = jsonDataList[i];
 
       try {
-        // ✅ Step 1: Insert metadata (DO NOT pass `image_id`, it auto-increments)
-        final response = await supabase
-            .from('images')
-            .insert({...jsonData, 'filename': null})
-            .select('image_id')
-            .single(); // Fetch the newly created image_id
-
-        int imageId = response['image_id']; // Fetch auto-generated image_id
-        if (kDebugMode) {
-          print("✅ Inserted into DB with image_id: $imageId");
+        final filename = jsonData['filename'];
+        if (filename == null || filename.isEmpty) {
+          throw Exception("Filename not provided in metadata.");
         }
 
-        // ✅ Step 2: Generate a unique filename using image_id
-        String fileExtension = p.extension(file.path);
-        String newFileName = '$imageId$fileExtension';
+        // ✅ Step 1: Insert metadata into DB
+        await supabase.from('images').insert(jsonData);
 
-        // ✅ Step 3: Update the filename in the database
-        await supabase.from('images').update({
-          'filename': newFileName,
-        }).eq('image_id', imageId);
-        if (kDebugMode) {
-          print("✅ Updated DB with filename: $newFileName");
-        }
 
-        final user = supabase.auth.currentUser;
+        // final user = supabase.auth.currentUser;
+        // if (user == null) {
+        //   throw Exception("User not authenticated.");
+        // }
 
-        if (user == null) {
-          if (kDebugMode) {
-            print("❌ User is not authenticated.");
-          }
-          return;
-        }
-
-        // ✅ Step 4: Upload the file to Supabase Storage
-        await supabase.storage.from(bucketName).upload(newFileName, file);
-        if (kDebugMode) {
-          print("✅ File uploaded successfully: $newFileName");
-        }
+        insertFileToBucket(
+            bucketName: bucketName, file: file, filename: filename);
       } catch (e) {
-        if (kDebugMode) {
-          print("❌ Error in upload process: $e");
-        }
+        if (kDebugMode) print("❌ Upload error: $e");
         TLoader.errorSnackBar(
-            title: 'Image Upload Failed', message: e.toString());
+            title: 'Image Table Upload Failed', message: e.toString());
       }
     }
   }
 
-  Future<void> updateEntityIdRepo(int entityId, int imageId, String mediaCategory) async {
+  Future<void> insertFileToBucket({
+    required String bucketName,
+    required String filename,
+    required File file,
+  }) async {
+    try {
+      await supabase.storage.from(bucketName).upload(filename, file);
+    } catch (e) {
+      if (kDebugMode) {
+        TLoader.errorSnackBar(
+            title: 'Bucket Upload Failed', message: e.toString());
+
+        print("❌ Bucket upload failed: $e");
+      }
+      throw Exception("Upload to bucket failed: $e");
+    }
+  }
+
+
+  Future<void> updateEntityIdRepo(int entityId, int imageId,
+      String mediaCategory) async {
     try {
       // Step 1: Find the previous image associated with the same entityId
       final previousImageResponse = await supabase
@@ -174,11 +209,150 @@ class MediaRepository extends GetxController {
       }
     } catch (e) {
       // Handle errors
-      TLoader.errorSnackBar(title: 'Error updating entity ID', message: e.toString());
+      TLoader.errorSnackBar(
+          title: 'Error updating entity ID', message: e.toString());
       if (kDebugMode) {
         print('Error updating entity ID: $e');
       }
       rethrow; // Rethrow the error if needed
+    }
+  }
+
+  Future<bool?> checkAssigned(int entityId, String entityType) async {
+    try {
+      final response = await supabase
+          .from('image_entity')
+          .select('image_entity_id')
+          .eq('entity_id', entityId)
+          .eq('entity_category', entityType)
+          .eq('isFeatured', true)
+          .maybeSingle();
+
+      return response != null;
+    } catch (e) {
+      if (kDebugMode) {
+        TLoader.errorSnackBar(
+            title: 'Check Assigned Error', message: e.toString());
+        print("❌ checkAssigned failed: $e");
+      }
+      return null; // null means failure to determine
+    }
+  }
+
+  Future<void> reAssignNewImage(int entityId, String entityType,
+      int imageId) async {
+    try {
+      try {
+        final existingRow = await supabase
+            .from('image_entity')
+            .select('image_entity_id')
+            .eq('entity_id', entityId)
+            .eq('entity_category', entityType)
+            .maybeSingle();
+
+        if (existingRow != null && existingRow['image_entity_id'] != null) {
+          final imageEntityId = existingRow['image_entity_id'];
+
+          await supabase
+              .from('image_entity')
+              .update({'image_id': imageId})
+              .eq('image_entity_id', imageEntityId);
+
+          if (kDebugMode) {
+            print("✅ Image updated for entity: $entityId");
+          }
+        } else {
+          if (kDebugMode) {
+            print("⚠️ No existing row to update for entity: $entityId");
+          }
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          TLoader.errorSnackBar(title: 'Update Error', message: e.toString());
+          print("❌ updateImageAssignment failed: $e");
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        TLoader.errorSnackBar(
+            title: 'reAssignNewImage Error', message: e.toString());
+        print("❌ reAssignNewImage failed: $e");
+      }
+    }
+  }
+
+  Future<void> assignNewImage(Map<String, dynamic> json) async {
+    try {
+      await supabase.from('image_entity').insert(json);
+    } catch (e) {
+      if (kDebugMode) {
+        TLoader.errorSnackBar(title: 'Insert Error', message: e.toString());
+        print("❌ assignNewImage failed: $e");
+      }
+    }
+  }
+
+  Future<ImageModel> getMainImage(int entityId, String entityType) async {
+    try {
+      final imageId = await fetchMainImageFromTable(entityId, entityType);
+
+     final model =  await fetchImageFromImageTable(imageId);
+
+    return model;
+    } catch (e) {
+      if (kDebugMode) {
+        print("❌ fetchMainImageFromTable failed: $e");
+      }
+      // If an error occurs, return null
+      return ImageModel.empty();
+    }
+  }
+
+  Future<int> fetchMainImageFromTable(int entityId, String entityType) async {
+    try {
+      // Fetch the image_id where isFeatured is true
+      final response = await supabase
+          .from('image_entity')
+          .select('image_id')
+          .eq('entity_id', entityId)
+          .eq('entity_category', entityType)
+          .eq('isFeatured', true)
+          .single();
+
+      final imageId = ImageEntityModel
+          .fromJson(response)
+          .imageId;
+
+
+      return imageId ?? -1;
+    } catch (e) {
+      if (kDebugMode) {
+        TLoader.errorSnackBar(
+            title: 'Main Image Table Fetching Error', message: e.toString());
+        print("❌ fetchMainImageFromTable failed: $e");
+      }
+      // If an error occurs, return null
+      return -1;
+    }
+  }
+
+  Future<ImageModel> fetchImageFromImageTable(int imageId) async {
+    try {
+      final response = await supabase
+          .from('images') // Access the 'images' table
+          .select('*')
+          .eq('image_id', imageId) // Filter by image_id
+          .single(); // We are expecting a single record.
+
+
+      final image = ImageModel.fromJson(response);
+
+      return image; // Return the ImageModel
+    } catch (e) {
+      if (kDebugMode) {
+        print("❌ fetchImageFromImageTable failed: $e");
+      }
+      return ImageModel.empty(); // Return null if any error occurs
     }
   }
 }

@@ -49,17 +49,22 @@ class UserInfo extends StatelessWidget {
             children: [
               Obx(
                     () {
-                  if(productImagesController.selectedImage.value == null){
-                    return const SizedBox(
-                        height: 120,
-                        width: 100,
-                        child: Icon(Iconsax.image));
-                  }
-                  // Check if selectedImages is empty
+                  // // If no image is selected yet
+                  // if (mediaController.isFetching.value) {
+                  //   return const TShimmerEffect(width: 80, height: 80);
+                  // }
+
+                  // const SizedBox(
+                  //   height: 120,
+                  //   width: 100,
+                  //   child: Icon(Iconsax.image),
+                  // );
+
+                  // Fetch main image from the bucket and show it
                   return FutureBuilder<String?>(
-                    future: mediaController.getImageFromBucket(
-                      productImagesController.selectedImage.value?.mediaCategory ?? '',
-                      productImagesController.selectedImage.value?.filename ?? '',
+                    future: mediaController.fetchMainImage(
+                      customerModel.customerId,
+                      'customers',
                     ),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
@@ -80,6 +85,8 @@ class UserInfo extends StatelessWidget {
                   );
                 },
               ),
+
+
               const SizedBox(width: TSizes.spaceBtwItems,),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

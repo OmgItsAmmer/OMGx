@@ -2,6 +2,7 @@ import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.d
 import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/common/widgets/shimmers/shimmer.dart';
+import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
@@ -11,6 +12,7 @@ import 'package:iconsax/iconsax.dart';
 
 import '../../../../controllers/media/media_controller.dart';
 import '../../../../controllers/product/product_images_controller.dart';
+import '../../../../utils/constants/enums.dart';
 
 class ThumbnailInfo extends StatelessWidget {
   const ThumbnailInfo({super.key});
@@ -19,6 +21,7 @@ class ThumbnailInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     final ProductImagesController productImagesController = Get.find<ProductImagesController>();
     final MediaController mediaController = Get.find<MediaController>();
+    final ProductController productController = Get.find<ProductController>();
 
     return Row(
       children: [
@@ -41,10 +44,8 @@ class ThumbnailInfo extends StatelessWidget {
                           }
                       // Check if selectedImages is empty
                       return FutureBuilder<String?>(
-                        future: mediaController.getImageFromBucket(
-                          productImagesController.selectedImage.value?.mediaCategory ?? '',
-                          productImagesController.selectedImage.value?.filename ?? '',
-                        ),
+                        future: mediaController.fetchMainImage(productController.entityId.value, MediaCategory.products.toString().split('.').last),
+
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
                             return const TShimmerEffect(width: 350, height: 170); // Show shimmer while loading

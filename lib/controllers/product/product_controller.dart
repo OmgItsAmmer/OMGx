@@ -39,7 +39,9 @@ class ProductController extends GetxController {
   int selectedBrandId = -1;
   int selectedCategoryId = -1;
   GlobalKey<FormState> productDetail =
-  GlobalKey<FormState>(); // Form key for form validation
+  GlobalKey<FormState>();
+
+  RxInt entityId = (-1).obs; // Form key for form validation
 
   @override
   void onInit() {

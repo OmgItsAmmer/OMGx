@@ -1,7 +1,9 @@
+import 'package:admin_dashboard_v3/Models/image/image_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
 import 'package:admin_dashboard_v3/controllers/media/media_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
+import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
 import 'package:flutter/material.dart';
@@ -213,24 +215,24 @@ class ProfileDetails extends StatelessWidget {
             children: [
               Expanded(
                 child: Obx(
-              () => ElevatedButton(
+                  () => ElevatedButton(
                     onPressed: () {
-                    shopController.updateStore();
+                      shopController.updateStore();
                     },
                     child: shopController.isUpdating.value
                         ? const CircularProgressIndicator(color: TColors.white)
                         : Text(
-                      'Update Store',
-                      style: Theme.of(context).textTheme.bodyMedium!.apply(
-                        color: TColors.white,
-                      ),
-                    ),
+                            'Update Store',
+                            style:
+                                Theme.of(context).textTheme.bodyMedium!.apply(
+                                      color: TColors.white,
+                                    ),
+                          ),
                   ),
                 ),
               ),
             ],
           )
-
         ],
       ),
     );
@@ -240,14 +242,14 @@ class ProfileDetails extends StatelessWidget {
 class StoreImageInfo extends StatelessWidget {
   const StoreImageInfo({super.key});
 
-  Future<String> _getImageUrl() async {
-    final MediaController mediaController = Get.find<MediaController>();
-    return await mediaController.getImageFromBucket(
-          mediaController.allImages[0].mediaCategory,
-          mediaController.allImages[0].filename,
-        ) ??
-        '';
-  }
+  // Future<String> _getImageUrl() async {
+  //   final MediaController mediaController = Get.find<MediaController>();
+  //   return await mediaController.getImageFromBucket(
+  //         mediaController.allImages[0].mediaCategory,
+  //         mediaController.allImages[0].filename,
+  //       ) ??
+  //       '';
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -267,44 +269,56 @@ class StoreImageInfo extends StatelessWidget {
                 .bottomRight, // Align the camera icon to the bottom right
             children: [
               // Rounded Image
-              Obx(
-                () {
-                  if (productImagesController.selectedImage.value == null) {
-                    return const SizedBox(
-                        height: 120, width: 100, child: Icon(Iconsax.image));
-                  }
-                  // Check if selectedImages is empty
+              Obx(() {
+                final image = mediaController.displayImage.value;
+
+                if (image != null) {
+                  //print(image.filename);
                   return FutureBuilder<String?>(
                     future: mediaController.getImageFromBucket(
-                      productImagesController
-                              .selectedImage.value?.mediaCategory ??
-                          '',
-                      productImagesController.selectedImage.value?.filename ??
-                          '',
+                      MediaCategory.shop.toString().split('.').last,
+                      image.filename ?? '',
                     ),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const TShimmerEffect(
-                            width: 350,
-                            height: 170); // Show shimmer while loading
-                      } else if (snapshot.hasError) {
-                        return const Text(
-                            'Error loading image'); // Handle error case
-                      } else if (snapshot.hasData && snapshot.data != null) {
+                        return const TShimmerEffect(width: 150, height: 150);
+                      } else if (snapshot.hasError || snapshot.data == null) {
+                        return const Icon(Icons.error);
+                      } else {
                         return TRoundedImage(
                           isNetworkImage: true,
                           width: 150,
                           height: 150,
                           imageurl: snapshot.data!,
                         );
-                      } else {
-                        return const Text(
-                            'No image available'); // Handle case where no image is available
                       }
                     },
                   );
-                },
-              ),
+                }
+
+                // Fallback to future-based image if no image is selected
+                return FutureBuilder<String?>(
+                  future: mediaController.fetchMainImage(
+                    shopController.selectedShop?.value.shopId ?? -1,
+                    MediaCategory.shop.toString().split('.').last,
+                  ),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const TShimmerEffect(width: 350, height: 170);
+                    } else if (snapshot.hasError || snapshot.data == null) {
+                      return const Text('No image available');
+                    } else {
+                      return TRoundedImage(
+                        isNetworkImage: true,
+                        width: 150,
+                        height: 150,
+                        imageurl: snapshot.data!,
+                      );
+                    }
+                  },
+                );
+              }),
+
 
               // Camera Icon
               TRoundedContainer(

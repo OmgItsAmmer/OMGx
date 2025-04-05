@@ -1,107 +1,86 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:get/get.dart'; // For RxBool
+import 'package:get/get.dart';
 
-/// Model class representing image data.
+/// Model class representing image data as per updated PostgreSQL schema.
 class ImageModel {
-  int image_id;
+  final int imageId;
   final String url;
-  String folder;
-  final String filename;
-  final int? sizeBytes;
-  int? entity_id;
-  final String? fullPath;
+  final String? filename;
   final DateTime? createdAt;
-  final DateTime? updatedAt;
-  final String? contentType;
-  String mediaCategory;
+  final String? folderType;
 
-  // Not Mapped
+  // Local only (not mapped to DB)
   final File? file;
   final Uint8List? localImageToDisplay;
-  RxBool isSelected = false.obs; // Observable boolean for selection state
+  RxBool isSelected;
 
-  /// Constructor for ImageModel.
+  /// Constructor
   ImageModel({
-    this.image_id = -1,
-    this.url = '',
-    this.folder = 'default',
-    this.filename = '',
-    this.sizeBytes,
-    this.entity_id,
-    this.fullPath,
+    this.imageId = -1,
+    required this.url,
+    this.filename,
     this.createdAt,
-    this.updatedAt,
-    this.contentType,
+    this.folderType,
     this.file,
     this.localImageToDisplay,
-    this.mediaCategory = '',
-  }) : isSelected = false.obs;
+    RxBool? isSelected,
+  }) : isSelected = isSelected ?? false.obs;
 
-  // Static function to create an empty image model
-  static ImageModel empty() => ImageModel();
+  /// Empty instance factory
+  static ImageModel empty() => ImageModel(url: '');
 
-  // Convert model to JSON for database insertion
+  /// Convert model to JSON
   Map<String, dynamic> toJson({bool isUpdate = false}) {
-    final Map<String, dynamic> data = {
-      'entity_id': entity_id,
-      'mediacategory': mediaCategory,
+    final data = <String, dynamic>{
       'image_url': url,
       'filename': filename,
-
+      'folderType': folderType,
     };
     if (!isUpdate) {
-      data['image_id'] = image_id;
+      data['image_id'] = imageId;
     }
     return data;
   }
 
-  // Factory method to create an ImageModel from a JSON response
+  /// Create model from JSON
   factory ImageModel.fromJson(Map<String, dynamic> json) {
     return ImageModel(
-      image_id: json['image_id'] ?? -1,
-      entity_id: json['entity_id'],
-      mediaCategory: json['mediacategory'] ?? '',
+      imageId: json['image_id'] ?? -1,
       url: json['image_url'] ?? '',
-      filename: json['filename'] ?? '',
-      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
+      filename: json['filename'],
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'])
+          : null,
+      folderType: json['folderType'],
     );
   }
 
-  // Helper method to toggle the selection state
+  /// Toggle selection state
   void toggleSelection() {
-    isSelected.toggle(); // Toggle the observable boolean
+    isSelected.toggle();
   }
 
-  // Helper method to copy the model with updated fields
+  /// Copy with updated fields
   ImageModel copyWith({
-    int? image_id,
-    String? url,
-    String? folder,
+    int? imageId,
+    String? imageUrl,
     String? filename,
-    int? sizeBytes,
-    String? fullPath,
     DateTime? createdAt,
-    DateTime? updatedAt,
-    String? contentType,
-    String? mediaCategory,
+    String? folderType,
     File? file,
     Uint8List? localImageToDisplay,
     bool? isSelected,
   }) {
     return ImageModel(
-      image_id: image_id ?? this.image_id,
-      url: url ?? this.url,
-      folder: folder ?? this.folder,
+      imageId: imageId ?? this.imageId,
+      url: imageUrl ?? this.url,
       filename: filename ?? this.filename,
-      sizeBytes: sizeBytes ?? this.sizeBytes,
-      fullPath: fullPath ?? this.fullPath,
       createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-      contentType: contentType ?? this.contentType,
-      mediaCategory: mediaCategory ?? this.mediaCategory,
+      folderType: folderType ?? this.folderType,
       file: file ?? this.file,
       localImageToDisplay: localImageToDisplay ?? this.localImageToDisplay,
-    )..isSelected.value = isSelected ?? this.isSelected.value;
+      isSelected: (isSelected != null) ? isSelected.obs : this.isSelected,
+    );
   }
 }

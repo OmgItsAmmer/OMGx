@@ -1,3 +1,4 @@
+import 'package:admin_dashboard_v3/Models/image/combined_image_model.dart';
 import 'package:admin_dashboard_v3/Models/image/image_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/loader_animation.dart';
@@ -135,7 +136,7 @@ class MediaContent extends StatelessWidget {
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: TSizes.sm),
                                       child: Text(
-                                        image.filename,
+                                        image.filename ?? 'No Name Found',
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
@@ -195,7 +196,7 @@ class MediaContent extends StatelessWidget {
         return AlertDialog(
           content: FutureBuilder<String?>(
             future: mediaController.getImageFromBucket(
-                image.mediaCategory, image.filename), // Fetch the image URL
+                image.folderType ?? '', image.filename ?? ''), // Fetch the image URL
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 // Show a loader while fetching the image
@@ -257,14 +258,14 @@ class MediaContent extends StatelessWidget {
     );
   }
 
-  Future<Widget> _buildListWithCheckbox(ImageModel image) async {
+  Future<Widget> _buildListWithCheckbox(ImageModel image,) async {
     final MediaController mediaController = Get.find<MediaController>();
 
     return Stack(
       children: [
         TRoundedImage(
           imageurl: await mediaController.getImageFromBucket(
-                  image.mediaCategory, image.filename) ??
+                 image.folderType ?? '' , image.filename ?? '') ??
               '',
           width: 140,
           height: 140,

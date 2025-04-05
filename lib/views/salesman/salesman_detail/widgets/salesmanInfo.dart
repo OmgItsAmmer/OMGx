@@ -11,6 +11,7 @@ import '../../../../common/widgets/tiles/user_advance_info_tile.dart';
 import '../../../../controllers/media/media_controller.dart';
 import '../../../../controllers/orders/orders_controller.dart';
 import '../../../../controllers/product/product_images_controller.dart';
+import '../../../../utils/constants/enums.dart';
 import '../../../profile/old/widgets/profile_menu.dart';
 
 class SalesmanInfo extends StatelessWidget {
@@ -46,18 +47,16 @@ class SalesmanInfo extends StatelessWidget {
             children: [
               Obx(
                     () {
-                  if(productImagesController.selectedImage.value == null){
-                    return const SizedBox(
-                        height: 120,
-                        width: 100,
-                        child: Icon(Iconsax.image));
-                  }
+                  // if(productImagesController.selectedImage.value == null){
+                  //   return const SizedBox(
+                  //       height: 120,
+                  //       width: 100,
+                  //       child: Icon(Iconsax.image));
+                  // }
                   // Check if selectedImages is empty
                   return FutureBuilder<String?>(
-                    future: mediaController.getImageFromBucket(
-                      productImagesController.selectedImage.value?.mediaCategory ?? '',
-                      productImagesController.selectedImage.value?.filename ?? '',
-                    ),
+                    future: mediaController.fetchMainImage(salesmanModel.salesmanId, MediaCategory.salesman.toString().split('.').last),
+
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const TShimmerEffect(width: 350, height: 170); // Show shimmer while loading
