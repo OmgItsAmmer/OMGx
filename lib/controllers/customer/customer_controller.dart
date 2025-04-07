@@ -14,7 +14,7 @@ class CustomerController extends GetxController {
   static CustomerController get instance => Get.find();
   final CustomerRepository customerRepository = Get.put(CustomerRepository());
   final MediaController mediaController = Get.put(MediaController());
-  final ProductImagesController productImagesController = Get.put(ProductImagesController());
+
   final AddressController addressController = Get.put(AddressController());
  // final AddressController addressController = Get.find<AddressController>();
 
@@ -23,6 +23,7 @@ class CustomerController extends GetxController {
 
   final profileLoading = false.obs;
   final isLoading = false.obs;
+  final isUpdating = false.obs;
   RxList<CustomerModel> allCustomers = <CustomerModel>[].obs;
   RxList<String> allCustomerNames = <String>[].obs;
 
@@ -35,7 +36,7 @@ class CustomerController extends GetxController {
   final email = TextEditingController();
   final cnic = TextEditingController();
   final phoneNumber = TextEditingController();
-   int customerId = -1;
+  int customerId = -1;
   GlobalKey<FormState> addCustomerKey =
   GlobalKey<FormState>();
   // final alertStock = TextEditingController();
@@ -74,11 +75,66 @@ class CustomerController extends GetxController {
     }
   }
 
-
-
-  Future<void> saveOrUpdateCustomer(int customerId) async {
+  Future<void> updateCustomer(int customerId) async {
     try {
       // Validate the form
+      isUpdating.value = true;
+      if (!addCustomerKey.currentState!.validate()) {
+        TLoader.errorSnackBar(
+          title: "Empty Fields",
+          message: 'Kindly fill all the fields before proceeding.',
+        );
+        return;
+      }
+      final customerModel = CustomerModel(
+        customerId: customerId,
+        firstName: firstName.text ,
+        lastName: lastName.text,
+        phoneNumber: phoneNumber.text,
+        email: email.text,
+        cnic: cnic.text,);
+
+
+      final json = customerModel.toJson(isUpdate: false); // we need id for updating
+
+
+        // Call the repository function to save or update the product
+       await customerRepository.updateCustomer(json);
+
+       await mediaController.imageAssigner(customerId, MediaCategory.customers.toString().split('.').last ,true);
+
+        await AddressController.instance.saveAddress(customerId, 'Customer');
+
+      customerModel.customerId = customerId;
+
+
+
+
+
+
+
+
+      // Clear the form after saving/updating
+      cleanCustomerDetails();
+      TLoader.successSnackBar(title: 'Customer Added!',message: '${firstName.text} added to Database ');
+
+      // TLoader.successSnackBar(title: 'Customer Added!');
+    } catch (e) {
+      // Handle errors
+      TLoader.errorSnackBar(
+        title: "Error",
+        message: e.toString(),
+      );
+    }
+    finally {
+      isUpdating.value = false;
+    }
+  }
+
+  Future<void> insertCustomer() async {
+    try {
+      // Validate the form
+      isUpdating.value = true;
       if (!addCustomerKey.currentState!.validate()) {
         TLoader.errorSnackBar(
           title: "Empty Fields",
@@ -87,10 +143,8 @@ class CustomerController extends GetxController {
         return;
       }
 
-
-
       final customerModel = CustomerModel(
-        customerId: customerId, //not uploading
+        customerId: null, //not uploading
         firstName: firstName.text ,
         lastName: lastName.text,
         phoneNumber: phoneNumber.text,
@@ -99,40 +153,26 @@ class CustomerController extends GetxController {
 
 
       );
-      final json = customerModel.toJson(isUpdate: false); // we need id for updating
-
+      final json = customerModel.toJson(isUpdate: true); // we need id for updating
 
 
       // Call the repository function to save or update the product
-      final result = await customerRepository.saveOrUpdateCustomerRepo(json);
-      int entityId = result['customer_id'];
-      bool isUpdate = result['is_update'];
-      //Update Image Table
-      if(entityId != -1   )
-      {
-        customerModel.customerId = entityId;
-        if(productImagesController.selectedImage.value != null){
-        //  await mediaController.updateEntityId(entityId, productImagesController.selectedImage.value!.imageId,MediaCategory.customers.toString().split('.').last);
-        }
-        await AddressController.instance.saveAddress(entityId, 'Customer');
-        if(!isUpdate){
-          allCustomers.add(customerModel);
-          allCustomerNames.add(customerModel.fullName);
-        }
+      final  customerId = await customerRepository.insertCustomerInTable(json);
 
-      }
-      else
-        {
-          TLoader.errorSnackBar(title: 'Cant Upload Image',message: 'Entity Id is negative');
-        }
+      await mediaController.imageAssigner(customerId, MediaCategory.customers.toString().split('.').last ,true);
+
+      await AddressController.instance.saveAddress(customerId, 'Customer');
+      //locally adding in table
+      allCustomers.add(customerModel);
+      allCustomerNames.add(customerModel.fullName);
 
 
-
+      customerModel.customerId = customerId; // idk why
 
       // Clear the form after saving/updating
       cleanCustomerDetails();
-      Get.back();
-     // TLoader.successSnackBar(title: 'Customer Added!');
+
+      TLoader.successSnackBar(title: 'Customer Added!',message: '${firstName.text} added to Database ');
     } catch (e) {
       // Handle errors
       TLoader.errorSnackBar(
@@ -140,6 +180,8 @@ class CustomerController extends GetxController {
         message: e.toString(),
       );
     }
+    finally {
+      isUpdating.value = false;}
   }
 
   void cleanCustomerDetails() {
@@ -156,7 +198,7 @@ class CustomerController extends GetxController {
   }
   void setCustomerDetail(CustomerModel customer) {
     try {
-      customerId = customer.customerId;
+      customerId = customer.customerId!;
       firstName.text = customer.firstName ;
       lastName.text = customer.lastName ;
       email.text = customer.email ;

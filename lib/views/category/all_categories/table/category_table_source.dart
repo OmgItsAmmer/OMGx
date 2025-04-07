@@ -19,7 +19,7 @@ class CategoryRow extends DataTableSource {
     final category = categoryController.allCategories[index];
     return DataRow2(
         onTap: () {
-          //categoryController.setBrandDetail(brand);
+          categoryController.setCategoryDetail(category);
 
           Get.toNamed(TRoutes.categoryDetails, arguments: category);
         },

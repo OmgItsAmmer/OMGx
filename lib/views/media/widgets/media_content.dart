@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:path/path.dart';
 
 import '../../../common/widgets/images/t_rounded_image.dart';
 import '../../../utils/constants/colors.dart';
@@ -61,7 +62,7 @@ class MediaContent extends StatelessWidget {
                 ),
               ),
               if (allowSelection) const SizedBox(width: TSizes.spaceBtwItems,),
-              if (allowSelection) buildAddSelectedImageButton(),
+              if (allowSelection) buildAddSelectedImageButton(context),
             ],
           ),
 
@@ -106,48 +107,87 @@ class MediaContent extends StatelessWidget {
                   alignment: WrapAlignment.start,
                   spacing: TSizes.spaceBtwItems / 2,
                   runSpacing: TSizes.spaceBtwItems / 2,
-                  children: mediaController.allImages
-                      .map((image) => GestureDetector(
-                            onTap: () async {
-                              // Open a dialog (pop-up)
-                              buildShowDialogForImage(
-                                  context, mediaController, image);
-                            },
-                            child: SizedBox(
-                              width: 140,
-                              height: 180,
-                              child: Column(
-                                children: [
-                                  FutureBuilder<Widget>(
-                                    future: _buildListWithCheckbox(image),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.connectionState ==
-                                          ConnectionState.waiting) {
-                                        return const CircularProgressIndicator(); // or any other loading widget
-                                      } else if (snapshot.hasError) {
-                                        return Text('Error: ${snapshot.error}');
-                                      } else {
-                                        return snapshot.data!;
-                                      }
-                                    },
-                                  ),
-                                  Expanded(
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: TSizes.sm),
-                                      child: Text(
-                                        image.filename ?? 'No Name Found',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
+                  children: mediaController.allImages.map((image) {
+                    return GestureDetector(
+                      onTap: () async {
+                        buildShowDialogForImage(context, mediaController, image);
+                      },
+                      child: SizedBox(
+                        width: 140,
+                        height: 180,
+                        child: Column(
+                          children: [
+                            FutureBuilder<String?>(
+                              future: mediaController.getImageFromBucket(
+                                image.folderType ?? '',
+                                image.filename ?? '',
+                              ),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  return const CircularProgressIndicator();
+                                } else if (snapshot.hasError) {
+                                  return Text('Error: ${snapshot.error}');
+                                } else {
+                                  return Stack(
+                                    children: [
+                                      TRoundedImage(
+                                        imageurl: snapshot.data ?? '',
+                                        width: 140,
+                                        height: 140,
+                                        padding: const EdgeInsets.all(TSizes.sm),
+                                        backgroundColor: TColors.primaryBackground,
+                                        isNetworkImage: true,
                                       ),
-                                    ),
-                                  ),
-                                ],
+                                      Positioned(
+                                        top: TSizes.md,
+                                        right: TSizes.md,
+                                        child: Obx(() => Checkbox(
+                                          value: image.isSelected.value,
+                                          onChanged: (selected) {
+                                            if (selected != null) {
+                                              image.isSelected.value = selected;
+                                              if (selected) {
+                                                if (!allowMultipleSelection) {
+                                                  for (var otherImage in selectedImages) {
+                                                    if (otherImage != image) {
+                                                      otherImage.isSelected.value = false;
+                                                    }
+                                                  }
+                                                  selectedImages.clear();
+                                                }
+                                                if (!selectedImages.contains(image)) {
+                                                  selectedImages.add(image);
+                                                }
+                                              } else {
+                                                selectedImages.remove(image);
+                                              }
+                                            }
+                                          },
+                                        )),
+                                      ),
+                                    ],
+                                  );
+                                }
+                              },
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding:
+                                const EdgeInsets.symmetric(horizontal: TSizes.sm),
+                                child: Text(
+                                  image.filename ?? 'No Name Found',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                             ),
-                          ))
-                      .toList(),
-                ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                )
+
               ],
             );
           }),
@@ -305,14 +345,14 @@ class MediaContent extends StatelessWidget {
     );
   }
 
-  Widget buildAddSelectedImageButton() {
+  Widget buildAddSelectedImageButton(BuildContext  context) {
     return Row(
       children: [
         // Close Button
         SizedBox(
           width: 120,
           child: OutlinedButton.icon(
-            onPressed: () => Get.back(),
+            onPressed: () => Navigator.of(context).pop(),
             label: const Text('Close'),
             icon: const Icon(Iconsax.close_circle),
           ),
@@ -327,7 +367,7 @@ class MediaContent extends StatelessWidget {
             onPressed: () {
               // Pass the selected images back via the callback
               onSelectedImage(selectedImages);
-              Get.back(); // Close the bottom sheet
+              Navigator.of(context).pop(); // Close the bottom sheet
             },
           ),
         ),

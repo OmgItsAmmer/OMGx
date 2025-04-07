@@ -7,10 +7,12 @@ import '../../../../utils/constants/sizes.dart';
 import '../../../../utils/device/device_utility.dart';
 
 class AddCustomerBottomBar extends StatelessWidget {
-   const AddCustomerBottomBar({
+   const AddCustomerBottomBar( {
     super.key,
+   required this.customerModel,
 
   });
+   final CustomerModel customerModel;
 
   @override
   Widget build(BuildContext context) {
@@ -42,12 +44,21 @@ class AddCustomerBottomBar extends StatelessWidget {
           Expanded(
             child: SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Handle Save action
-                  customerController.saveOrUpdateCustomer(customerController.customerId);
-                },
-                child: const Text('Save'),
+              child: Obx(
+              () => ElevatedButton(
+                  onPressed: () async {
+                    if(customerModel.customerId == null ) { // save
+                      // Handle Save action
+                    await customerController.insertCustomer();
+                    }
+                    else{ //update
+                   await customerController.updateCustomer(customerModel.customerId!);
+
+                     }
+                    Navigator.of(context).pop();
+                  },
+                  child: (customerController.isUpdating.value) ? const CircularProgressIndicator(color: Colors.white,) : (customerModel.customerId == null) ? const Text('Save') : const Text('Update'),
+                ),
               ),
             ),
           ),

@@ -16,7 +16,7 @@ class CategoryModel {
 
   // Static function to create an empty category model
   static CategoryModel empty() => CategoryModel(
-    categoryId: 0,
+    categoryId: -1,
     categoryName: '',
     parentCategoryId: null,
     isFeatured: null,

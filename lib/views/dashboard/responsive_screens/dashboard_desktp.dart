@@ -212,7 +212,7 @@ class DashboardDesktop extends StatelessWidget {
       ),
       leftTitles: const AxisTitles(
         sideTitles: SideTitles(
-          showTitles: true,
+          showTitles: false,
           interval: 1, // Set this to a non-zero value
           reservedSize: 50,
         ),

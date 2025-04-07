@@ -26,7 +26,7 @@ final BrandModel brandModel;
 
 
                 child: TRoundedContainer(
-                  padding: EdgeInsets.all(TSizes.defaultSpace),
+                  padding: const EdgeInsets.all(TSizes.defaultSpace),
                   child: BrandInfo(brandModel: brandModel,),
                 ),
               ),

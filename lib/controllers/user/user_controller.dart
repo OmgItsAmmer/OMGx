@@ -27,7 +27,7 @@ class UserController extends GetxController {
 //  final StartUpController startUpController =  Get.put(StartUpController());
   // final SalesController salesController =  Get.put(SalesController());
   final MediaController mediaController = Get.put(MediaController());
-  final ProductImagesController productImagesController = Get.put(ProductImagesController());
+  // final ProductImagesController productImagesController = Get.put(ProductImagesController());
 
   final profileLoading = false.obs;
 

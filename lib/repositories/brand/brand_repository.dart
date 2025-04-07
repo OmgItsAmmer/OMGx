@@ -13,44 +13,41 @@ class BrandRepository {
 
   Future<void> saveOrUpdateBrandRepo(Map<String, dynamic> json) async {
     try {
+      final brandId = json['brandID'];
 
-
-      if (json['brandID'] != null) {
-        // Fetch the brand with the given brandID
-        final response = await supabase
+      if (brandId != null && brandId != -1) {
+        // Check if brand with brandID exists
+        final existingBrand = await supabase
             .from('brands')
             .select()
-            .eq('brandID', json['brandID'])
-            .maybeSingle(); // Avoids exception if no brand is found
+            .eq('brandID', brandId)
+            .maybeSingle();
 
-        if (response != null) {
-          // If the brand exists, update it
+        if (existingBrand != null) {
+          // Update existing brand
           await supabase
               .from('brands')
               .update(json)
-              .eq('brandID', json['brandID']);
-        } else {
-          // If no existing brand is found, insert a new one
-          // Remove the brandID to let the database auto-generate it
-          json.remove('brandID');
-          await supabase.from('brands').insert(json);
+              .eq('brandID', brandId);
+          return;
         }
-      } else {
-        // If brandID is not provided, insert a new brand
-        // Ensure brandID is not present in the json
-        json.remove('brandID');
-        await supabase.from('brands').insert(json);
       }
+
+      // Insert new brand (remove brandID if it's -1 or not needed)
+      json.remove('brandID');
+      await supabase.from('brands').insert(json);
+
+      TLoader.successSnackBar(title: 'Brand Added!',message: json['bname'] + ' is Added');
+
     } on PostgrestException catch (e) {
-      // Handle Supabase-specific errors
-      TLoader.errorSnackBar(title: 'Brand Repo', message: e.message);
+      TLoader.errorSnackBar(title: 'Brand Repo Error', message: e.message);
       rethrow;
     } catch (e) {
-      // Handle other errors
-      TLoader.errorSnackBar(title: 'Brand Repo', message: e.toString());
+      TLoader.errorSnackBar(title: 'Unexpected Error', message: e.toString());
       rethrow;
     }
   }
+
 
 
 

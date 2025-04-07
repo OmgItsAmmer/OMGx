@@ -5,11 +5,16 @@ import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
 import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
 
 
 import '../../../../Models/orders/order_item_model.dart';
 import '../../../../Models/products/product_model.dart';
 import '../../../../common/widgets/containers/rounded_container.dart';
+import '../../../../common/widgets/icons/t_circular_icon.dart';
+import '../../../../common/widgets/shimmers/shimmer.dart';
+import '../../../../controllers/media/media_controller.dart';
+import '../../../../utils/constants/enums.dart';
 import '../../../../utils/constants/sizes.dart';
 
 class OrderItems extends StatelessWidget {
@@ -19,6 +24,8 @@ class OrderItems extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ProductController productController = Get.find<ProductController>();
+    final MediaController mediaController = Get.find<MediaController>();
+
 
     final subTotal = order.orderItems?.fold(
       0.0,
@@ -82,15 +89,32 @@ class OrderItems extends StatelessWidget {
               ...order.orderItems?.map((item) {
                 return TableRow(
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: TRoundedImage(
-                        height: 60,
-                        width: 60,
-                        imageurl: TImages.productImage1,
-                        backgroundColor: TColors.primaryBackground,
-                        isNetworkImage: false,
-                      ),
+                     Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: FutureBuilder<String?>(
+                            future: mediaController.fetchMainImage(
+                              item.productId,
+                              MediaCategory.products.toString().split('.').last,
+                            ),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return const TShimmerEffect(width: 60, height: 60); // Show shimmer while loading
+                              } else if (snapshot.hasError) {
+                                return const Text('Error loading image'); // Handle error case
+                              } else if (snapshot.hasData && snapshot.data != null) {
+                                return TRoundedImage(
+                                  isNetworkImage: true,
+                                  width: 60,
+                                  height: 60,
+                                  imageurl: snapshot.data!,
+                                );
+                              } else {
+                                return const TCircularIcon(icon: Iconsax.image,width: 60,height: 60,backgroundColor: TColors.primaryBackground,); // Handle case where no image is available
+                                // Handle case where no image is available
+                              }
+                            },
+                          ),
+
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),

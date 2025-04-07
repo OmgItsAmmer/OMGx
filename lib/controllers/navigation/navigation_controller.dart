@@ -24,7 +24,7 @@ class NavigationController extends GetxController {
     const ProductScreen(),
     const Orderscreen(),
    // const BrandScreen(),
-    const CategoryScreen(),
+    //const CategoryScreen(),
     const ReviewScreen(),
     //const SettingsScreen()
   ];

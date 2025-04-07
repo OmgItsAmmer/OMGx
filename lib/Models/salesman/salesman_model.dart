@@ -1,5 +1,5 @@
 class SalesmanModel {
-  int salesmanId;
+  int? salesmanId; // Made nullable
   final String firstName;
   final String lastName;
   final String phoneNumber;
@@ -7,12 +7,12 @@ class SalesmanModel {
   final String cnic;
   final String area;
   final String city;
-  final String? pfp; // Optional profile picture field
-  final DateTime? createdAt; // Optional created_at field
-  final int? comission; // Optional commission field
+  final String? pfp;
+  final DateTime? createdAt;
+  final int? comission;
 
   SalesmanModel({
-    required this.salesmanId,
+    this.salesmanId, // Now optional
     required this.firstName,
     required this.lastName,
     required this.phoneNumber,
@@ -22,12 +22,12 @@ class SalesmanModel {
     required this.city,
     this.pfp,
     this.createdAt,
-    this.comission, // Optional commission
+    this.comission,
   });
 
   // Static function to create an empty salesman model
   static SalesmanModel empty() => SalesmanModel(
-    salesmanId: 0,
+    salesmanId: null, // Now null
     firstName: "",
     lastName: "",
     phoneNumber: "",
@@ -37,16 +37,14 @@ class SalesmanModel {
     city: "",
     pfp: null,
     createdAt: null,
-    comission: null, // Default to null
+    comission: null,
   );
 
-  // Function to get the full name
   String get fullName => "$firstName $lastName".trim();
 
   // Convert model to JSON for database insertion
-  Map<String, dynamic> toJson() {
-    return {
-      'salesman_id': salesmanId,
+  Map<String, dynamic> toJson({bool isUpdate = false}) {
+    final Map<String, dynamic> data = {
       'first_name': firstName,
       'last_name': lastName,
       'phone_number': phoneNumber,
@@ -55,15 +53,23 @@ class SalesmanModel {
       'area': area,
       'city': city,
       'pfp': pfp,
-      'created_at': createdAt?.toIso8601String(),
-      'comission': comission, // Include commission in JSON
+      'comission': comission,
     };
+
+    if (!isUpdate) {
+      if (salesmanId != null) {
+        data['salesman_id'] = salesmanId;
+      }
+
+    }
+
+    return data;
   }
 
   // Factory method to create a SalesmanModel from a JSON object
   factory SalesmanModel.fromJson(Map<String, dynamic> json) {
     return SalesmanModel(
-      salesmanId: json['salesman_id'] as int,
+      salesmanId: json['salesman_id'] as int?,
       firstName: json['first_name'] as String,
       lastName: json['last_name'] as String? ?? "",
       phoneNumber: json['phone_number'] as String? ?? "",
@@ -73,7 +79,7 @@ class SalesmanModel {
       city: json['city'] as String,
       pfp: json['pfp'] as String?,
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
-      comission: json['comission'] as int?, // Parse commission
+      comission: json['comission'] as int?,
     );
   }
 

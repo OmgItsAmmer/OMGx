@@ -1,4 +1,3 @@
-import 'package:admin_dashboard_v3/Models/orders/order_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:admin_dashboard_v3/views/installments/table/installment_table.dart';
@@ -11,7 +10,6 @@ import 'package:get/get.dart';
 
 import '../../../../Models/orders/order_item_model.dart';
 import '../../../../controllers/customer/customer_controller.dart';
-import '../../../../controllers/installments/installments_controller.dart';
 import '../../../../controllers/salesman/salesman_controller.dart';
 import '../../../../utils/constants/enums.dart';
 import '../widgets/guarrantor_card.dart';
@@ -63,6 +61,8 @@ class OrderDetailDesktopScreen extends StatelessWidget {
                       child: Column(
                         children: [
                           UserInfo(
+                            mediaCategory: MediaCategory.customers,
+
                             title: 'Customer',
                             showAddress: true,
                             fullName:
@@ -75,6 +75,7 @@ class OrderDetailDesktopScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: TSizes.spaceBtwSections),
                           UserInfo(
+                            mediaCategory: MediaCategory.salesman,
                             title: 'Salesman',
                             showAddress: false,
                             fullName: salesmanController

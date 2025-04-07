@@ -2,7 +2,6 @@ import 'package:admin_dashboard_v3/common/widgets/images/t_circular_image.dart';
 import 'package:admin_dashboard_v3/common/widgets/shimmers/shimmer.dart';
 import 'package:admin_dashboard_v3/controllers/notification/notification_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
 import 'package:flutter/material.dart';
@@ -54,7 +53,7 @@ actions: [
                 () {
               final image = mediaController.displayImage.value;
 
-              if (image != null) {
+              if (image != null && mediaController.displayImageOwner == MediaCategory.users.toString().split('.').last) {
                 //print(image.filename);
                 return FutureBuilder<String?>(
                   future: mediaController.getImageFromBucket(

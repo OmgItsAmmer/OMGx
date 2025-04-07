@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../common/widgets/containers/rounded_container.dart';
+import '../../../../controllers/media/media_controller.dart';
 import '../../../../controllers/product/product_controller.dart';
+import '../../../../utils/constants/enums.dart';
 import '../../../../utils/constants/sizes.dart';
 import '../../../../utils/device/device_utility.dart';
 
@@ -14,6 +16,7 @@ class ProductDetailBottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ProductController productController = Get.find<ProductController>();
+
 
     return TRoundedContainer(
 
@@ -32,7 +35,8 @@ class ProductDetailBottomBar extends StatelessWidget {
                 onPressed: () {
                   // Handle Discard action
                   productController.cleanProductDetail();
-                  Get.back();
+                  Navigator.of(context).pop();
+
                 },
                 child: const Text('Discard'),
               ),
@@ -45,8 +49,11 @@ class ProductDetailBottomBar extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () {
                   // Handle Save action
+
+
                   productController.saveOrUpdateProduct();
-                  Get.back();
+                  Navigator.of(context).pop();
+
 
                 },
                 child: const Text('Save/Update'),

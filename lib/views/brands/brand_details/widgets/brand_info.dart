@@ -3,9 +3,15 @@ import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
 
+import '../../../../common/widgets/containers/rounded_container.dart';
+import '../../../../common/widgets/icons/t_circular_icon.dart';
 import '../../../../common/widgets/images/t_rounded_image.dart';
+import '../../../../common/widgets/shimmers/shimmer.dart';
 import '../../../../controllers/brands/brand_controller.dart';
+import '../../../../controllers/media/media_controller.dart';
+import '../../../../utils/constants/enums.dart';
 import '../../../../utils/constants/image_strings.dart';
 import '../../../../utils/constants/sizes.dart';
 import '../../../../utils/validators/validation.dart';
@@ -17,6 +23,8 @@ class BrandInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final BrandController brandController = Get.find<BrandController>();
+    final MediaController mediaController = Get.find<MediaController>();
+
     final bool isMobile = TDeviceUtils.isMobileScreen(context);
 
     return Form(
@@ -49,17 +57,79 @@ class BrandInfo extends StatelessWidget {
 
           const SizedBox(height: TSizes.spaceBtwSections),
 
-          // Image
-          InkWell(
-            onTap: () {
-              // Handle image tap
-            },
-            child: TRoundedImage(
-              height: isMobile ? 80 : 100, // Adjust image size for mobile
-              width: isMobile ? 80 : 100,
-              imageurl: TImages.productImage1,
-              isNetworkImage: false,
-            ),
+          Stack(
+            alignment: Alignment
+                .bottomRight, // Align the camera icon to the bottom right
+            children: [
+              // Rounded Image
+              Obx(() {
+                final image = mediaController.displayImage.value;
+
+                if (image != null) {
+                  //print(image.filename);
+                  return FutureBuilder<String?>(
+                    future: mediaController.getImageFromBucket(
+                      MediaCategory.brands.toString().split('.').last,
+                      image.filename ?? '',
+                    ),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const TShimmerEffect(width: 80, height: 80);
+                      } else if (snapshot.hasError || snapshot.data == null) {
+                        return const Icon(Icons.error);
+                      } else {
+                        return TRoundedImage(
+                          isNetworkImage: true,
+                          width: 80,
+                          height: 80,
+                          imageurl: snapshot.data!,
+                        );
+                      }
+                    },
+                  );
+                }
+
+                // Fallback to future-based image if no image is selected
+                return FutureBuilder<String?>(
+                  future: mediaController.fetchMainImage(
+                    brandController.selectedBrand.value.brandID ,
+                    MediaCategory.brands.toString().split('.').last,
+                  ),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const TShimmerEffect(width: 80, height: 80);
+                    } else if (snapshot.hasError || snapshot.data == null) {
+                      return const TCircularIcon(icon: Iconsax.image,width: 80,height: 80,backgroundColor: TColors.primaryBackground,); // Handle case where no image is available
+
+                    } else {
+                      return TRoundedImage(
+                        isNetworkImage: true,
+                        width: 80,
+                        height: 80,
+                        imageurl: snapshot.data!,
+                      );
+                    }
+                  },
+                );
+              }),
+
+
+              // Camera Icon
+              TRoundedContainer(
+                onTap: () {
+                  // productImagesController.selectThumbnailImage();
+                  mediaController.selectImagesFromMedia();
+                },
+                borderColor: TColors.white,
+                backgroundColor: TColors.primary,
+                padding: const EdgeInsets.all(6), // Add padding around the icon
+                child: const Icon(
+                  Iconsax.camera, // Camera icon
+                  size: 25, // Icon size
+                  color: Colors.white, // Icon color
+                ),
+              ),
+            ],
           ),
 
           const SizedBox(height: TSizes.spaceBtwSections),
@@ -72,6 +142,7 @@ class BrandInfo extends StatelessWidget {
                   onPressed: () {
                     // Handle save button press
                     brandController.saveOrUpdate(brandModel.brandID);
+                    Navigator.of(context).pop();
                   },
                   child: Text(
                     'Save',

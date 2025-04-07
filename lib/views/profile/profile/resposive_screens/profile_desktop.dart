@@ -205,7 +205,7 @@ class ProfileImageInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ProductImagesController productImagesController = Get.find<ProductImagesController>();
+    // final ProductImagesController productImagesController = Get.find<ProductImagesController>();
     final MediaController mediaController = Get.find<MediaController>();
     final UserController userController = Get.find<UserController>();
     return TRoundedContainer(
@@ -273,7 +273,8 @@ class ProfileImageInfo extends StatelessWidget {
               // Camera Icon
                TRoundedContainer(
                 onTap: () {
-                  productImagesController.selectThumbnailImage();
+                  // productImagesController.selectThumbnailImage();
+                  mediaController.selectImagesFromMedia();
                 },
                 borderColor: TColors.white,
                 backgroundColor: TColors.primary,

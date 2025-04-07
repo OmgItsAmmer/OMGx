@@ -19,6 +19,10 @@ class OrderTable extends StatelessWidget {
       () => TPaginatedDataTable(
         sortAscending: true,
         minWidth: 700,
+        showCheckBox: false,
+        dataRowHeight: 60,
+
+
         columns:  [
           const DataColumn2(label: Text('Order ID')),
           const DataColumn2(label: Text('Date')),

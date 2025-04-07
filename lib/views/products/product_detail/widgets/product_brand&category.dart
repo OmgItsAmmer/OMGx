@@ -36,9 +36,9 @@ class ProductBrandcCategory extends StatelessWidget {
                   const Icon(Iconsax.add)
                 ],
               ),
-                // const SizedBox(
-                //   height: TSizes.spaceBtwSections,
-                // ),
+                const SizedBox(
+                  height: TSizes.spaceBtwSections,
+                ),
               AutoCompleteTextField(
                   titleText: '',
                   optionList: categoryController.categoriesNames,
@@ -75,9 +75,9 @@ class ProductBrandcCategory extends StatelessWidget {
                   const Icon(Iconsax.add)
                 ],
               ),
-              // const SizedBox(
-              //   height: TSizes.spaceBtwSections,
-              // ),
+              const SizedBox(
+                height: TSizes.spaceBtwSections,
+              ),
               AutoCompleteTextField(
                   titleText: '',
                   optionList: brandController.brandNames,

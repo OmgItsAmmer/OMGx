@@ -3,14 +3,11 @@ import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
 import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:admin_dashboard_v3/views/sales/widgets/sale_action_buttons.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../controllers/media/media_controller.dart';
-import '../../../controllers/product/product_images_controller.dart';
 import '../../../controllers/sales/sales_controller.dart';
-import '../../../utils/constants/enums.dart';
 import '../table/sale_table.dart';
 import '../widgets/cashier_info.dart';
 import '../widgets/sale_customer_info.dart';
@@ -29,8 +26,8 @@ class SalesDesktop extends StatelessWidget {
     final CustomerController customerController =
         Get.find<CustomerController>();
     final AddressController addressController = Get.find<AddressController>();
-    final ProductImagesController productImagesController =
-        Get.find<ProductImagesController>();
+    // final ProductImagesController productImagesController =
+    //     Get.find<ProductImagesController>();
     final MediaController mediaController = Get.find<MediaController>();
 
 
@@ -88,11 +85,11 @@ class SalesDesktop extends StatelessWidget {
                                                 (user) => user.fullName == val);
                                     addressController.fetchEntityAddresses(
                                         customerController
-                                            .selectedCustomer.value.customerId,
+                                            .selectedCustomer.value.customerId!,
                                         'Customer');
 
                                     //Fetch Image
-                                    salesController.entityId.value = customerController.selectedCustomer.value.customerId;
+                                    salesController.entityId.value = customerController.selectedCustomer.value.customerId!;
 
 
 

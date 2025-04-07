@@ -59,6 +59,8 @@ class BasicInfo extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyLarge,
               decoration: const InputDecoration(labelText: 'Base Price(Buying Price)'),
             ),
+            const SizedBox(height: TSizes.spaceBtwSections,),
+
             TextFormField(
               validator: (value) =>
                   TValidator.validateEmptyText('Sale Price(Selling Price)', value),

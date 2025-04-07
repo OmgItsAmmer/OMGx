@@ -1,8 +1,11 @@
 import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
+import '../../Models/orders/order_item_model.dart';
 import '../../common/widgets/loaders/tloaders.dart';
+import '../../utils/helpers/helper_functions.dart';
 import '../expenses/expense_controller.dart';
 import '../orders/orders_controller.dart';
 import 'services/sales_service.dart';
@@ -57,7 +60,25 @@ class DashboardController extends GetxController {
   }
 
   void _calculateWeeklySales() {
-    weeklySales.value = salesService.calculateWeeklySales(orderController.allOrders);
+    weeklySales.value = calculateWeeklySales(orderController.allOrders);
+  }
+
+  List<double> calculateWeeklySales(List<OrderModel> allOrders) {
+    List<double> weeklySales = List<double>.filled(7, 0.0);
+    DateFormat dateFormat = DateFormat('yyyy-MM-dd');
+
+    for (var order in allOrders) {
+      DateTime orderDate = dateFormat.parse(order.orderDate);
+      DateTime orderWeekStart = THelperFunctions.getStartOfWeek(orderDate);
+
+      if (orderWeekStart.isBefore(DateTime.now()) &&
+          orderWeekStart.add(const Duration(days: 7)).isAfter(DateTime.now())) {
+        int index = (orderDate.weekday - 1) % 7;
+        index = index < 0 ? index + 7 : index;
+        weeklySales[index] += order.totalPrice;
+      }
+    }
+    return weeklySales;
   }
 
   void fetchSalesTotalCard() {

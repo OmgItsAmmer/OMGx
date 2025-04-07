@@ -28,41 +28,19 @@ class CustomerRepository extends GetxController {
     }
   }
 
-  Future<Map<String, dynamic>> saveOrUpdateCustomerRepo(Map<String, dynamic> json) async {
+  Future<void> updateCustomer(Map<String, dynamic> json) async {
     try {
       int? customerId = json['customer_id'];
-      bool isUpdate = false; // Flag to track if an update occurred
+      if (customerId == null) throw Exception('Customer ID is required for update.');
 
-      if (customerId != null) {
-        // Fetch the customer with the given customer_id
-        final response = await supabase
-            .from('customers')
-            .select()
-            .eq('customer_id', customerId)
-            .maybeSingle();
+      // Remove customer_id from the update payload to avoid trying to update the primary key
+      final updateData = Map<String, dynamic>.from(json)..remove('customer_id');
 
-        if (response != null) {
-          // If the customer exists, update it
-          await supabase.from('customers').update(json).eq('customer_id', customerId);
-          isUpdate = true; // Set the flag to true since it's an update
-        } else {
-          // If no existing customer is found, insert a new one
-          json.remove('customer_id');
-          final insertResponse = await supabase.from('customers').insert(json).select('customer_id').single();
-          customerId = insertResponse['customer_id'];
-        }
-      } else {
-        // If customer_id is not provided, insert a new customer
-        json.remove('customer_id');
-        final insertResponse = await supabase.from('customers').insert(json).select('customer_id').single();
-        customerId = insertResponse['customer_id'];
-      }
+      await supabase
+          .from('customers')
+          .update(updateData)
+          .eq('customer_id', customerId);
 
-      // Return both the customerId and the isUpdate flag
-      return {
-        'customer_id': customerId,
-        'is_update': isUpdate,
-      };
     } on PostgrestException catch (e) {
       TLoader.errorSnackBar(title: 'Customer Repo', message: e.message);
       rethrow;
@@ -71,6 +49,28 @@ class CustomerRepository extends GetxController {
       rethrow;
     }
   }
+
+
+  Future<int> insertCustomerInTable(Map<String, dynamic> json) async {
+    try {
+      final response = await supabase
+          .from('customers')
+          .insert(json)
+          .select('customer_id')
+          .single();
+
+      final customerId = response['customer_id'] as int;
+      return customerId;
+
+    } on PostgrestException catch (e) {
+      TLoader.errorSnackBar(title: 'Customer Repo', message: e.message);
+      rethrow;
+    } catch (e) {
+      TLoader.errorSnackBar(title: 'Customer Repo', message: e.toString());
+      rethrow;
+    }
+  }
+
 
 
   Future<void> deleteCustomerFromTable(int customerId) async {

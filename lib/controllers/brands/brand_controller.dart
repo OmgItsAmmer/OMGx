@@ -5,17 +5,20 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 import '../../common/widgets/loaders/tloaders.dart';
+import '../../utils/constants/enums.dart';
+import '../media/media_controller.dart';
 
 class BrandController extends GetxController {
   static BrandController get instance => Get.find();
   final BrandRepository brandRepository = Get.put(BrandRepository());
+
 
 // List of brands (observable)
   RxList<BrandModel> allBrands = <BrandModel>[].obs;
   RxList<String> brandNames = <String>[].obs;
 
   // Currently selected brand (observable)
-  var selectedBrand = ''.obs;
+  Rx<BrandModel> selectedBrand = BrandModel.empty().obs;
 
   // Controller for the text field to add a new brand
 
@@ -34,8 +37,10 @@ class BrandController extends GetxController {
     super.onInit();
   }
 
-  Future<void> saveOrUpdate(int? brandId) async {
+  Future<void> saveOrUpdate(int brandId) async {
     try{
+      final MediaController mediaController = Get.find<MediaController>();
+
       // Validate the form
       if (!brandDetail.currentState!.validate()) {
         TLoader.errorSnackBar(
@@ -46,15 +51,18 @@ class BrandController extends GetxController {
       }
 
       final brandModel = BrandModel(
-        brandID: brandId ?? -1,
+        brandID: brandId ,
         bname: brandName.text.trim(),
 
 
       );
+
+      await mediaController.imageAssigner(brandId, MediaCategory.brands.toString().split('.').last, true);
       final json = brandModel.toJson();
       brandRepository.saveOrUpdateBrandRepo(json);
       cleanBrandDetail();
       TLoader.successSnackBar(title: 'Brand Uploaded!');
+
 
     }
     catch(e){
@@ -69,6 +77,7 @@ class BrandController extends GetxController {
 
   void setBrandDetail(BrandModel brand) {
     try {
+      selectedBrand.value = brand;
       brandName.text = brand.bname ?? ' ';
       productCount.text = brand.productsCount.toString();
 
@@ -85,6 +94,7 @@ class BrandController extends GetxController {
     try {
       brandName.text = '';
       productCount.text = '';
+      selectedBrand.value = BrandModel.empty();
     } catch (e) {
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }

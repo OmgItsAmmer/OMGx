@@ -57,7 +57,7 @@ class MediaUploader extends StatelessWidget {
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Image.asset(TImages.productImage1,
+                                    Image.asset(TImages.defaultImage,
                                         width: 50, height: 50),
                                     const SizedBox(
                                         height: TSizes.spaceBtwItems),

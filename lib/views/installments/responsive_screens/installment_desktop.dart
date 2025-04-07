@@ -60,6 +60,7 @@ class InstallmentDesktop extends StatelessWidget {
                       Expanded(
                         flex: 2,
                         child: GuarrantorCard(
+                          guarrantorIndex: 1,
                           cardTitle: 'Guarantee 1 Info',
                           hintText: 'Guarantee Name',
                           namesList: const ['empty'],
@@ -80,7 +81,7 @@ class InstallmentDesktop extends StatelessWidget {
                       Expanded(
                         flex: 2,
                         child: GuarrantorCard(
-
+                          guarrantorIndex: 2,
                           cardTitle: 'Guarantee 2 Info',
                           hintText: 'Guarantee Name',
                           namesList: const ['empty'],

@@ -43,7 +43,7 @@ class TSideBar extends StatelessWidget {
                   Obx(() {
                     final image = mediaController.displayImage.value;
 
-                    if (image != null) {
+                    if (image != null  && mediaController.displayImageOwner == MediaCategory.shop.toString().split('.').last) {
                       return FutureBuilder<String?>(
                         future: mediaController.getImageFromBucket(
                           MediaCategory.shop.toString().split('.').last,
@@ -104,7 +104,7 @@ class TSideBar extends StatelessWidget {
                   Obx((){
 
                     if(shopController.isLoading.value){
-                      return const TShimmerEffect(width: 80, height: 80);
+                      return const TShimmerEffect(width: 80, height: 40);
                     }
 
                     return Text(shopController.selectedShop?.value.shopname ?? '',style: Theme.of(context).textTheme.headlineLarge,);

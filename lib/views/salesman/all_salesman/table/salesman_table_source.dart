@@ -17,7 +17,7 @@ class SalesmanRow extends DataTableSource {
   final itemCount;
   final AddressController addressController = Get.find<AddressController>();
   final OrderController orderController = Get.find<OrderController>();
-  final ProductImagesController productImagesController = Get.find<ProductImagesController>();
+  // final ProductImagesController productImagesController = Get.find<ProductImagesController>();
   final SalesmanController salesmanController = Get.find<SalesmanController>();
 
   @override
@@ -27,11 +27,11 @@ class SalesmanRow extends DataTableSource {
 
         onTap: () async {
 
-          await addressController.fetchEntityAddresses(salesman.salesmanId,'Salesman');
-          await orderController.fetchEntityOrders(salesman.salesmanId,'Salesman');
+          await addressController.fetchEntityAddresses(salesman.salesmanId!,'Salesman');
+          await orderController.fetchEntityOrders(salesman.salesmanId!,'Salesman');
           orderController.setRecentOrderDay();
          // orderController.setAverageTotalAmount();
-          productImagesController.setDesiredImage(MediaCategory.salesman, salesman.salesmanId);
+         //  productImagesController.setDesiredImage(MediaCategory.salesman, salesman.salesmanId);
           Get.toNamed(TRoutes.salesmanDetails, arguments: salesman);
         },
         selected: false,
@@ -78,13 +78,28 @@ class SalesmanRow extends DataTableSource {
             onEditPressed: () async {
              // await addressController.fetchEntityAddresses(salesman.salesmanId,'Salesman');
               salesmanController.setSalesmanDetail(salesman);
-              productImagesController.setDesiredImage(MediaCategory.salesman, salesman.salesmanId);
+              // productImagesController.setDesiredImage(MediaCategory.salesman, salesman.salesmanId);
               Get.toNamed(TRoutes.addSalesman, arguments: salesman);
 
             },
             onDeletePressed: () async {
-            //  await salesman.deleteCustomer(salesman.salesmanId);
+              Get.defaultDialog(
+                title: "Confirm Delete",
+                middleText: "Are you sure you want to delete ${salesman.fullName}?",
+                textConfirm: "Delete",
+                textCancel: "Cancel",
+                confirmTextColor: Colors.white,
+                buttonColor: Colors.red,
+                onConfirm: () async {
+                  Get.back(); // Close the dialog
+                  await salesmanController.deleteSalesman(salesman.salesmanId!);
+                },
+                onCancel: () {
+                  Get.back(); // Just close the dialog if cancelled
+                },
+              );
             },
+
           ))
         ]);
   }

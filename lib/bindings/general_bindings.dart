@@ -33,7 +33,7 @@ class GeneralBindings extends Bindings {
     Get.put(OrderController());
     Get.put(BrandController());
     Get.put(CategoryController());
-    Get.put(ProductImagesController());
+   // Get.put(ProductImagesController());
    Get.put(MediaController());
    Get.put(ExpenseController());
    Get.put(NotificationController());

@@ -1,4 +1,5 @@
 import 'package:admin_dashboard_v3/Models/guarantors/guarantors_model.dart';
+import 'package:admin_dashboard_v3/Models/image/image_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/repositories/guarantors/guarantor_repository.dart';
 import 'package:admin_dashboard_v3/repositories/installment/installment_repository.dart';
@@ -37,6 +38,10 @@ class GuarantorController extends GetxController {
   final RxList<GuarantorsModel> selectedGuarantors = <GuarantorsModel>[
 
   ].obs;
+  Rx<ImageModel?> guarrantor1Image = Rx<ImageModel?>(null);
+  Rx<ImageModel?> guarrantor2Image = Rx<ImageModel?>(null);
+
+
 
   Future<void> fetchGuarantors(int orderId) async {
     try {

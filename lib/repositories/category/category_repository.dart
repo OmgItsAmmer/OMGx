@@ -11,44 +11,40 @@ class CategoryRepository {
 
   Future<void> saveOrUpdateCategoryRepo(Map<String, dynamic> json) async {
     try {
+      final categoryId = json['category_id'];
 
-
-      if (json['category_id'] != null) {
-        // Fetch the brand with the given brandID
-        final response = await supabase
+      // Check if category_id is valid and update if exists
+      if (categoryId != -1) {
+        final exists = await supabase
             .from('categories')
-            .select()
-            .eq('category_id', json['category_id'])
-            .maybeSingle(); // Avoids exception if no brand is found
+            .select('category_id')
+            .eq('category_id', categoryId)
+            .maybeSingle();
 
-        if (response != null) {
-          // If the brand exists, update it
+        if (exists != null) {
           await supabase
               .from('categories')
               .update(json)
-              .eq('category_id', json['category_id']);
-        } else {
-          // If no existing brand is found, insert a new one
-          // Remove the brandID to let the database auto-generate it
-          json.remove('category_id');
-          await supabase.from('categories').insert(json);
+              .eq('category_id', categoryId);
+          return;
         }
-      } else {
-        // If brandID is not provided, insert a new brand
-        // Ensure brandID is not present in the json
-        json.remove('category_id');
-        await supabase.from('categories').insert(json);
       }
+
+      // Insert new if not existing or category_id == -1
+      json.remove('category_id');
+      await supabase.from('categories').insert(json);
+
+      TLoader.successSnackBar(title: 'Category uploaded');
+
     } on PostgrestException catch (e) {
-      // Handle Supabase-specific errors
-      TLoader.errorSnackBar(title: 'categories Repo', message: e.message);
+      TLoader.errorSnackBar(title: 'Categories Repo', message: e.message);
       rethrow;
     } catch (e) {
-      // Handle other errors
-      TLoader.errorSnackBar(title: 'categories Repo', message: e.toString());
+      TLoader.errorSnackBar(title: 'Categories Repo', message: e.toString());
       rethrow;
     }
   }
+
 
   Future<List<CategoryModel>> fetchCategories() async {
     try {

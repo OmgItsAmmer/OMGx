@@ -7,6 +7,8 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 import '../../common/widgets/loaders/tloaders.dart';
+import '../../utils/constants/enums.dart';
+import '../media/media_controller.dart';
 
 class CategoryController extends GetxController {
   static CategoryController get instance => Get.find();
@@ -35,7 +37,9 @@ class CategoryController extends GetxController {
 
 
 
-  Future<void> saveOrUpdate(int? categoryId) async {
+  Future<void> saveOrUpdate(int categoryId) async {
+    final MediaController mediaController = Get.find<MediaController>();
+
     try{
       // Validate the form
       if (!categoryDetail.currentState!.validate()) {
@@ -47,15 +51,16 @@ class CategoryController extends GetxController {
       }
 
       final categoryModel = CategoryModel(
-        categoryId: categoryId ?? -1,
+        categoryId: categoryId ,
         categoryName: categoryName.text.trim(),
 
 
       );
       final json = categoryModel.toJson();
+      await mediaController.imageAssigner(categoryId, MediaCategory.categories.toString().split('.').last, true);
       categoryRepository.saveOrUpdateCategoryRepo(json);
       cleanCategoryDetail();
-      TLoader.successSnackBar(title: 'Brand Uploaded!');
+
 
     }
     catch(e){
@@ -70,11 +75,8 @@ class CategoryController extends GetxController {
 
   void setCategoryDetail(CategoryModel category) {
     try {
-      categoryName.text = category.categoryName ?? ' ';
+      categoryName.text = category.categoryName ;
     //  productCount.text = category.image.toString(); //Image
-
-
-
 
     } catch (e) {
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());

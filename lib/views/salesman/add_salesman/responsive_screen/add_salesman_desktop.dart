@@ -1,3 +1,4 @@
+import 'package:admin_dashboard_v3/Models/salesman/salesman_model.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -10,13 +11,14 @@ import '../widgets/salesman_thumbnaiil_info.dart';
 
 
 class AddSalesmanDesktop extends StatelessWidget {
-  const AddSalesmanDesktop({super.key});
+  const AddSalesmanDesktop({super.key, required  this.salesmanModel});
 
+  final SalesmanModel salesmanModel;
   @override
   Widget build(BuildContext context) {
-    return const Expanded(
+    return  Expanded(
       child: Scaffold(
-        body: SingleChildScrollView(
+        body: const SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.all(TSizes.defaultSpace),
             child: Row(
@@ -58,7 +60,7 @@ class AddSalesmanDesktop extends StatelessWidget {
             ),
           ),
         ),
-        bottomNavigationBar: AddSalesmanBottomBar(),
+        bottomNavigationBar: AddSalesmanBottomBar(salesmanModel: salesmanModel,),
       ),
     );
   }

@@ -1,6 +1,8 @@
 import 'package:admin_dashboard_v3/Models/orders/order_item_model.dart';
 import 'package:admin_dashboard_v3/Models/products/product_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
+import 'package:admin_dashboard_v3/controllers/brands/brand_controller.dart';
+import 'package:admin_dashboard_v3/controllers/category/category_controller.dart';
 import 'package:admin_dashboard_v3/controllers/product/product_images_controller.dart';
 import 'package:admin_dashboard_v3/repositories/products/product_repository.dart';
 import 'package:flutter/material.dart';
@@ -8,10 +10,13 @@ import 'package:get/get.dart';
 
 import '../../routes/routes.dart';
 import '../../utils/constants/enums.dart';
+import '../media/media_controller.dart';
 
 class ProductController extends GetxController {
   static ProductController get instance => Get.find();
   final productRepository = Get.put(ProductRepository());
+  final MediaController mediaController = Get.find<MediaController>();
+
 
 //List of product Model
   RxList<ProductModel> allProducts = <ProductModel>[].obs;
@@ -26,6 +31,7 @@ class ProductController extends GetxController {
   Rx<String> selectedProduct = ''.obs;
 
   //Product Detail Controllers
+  RxInt productId = (-1).obs;
   final productName = TextEditingController();
   final productDescription = TextEditingController();
   final basePrice = TextEditingController();
@@ -98,6 +104,7 @@ class ProductController extends GetxController {
       final json = productModel.toJson();
 
       // Save or update the product in the repository
+      await mediaController.imageAssigner(productId, MediaCategory.products.toString().split('.').last, true);
       await productRepository.saveOrUpdateProductRepo(json);
 
       // Update stock in the allProducts list
@@ -164,11 +171,26 @@ class ProductController extends GetxController {
 
   void setProductDetail(ProductModel product) {
     try {
+      final BrandController brandController = Get.find<BrandController>();
+      final CategoryController categoryController = Get.find<CategoryController>();
+
+      print(product.productId);
+      productId.value = product.productId ?? -1;
       productName.text = product.name ?? ' ';
       productDescription.text = product.description ?? ' ';
       basePrice.text = product.basePrice ?? ' ';
+      salePrice.text = product.salePrice ?? ' ';
       stock.text = product.stockQuantity.toString();
-      alertStock.text = product.alertStock.toString() ?? '';
+      alertStock.text = product.alertStock.toString();
+      selectedBrandId = product.brandID ?? -1;
+      selectedCategoryId = product.categoryId ?? -1;
+      selectedBrandNameController.text = brandController.allBrands
+          .firstWhere((brand) => brand.brandID == product.brandID)
+          .bname ?? '';
+      selectedCategoryNameController.text = categoryController.allCategories
+          .firstWhere((category) => category.categoryId == product.categoryId)
+          .categoryName;
+
     } catch (e) {
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
@@ -179,6 +201,7 @@ class ProductController extends GetxController {
       productName.clear();
       productDescription.clear();
       basePrice.clear();
+      salePrice.clear();
       stock.clear();
       alertStock.clear();
       brandName.clear();
@@ -254,11 +277,10 @@ class ProductController extends GetxController {
   }
 
   void onProductTap(ProductModel product) async {
-    final ProductImagesController productImagesController = Get.find<ProductImagesController>();
+
 
     setProductDetail(product);
-    await productImagesController.getSpecificImage(
-        MediaCategory.products, product.productId ?? -1);
+
 
     Get.toNamed(TRoutes.productsDetail, arguments: product);
   }

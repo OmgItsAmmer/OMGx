@@ -1,5 +1,5 @@
 class CustomerModel {
-  int customerId;
+  int? customerId; // Made nullable
   final String firstName;
   final String lastName;
   final String phoneNumber;
@@ -9,26 +9,26 @@ class CustomerModel {
   final DateTime? createdAt; // Optional, not required
 
   CustomerModel({
-    required this.customerId,
+    this.customerId, // nullable now
     required this.firstName,
     required this.lastName,
     required this.phoneNumber,
     required this.email,
     required this.cnic,
     this.pfp,
-    this.createdAt, // Optional, can be null
+    this.createdAt,
   });
 
   // Static function to create an empty user model
   static CustomerModel empty() => CustomerModel(
-    customerId: 0,
+    customerId: null, // nullable now
     firstName: "",
     lastName: "",
     phoneNumber: "",
     email: "",
     cnic: "",
     pfp: null,
-    createdAt: null, // Defaults to null
+    createdAt: null,
   );
 
   // Function to get the full name
@@ -43,21 +43,22 @@ class CustomerModel {
       'email': email,
       'cnic': cnic,
       'pfp': pfp,
-      'created_at': createdAt?.toIso8601String(), // Convert DateTime to ISO string
     };
 
     if (!isUpdate) {
-      data['customer_id'] = customerId; // Include `customer_id` only if it's not an update
+      if (customerId != null) {
+        data['customer_id'] = customerId;
+      }
+
     }
 
     return data;
   }
 
-
   // Factory method to create a CustomerModel from Supabase response
   factory CustomerModel.fromJson(Map<String, dynamic> json) {
     return CustomerModel(
-      customerId: json['customer_id'] as int,
+      customerId: json['customer_id'] as int?,
       firstName: json['first_name'] as String,
       lastName: json['last_name'] as String,
       phoneNumber: json['phone_number'] as String,
@@ -66,7 +67,7 @@ class CustomerModel {
       pfp: json['pfp'] as String?,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
-          : null, // Parse ISO string to DateTime, or null if not present
+          : null,
     );
   }
 

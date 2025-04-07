@@ -6,6 +6,13 @@ import 'package:admin_dashboard_v3/common/widgets/shimmers/shimmer.dart';
 import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
+import 'package:iconsax/iconsax.dart';
+import '../../../../common/widgets/icons/t_circular_icon.dart';
+import '../../../../controllers/customer/customer_controller.dart';
+import '../../../../controllers/media/media_controller.dart';
+import '../../../../controllers/salesman/salesman_controller.dart';
+import '../../../../utils/constants/colors.dart';
+import '../../../../utils/constants/enums.dart';
 
 class UserInfo extends StatelessWidget {
   final String title;
@@ -14,6 +21,7 @@ class UserInfo extends StatelessWidget {
   final String phoneNumber; // Passed directly
   final bool isLoading;
   final bool showAddress; // Added parameter to control showing address
+  final MediaCategory mediaCategory;
 
   const UserInfo({
     super.key,
@@ -22,12 +30,19 @@ class UserInfo extends StatelessWidget {
     required this.email,
     required this.phoneNumber,
     required this.isLoading,
-    this.showAddress = true, // Default: Show address
+    this.showAddress = true,
+    required this.mediaCategory, // Default: Show address
   });
 
   @override
   Widget build(BuildContext context) {
     final AddressController addressController = Get.find<AddressController>();
+    final MediaController mediaController = Get.find<MediaController>();
+    final CustomerController customerController =
+    Get.find<CustomerController>();
+    final SalesmanController salesmanController =
+    Get.find<SalesmanController>();
+
 
     return TRoundedContainer(
       padding: const EdgeInsets.all(TSizes.defaultSpace),
@@ -41,15 +56,64 @@ class UserInfo extends StatelessWidget {
           const SizedBox(height: TSizes.spaceBtwSections),
           Row(
             children: [
-              const Expanded(
-                child: TRoundedImage(
-                  width: 120,
-                  height: 120,
-                  imageurl: TImages.user,
-                  padding: EdgeInsets.all(0),
-                  isNetworkImage: false,
-                ),
-              ),
+              (mediaCategory == MediaCategory.customers) ?
+              Obx(
+                    () {
+
+
+                  // Fetch main image from the bucket and show it
+                  return FutureBuilder<String?>(
+                    future: mediaController.fetchMainImage(
+                      customerController.selectedCustomer.value.customerId ?? -1,
+                      MediaCategory.customers.toString().split('.').last,
+                    ),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const TShimmerEffect(width: 100, height: 100); // Show shimmer while loading
+                      } else if (snapshot.hasError) {
+                        return const Text('Error loading image'); // Handle error case
+                      } else if (snapshot.hasData && snapshot.data != null) {
+                        return TRoundedImage(
+                          isNetworkImage: true,
+                          width: 100,
+                          height: 100,
+                          imageurl: snapshot.data!,
+                        );
+                      } else {
+                        return const TCircularIcon(icon: Iconsax.image,width: 100,height: 100,backgroundColor: TColors.primaryBackground,); // Handle case where no image is available
+                        // Handle case where no image is available
+                      }
+                    },
+                  );
+                },
+              ) : Obx(
+                    () {
+                      // Fetch main image from the bucket and show it
+                  return FutureBuilder<String?>(
+                    future: mediaController.fetchMainImage(
+                      salesmanController.selectedSalesman?.value.salesmanId ?? -1,
+                      MediaCategory.salesman.toString().split('.').last,
+                    ),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const TShimmerEffect(width: 80, height: 80); // Show shimmer while loading
+                      } else if (snapshot.hasError) {
+                        return const Text('Error loading image'); // Handle error case
+                      } else if (snapshot.hasData && snapshot.data != null) {
+                        return TRoundedImage(
+                          isNetworkImage: true,
+                          width: 100,
+                          height: 100,
+                          imageurl: snapshot.data!,
+                        );
+                      } else {
+                        return const TCircularIcon(icon: Iconsax.image,width: 100,height: 100,backgroundColor: TColors.primaryBackground,); // Handle case where no image is available
+                        // Handle case where no image is available
+                      }
+                    },
+                  );
+                },
+              )  ,
               const SizedBox(width: TSizes.spaceBtwItems),
               Expanded(
                 child: Column(

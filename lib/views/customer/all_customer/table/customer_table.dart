@@ -19,7 +19,7 @@ class CustomerTable extends StatelessWidget {
       () => TPaginatedDataTable(
         sortAscending: true,
         minWidth: 700,
-        showCheckBox: true,
+        showCheckBox: false,
         columns: const [
         //    DataColumn2(label: Text('')),
           DataColumn2(label: Text('Customer')),

@@ -1,4 +1,5 @@
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
+import 'package:admin_dashboard_v3/common/widgets/icons/t_circular_icon.dart';
 import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/common/widgets/shimmers/shimmer.dart';
@@ -19,7 +20,7 @@ class ThumbnailInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ProductImagesController productImagesController = Get.find<ProductImagesController>();
+    // final ProductImagesController productImagesController = Get.find<ProductImagesController>();
     final MediaController mediaController = Get.find<MediaController>();
     final ProductController productController = Get.find<ProductController>();
 
@@ -36,19 +37,38 @@ class ThumbnailInfo extends StatelessWidget {
                 children: [
                   Obx(
                         () {
-                          if(productImagesController.selectedImage.value == null){
-                            return const SizedBox(
-                                height: 120,
-                                width: 100,
-                                child: Icon(Iconsax.image));
+                          final image = mediaController.displayImage.value;
+
+                          if (image != null) {
+                            //print(image.filename);
+                            return FutureBuilder<String?>(
+                              future: mediaController.getImageFromBucket(
+                                MediaCategory.products.toString().split('.').last,
+                                image.filename ?? '',
+                              ),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  return const TShimmerEffect(width: 150, height: 150);
+                                } else if (snapshot.hasError || snapshot.data == null) {
+                                  return const Icon(Icons.error);
+                                } else {
+                                  return TRoundedImage(
+                                    isNetworkImage: true,
+                                    width: 80,
+                                    height: 80,
+                                    imageurl: snapshot.data!,
+                                  );
+                                }
+                              },
+                            );
                           }
                       // Check if selectedImages is empty
                       return FutureBuilder<String?>(
-                        future: mediaController.fetchMainImage(productController.entityId.value, MediaCategory.products.toString().split('.').last),
+                        future: mediaController.fetchMainImage(productController.productId.value, MediaCategory.products.toString().split('.').last),
 
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const TShimmerEffect(width: 350, height: 170); // Show shimmer while loading
+                            return const TShimmerEffect(width: 80, height: 80); // Show shimmer while loading
                           } else if (snapshot.hasError) {
                             return const Text('Error loading image'); // Handle error case
                           } else if (snapshot.hasData && snapshot.data != null) {
@@ -59,7 +79,7 @@ class ThumbnailInfo extends StatelessWidget {
                               imageurl: snapshot.data!,
                             );
                           } else {
-                            return const Text('No image available'); // Handle case where no image is available
+                            return const TCircularIcon(icon: Iconsax.image,width: 80,height: 80,backgroundColor: TColors.primaryBackground,); // Handle case where no image is available
                           }
                         },
                       );
@@ -69,7 +89,8 @@ class ThumbnailInfo extends StatelessWidget {
                   OutlinedButton(
                     onPressed: () {
                       // Trigger the selection of a thumbnail image
-                      productImagesController.selectThumbnailImage();
+                      mediaController.selectImagesFromMedia();
+                     // productImagesController.selectThumbnailImage();
                     },
                     child: Text(
                       'Add Thumbnail',

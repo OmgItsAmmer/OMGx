@@ -50,7 +50,7 @@ class SalesSalemanInfo extends StatelessWidget {
                   final selectedSalesman = salesmanController.allSalesman
                       .firstWhere((user) => user.fullName == val);
 
-                  salesController.selectedSalesmanId = selectedSalesman.salesmanId;
+                  salesController.selectedSalesmanId = selectedSalesman.salesmanId!;
 
 
                   //Automatic gives unit price

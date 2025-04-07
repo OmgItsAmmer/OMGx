@@ -6,11 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
+import '../../../../common/widgets/icons/t_circular_icon.dart';
 import '../../../../common/widgets/shimmers/shimmer.dart';
 import '../../../../common/widgets/tiles/user_advance_info_tile.dart';
 import '../../../../controllers/media/media_controller.dart';
 import '../../../../controllers/orders/orders_controller.dart';
 import '../../../../controllers/product/product_images_controller.dart';
+import '../../../../utils/constants/colors.dart';
 import '../../../../utils/constants/enums.dart';
 import '../../../profile/old/widgets/profile_menu.dart';
 
@@ -22,7 +24,7 @@ class SalesmanInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     // final AddressController addressController = Get.find<AddressController>();
     final OrderController orderController = Get.find<OrderController>();
-    final ProductImagesController productImagesController = Get.find<ProductImagesController>();
+    // final ProductImagesController productImagesController = Get.find<ProductImagesController>();
     final MediaController mediaController = Get.find<MediaController>();
 
 
@@ -47,19 +49,38 @@ class SalesmanInfo extends StatelessWidget {
             children: [
               Obx(
                     () {
-                  // if(productImagesController.selectedImage.value == null){
-                  //   return const SizedBox(
-                  //       height: 120,
-                  //       width: 100,
-                  //       child: Icon(Iconsax.image));
-                  // }
+                      final image = mediaController.displayImage.value;
+
+                      if (image != null) {
+                        //print(image.filename);
+                        return FutureBuilder<String?>(
+                          future: mediaController.getImageFromBucket(
+                            MediaCategory.salesman.toString().split('.').last,
+                            image.filename ?? '',
+                          ),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const TShimmerEffect(width: 80, height: 80);
+                            } else if (snapshot.hasError || snapshot.data == null) {
+                              return const Icon(Icons.error);
+                            } else {
+                              return TRoundedImage(
+                                isNetworkImage: true,
+                                width: 80,
+                                height: 80,
+                                imageurl: snapshot.data!,
+                              );
+                            }
+                          },
+                        );
+                      }
                   // Check if selectedImages is empty
                   return FutureBuilder<String?>(
-                    future: mediaController.fetchMainImage(salesmanModel.salesmanId, MediaCategory.salesman.toString().split('.').last),
+                    future: mediaController.fetchMainImage(salesmanModel.salesmanId ?? -1, MediaCategory.salesman.toString().split('.').last),
 
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const TShimmerEffect(width: 350, height: 170); // Show shimmer while loading
+                        return const TShimmerEffect(width: 80, height: 80); // Show shimmer while loading
                       } else if (snapshot.hasError) {
                         return const Text('Error loading image'); // Handle error case
                       } else if (snapshot.hasData && snapshot.data != null) {
@@ -70,7 +91,8 @@ class SalesmanInfo extends StatelessWidget {
                           imageurl: snapshot.data!,
                         );
                       } else {
-                        return const Text('No image available'); // Handle case where no image is available
+                        return const TCircularIcon(icon: Iconsax.image,width: 80,height: 80,backgroundColor: TColors.primaryBackground,); // Handle case where no image is available
+
                       }
                     },
                   );

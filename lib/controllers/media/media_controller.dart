@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:admin_dashboard_v3/Models/image/combined_image_model.dart';
 import 'package:admin_dashboard_v3/Models/image/image_entity_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
@@ -9,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dropzone/flutter_dropzone.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../Models/image/image_model.dart';
@@ -32,6 +30,8 @@ class MediaController extends GetxController {
   final RxBool showImagesUploaderSection = false.obs;
   final RxBool isLoading = false.obs;
   final RxBool isFetching = false.obs;
+
+  final RxnString displayImageOwner = RxnString();
   Rx<ImageModel?> displayImage = Rx<ImageModel?>(null);
 
   // Pagination (lazy loading)
@@ -119,11 +119,9 @@ class MediaController extends GetxController {
                     onSelectedImage: (List<ImageModel> images) {
                       // Update the selectedImages list
                       selectedImages.value = images;
-                      print(selectedImages.length);
-
                       displayImage.value = selectedImages.first;
-                     // displayImage.refresh();
-                      print(displayImage.value?.url);
+                      displayImageOwner.value = displayImage.value?.folderType;
+
                     },
                   ),
                   const SizedBox(height: TSizes.spaceBtwItems),
@@ -140,6 +138,10 @@ class MediaController extends GetxController {
 //Call when stuff needs to be confirmed
   Future<void> imageAssigner(int entityId, String entityType, bool isFeatured) async {
     try {
+
+      if(selectedImages.isEmpty)
+        {return;}
+
       if (isFeatured) {
         // Make sure only one image is selected
         if (selectedImages.length > 1) {
@@ -185,8 +187,13 @@ class MediaController extends GetxController {
     } catch (e) {
       TLoader.errorSnackBar(title: 'Image Assigner Issue', message: e.toString());
     } finally {
+      for (var image in allImages) {
+        image.isSelected.value = false; // ✅ Reset checkbox state
+      }
       selectedImages.clear();
+      displayImage.value = null;
     }
+
   }
 
 
@@ -333,7 +340,7 @@ class MediaController extends GetxController {
       isFetching.value = true;
      final ImageModel image = await mediaRepository.getMainImage(entityId,entityType);
      if(image.filename == null || image.filename!.isEmpty){
-       TLoader.warningSnackBar(title: 'No Image Found!',message: 'There is No image in table');
+     //  TLoader.warningSnackBar(title: 'No Image Found!',message: 'There is No image in table');
        return null;
      }
      else{

@@ -1,36 +1,29 @@
-import 'dart:io';
 
 import 'package:admin_dashboard_v3/controllers/media/media_controller.dart';
-import 'package:admin_dashboard_v3/routes/routes.dart';
-import 'package:admin_dashboard_v3/views/login/login.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
-
-import '../common/widgets/loaders/tloaders.dart';
-import '../controllers/product/product_images_controller.dart';
-import '../controllers/user/user_controller.dart';
-import '../main.dart';
 import '../utils/constants/enums.dart';
 
-class   TRouteMiddleware extends GetMiddleware {
-
+class TRouteMiddleware extends GetMiddleware {
   @override
   RouteSettings? redirect(String? route) {
     // final ProductImagesController productImagesController =
     //   Get.find<ProductImagesController>();
-    final MediaController mediaController =
-    Get.find<MediaController>();
+    final MediaController mediaController = Get.find<MediaController>();
 
     mediaController.displayImage.value = null;
+    for (var image in mediaController.allImages) {
+      image.isSelected.value = false; // ✅ Reset checkbox state
+    }
+    mediaController.selectedImages.clear();
+    mediaController.selectedPath.value = MediaCategory.folders;
+
     //
     // productImagesController.selectedImage.value = null;
-   // const isAuthenticated = true;
+    // const isAuthenticated = true;
     // return isAuthenticated
     //     ? null
     //     : const RouteSettings(name: TRoutes.firstScreen);
-
-
 
     // Run function when navigating to ProfileScreen
     if (route != null) {
@@ -46,46 +39,45 @@ class   TRouteMiddleware extends GetMiddleware {
     return null;
   }
 
-  void fetchProfileImage()  async {
-    try {
-      //TLoader.successSnackBar(title: 'Pushed  by jynx');
-      final ProductImagesController productImagesController =
-      Get.find<ProductImagesController>();
-      final MediaController mediaController =
-      Get.find<MediaController>();
-
-      mediaController.selectedPath.value  = MediaCategory.users;
-      await  productImagesController.setDesiredImage(MediaCategory.users,
-          UserController.instance.currentUser.value.userId);
-
-    }
-    catch (e) {
-      if (kDebugMode) {
-        TLoader.errorSnackBar(title: 'Observer Profile', message: e.toString());
-        print(e);
-      }
-    }
-  }
-
-  void fetchStoreImage() {
-    try {
-
-
-      final MediaController mediaController =
-      Get.find<MediaController>();
-
-      mediaController.selectedPath.value  = MediaCategory.shop;
-      ProductImagesController.instance.setDesiredImage(
-          MediaCategory.shop, UserController.instance.currentUser.value.userId);
-    }
-    catch (e) {
-      if (kDebugMode) {
-        TLoader.errorSnackBar(title: 'Observer Profile', message: e.toString());
-        print(e);
-      }
-    }
-  }
-
+  // void fetchProfileImage()  async {
+  //   try {
+  //     //TLoader.successSnackBar(title: 'Pushed  by jynx');
+  //     // final ProductImagesController productImagesController =
+  //     // Get.find<ProductImagesController>();
+  //     final MediaController mediaController =
+  //     Get.find<MediaController>();
+  //
+  //     mediaController.selectedPath.value  = MediaCategory.users;
+  //     // await  productImagesController.setDesiredImage(MediaCategory.users,
+  //     //     UserController.instance.currentUser.value.userId);
+  //
+  //   }
+  //   catch (e) {
+  //     if (kDebugMode) {
+  //       TLoader.errorSnackBar(title: 'Observer Profile', message: e.toString());
+  //       print(e);
+  //     }
+  //   }
+  // }
+  //
+  // void fetchStoreImage() {
+  //   try {
+  //
+  //
+  //     final MediaController mediaController =
+  //     Get.find<MediaController>();
+  //
+  //     mediaController.selectedPath.value  = MediaCategory.shop;
+  //     // ProductImagesController.instance.setDesiredImage(
+  //     //     MediaCategory.shop, UserController.instance.currentUser.value.userId);
+  //   }
+  //   catch (e) {
+  //     if (kDebugMode) {
+  //       TLoader.errorSnackBar(title: 'Observer Profile', message: e.toString());
+  //       print(e);
+  //     }
+  //   }
+  // }
 
 // bool isInternetAvailable() {
 //   try {
@@ -95,6 +87,4 @@ class   TRouteMiddleware extends GetMiddleware {
 //     return false;
 //   }
 // }
-
-
 }

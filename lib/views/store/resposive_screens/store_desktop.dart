@@ -11,6 +11,7 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
 import '../../../../utils/validators/validation.dart';
+import '../../../common/widgets/icons/t_circular_icon.dart';
 import '../../../common/widgets/shimmers/shimmer.dart';
 import '../../../controllers/product/product_images_controller.dart';
 import '../../../controllers/shop/shop_controller.dart';
@@ -254,8 +255,8 @@ class StoreImageInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ShopController shopController = Get.find<ShopController>();
-    final ProductImagesController productImagesController =
-        Get.find<ProductImagesController>();
+    // final ProductImagesController productImagesController =
+    //     Get.find<ProductImagesController>();
     final MediaController mediaController = Get.find<MediaController>();
 
     return TRoundedContainer(
@@ -272,7 +273,7 @@ class StoreImageInfo extends StatelessWidget {
               Obx(() {
                 final image = mediaController.displayImage.value;
 
-                if (image != null) {
+                if (image != null && mediaController.displayImageOwner == MediaCategory.shop.toString().split('.').last) {
                   //print(image.filename);
                   return FutureBuilder<String?>(
                     future: mediaController.getImageFromBucket(
@@ -281,14 +282,14 @@ class StoreImageInfo extends StatelessWidget {
                     ),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const TShimmerEffect(width: 150, height: 150);
+                        return const TShimmerEffect(width: 80, height: 80);
                       } else if (snapshot.hasError || snapshot.data == null) {
                         return const Icon(Icons.error);
                       } else {
                         return TRoundedImage(
                           isNetworkImage: true,
-                          width: 150,
-                          height: 150,
+                          width: 80,
+                          height: 80,
                           imageurl: snapshot.data!,
                         );
                       }
@@ -304,14 +305,15 @@ class StoreImageInfo extends StatelessWidget {
                   ),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const TShimmerEffect(width: 350, height: 170);
+                      return const TShimmerEffect(width: 80, height: 80);
                     } else if (snapshot.hasError || snapshot.data == null) {
-                      return const Text('No image available');
+                      return const TCircularIcon(icon: Iconsax.image,width: 80,height: 80,backgroundColor: TColors.primaryBackground,); // Handle case where no image is available
+
                     } else {
                       return TRoundedImage(
                         isNetworkImage: true,
-                        width: 150,
-                        height: 150,
+                        width: 80,
+                        height: 80,
                         imageurl: snapshot.data!,
                       );
                     }
@@ -323,7 +325,8 @@ class StoreImageInfo extends StatelessWidget {
               // Camera Icon
               TRoundedContainer(
                 onTap: () {
-                  productImagesController.selectThumbnailImage();
+                  // productImagesController.selectThumbnailImage();
+                  mediaController.selectImagesFromMedia();
                 },
                 borderColor: TColors.white,
                 backgroundColor: TColors.primary,

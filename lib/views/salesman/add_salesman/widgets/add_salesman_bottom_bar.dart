@@ -1,3 +1,4 @@
+import 'package:admin_dashboard_v3/Models/salesman/salesman_model.dart';
 import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
 import 'package:admin_dashboard_v3/controllers/salesman/salesman_controller.dart';
 import 'package:flutter/material.dart';
@@ -7,9 +8,11 @@ import '../../../../utils/constants/sizes.dart';
 import '../../../../utils/device/device_utility.dart';
 
 class AddSalesmanBottomBar extends StatelessWidget {
+
   const AddSalesmanBottomBar({
-    super.key,
+    super.key, required this.salesmanModel,
   });
+  final SalesmanModel salesmanModel;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +34,8 @@ class AddSalesmanBottomBar extends StatelessWidget {
               child: OutlinedButton(
                 onPressed: () {
                   salesmanController.cleanSalesmanDetails();
-                  Get.back();
+                  Navigator.of(context).pop();
+
                 },
                 child: const Text('Discard'),
               ),
@@ -41,12 +45,21 @@ class AddSalesmanBottomBar extends StatelessWidget {
           Expanded(
             child: SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Handle Save action
-                  salesmanController.saveOrUpdateSalesman();
-                },
-                child: const Text('Save'),
+              child:  Obx(
+                    () => ElevatedButton(
+                  onPressed: () async {
+                    if(salesmanModel.salesmanId == null ) { // save
+                      // Handle Save action
+                      await salesmanController.insertSalesman();
+                    }
+                    else{ //update
+                      await salesmanController.updateSalesman(salesmanModel.salesmanId!);
+
+                    }
+                    Navigator.of(context).pop();
+                  },
+                  child: (salesmanController.isUpdating.value) ? const CircularProgressIndicator(color: Colors.white,) : (salesmanModel.salesmanId == null) ? const Text('Save') : const Text('Update'),
+                ),
               ),
             ),
           ),

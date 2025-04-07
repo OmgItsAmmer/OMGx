@@ -22,8 +22,7 @@ class SalesController extends GetxController {
 
   // Other Controllers Interaction
   final OrderRepository orderRepository = Get.put(OrderRepository());
-  final ProductImagesController productImagesController =
-      Get.find<ProductImagesController>();
+
   final  shopController =  Get.put(ShopController());
 
 
@@ -368,7 +367,7 @@ class SalesController extends GetxController {
     salesmanCityController.value.clear();
     salesmanAreaController.value.clear();
     remainingAmount.value.clear(); // Optional if needed
-    productImagesController.selectedImage.value = ImageModel.empty();
+    //productImagesController.selectedImage.value = ImageModel.empty();
   }
 
   String statusCheck() {

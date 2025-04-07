@@ -2,7 +2,9 @@ import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
+import '../../../../controllers/media/media_controller.dart';
 import '../table/customer_order_table.dart';
 import '../widgets/customer_shipping_info.dart';
 import '../widgets/user_info.dart';
@@ -12,6 +14,7 @@ class CustomerDetailDesktop extends StatelessWidget {
 final CustomerModel customerModel;
   @override
   Widget build(BuildContext context) {
+
     return Expanded(
       child: SizedBox(
         // height: 800,

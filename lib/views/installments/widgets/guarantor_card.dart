@@ -1,13 +1,20 @@
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
+import 'package:admin_dashboard_v3/controllers/guarantors/guarantor_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
 
 import '../../../common/widgets/dropdown_search/searchable_text_field.dart';
+import '../../../common/widgets/icons/t_circular_icon.dart';
+import '../../../common/widgets/shimmers/shimmer.dart';
+import '../../../controllers/media/media_controller.dart';
 import '../../../utils/constants/colors.dart';
+import '../../../utils/constants/enums.dart';
 import '../../../utils/validators/validation.dart';
 
 class GuarrantorCard extends StatelessWidget {
@@ -22,6 +29,7 @@ class GuarrantorCard extends StatelessWidget {
   final cnicTextController;
   final phoneNoTextController;
   final readOnly;
+  final int guarrantorIndex;
   final GlobalKey<FormState>? formKey;
 
 
@@ -37,10 +45,12 @@ class GuarrantorCard extends StatelessWidget {
         required this.phoneNoTextController,
         required this.addressList,
         this.formKey,
-        required this.addressTextController});
+        required this.addressTextController, required this.guarrantorIndex});
 
   @override
   Widget build(BuildContext context) {
+    final MediaController mediaController = Get.find<MediaController>();
+    final GuarantorController guarantorController = Get.find<GuarantorController>();
 
 
 
@@ -69,8 +79,109 @@ class GuarrantorCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const TRoundedImage(
-                          width: 100, height: 100, imageurl: TImages.user),
+                      Stack(
+                        alignment: Alignment
+                            .bottomRight, // Align the camera icon to the bottom right
+                        children: [
+                          // Rounded Image
+                          Obx(() {
+
+                            final image = mediaController.displayImage.value;
+
+                            if(guarrantorIndex == 1){
+                                  guarantorController.guarrantor1Image.value = image;
+                            }
+                            else if(guarrantorIndex == 2){
+                              guarantorController.guarrantor2Image.value = image;
+
+                            }
+
+                            if (image != null && mediaController.displayImageOwner == MediaCategory.guarantors.toString().split('.').last ) {
+                              return FutureBuilder<String?>(
+                                future: mediaController.getImageFromBucket(
+                                  MediaCategory.guarantors.toString().split('.').last,
+                                  image.filename ?? '',
+                                ),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState == ConnectionState.waiting) {
+                                    return const TShimmerEffect(width: 120, height: 120);
+                                  } else if (snapshot.hasError || snapshot.data == null) {
+                                    return const Icon(Icons.error);
+                                  } else {
+                                    return TRoundedImage(
+                                      isNetworkImage: true,
+                                      width: 120,
+                                      height: 120,
+                                      imageurl: snapshot.data!,
+                                    );
+                                  }
+                                },
+                              );
+                            }
+                            else{
+                              return const TCircularIcon(
+                                          icon: Iconsax.image,
+                                          width: 120,
+                                          height: 120,
+                                          backgroundColor: TColors.primaryBackground,
+                                        );
+                            }
+
+                            // 👇 Uses entityId directly to reactively fetch new image
+                            // return FutureBuilder<String?>(
+                            //   future: mediaController.fetchMainImage(
+                            //     -1,
+                            //     MediaCategory.guarantors.toString().split('.').last,
+                            //   ),
+                            //   builder: (context, snapshot) {
+                            //     if (snapshot.connectionState == ConnectionState.waiting) {
+                            //       return const TShimmerEffect(width: 120, height: 120);
+                            //     } else if (snapshot.hasError || snapshot.data == null) {
+                            //       return const TCircularIcon(
+                            //         icon: Iconsax.image,
+                            //         width: 120,
+                            //         height: 120,
+                            //         backgroundColor: TColors.primaryBackground,
+                            //       );
+                            //     } else {
+                            //       return TRoundedImage(
+                            //         isNetworkImage: true,
+                            //         width: 120,
+                            //         height: 120,
+                            //         imageurl: snapshot.data!,
+                            //       );
+                            //     }
+                            //   },
+                            // );
+                          }),
+
+
+
+                          // Camera Icon
+                          Positioned(
+                            right: 0, // Adjust the position of the icon
+                            bottom: 0, // Adjust the position of the icon
+                            child: GestureDetector(
+                              onTap: () {
+                                // productImagesController
+                                //     .selectThumbnailImage(); // Trigger image selection
+                                mediaController.selectImagesFromMedia();
+                              },
+                              child: const TRoundedContainer(
+                                borderColor: TColors.white,
+                                backgroundColor: TColors.primary,
+                                padding: EdgeInsets.all(
+                                    6), // Add padding around the icon
+                                child: Icon(
+                                  Iconsax.camera, // Camera icon
+                                  size: 25, // Icon size
+                                  color: Colors.white, // Icon color
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                       const SizedBox(
                         height: TSizes.spaceBtwItems,
                       ),

@@ -11,6 +11,7 @@ import 'package:iconsax/iconsax.dart';
 import '../../../common/widgets/dropdown_search/drop_down_searchbar.dart';
 import '../../../common/widgets/dropdown_search/dropdown_search.dart';
 import '../../../common/widgets/dropdown_search/searchable_text_field.dart';
+import '../../../common/widgets/icons/t_circular_icon.dart';
 import '../../../common/widgets/shimmers/shimmer.dart';
 import '../../../controllers/media/media_controller.dart';
 import '../../../controllers/product/product_images_controller.dart';
@@ -44,8 +45,8 @@ class SaleCustomerInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final SalesController salesController = Get.find<SalesController>();
-    final ProductImagesController productImagesController =
-        Get.find<ProductImagesController>();
+    // final ProductImagesController productImagesController =
+    //     Get.find<ProductImagesController>();
     final MediaController mediaController = Get.find<MediaController>();
 
     return Form(
@@ -73,78 +74,60 @@ class SaleCustomerInfo extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Stack(
-                        alignment: Alignment
-                            .bottomRight, // Align the camera icon to the bottom right
-                        children: [
-                          // Rounded Image
-                          Obx(
-                            () {
-                              if (salesController.entityId.value == -1) {
-                                return const SizedBox(
+                      Obx(() {
+                        final id = salesController.entityId.value; // 👈 This makes Obx react to changes
+                        final image = mediaController.displayImage.value;
+
+                        if (image != null) {
+                          return FutureBuilder<String?>(
+                            future: mediaController.getImageFromBucket(
+                              MediaCategory.customers.toString().split('.').last,
+                              image.filename ?? '',
+                            ),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return const TShimmerEffect(width: 120, height: 120);
+                              } else if (snapshot.hasError || snapshot.data == null) {
+                                return const Icon(Icons.error);
+                              } else {
+                                return TRoundedImage(
+                                  isNetworkImage: true,
+                                  width: 120,
                                   height: 120,
-                                  width: 100,
-                                  child: Icon(Iconsax
-                                      .image), // Placeholder icon when no image is selected
+                                  imageurl: snapshot.data!,
                                 );
                               }
-                              // Check if selectedImages is empty
-                              return FutureBuilder<String?>(
-                                future: mediaController.fetchMainImage(
-                                salesController.entityId.value ,
-                                MediaCategory.customers.toString().split('.').last
-                              ),
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return const TShimmerEffect(
-                                        width: 350,
-                                        height:
-                                            170); // Show shimmer while loading
-                                  } else if (snapshot.hasError) {
-                                    return const Text(
-                                        'Error loading image'); // Handle error case
-                                  } else if (snapshot.hasData &&
-                                      snapshot.data != null) {
-                                    return TRoundedImage(
-                                      isNetworkImage: true,
-                                      width: 150,
-                                      height: 150,
-                                      imageurl: snapshot.data!,
-                                    );
-                                  } else {
-                                    return const Text(
-                                        'No image available'); // Handle case where no image is available
-                                  }
-                                },
-                              );
                             },
-                          ),
+                          );
+                        }
 
-                          // Camera Icon
-                          Positioned(
-                            right: 0, // Adjust the position of the icon
-                            bottom: 0, // Adjust the position of the icon
-                            child: GestureDetector(
-                              onTap: () {
-                                productImagesController
-                                    .selectThumbnailImage(); // Trigger image selection
-                              },
-                              child: const TRoundedContainer(
-                                borderColor: TColors.white,
-                                backgroundColor: TColors.primary,
-                                padding: EdgeInsets.all(
-                                    6), // Add padding around the icon
-                                child: Icon(
-                                  Iconsax.camera, // Camera icon
-                                  size: 25, // Icon size
-                                  color: Colors.white, // Icon color
-                                ),
-                              ),
-                            ),
+                        // 👇 Uses entityId directly to reactively fetch new image
+                        return FutureBuilder<String?>(
+                          future: mediaController.fetchMainImage(
+                            id,
+                            MediaCategory.customers.toString().split('.').last,
                           ),
-                        ],
-                      ),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const TShimmerEffect(width: 120, height: 120);
+                            } else if (snapshot.hasError || snapshot.data == null) {
+                              return const TCircularIcon(
+                                icon: Iconsax.image,
+                                width: 120,
+                                height: 120,
+                                backgroundColor: TColors.primaryBackground,
+                              );
+                            } else {
+                              return TRoundedImage(
+                                isNetworkImage: true,
+                                width: 120,
+                                height: 120,
+                                imageurl: snapshot.data!,
+                              );
+                            }
+                          },
+                        );
+                      }),
                       const SizedBox(height: TSizes.spaceBtwSections),
                       const SizedBox(
                         height: TSizes.spaceBtwItems,

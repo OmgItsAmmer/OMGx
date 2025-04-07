@@ -50,6 +50,8 @@ class SalesmanRepository extends GetxController {
       rethrow;
     }
   }
+
+
   Future<List<SalesmanModel>> fetchAllSalesman() async {
     try {
       final data =  await supabase.from('salesman').select();
@@ -67,6 +69,82 @@ class SalesmanRepository extends GetxController {
       return [];
     }
 
+  }
+
+Future<int>  insertSalesmanInTable(Map<String, dynamic> json) async {
+  try {
+    final response = await supabase
+        .from('salesman')
+        .insert(json)
+        .select('salesman_id')
+        .single();
+
+    final salesmanId = response['salesman_id'] as int;
+    return salesmanId;
+
+  } on PostgrestException catch (e) {
+    if (kDebugMode) {
+      print(e);
+      TLoader.errorSnackBar(title: 'insertSalesmanInTable', message: e.message);
+    }
+    rethrow;
+  } catch (e) {
+    if (kDebugMode) {
+      print(e);
+      TLoader.errorSnackBar(title: 'insertSalesmanInTable', message: e.toString());
+    }
+    rethrow;
+  }
+
+}
+
+  Future<void> updateSalesman(Map<String, dynamic> json) async {
+    try {
+      int? salesmanId = json['salesman_id'];
+      if (salesmanId == null) throw Exception('Salesman ID is required for update.');
+
+      // Remove customer_id from the update payload to avoid trying to update the primary key
+      final updateData = Map<String, dynamic>.from(json)..remove('salesman_id');
+
+      await supabase
+          .from('salesman')
+          .update(updateData)
+          .eq('salesman_id', salesmanId);
+
+    } on PostgrestException catch (e) {
+      if (kDebugMode) {
+        print(e);
+        TLoader.errorSnackBar(title: 'updateSalesman', message: e.message);
+      }
+      rethrow;
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+        TLoader.errorSnackBar(title: 'updateSalesman', message: e.toString());
+      }
+      rethrow;
+    }
+  }
+
+
+  Future<void> deleteSalesmanFromTable(int customerId) async {
+    try {
+
+      await supabase
+          .from('salesman')
+          .delete()
+          .match({'salesman_id': customerId});
+
+
+
+      TLoader.successSnackBar(title: "Success", message: "Salesman deleted successfully");
+
+    } catch (e) {
+      if (kDebugMode) {
+        TLoader.errorSnackBar(title: 'deleteSalesmanFromTable', message: e.toString());
+        print("Error deleting customer: $e");
+      }
+    }
   }
 
 

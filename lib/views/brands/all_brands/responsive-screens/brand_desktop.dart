@@ -8,7 +8,6 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
 import '../../../../Models/brand/brand_model.dart';
-import '../../../../controllers/product/product_controller.dart';
 import '../../../../routes/routes.dart';
 
 class AllBrandsDesktopScreen extends StatelessWidget {

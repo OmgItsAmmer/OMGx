@@ -13,8 +13,7 @@ class ShopController extends GetxController {
   static ShopController get instance => Get.find();
   final ShopRepository shopRepository = Get.put(ShopRepository());
   final MediaController mediaController = Get.find<MediaController>();
-  final ProductImagesController productImagesController =
-      Get.find<ProductImagesController>();
+
 
   Rx<ShopModel>? selectedShop = ShopModel.empty().obs;
 
