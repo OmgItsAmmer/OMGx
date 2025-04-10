@@ -1,24 +1,30 @@
 class OrderItemModel {
   final int quantity;
   final double price;
-  final int productId;  // Changed from variantId to productId
+  final int productId;
   final String? unit;
   final int orderId;
+  final double totalBuyPrice; // New field added
+  final DateTime? createdAt; // New field for created_at
 
   OrderItemModel({
     required this.quantity,
     required this.price,
-    required this.productId,  // Updated field name
+    required this.productId,
     this.unit,
     required this.orderId,
+    this.totalBuyPrice = 0.0, // Default value set
+    this.createdAt, // New field added with nullable type
   });
 
   // Static function to create an empty order item model
   static OrderItemModel empty() => OrderItemModel(
     quantity: 0,
     price: 0.0,
-    productId: 0,  // Default value for productId
-    orderId: 0,    // Default value for orderId
+    productId: 0,
+    orderId: 0,
+    totalBuyPrice: 0.0,
+    createdAt: null, // Default for createdAt
   );
 
   // Convert model to JSON for database insertion
@@ -26,9 +32,11 @@ class OrderItemModel {
     return {
       'quantity': quantity,
       'price': price,
-      'product_id': productId,  // Updated field name
+      'product_id': productId,
       'order_id': orderId,
       'unit': unit,
+      'total_buy_price': totalBuyPrice,
+
     };
   }
 
@@ -37,9 +45,11 @@ class OrderItemModel {
     return OrderItemModel(
       quantity: json['quantity'] as int,
       price: (json['price'] as num).toDouble(),
-      productId: json['product_id'] as int,  // Updated field name
+      productId: json['product_id'] as int,
       orderId: json['order_id'] as int,
       unit: json['unit'] as String?,
+      totalBuyPrice: (json['total_buy_price'] ?? 0.0) as double,
+      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null, // Parse DateTime if available
     );
   }
 
@@ -55,6 +65,8 @@ class OrderItemModel {
     int? productId,
     String? unit,
     int? orderId,
+    double? totalBuyPrice,
+    DateTime? createdAt,
   }) {
     return OrderItemModel(
       quantity: quantity ?? this.quantity,
@@ -62,9 +74,13 @@ class OrderItemModel {
       productId: productId ?? this.productId,
       unit: unit ?? this.unit,
       orderId: orderId ?? this.orderId,
+      totalBuyPrice: totalBuyPrice ?? this.totalBuyPrice,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 }
+
+
 
 class OrderModel {
   final int orderId;

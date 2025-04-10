@@ -88,8 +88,8 @@ class SalesmanRow extends DataTableSource {
                 middleText: "Are you sure you want to delete ${salesman.fullName}?",
                 textConfirm: "Delete",
                 textCancel: "Cancel",
-                confirmTextColor: Colors.white,
-                buttonColor: Colors.red,
+                confirmTextColor: Colors.red,
+                buttonColor: Colors.black,
                 onConfirm: () async {
                   Get.back(); // Close the dialog
                   await salesmanController.deleteSalesman(salesman.salesmanId!);

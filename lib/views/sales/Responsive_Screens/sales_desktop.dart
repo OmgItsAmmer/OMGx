@@ -1,3 +1,4 @@
+import 'package:admin_dashboard_v3/Models/address/address_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
 import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
@@ -6,6 +7,7 @@ import 'package:admin_dashboard_v3/views/sales/widgets/sale_action_buttons.dart'
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../Models/customer/customer_model.dart';
 import '../../../controllers/media/media_controller.dart';
 import '../../../controllers/sales/sales_controller.dart';
 import '../table/sale_table.dart';
@@ -79,35 +81,28 @@ class SalesDesktop extends StatelessWidget {
                                       salesController.customerNameController,
 
                                   onSelectedName: (val) async {
+                                    if (val.isEmpty) {
+                                      // Clear logic when text is manually cleared
+                                      customerController.selectedCustomer.value = CustomerModel.empty(); // or null
+                                      salesController.customerPhoneNoController.value.text = '';
+                                      salesController.customerCNICController.value.text = '';
+                                      addressController.selectedCustomerAddress.value = AddressModel.empty(); // or null
+                                      salesController.selectedAddressId = null;
+                                      return;
+                                    }
+
+                                    // Continue normal logic
                                     customerController.selectedCustomer.value =
-                                        customerController.allCustomers
-                                            .firstWhere(
-                                                (user) => user.fullName == val);
+                                        customerController.allCustomers.firstWhere((user) => user.fullName == val);
                                     addressController.fetchEntityAddresses(
-                                        customerController
-                                            .selectedCustomer.value.customerId!,
-                                        'Customer');
-
-                                    //Fetch Image
+                                        customerController.selectedCustomer.value.customerId!, 'Customer');
                                     salesController.entityId.value = customerController.selectedCustomer.value.customerId!;
-
-
-
-                                    // await productImagesController
-                                    //     .getSpecificImage(
-                                    //         MediaCategory.customers,
-                                    //         customerController.selectedCustomer
-                                    //             .value.customerId);
-                                    //Automatic gives unit price
-                                    salesController.customerPhoneNoController
-                                            .value.text =
-                                        customerController
-                                            .selectedCustomer.value.phoneNumber;
-                                    salesController
-                                            .customerCNICController.value.text =
-                                        customerController
-                                            .selectedCustomer.value.cnic;
+                                    salesController.customerPhoneNoController.value.text =
+                                        customerController.selectedCustomer.value.phoneNumber;
+                                    salesController.customerCNICController.value.text =
+                                        customerController.selectedCustomer.value.cnic;
                                   },
+
 
                                   ///ADDRESS RELATED
                                   addressList: addressController

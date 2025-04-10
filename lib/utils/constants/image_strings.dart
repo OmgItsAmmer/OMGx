@@ -54,6 +54,10 @@ class TImages {
 
 
   // -- Lottie Animations
+  static const String a11 = "assets/images/animations/11.json";
+  static String circularLoader = "assets/images/animations/12.json";
+  static String spy = "assets/images/animations/13.json";
+  static String animatedFile = "assets/images/animations/14.json";
   static String defaultLoaderAnimation = "assets/images/animations/default-loader-animation.json";
   static String cartAnimation = "assets/images/animations/lady-adding-product-in-cart-animation.json";
   static String orderCompletedAnimation = "assets/images/animations/order-complete-car-delivery-animation.json";

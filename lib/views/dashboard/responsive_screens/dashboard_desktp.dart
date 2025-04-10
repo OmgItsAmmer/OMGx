@@ -1,9 +1,11 @@
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
+import 'package:admin_dashboard_v3/common/widgets/icons/t_circular_icon.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
 import 'package:admin_dashboard_v3/views/orders/all_orders/table/order_table.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
@@ -40,6 +42,14 @@ class DashboardDesktop extends StatelessWidget {
                   children: [
                     Expanded(
                         child: TDashBoardCard(
+                          iconWidget: const TCircularIcon(
+                            width: 40,
+                            height: 40,
+                            backgroundColor: TColors.primary,
+                            icon: Iconsax.box,
+                            color: TColors.white,
+                          ),
+
                           value: 'Rs ${dashboardController.currentMonthSales.value.toStringAsFixed(2)}',
                       stats: dashboardController.card1Percentage.value ,
                       title: 'Sales Total',
@@ -51,7 +61,15 @@ class DashboardDesktop extends StatelessWidget {
                       width: TSizes.spaceBtwItems,
                     ),
                     Expanded(
+
                         child: TDashBoardCard(
+                          iconWidget: const TCircularIcon(
+                            width: 40,
+                            height: 40,
+                            backgroundColor: Colors.purple,
+                            icon: Iconsax.receipt_item,
+                            color: TColors.white,
+                          ),
                           value: '',
 
                       stats: 25,
@@ -65,6 +83,16 @@ class DashboardDesktop extends StatelessWidget {
                     ),
                     Expanded(
                       child: TDashBoardCard(
+                        iconWidget: const TCircularIcon(
+                          width: 40,
+                          height: 40,
+                          backgroundColor: CupertinoColors.systemYellow,
+                          icon: Iconsax.money,
+                          color: TColors.white,
+                        ),
+
+
+
                         value: 'Rs ${dashboardController.currentMonthProfit.value.toStringAsFixed(2)}', // ✅ Two decimal places
                         stats: dashboardController.card2Percentage.value,
                         title: 'Profit',
@@ -79,7 +107,16 @@ class DashboardDesktop extends StatelessWidget {
                     ),
                      Expanded(
                         child: TDashBoardCard(
-                      value: dashboardController.customerCount.value.toString(),
+                          iconWidget: const TCircularIcon(
+                            width: 40,
+                            height: 40,
+                            backgroundColor: Colors.green,
+                            icon: Iconsax.people,
+                            color: TColors.white,
+                          ),
+
+
+                          value: dashboardController.customerCount.value.toString(),
                       stats: dashboardController.card4Percentage.value,
                       title: 'Customers',
                       subTitle: 'Compared to ${dashboardController.lastMonth.value}',

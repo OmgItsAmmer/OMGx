@@ -1,6 +1,5 @@
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
-import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 
 import 'package:flutter/material.dart';
@@ -8,13 +7,10 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
-import '../../../common/widgets/dropdown_search/drop_down_searchbar.dart';
-import '../../../common/widgets/dropdown_search/dropdown_search.dart';
 import '../../../common/widgets/dropdown_search/searchable_text_field.dart';
 import '../../../common/widgets/icons/t_circular_icon.dart';
 import '../../../common/widgets/shimmers/shimmer.dart';
 import '../../../controllers/media/media_controller.dart';
-import '../../../controllers/product/product_images_controller.dart';
 import '../../../controllers/sales/sales_controller.dart';
 import '../../../utils/constants/colors.dart';
 import '../../../utils/constants/enums.dart';

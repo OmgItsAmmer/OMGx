@@ -6,7 +6,7 @@ class AutoCompleteTextField extends StatefulWidget {
   final TextEditingController textController;
   final Function(String)? parameterFunc;
 
-  AutoCompleteTextField({
+  const AutoCompleteTextField({
     required this.titleText,
     required this.optionList,
     required this.textController,
@@ -27,12 +27,12 @@ class _AutoCompleteTextFieldState extends State<AutoCompleteTextField> {
     if (_overlayEntry != null) _removeOverlay();
 
     final RenderBox renderBox =
-        _fieldKey.currentContext!.findRenderObject() as RenderBox;
+    _fieldKey.currentContext!.findRenderObject() as RenderBox;
     final position = renderBox.localToGlobal(Offset.zero);
     final filteredOptions = widget.optionList
         .where((option) => option
-            .toLowerCase()
-            .contains(widget.textController.text.toLowerCase()))
+        .toLowerCase()
+        .contains(widget.textController.text.toLowerCase()))
         .toList();
 
     if (filteredOptions.isEmpty) return;
@@ -46,17 +46,19 @@ class _AutoCompleteTextFieldState extends State<AutoCompleteTextField> {
           elevation: 4.0,
           child: Container(
             color: Colors.white,
+            constraints: const BoxConstraints(maxHeight: 200), // Limiting the height
             child: ListView(
               shrinkWrap: true,
+              physics: const ClampingScrollPhysics(), // Scroll when overflows
               children: filteredOptions
                   .map((option) => ListTile(
-                        title: Text(option),
-                        onTap: () {
-                          widget.textController.text = option;
-                          widget.parameterFunc?.call(option);
-                          _removeOverlay();
-                        },
-                      ))
+                title: Text(option),
+                onTap: () {
+                  widget.textController.text = option;
+                  widget.parameterFunc?.call(option);
+                  _removeOverlay();
+                },
+              ))
                   .toList(),
             ),
           ),
@@ -71,6 +73,13 @@ class _AutoCompleteTextFieldState extends State<AutoCompleteTextField> {
     _overlayEntry?.remove();
     _overlayEntry = null;
   }
+
+  void _clearText() {
+    widget.textController.clear();
+    widget.parameterFunc?.call(''); // Notify parent of the clear action
+    _removeOverlay();
+  }
+
 
   @override
   void initState() {
@@ -94,16 +103,17 @@ class _AutoCompleteTextFieldState extends State<AutoCompleteTextField> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Text(widget.titleText,
-        //     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-       // SizedBox(height: 8),
         TextFormField(
           key: _fieldKey,
           controller: widget.textController,
           focusNode: _focusNode,
           decoration: InputDecoration(
             hintText: widget.titleText,
-            border: OutlineInputBorder(),
+            border: const OutlineInputBorder(),
+            suffixIcon: IconButton(
+              icon: const Icon(Icons.close, size: 18,),
+              onPressed: _clearText, // Clears the text and closes the overlay
+            ),
           ),
         ),
       ],

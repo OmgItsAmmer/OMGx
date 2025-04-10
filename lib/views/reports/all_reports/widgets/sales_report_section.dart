@@ -27,7 +27,17 @@ class SalesReportSection extends StatelessWidget {
               HoverableCard(
                 text: 'All Products Report',
                 animation: TImages.docerAnimation,
-                onPressed: (){},
+                onPressed: (){
+
+                },
+
+              ),
+              HoverableCard(
+                text: 'All Products Report',
+                animation: TImages.docerAnimation,
+                onPressed: (){
+
+                },
 
               ),
 

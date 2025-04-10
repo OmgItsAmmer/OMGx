@@ -132,6 +132,8 @@ class SalesController extends GetxController {
             message: 'Kindly fill all the Text fields before proceed');
         return;
       }
+      buyingPriceTotal += buyingPriceIndividual * double.parse(quantity.text);
+
 
       final sale = SaleModel(
           productId: selectedProductId.value,
@@ -139,11 +141,12 @@ class SalesController extends GetxController {
           salePrice: unitPrice.value.text.trim(),
           unit: selectedUnit.toString().trim(),
           quantity: quantity.text,
-          totalPrice: totalPrice.value.text);
+          totalPrice: totalPrice.value.text,
+          buyPrice: buyingPriceTotal,
+      );
       //Adding in netTotal
       netTotal.value += double.parse(totalPrice.value.text);
       originalNetTotal.value += double.parse(totalPrice.value.text);
-      buyingPriceTotal += buyingPriceIndividual * double.parse(quantity.text);
       // Parse the current remainingAmount and totalPrice as doubles
       double currentRemaining =
           double.tryParse(remainingAmount.value.text) ?? 0.0;
@@ -233,6 +236,7 @@ class SalesController extends GetxController {
           quantity: int.tryParse(sale.quantity) ?? 0,
           price: double.tryParse(sale.totalPrice) ?? 0.0,
           unit: sale.unit.toString().split('.').last,
+          totalBuyPrice: sale.buyPrice,
         )).toList(),
       );
 

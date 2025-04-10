@@ -44,7 +44,7 @@ class MediaUploader extends StatelessWidget {
                           // DropZone using desktop_drop
                           DropTarget(
                             onDragEntered: (val) {
-                              print(val);
+                              // print(val);
                             },
                             onDragDone: (details) {
                               for (var file in details.files) {
@@ -57,11 +57,10 @@ class MediaUploader extends StatelessWidget {
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Image.asset(TImages.defaultImage,
-                                        width: 50, height: 50),
-                                    const SizedBox(
-                                        height: TSizes.spaceBtwItems),
-                                    const Text('Drag and Drop Images here'),
+                                    TAnimationLoaderWidget(animation: TImages.animatedFile ,height: 80 ,width: 80,text: 'Drag and Drop Images here',),
+                                    // const SizedBox(
+                                    //     height: TSizes.spaceBtwItems),
+                                    // const Text('Drag and Drop Images here'),
                                     const SizedBox(
                                         height: TSizes.spaceBtwItems),
                                     OutlinedButton(

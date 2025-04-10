@@ -47,18 +47,22 @@ class SalesSalemanInfo extends StatelessWidget {
                 optionList: salesmanController.allSalesmanNames,
                 textController: salesController.salesmanNameController,
                 parameterFunc: (val) {
+                  if (val.isEmpty) {
+                    // Reset logic when field is cleared
+                    salesController.selectedSalesmanId = -1;
+                    salesController.salesmanCityController.value.text = '';
+                    salesController.salesmanAreaController.value.text = '';
+                    return;
+                  }
+
                   final selectedSalesman = salesmanController.allSalesman
                       .firstWhere((user) => user.fullName == val);
 
                   salesController.selectedSalesmanId = selectedSalesman.salesmanId!;
-
-
-                  //Automatic gives unit price
                   salesController.salesmanCityController.value.text = selectedSalesman.city;
                   salesController.salesmanAreaController.value.text = selectedSalesman.area;
-
-
                 },
+
               ),
             ),
             const SizedBox(height: TSizes.spaceBtwItems,),

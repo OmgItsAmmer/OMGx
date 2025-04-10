@@ -1,7 +1,12 @@
+import 'package:admin_dashboard_v3/Models/brand/brand_model.dart';
+import 'package:admin_dashboard_v3/Models/category/category_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
+import 'package:admin_dashboard_v3/common/widgets/icons/t_circular_icon.dart';
 import 'package:admin_dashboard_v3/controllers/brands/brand_controller.dart';
 import 'package:admin_dashboard_v3/controllers/category/category_controller.dart';
 import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
+import 'package:admin_dashboard_v3/routes/routes.dart';
+import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -33,7 +38,12 @@ class ProductBrandcCategory extends StatelessWidget {
                     'Category',
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
-                  const Icon(Iconsax.add)
+                   TCircularIcon(icon: Icons.add,backgroundColor: TColors.primary,color: TColors.white,
+
+                    onPressed: () {
+                    Get.toNamed(TRoutes.categoryDetails,arguments: CategoryModel.empty());
+                  },),
+
                 ],
               ),
                 const SizedBox(
@@ -45,13 +55,16 @@ class ProductBrandcCategory extends StatelessWidget {
                   textController:
                   productController.selectedCategoryNameController,
                   parameterFunc: (val) async {
-                    productController.selectedCategoryNameController.text = val;
+                    if (val.isEmpty) {
+                      resetCategorySelection();
+                      return;
+                    }
 
+                    productController.selectedCategoryNameController.text = val;
                     productController.selectedCategoryId =
                     await categoryController.fetchCategoryId(val);
-
-
-                  }),
+                  }
+              ),
             ],
           ),
         ),
@@ -72,7 +85,13 @@ class ProductBrandcCategory extends StatelessWidget {
                     'Brand',
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
-                  const Icon(Iconsax.add)
+                   TCircularIcon(icon: Icons.add,backgroundColor: TColors.primary,color: TColors.white,
+
+                    onPressed: () {
+                      Get.toNamed(TRoutes.brandDetails,arguments: BrandModel.empty());
+
+                    },
+                  ),
                 ],
               ),
               const SizedBox(
@@ -83,14 +102,17 @@ class ProductBrandcCategory extends StatelessWidget {
                   optionList: brandController.brandNames,
                   textController:
                       productController.selectedBrandNameController,
-                  parameterFunc: (val) async {
+                parameterFunc: (val) async {
+                  if (val.isEmpty) {
+                    productController.selectedBrandId = -1;
+                    productController.selectedBrandNameController.clear();
+                    return;
+                  }
 
-
-                    productController.selectedBrandId =
-                        await brandController.fetchBrandId(val);
-
-
-                  }),
+                  productController.selectedBrandId =
+                  await brandController.fetchBrandId(val);
+                },
+              ),
             ],
           ),
         ),
@@ -131,4 +153,13 @@ class ProductBrandcCategory extends StatelessWidget {
       ],
     );
   }
+
 }
+void resetCategorySelection() {
+  final ProductController productController = Get.find<ProductController>();
+
+  productController.selectedCategoryId = -1;
+  productController.selectedCategoryNameController.clear();
+}
+
+

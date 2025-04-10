@@ -1,3 +1,4 @@
+import 'package:admin_dashboard_v3/common/widgets/icons/t_circular_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 
@@ -12,16 +13,18 @@ class TDashBoardCard extends StatelessWidget {
     required this.title,
     required this.subTitle,
     required this.value,
-     this.icon=  Iconsax.arrow_up_3,
-     this.color = TColors.success,
+    this.icon = Iconsax.arrow_up_3,
+    this.color = TColors.success,
     required this.stats,
     this.onTap,
+    required this.iconWidget,
   });
-  final String title, subTitle,value;
+  final String title, subTitle, value;
   final IconData icon;
   final Color color;
   final int stats;
   final void Function()? onTap;
+  final TCircularIcon iconWidget;
 
   @override
   Widget build(BuildContext context) {
@@ -29,11 +32,21 @@ class TDashBoardCard extends StatelessWidget {
       onTap: onTap,
       padding: const EdgeInsets.all(TSizes.lg),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           //Heading
-           TSectionHeading(
-            title: title,
-            textColor: TColors.textSecondary,
+          Row(
+
+            children: [
+              iconWidget,
+              const SizedBox(
+                width: TSizes.spaceBtwItems,
+              ),
+              TSectionHeading(
+                title: title,
+                textColor: TColors.textSecondary,
+              ),
+            ],
           ),
           const SizedBox(
             height: TSizes.spaceBtwSections,
@@ -49,16 +62,15 @@ class TDashBoardCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                       Icon(
-                       icon,
+                      Icon(
+                        icon,
                         color: color,
                         size: TSizes.iconSm,
                       ),
                       Text(
                         '$stats%',
                         style: Theme.of(context).textTheme.titleLarge!.apply(
-                            color: color,
-                            overflow: TextOverflow.ellipsis),
+                            color: color, overflow: TextOverflow.ellipsis),
                       ),
                     ],
                   ),

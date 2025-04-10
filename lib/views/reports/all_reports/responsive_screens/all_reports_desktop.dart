@@ -1,8 +1,8 @@
-import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
+import 'package:admin_dashboard_v3/controllers/report/report_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-import '../../../../common/widgets/cards/hover_able_card.dart';
 import '../widgets/orders_report_section.dart';
 import '../widgets/product_report_section.dart';
 import '../widgets/sales_report_section.dart';
@@ -12,6 +12,8 @@ class AllReportsDesktop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+     Get.put(ReportController());
+
     return  Expanded(
         child: Scaffold(
       body: SingleChildScrollView(

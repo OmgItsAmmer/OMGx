@@ -125,41 +125,46 @@ class DashboardController extends GetxController {
   void fetchCustomerCard() {
     try {
       DateTime now = DateTime.now();
-      DateTime firstDayOfCurrentMonth = DateTime(now.year, now.month, 1);
-      DateTime firstDayOfPreviousMonth = DateTime(now.year, now.month - 1, 1);
-      DateTime lastDayOfPreviousMonth = firstDayOfCurrentMonth.subtract(const Duration(days: 1));
 
-      // ✅ Count new customers for the current month
-      int currentMonthCustomers = customerController.allCustomers
+      // Current month range: from 1st to today
+      DateTime startOfCurrentMonth = DateTime(now.year, now.month, 1);
+      DateTime today = now;
+
+      // Previous month range: from 1st of previous month to same day number
+      DateTime startOfPreviousMonth = DateTime(now.year, now.month - 1, 1);
+      DateTime sameDayLastMonth = DateTime(now.year, now.month - 1, now.day);
+
+      // Count current month's customers from 1st to today
+      int currentPartialCustomers = customerController.allCustomers
           .where((customer) =>
       customer.createdAt != null &&
-          customer.createdAt!.isAfter(firstDayOfCurrentMonth))
+          customer.createdAt!.isAfter(startOfCurrentMonth.subtract(const Duration(seconds: 1))) &&
+          customer.createdAt!.isBefore(today.add(const Duration(days: 1)))) // inclusive of today
           .length;
 
-      // ✅ Count new customers for the previous month
-      int previousMonthCustomers = customerController.allCustomers
+      // Count previous month's customers for same period
+      int previousPartialCustomers = customerController.allCustomers
           .where((customer) =>
       customer.createdAt != null &&
-          customer.createdAt!.isAfter(firstDayOfPreviousMonth) &&
-          customer.createdAt!.isBefore(lastDayOfPreviousMonth))
+          customer.createdAt!.isAfter(startOfPreviousMonth.subtract(const Duration(seconds: 1))) &&
+          customer.createdAt!.isBefore(sameDayLastMonth.add(const Duration(days: 1)))) // inclusive of same day
           .length;
 
-      // ✅ Calculate percentage increase or decrease
-      int percentageChange = previousMonthCustomers == 0
-          ? (currentMonthCustomers > 0 ? 100 : 0)
-          : (((currentMonthCustomers - previousMonthCustomers) / previousMonthCustomers) * 100).round();
+      // Calculate percentage change
+      int percentageChange = previousPartialCustomers == 0
+          ? (currentPartialCustomers > 0 ? 100 : 0)
+          : (((currentPartialCustomers - previousPartialCustomers) / previousPartialCustomers) * 100).round();
 
-      // ✅ Determine if there's an increase
-      bool isIncrease = currentMonthCustomers > previousMonthCustomers;
+      bool isIncrease = currentPartialCustomers > previousPartialCustomers;
 
-      // ✅ Store values in controller variables
-      customerCount.value = currentMonthCustomers;
-     // previousMonthCustomers.value = previousMonthCustomers;
+      // Update controller variables
+      customerCount.value = currentPartialCustomers;
       card4Percentage.value = percentageChange;
       isCustomerIncrease.value = isIncrease;
     } catch (e) {
       TLoader.errorSnackBar(title: "Error", message: e.toString());
     }
   }
+
 
 }
