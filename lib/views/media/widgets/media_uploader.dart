@@ -1,20 +1,16 @@
 import 'dart:io';
-
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/animation_loader.dart';
-import 'package:admin_dashboard_v3/common/widgets/loaders/loader_animation.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:get/get.dart';
-
 import '../../../controllers/media/media_controller.dart';
 import 'folder_dropdown.dart';
 
@@ -54,22 +50,41 @@ class MediaUploader extends StatelessWidget {
                             child: Container(
                               color: Colors.transparent,
                               child: Center(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    TAnimationLoaderWidget(animation: TImages.animatedFile ,height: 80 ,width: 80,text: 'Drag and Drop Images here',),
-                                    // const SizedBox(
-                                    //     height: TSizes.spaceBtwItems),
-                                    // const Text('Drag and Drop Images here'),
-                                    const SizedBox(
-                                        height: TSizes.spaceBtwItems),
-                                    OutlinedButton(
-                                      onPressed: () async {
-                                        mediaController.pickImageFromExplorer();
-                                      },
-                                      child: const Text('Select Images'),
-                                    ),
-                                  ],
+                                child: Obx(
+                                  () {
+                                    if(mediaController.isInserting.value) {
+                                      return TAnimationLoaderWidget(
+                                        animation: TImages.docerAnimation,
+                                        height: 80,
+                                        width: 80,
+                                        text: 'Uploading...',
+                                      );
+                                    }
+
+                                   return Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        TAnimationLoaderWidget(
+                                          animation: TImages.animatedFile,
+                                          height: 80,
+                                          width: 80,
+                                          text: 'Drag and Drop Images here',
+                                        ),
+                                        // const SizedBox(
+                                        //     height: TSizes.spaceBtwItems),
+                                        // const Text('Drag and Drop Images here'),
+                                        const SizedBox(
+                                            height: TSizes.spaceBtwItems),
+                                        OutlinedButton(
+                                          onPressed: () async {
+                                            mediaController
+                                                .pickImageFromExplorer();
+                                          },
+                                          child: const Text('Select Images'),
+                                        ),
+                                      ],
+                                    );
+                                  }
                                 ),
                               ),
                             ),
@@ -135,22 +150,44 @@ class MediaUploader extends StatelessWidget {
                                       : SizedBox(
                                           width: TSizes.buttonWidth,
                                           child: ElevatedButton(
-                                              onPressed: () {
-                                                if (mediaController
-                                                        .selectedPath !=
-                                                    MediaCategory.folders) {
-                                                  //mediaController.uploadImages(mediaController.selectedPath.value.toString().split('.').last);
-                                                  _openConfirmationDialog(
-                                                      context);
-                                                } else {
-                                                  TLoader.errorSnackBar(
-                                                      title: 'Select Category',
-                                                      message:
-                                                          'Kindly select the category first');
-                                                }
-                                              },
-                                              child: const Text('Upload')),
-                                        )
+                                            onPressed: () {
+                                              if (mediaController
+                                                      .selectedPath !=
+                                                  MediaCategory.folders) {
+                                                // Step 1: Confirmation dialog
+                                                Get.defaultDialog(
+                                                  title: 'Confirm Upload',
+                                                  middleText:
+                                                      'Are you sure you want to upload?',
+                                                  textConfirm: 'Yes',
+                                                  textCancel: 'No',
+                                                  onConfirm: () {
+                                                    Navigator.of(context).pop();
+
+                                                    mediaController
+                                                        .insertImagesInTableAndBucket(
+                                                      mediaController
+                                                          .selectedPath.value
+                                                          .toString()
+                                                          .split('.')
+                                                          .last,
+                                                    );
+                                                  },
+                                                  onCancel: () {
+                                                    Navigator.of(context).pop();
+
+                                                  },
+                                                );
+                                              } else {
+                                                TLoader.errorSnackBar(
+                                                  title: 'Select Category',
+                                                  message:
+                                                      'Kindly select the category first',
+                                                );
+                                              }
+                                            },
+                                            child: const Text('Upload'),
+                                          ))
                                 ],
                               ),
                             ],
@@ -192,23 +229,38 @@ class MediaUploader extends StatelessWidget {
                               ? SizedBox(
                                   width: double.infinity,
                                   child: ElevatedButton(
-                                      onPressed: () {
-                                        if (mediaController.selectedPath !=
-                                            MediaCategory.folders) {
-                                          mediaController.insertImagesInTableAndBucket(
+                                    onPressed: () {
+                                      if (mediaController.selectedPath !=
+                                          MediaCategory.folders) {
+                                        // Step 1: Confirmation dialog
+                                        Get.defaultDialog(
+                                          title: 'Confirm Upload',
+                                          middleText:
+                                              'Are you sure you want to upload?',
+                                          textConfirm: 'Yes',
+                                          textCancel: 'No',
+                                          onConfirm: () {
+                                            Navigator.of(context).pop();
+                                            mediaController
+                                                .insertImagesInTableAndBucket(
                                               mediaController.selectedPath.value
                                                   .toString()
                                                   .split('.')
-                                                  .last);
-                                        } else {
-                                          TLoader.errorSnackBar(
-                                              title: 'Select Category',
-                                              message:
-                                                  'Kindly select the category first');
-                                        }
-                                      },
-                                      child: const Text('Upload')),
-                                )
+                                                  .last,
+                                            );
+                                          },
+                                          onCancel: () {},
+                                        );
+                                      } else {
+                                        TLoader.errorSnackBar(
+                                          title: 'Select Category',
+                                          message:
+                                              'Kindly select the category first',
+                                        );
+                                      }
+                                    },
+                                    child: const Text('Upload'),
+                                  ))
                               : const SizedBox.shrink()
                         ],
                       ),
@@ -218,84 +270,6 @@ class MediaUploader extends StatelessWidget {
           )
         : const SizedBox.shrink());
   }
-  void _openConfirmationDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                'Are you sure you want to proceed?',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the confirmation dialog
-                _openNonClosableDialog(context); // Open the non-closable dialog
-              },
-              child: const Text('Confirm'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _openNonClosableDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false, // Prevent closing when clicking outside
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: SizedBox(
-            height: 400,
-            width: 200,
-            child: Padding(
-              padding: const EdgeInsets.all(TSizes.defaultSpace),
-              child: Column(
-                children: [
-                  TAnimationLoaderWidget(animation: TImages.docerAnimation),
-                  const SizedBox(
-                    height: TSizes.spaceBtwSections,
-                  ),
-                  Text(
-                    'Sit Tight! Uploading in Progress..',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    ).then((_) {
-      // This block will execute when the dialog is closed
-      print("Dialog closed");
-    });
-
-    // Call your image upload function here
-    _uploadImage(context).then((_) {
-      // Close the dialog after the image is uploaded
-      Navigator.of(context).pop();
-    });
-  }
-
-  Future<void> _uploadImage(BuildContext context) async {
-    // Simulate an image upload process (replace with your actual upload logic)
-    print(mediaController.selectedPath.value.toString().split('.').last);
-   mediaController.insertImagesInTableAndBucket(mediaController.selectedPath.value.toString().split('.').last);
-  }
-
 }
+
+

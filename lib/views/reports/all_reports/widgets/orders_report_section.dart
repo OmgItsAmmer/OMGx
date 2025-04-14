@@ -43,7 +43,7 @@ class OrderReportSection extends StatelessWidget {
                 text: 'Salesman',
                 animation: TImages.docerAnimation,
                 onPressed: (){
-                  reportController.showDateRangePickerDialog(context);
+                  reportController.showDateRangePickerDialogSalesman(context);
 
 
                 },

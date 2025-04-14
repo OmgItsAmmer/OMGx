@@ -93,7 +93,7 @@ class CategoryInfo extends StatelessWidget {
                 // Fallback to future-based image if no image is selected
                 return FutureBuilder<String?>(
                   future: mediaController.fetchMainImage(
-                    categoryModel.categoryId,
+                    categoryModel.categoryId ?? -1,
                     MediaCategory.categories.toString().split('.').last,
                   ),
                   builder: (context, snapshot) {
@@ -139,21 +139,29 @@ class CategoryInfo extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    // Handle save button press
-                    categoryController.saveOrUpdate(categoryModel.categoryId);
-                    Navigator.of(context).pop();
+                child: Obx(
+              () => ElevatedButton(
+                    onPressed: () {
+                      if (categoryModel.categoryId == null) {
+                        categoryController.insertCategory();
+                      } else {
+                        categoryController.updateCategory(categoryModel.categoryId!);
+                      }
 
-                  },
-                  child: Text(
-                    'Save/Update',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium!
-                        .apply(color: TColors.white),
+                      Navigator.of(context).pop();
+                    },
+                    child: (categoryController.isUpdating.value)
+                        ? const CircularProgressIndicator(color: TColors.white)
+                        : Text(
+                      (categoryModel.categoryId == null) ? 'Save' : 'Update',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium!
+                          .apply(color: TColors.white),
+                    ),
                   ),
                 ),
+
               ),
             ],
           ),

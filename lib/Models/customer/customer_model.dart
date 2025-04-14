@@ -5,7 +5,6 @@ class CustomerModel {
   final String phoneNumber;
   final String email;
   final String cnic;
-  final String? pfp; // Optional profile picture field
   final DateTime? createdAt; // Optional, not required
 
   CustomerModel({
@@ -15,7 +14,6 @@ class CustomerModel {
     required this.phoneNumber,
     required this.email,
     required this.cnic,
-    this.pfp,
     this.createdAt,
   });
 
@@ -27,7 +25,6 @@ class CustomerModel {
     phoneNumber: "",
     email: "",
     cnic: "",
-    pfp: null,
     createdAt: null,
   );
 
@@ -42,14 +39,12 @@ class CustomerModel {
       'phone_number': phoneNumber,
       'email': email,
       'cnic': cnic,
-      'pfp': pfp,
     };
 
     if (!isUpdate) {
       if (customerId != null) {
         data['customer_id'] = customerId;
       }
-
     }
 
     return data;
@@ -64,7 +59,6 @@ class CustomerModel {
       phoneNumber: json['phone_number'] as String,
       email: json['email'] as String,
       cnic: json['cnic'] as String,
-      pfp: json['pfp'] as String?,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : null,

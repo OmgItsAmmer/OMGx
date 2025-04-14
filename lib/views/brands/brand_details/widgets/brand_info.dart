@@ -92,7 +92,7 @@ class BrandInfo extends StatelessWidget {
                 // Fallback to future-based image if no image is selected
                 return FutureBuilder<String?>(
                   future: mediaController.fetchMainImage(
-                    brandController.selectedBrand.value.brandID ,
+                    brandController.selectedBrand.value.brandID ?? -1 ,
                     MediaCategory.brands.toString().split('.').last,
                   ),
                   builder: (context, snapshot) {
@@ -138,18 +138,26 @@ class BrandInfo extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    // Handle save button press
-                    brandController.saveOrUpdate(brandModel.brandID);
-                    Navigator.of(context).pop();
-                  },
-                  child: Text(
-                    'Save',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium!
-                        .apply(color: TColors.white),
+                child: Obx(
+              () => ElevatedButton(
+                    onPressed: () {
+
+                      if(brandModel.brandID == null){
+                        brandController.insertBrand();
+                      }
+                      else {
+                        brandController.updateBrand(brandModel.brandID!);
+                      }
+
+                      Navigator.of(context).pop();
+                    },
+                    child: (brandController.isUpdating.value) ? const CircularProgressIndicator(color: TColors.white,) :Text( (brandModel.brandID == null) ?
+                      'Save': 'Update',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium!
+                          .apply(color: TColors.white),
+                    ),
                   ),
                 ),
               ),

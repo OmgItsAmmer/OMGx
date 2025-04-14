@@ -30,7 +30,7 @@ class SalesDesktop extends StatelessWidget {
     final AddressController addressController = Get.find<AddressController>();
     // final ProductImagesController productImagesController =
     //     Get.find<ProductImagesController>();
-    final MediaController mediaController = Get.find<MediaController>();
+   final MediaController mediaController = Get.find<MediaController>();
 
 
     return Expanded(
@@ -75,21 +75,24 @@ class SalesDesktop extends StatelessWidget {
                                 flex: 2,
                                 child: SaleCustomerInfo(
                                   namesList:
-                                      customerController.allCustomerNames,
+                                  customerController.allCustomers.map((e) => e.fullName).toList(),
                                   hintText: 'Customer Name',
                                   userNameTextController:
                                       salesController.customerNameController,
 
                                   onSelectedName: (val) async {
                                     if (val.isEmpty) {
-                                      // Clear logic when text is manually cleared
                                       customerController.selectedCustomer.value = CustomerModel.empty(); // or null
-                                      salesController.customerPhoneNoController.value.text = '';
-                                      salesController.customerCNICController.value.text = '';
+                                      salesController.customerPhoneNoController.value.clear();
+                                      salesController.customerCNICController.value.clear();
                                       addressController.selectedCustomerAddress.value = AddressModel.empty(); // or null
+                                      salesController.customerAddressController.value.clear(); // ← THIS clears the address field
                                       salesController.selectedAddressId = null;
+                                      mediaController.displayImage.value = null;
                                       return;
                                     }
+
+
 
                                     // Continue normal logic
                                     customerController.selectedCustomer.value =

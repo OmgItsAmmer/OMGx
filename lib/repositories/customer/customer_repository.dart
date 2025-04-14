@@ -18,9 +18,7 @@ class CustomerRepository extends GetxController {
       final customerList = data.map((item) {
         return CustomerModel.fromJson(item);
       }).toList();
-      if (kDebugMode) {
-        print(customerList[1].fullName);
-      }
+
       return customerList;
     } catch (e) {
       TLoader.errorSnackBar(title: 'Oh Snap', message: e.toString());

@@ -282,14 +282,14 @@ class StoreImageInfo extends StatelessWidget {
                     ),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const TShimmerEffect(width: 80, height: 80);
+                        return const TShimmerEffect(width: 150, height: 150);
                       } else if (snapshot.hasError || snapshot.data == null) {
                         return const Icon(Icons.error);
                       } else {
                         return TRoundedImage(
                           isNetworkImage: true,
-                          width: 80,
-                          height: 80,
+                          width: 150,
+                          height: 150,
                           imageurl: snapshot.data!,
                         );
                       }
@@ -305,15 +305,15 @@ class StoreImageInfo extends StatelessWidget {
                   ),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const TShimmerEffect(width: 80, height: 80);
+                      return const TShimmerEffect(width: 150, height: 150);
                     } else if (snapshot.hasError || snapshot.data == null) {
                       return const TCircularIcon(icon: Iconsax.image,width: 80,height: 80,backgroundColor: TColors.primaryBackground,); // Handle case where no image is available
 
                     } else {
                       return TRoundedImage(
                         isNetworkImage: true,
-                        width: 80,
-                        height: 80,
+                        width: 150,
+                        height: 150,
                         imageurl: snapshot.data!,
                       );
                     }

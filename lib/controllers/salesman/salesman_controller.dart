@@ -10,13 +10,9 @@ import '../media/media_controller.dart';
 
 class SalesmanController extends GetxController {
   static SalesmanController get instance => Get.find();
-  final  SalesmanRepository salesmanRepository = Get.put(SalesmanRepository());
+  final SalesmanRepository salesmanRepository = Get.put(SalesmanRepository());
   final AddressController addressController = Get.put(AddressController());
   final MediaController mediaController = Get.put(MediaController());
-
-
-
-
 
   final profileLoading = false.obs;
   final isLoading = false.obs;
@@ -26,7 +22,6 @@ class SalesmanController extends GetxController {
   RxList<String> allSalesmanNames = <String>[].obs;
 
   Rx<SalesmanModel>? selectedSalesman = SalesmanModel.empty().obs;
-
 
   //Add Customer
   final firstName = TextEditingController();
@@ -38,14 +33,9 @@ class SalesmanController extends GetxController {
   final area = TextEditingController();
   final city = TextEditingController();
   RxInt entityId = (-1).obs;
-  GlobalKey<FormState> addSalesmanKey =
-  GlobalKey<FormState>();
+  GlobalKey<FormState> addSalesmanKey = GlobalKey<FormState>();
 
   RxInt salesmanId = (-1).obs;
-
-
-
-
 
   @override
   void onInit() {
@@ -54,11 +44,8 @@ class SalesmanController extends GetxController {
     fetchAllSalesman();
   }
 
-
-
   Future<void> fetchAllSalesman() async {
     try {
-
       final salesman = await salesmanRepository.fetchAllSalesman();
       allSalesman.assignAll(salesman);
 
@@ -69,8 +56,6 @@ class SalesmanController extends GetxController {
       if (kDebugMode) {
         print(allSalesmanNames);
       }
-
-
     } catch (e) {
       TLoader.errorSnackBar(title: "Oh Snap!", message: e.toString());
     }
@@ -91,13 +76,13 @@ class SalesmanController extends GetxController {
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
   }
+
   void setSalesmanDetail(SalesmanModel salesman) {
     try {
-
       salesmanId.value = salesman.salesmanId!;
-      firstName.text = salesman.firstName ;
-      lastName.text = salesman.lastName ;
-      email.text = salesman.email ;
+      firstName.text = salesman.firstName;
+      lastName.text = salesman.lastName;
+      email.text = salesman.email;
       cnic.text = salesman.cnic.toString();
       commission.text = salesman.comission.toString();
       phoneNumber.text = salesman.phoneNumber.toString();
@@ -110,75 +95,63 @@ class SalesmanController extends GetxController {
 
       // Set the address text if a match is found
       //AddressController.instance.address.text = matchingAddress.location ?? ''; // Assuming `addressText` is the property holding the address as a String
-
-
-
-
     } catch (e) {
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
   }
 
+  // Future<void> saveOrUpdateSalesman(int salesmanId) async {
+  //   try {
+  //     // Validate the form
+  //     if (!addSalesmanKey.currentState!.validate()) {
+  //       TLoader.errorSnackBar(
+  //         title: "Empty Fields",
+  //         message: 'Kindly fill all the fields before proceeding.',
+  //       );
+  //       return;
+  //     }
 
-  Future<void> saveOrUpdateSalesman(int salesmanId) async {
-    try {
-      // Validate the form
-      if (!addSalesmanKey.currentState!.validate()) {
-        TLoader.errorSnackBar(
-          title: "Empty Fields",
-          message: 'Kindly fill all the fields before proceeding.',
-        );
-        return;
-      }
+  //     final salesmanModel = SalesmanModel(
+  //       salesmanId: salesmanId, //not uploading
+  //       firstName: firstName.text ,
+  //       lastName: lastName.text,
+  //       phoneNumber: phoneNumber.text,
+  //       email: email.text,
+  //       cnic: cnic.text,
+  //       area: area.text,
+  //       city: city.text
+  //     );
+  //     final json = salesmanModel.toJson();
 
+  //     // Call the repository function to save or update the product
+  //     int entityId = await salesmanRepository.saveOrUpdateSalesmanRepo(json) ?? -1;
+  //     //Update Image Table
+  //     if(entityId != -1   )
+  //     {
+  //       mediaController.imageAssigner(entityId, MediaCategory.salesman.toString().split('.').last, true);
 
+  //       salesmanModel.salesmanId = entityId;
 
-      final salesmanModel = SalesmanModel(
-        salesmanId: salesmanId, //not uploading
-        firstName: firstName.text ,
-        lastName: lastName.text,
-        phoneNumber: phoneNumber.text,
-        email: email.text,
-        cnic: cnic.text,
-        area: area.text,
-        city: city.text
-      );
-      final json = salesmanModel.toJson();
+  //       await AddressController.instance.saveAddress(entityId, 'Salesman');
+  //       allSalesman.add(salesmanModel);
+  //       allSalesmanNames.add(salesmanModel.fullName);
+  //     }
+  //     else
+  //     {
+  //       TLoader.errorSnackBar(title: 'Cant Upload Image',message: 'Entity Id is negative');
+  //     }
 
+  //     // Clear the form after saving/updating
+  //     cleanSalesmanDetails();
 
-      // Call the repository function to save or update the product
-      int entityId = await salesmanRepository.saveOrUpdateSalesmanRepo(json) ?? -1;
-      //Update Image Table
-      if(entityId != -1   )
-      {
-        mediaController.imageAssigner(entityId, MediaCategory.salesman.toString().split('.').last, true);
-
-        salesmanModel.salesmanId = entityId;
-
-        await AddressController.instance.saveAddress(entityId, 'Salesman');
-        allSalesman.add(salesmanModel);
-        allSalesmanNames.add(salesmanModel.fullName);
-      }
-      else
-      {
-        TLoader.errorSnackBar(title: 'Cant Upload Image',message: 'Entity Id is negative');
-      }
-
-
-
-
-      // Clear the form after saving/updating
-      cleanSalesmanDetails();
-
-
-    } catch (e) {
-      // Handle errors
-      TLoader.errorSnackBar(
-        title: "Error",
-        message: e.toString(),
-      );
-    }
-  }
+  //   } catch (e) {
+  //     // Handle errors
+  //     TLoader.errorSnackBar(
+  //       title: "Error",
+  //       message: e.toString(),
+  //     );
+  //   }
+  // }
   void fetchSalesmanInfo(int salesmanId) {
     try {
       // Set loading state to true
@@ -186,7 +159,7 @@ class SalesmanController extends GetxController {
 
       // Fetch salesman data based on salesmanId
       final salesmanData = allSalesman.firstWhere(
-            (salesman) => salesman.salesmanId == salesmanId,
+        (salesman) => salesman.salesmanId == salesmanId,
         orElse: () => SalesmanModel.empty(), // Fallback if no salesman is found
       );
 
@@ -235,7 +208,8 @@ class SalesmanController extends GetxController {
         city: city.text,
       );
 
-      final json = salesmanModel.toJson(isUpdate: true); // exclude ID & createdAt
+      final json =
+          salesmanModel.toJson(isUpdate: true); // exclude ID & createdAt
 
       // Insert into DB
       final salesmanId = await salesmanRepository.insertSalesmanInTable(json);
@@ -297,6 +271,7 @@ class SalesmanController extends GetxController {
         cnic: cnic.text,
         area: area.text,
         city: city.text,
+        comission: int.parse(commission.text),
       );
 
       final json = updatedSalesman.toJson(isUpdate: false);
@@ -321,8 +296,8 @@ class SalesmanController extends GetxController {
       }
 
       // ✅ Update fullName list too if you have a display list
-      int nameIndex = allSalesmanNames.indexWhere((name) =>
-      name == allSalesman[index].fullName);
+      int nameIndex = allSalesmanNames
+          .indexWhere((name) => name == allSalesman[index].fullName);
       if (nameIndex != -1) {
         allSalesmanNames[nameIndex] = updatedSalesman.fullName;
       }
@@ -344,7 +319,6 @@ class SalesmanController extends GetxController {
     }
   }
 
-
   Future<void> deleteSalesman(int salesmanId) async {
     try {
       // Call the repository function to delete from the database
@@ -352,7 +326,7 @@ class SalesmanController extends GetxController {
 
       // Find the salesman in the list to fetch the name
       final salesmanToRemove = allSalesman.firstWhere(
-            (salesman) => salesman.salesmanId == salesmanId,
+        (salesman) => salesman.salesmanId == salesmanId,
         orElse: () => SalesmanModel.empty(), // Default if not found
       );
 
@@ -379,5 +353,3 @@ class SalesmanController extends GetxController {
     }
   }
 }
-
-

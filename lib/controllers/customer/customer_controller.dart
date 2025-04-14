@@ -21,11 +21,12 @@ class CustomerController extends GetxController {
 
 
 
+
   final profileLoading = false.obs;
   final isLoading = false.obs;
   final isUpdating = false.obs;
   RxList<CustomerModel> allCustomers = <CustomerModel>[].obs;
-  RxList<String> allCustomerNames = <String>[].obs;
+ RxList<String> allCustomerNames = <String>[].obs;
 
   Rx<CustomerModel> selectedCustomer = CustomerModel.empty().obs;
 
@@ -65,8 +66,8 @@ class CustomerController extends GetxController {
       allCustomers.assignAll(customers);
 
       //filter names
-      final names = allCustomers.map((user) => user.fullName).toList();
-      allCustomerNames.assignAll(names);
+      // final names = allCustomers.map((user) => user.fullName).toList();
+      // allCustomerNames.assignAll(names);
      // print(allCustomerNames);
 
 
@@ -164,7 +165,7 @@ class CustomerController extends GetxController {
       await AddressController.instance.saveAddress(customerId, 'Customer');
       //locally adding in table
       allCustomers.add(customerModel);
-      allCustomerNames.add(customerModel.fullName);
+      //allCustomerNames.add(customerModel.fullName);
 
 
       customerModel.customerId = customerId; // idk why
@@ -239,7 +240,7 @@ class CustomerController extends GetxController {
 
       // Remove customer from lists
       allCustomers.removeWhere((customer) => customer.customerId == customerId);
-      allCustomerNames.removeWhere((name) => name == customerToRemove.firstName);
+      //allCustomerNames.removeWhere((name) => name == customerToRemove.firstName);
 
 
 

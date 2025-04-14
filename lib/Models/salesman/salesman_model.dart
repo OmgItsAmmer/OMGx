@@ -7,7 +7,6 @@ class SalesmanModel {
   final String cnic;
   final String area;
   final String city;
-  final String? pfp;
   final DateTime? createdAt;
   final int? comission;
 
@@ -20,14 +19,13 @@ class SalesmanModel {
     required this.cnic,
     required this.area,
     required this.city,
-    this.pfp,
     this.createdAt,
     this.comission,
   });
 
   // Static function to create an empty salesman model
   static SalesmanModel empty() => SalesmanModel(
-    salesmanId: null, // Now null
+    salesmanId: null,
     firstName: "",
     lastName: "",
     phoneNumber: "",
@@ -35,7 +33,6 @@ class SalesmanModel {
     cnic: "",
     area: "",
     city: "",
-    pfp: null,
     createdAt: null,
     comission: null,
   );
@@ -52,7 +49,6 @@ class SalesmanModel {
       'cnic': cnic,
       'area': area,
       'city': city,
-      'pfp': pfp,
       'comission': comission,
     };
 
@@ -60,7 +56,6 @@ class SalesmanModel {
       if (salesmanId != null) {
         data['salesman_id'] = salesmanId;
       }
-
     }
 
     return data;
@@ -77,7 +72,6 @@ class SalesmanModel {
       cnic: json['cnic'] as String,
       area: json['area'] as String,
       city: json['city'] as String,
-      pfp: json['pfp'] as String?,
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
       comission: json['comission'] as int?,
     );

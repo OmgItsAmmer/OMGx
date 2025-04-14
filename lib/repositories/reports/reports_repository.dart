@@ -1,10 +1,12 @@
 
 
+import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../main.dart';
 
+import '../../Models/reports/pnl_report_model.dart';
 import '../../Models/reports/recovey_salesman_report_model.dart';
 import '../../Models/reports/sale_report_model.dart';
 
@@ -55,6 +57,33 @@ class ReportsRepository extends GetxController {
       throw Exception('Error fetching report: ${e.message}');
     }
   }
+  Future<List<PnLReportModel>> fetchPnLReportData(DateTime startDate, DateTime endDate) async {
+    try {
+      String startDateFormatted = startDate.toIso8601String().split("T")[0];
+      String endDateFormatted = endDate.toIso8601String().split("T")[0];
+
+      final response = await supabase.rpc(
+        'get_profit_loss_report',
+        params: {
+          'start_date': startDateFormatted,
+          'end_date': endDateFormatted,
+        },
+      );
+
+
+        List<PnLReportModel> reportList = (response as List)
+            .map((item) => PnLReportModel.fromJson(item as Map<String, dynamic>))
+            .toList();
+
+        return reportList;
+
+    } catch (e) {
+      TLoader.errorSnackBar(title: e.toString());
+      print(e);
+      return [];
+    }
+  }
+
 }
 
 

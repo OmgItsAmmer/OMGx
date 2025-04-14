@@ -50,8 +50,11 @@ class ProductBrandcCategory extends StatelessWidget {
                   height: TSizes.spaceBtwSections,
                 ),
               AutoCompleteTextField(
-                  titleText: '',
-                  optionList: categoryController.categoriesNames,
+                  titleText: 'Select Category',
+                  optionList: categoryController.allCategories
+                      .map((e) => e.categoryName)
+                      .whereType<String>()
+                      .toList(),
                   textController:
                   productController.selectedCategoryNameController,
                   parameterFunc: (val) async {
@@ -98,9 +101,12 @@ class ProductBrandcCategory extends StatelessWidget {
                 height: TSizes.spaceBtwSections,
               ),
               AutoCompleteTextField(
-                  titleText: '',
-                  optionList: brandController.brandNames,
-                  textController:
+                  titleText: 'Select Brand',
+                optionList: brandController.allBrands
+                    .map((e) => e.bname)
+                    .whereType<String>()
+                    .toList(),
+                textController:
                       productController.selectedBrandNameController,
                 parameterFunc: (val) async {
                   if (val.isEmpty) {

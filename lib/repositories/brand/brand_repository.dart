@@ -1,43 +1,26 @@
-import 'package:admin_dashboard_v3/Models/products/product_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 import '../../Models/brand/brand_model.dart';
 import '../../main.dart';
 
 class BrandRepository {
 
 
-
-
-  Future<void> saveOrUpdateBrandRepo(Map<String, dynamic> json) async {
+  Future<void> updateBrand(Map<String, dynamic> json) async {
     try {
-      final brandId = json['brandID'];
+      int? brandId = json['brandID'];
+      if (brandId == null) throw Exception('Brand ID is required for update.');
 
-      if (brandId != null && brandId != -1) {
-        // Check if brand with brandID exists
-        final existingBrand = await supabase
-            .from('brands')
-            .select()
-            .eq('brandID', brandId)
-            .maybeSingle();
+      // Remove brandID from the update payload to avoid trying to update the primary key
+      final updateData = Map<String, dynamic>.from(json)..remove('brandID');
 
-        if (existingBrand != null) {
-          // Update existing brand
-          await supabase
-              .from('brands')
-              .update(json)
-              .eq('brandID', brandId);
-          return;
-        }
-      }
+      await supabase
+          .from('brands')
+          .update(updateData)
+          .eq('brandID', brandId);
 
-      // Insert new brand (remove brandID if it's -1 or not needed)
-      json.remove('brandID');
-      await supabase.from('brands').insert(json);
-
-      TLoader.successSnackBar(title: 'Brand Added!',message: json['bname'] + ' is Added');
+      TLoader.successSnackBar(title: 'Brand Updated', message: '${json['bname']} has been updated.');
 
     } on PostgrestException catch (e) {
       TLoader.errorSnackBar(title: 'Brand Repo Error', message: e.message);
@@ -49,19 +32,39 @@ class BrandRepository {
   }
 
 
+  Future<int> insertBrandInTable(Map<String, dynamic> json) async {
+    try {
+      final response = await supabase
+          .from('brands')
+          .insert(json)
+          .select('brandID')
+          .single();
+
+      final brandId = response['brandID'] as int;
+      return brandId;
+
+    } on PostgrestException catch (e) {
+      TLoader.errorSnackBar(title: 'Brand Repo', message: e.message);
+      rethrow;
+    } catch (e) {
+      TLoader.errorSnackBar(title: 'Brand Repo', message: e.toString());
+      rethrow;
+    }
+  }
+
+
+
 
 
   Future<List<BrandModel>> fetchBrands() async {
     try {
       final data = await supabase.from('brands').select();
-      //print(data);
+
 
       final brandList = data.map((item) {
         return BrandModel.fromJson(item);
       }).toList();
-      if (kDebugMode) {
-        print(brandList[1].bname);
-      }
+
       return brandList;
     } catch (e) {
       TLoader.errorSnackBar(title: 'Brand Repo', message: e.toString());
@@ -83,10 +86,26 @@ class BrandRepository {
       // Check if the response contains the brandID
       return response['brandID'] as int? ?? -1;
     } catch (e) {
-      // Handle errors and return -1 instead of throwing an exception
-     // TLoader.errorSnackBar(title: 'Can\'t get Brand Id!', message: e.toString());
+
       return -1;
     }
   }
+
+  Future<void> deleteBrandFromTable(int brandId) async {
+    try {
+      await supabase
+          .from('brands')
+          .delete()
+          .match({'brand_id': brandId});
+
+      TLoader.successSnackBar(title: "Success", message: "Brand deleted successfully");
+    } catch (e) {
+      if (kDebugMode) {
+        TLoader.errorSnackBar(title: 'Brand Repo', message: e.toString());
+        print("Error deleting brand: $e");
+      }
+    }
+  }
+
 
 }

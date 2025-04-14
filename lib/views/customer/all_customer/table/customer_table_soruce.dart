@@ -87,11 +87,12 @@ class CustomerRow extends DataTableSource {
                   confirmTextColor: Colors.white,
                   buttonColor: Colors.red,
                   onConfirm: () async {
-                    Get.back(); // Close the dialog
+                    Navigator.of(Get.context!).pop(); // Close the dialog
                     await customerController.deleteCustomer(customer.customerId!);
                   },
                   onCancel: () {
-                    Get.back(); // Just close the dialog if cancelled
+                    Navigator.of(Get.context!).pop(); // Close the dialog
+
                   },
                 );
 

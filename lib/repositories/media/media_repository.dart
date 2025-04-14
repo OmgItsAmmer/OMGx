@@ -327,8 +327,6 @@ class MediaRepository extends GetxController {
       return imageId ?? -1;
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(
-            title: 'Main Image Table Fetching Error', message: e.toString());
         print("❌ fetchMainImageFromTable failed: $e");
       }
       // If an error occurs, return null

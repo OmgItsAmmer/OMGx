@@ -37,6 +37,7 @@ class BrandRow extends DataTableSource {
           )),
 
           DataCell(Text(
+    (brand.productsCount == null) ? '0':
             brand.productsCount.toString(),
             style: Theme.of(Get.context!)
                 .textTheme
@@ -51,7 +52,26 @@ class BrandRow extends DataTableSource {
 
               Get.toNamed(TRoutes.brandDetails, arguments: brand);
             }, // TODO use get argument to send data in order detail screen
-            onDeletePressed: () {},
+            onDeletePressed: () {
+              Get.defaultDialog(
+                title: "Confirm Delete",
+                middleText: "Are you sure you want to delete the brand ${brand.bname}?",
+                textConfirm: "Delete",
+                textCancel: "Cancel",
+                confirmTextColor: Colors.white,
+                buttonColor: Colors.red,
+                onConfirm: () async {
+                  Navigator.of(Get.context!).pop(); // Close the dialog
+                  await brandController.deleteBrand(brand.brandID!);
+                },
+                onCancel: () {
+                  Navigator.of(Get.context!).pop(); // Close the dialog
+                },
+              );
+
+
+
+            },
           ))
         ]);
   }

@@ -1,40 +1,44 @@
 import 'package:admin_dashboard_v3/Models/category/category_model.dart';
-import 'package:admin_dashboard_v3/Models/products/product_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
-import '../../Models/brand/brand_model.dart';
 import '../../main.dart';
 
 class CategoryRepository {
 
-  Future<void> saveOrUpdateCategoryRepo(Map<String, dynamic> json) async {
+  Future<int> insertCategoryInTable(Map<String, dynamic> json) async {
     try {
-      final categoryId = json['category_id'];
+      final response = await supabase
+          .from('categories')
+          .insert(json)
+          .select('category_id')
+          .single();
 
-      // Check if category_id is valid and update if exists
-      if (categoryId != -1) {
-        final exists = await supabase
-            .from('categories')
-            .select('category_id')
-            .eq('category_id', categoryId)
-            .maybeSingle();
+      final categoryId = response['category_id'] as int;
+      return categoryId;
 
-        if (exists != null) {
-          await supabase
-              .from('categories')
-              .update(json)
-              .eq('category_id', categoryId);
-          return;
-        }
-      }
+    } on PostgrestException catch (e) {
+      TLoader.errorSnackBar(title: 'Categories Repo', message: e.message);
+      rethrow;
+    } catch (e) {
+      TLoader.errorSnackBar(title: 'Categories Repo', message: e.toString());
+      rethrow;
+    }
+  }
 
-      // Insert new if not existing or category_id == -1
-      json.remove('category_id');
-      await supabase.from('categories').insert(json);
+  Future<void> updateCategory(Map<String, dynamic> json) async {
+    try {
+      int? categoryId = json['category_id'];
+      if (categoryId == null) throw Exception('Category ID is required for update.');
 
-      TLoader.successSnackBar(title: 'Category uploaded');
+      final updateData = Map<String, dynamic>.from(json)..remove('category_id');
+
+      await supabase
+          .from('categories')
+          .update(updateData)
+          .eq('category_id', categoryId);
+
+      TLoader.successSnackBar(title: 'Category Updated');
 
     } on PostgrestException catch (e) {
       TLoader.errorSnackBar(title: 'Categories Repo', message: e.message);
@@ -49,17 +53,15 @@ class CategoryRepository {
   Future<List<CategoryModel>> fetchCategories() async {
     try {
       final data = await supabase.from('categories').select();
-      print(data);
+
 
       final categoryList = data.map((item) {
         return CategoryModel.fromJson(item);
       }).toList();
-      if (kDebugMode) {
-        print(categoryList[1].categoryName);
-      }
+
       return categoryList;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Brand Repo', message: e.toString());
+      TLoader.errorSnackBar(title: 'fetchCategories', message: e.toString());
       return [];
     }
   }
@@ -69,7 +71,7 @@ class CategoryRepository {
   Future<int> getCategoryId(String categoryName) async {
     try {
       // Query the Supabase database to find the brand by name
-      final response = await Supabase.instance.client
+      final response = await supabase
           .from('categories')
           .select('category_id')
           .eq('category_name', categoryName)
@@ -91,4 +93,21 @@ class CategoryRepository {
       rethrow;
     }
   }
+
+  Future<void> deleteCategoryFromTable(int categoryId) async {
+    try {
+      await supabase
+          .from('categories')
+          .delete()
+          .match({'category_id': categoryId});
+
+      TLoader.successSnackBar(title: "Success", message: "Category deleted successfully");
+    } catch (e) {
+      if (kDebugMode) {
+        TLoader.errorSnackBar(title: 'Category Repo', message: e.toString());
+        print("Error deleting category: $e");
+      }
+    }
+  }
+
 }

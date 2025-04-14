@@ -55,14 +55,12 @@ class SalesmanRepository extends GetxController {
   Future<List<SalesmanModel>> fetchAllSalesman() async {
     try {
       final data =  await supabase.from('salesman').select();
-      //print(data);
+
 
       final salesmanList = data.map((item) {
         return SalesmanModel.fromJson(item);
       }).toList();
-      if (kDebugMode) {
-        print(salesmanList[1].fullName);
-      }
+
       return salesmanList;
     } catch (e) {
       TLoader.errorSnackBar(title: 'Oh Snap', message: e.toString());

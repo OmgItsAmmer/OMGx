@@ -7,6 +7,7 @@ import '../../../../controllers/product/product_controller.dart';
 import '../../../../utils/constants/enums.dart';
 import '../../../../utils/constants/sizes.dart';
 import '../../../../utils/device/device_utility.dart';
+import '../../../../utils/constants/colors.dart';
 
 class ProductDetailBottomBar extends StatelessWidget {
   const ProductDetailBottomBar({
@@ -17,9 +18,7 @@ class ProductDetailBottomBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final ProductController productController = Get.find<ProductController>();
 
-
     return TRoundedContainer(
-
       padding: const EdgeInsets.all(TSizes.defaultSpace),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -30,13 +29,11 @@ class ProductDetailBottomBar extends StatelessWidget {
           Expanded(
             child: SizedBox(
               width: double.infinity,
-
               child: OutlinedButton(
                 onPressed: () {
                   // Handle Discard action
                   productController.cleanProductDetail();
                   Navigator.of(context).pop();
-
                 },
                 child: const Text('Discard'),
               ),
@@ -46,17 +43,28 @@ class ProductDetailBottomBar extends StatelessWidget {
           Expanded(
             child: SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Handle Save action
-
-
-                  productController.saveOrUpdateProduct();
-                  Navigator.of(context).pop();
-
-
-                },
-                child: const Text('Save/Update'),
+              child: Obx(
+                () => ElevatedButton(
+                  onPressed: () {
+                    if (productController.productId.value == -1) {
+                      productController.insertProduct();
+                    } else {
+                      productController.updateProduct();
+                    }
+                    Navigator.of(context).pop();
+                  },
+                  child: productController.isUpdating.value
+                      ? const CircularProgressIndicator(color: TColors.white)
+                      : Text(
+                          productController.productId.value == -1
+                              ? 'Save'
+                              : 'Update',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium!
+                              .apply(color: TColors.white),
+                        ),
+                ),
               ),
             ),
           ),

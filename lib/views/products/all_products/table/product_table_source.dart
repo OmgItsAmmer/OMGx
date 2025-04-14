@@ -1,3 +1,4 @@
+import 'package:admin_dashboard_v3/controllers/brands/brand_controller.dart';
 import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:data_table_2/data_table_2.dart';
@@ -7,69 +8,70 @@ import 'package:get/get_core/src/get_main.dart';
 
 import '../../../../common/widgets/icons/table_action_icon_buttons.dart';
 import '../../../../controllers/media/media_controller.dart';
-import '../../../../controllers/product/product_images_controller.dart';
 
 class ProductRow extends DataTableSource {
-
   ProductRow({required this.productCount});
   final ProductController productController = Get.find<ProductController>();
   // final ProductImagesController productImagesController = Get.find<ProductImagesController>();
   final MediaController mediaController = Get.find<MediaController>();
+  final BrandController brandController = Get.find<BrandController>();
 
-  final  productCount;
+  final productCount;
 
-    @override
-    DataRow? getRow(int index) {
-      final product = productController.allProducts[index];
-      return DataRow2(
-          onTap: () async {
-
-         productController.onProductTap(product);
-          },
-       //   selected: productController.selectedRows[index],
-          onSelectChanged: (value) {
-            productController.selectedRows[index] = value ?? false;
-           // productController.selectedRows.refresh(); // Refresh observable list
-          },
-          cells: [
-            DataCell(Text(
-              product.name.toString(),
-              style: Theme.of(Get.context!)
-                  .textTheme
-                  .bodyLarge!
-                  .apply(color: TColors.primary),
-            )),
-            DataCell(Text(
-              product.stockQuantity.toString(),
-              style: Theme.of(Get.context!)
-                  .textTheme
-                  .bodyLarge!
-                  .apply(color: TColors.primary),
-            )),
-            DataCell(Text(
-              product.basePrice.toString(),
-              style: Theme.of(Get.context!)
-                  .textTheme
-                  .bodyLarge!
-                  .apply(color: TColors.primary),
-            )),
-            DataCell(Text(
-              product.brandID.toString(),
-              style: Theme.of(Get.context!)
-                  .textTheme
-                  .bodyLarge!
-                  .apply(color: TColors.primary),
-            )), //TODO show brand names
-            DataCell(TTableActionButtons(
-              view: true,
-              edit: false,
-              onViewPressed:() {
-                productController.onProductTap(product);
-              },
-              onDeletePressed: () {},
-            ))
-          ]);
-    }
+  @override
+  DataRow? getRow(int index) {
+    final product = productController.allProducts[index];
+    return DataRow2(
+        onTap: () async {
+          productController.onProductTap(product);
+        },
+        //   selected: productController.selectedRows[index],
+        onSelectChanged: (value) {
+          productController.selectedRows[index] = value ?? false;
+          // productController.selectedRows.refresh(); // Refresh observable list
+        },
+        cells: [
+          DataCell(Text(
+            product.name.toString(),
+            style: Theme.of(Get.context!)
+                .textTheme
+                .bodyLarge!
+                .apply(color: TColors.primary),
+          )),
+          DataCell(Text(
+            product.salePrice.toString(),
+            style: Theme.of(Get.context!)
+                .textTheme
+                .bodyLarge!
+                .apply(color: TColors.primary),
+          )),
+          DataCell(Text(
+            product.stockQuantity.toString(),
+            style: Theme.of(Get.context!)
+                .textTheme
+                .bodyLarge!
+                .apply(color: TColors.primary),
+          )),
+          DataCell(Text(
+            brandController.allBrands
+                .firstWhere((element) => element.brandID == product.brandID)
+                .bname
+                .toString(),
+            style: Theme.of(Get.context!)
+                .textTheme
+                .bodyLarge!
+                .apply(color: TColors.primary),
+          )), //TODO show brand names
+          DataCell(TTableActionButtons(
+            view: true,
+            edit: false,
+            onViewPressed: () {
+              productController.onProductTap(product);
+            },
+            onDeletePressed: () {},
+          ))
+        ]);
+  }
 
   @override
   // TODO: implement isRowCountApproximate

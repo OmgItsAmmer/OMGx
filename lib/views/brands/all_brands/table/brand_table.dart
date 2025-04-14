@@ -20,7 +20,7 @@ class BrandTable extends StatelessWidget {
             () {
 
           return TPaginatedDataTable(
-
+            showCheckBox: false,
             sortAscending: true,
             minWidth: 700,
             columns: const [

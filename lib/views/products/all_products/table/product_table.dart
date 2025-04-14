@@ -14,32 +14,21 @@ class ProductTable extends StatelessWidget {
   Widget build(BuildContext context) {
     final ProductController productController = Get.find<ProductController>();
 
-    return  Obx(
-          () {
-
-            if (productController.allProducts.isEmpty) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            return TPaginatedDataTable(
-
-              sortAscending: true,
-              minWidth: 700,
-              columns: const [
-                DataColumn2(label: Text('Product')),
-                DataColumn2(label: Text('Price')),
-                DataColumn2(label: Text('Sold')),
-                DataColumn2(label: Text('Brand')),
-                DataColumn2(label: Text('Action'), fixedWidth: 100),
-              ],
-              source: ProductRow(
-                productCount: productController.allProducts.length,
-
-              ),
-            );
-
-
-          }
-    );
-
+    return Obx(() {
+      return TPaginatedDataTable(
+        sortAscending: true,
+        minWidth: 700,
+        columns: const [
+          DataColumn2(label: Text('Product')),
+          DataColumn2(label: Text('Price')),
+          DataColumn2(label: Text('Stock')),
+          DataColumn2(label: Text('Brand')),
+          DataColumn2(label: Text('Action'), fixedWidth: 100),
+        ],
+        source: ProductRow(
+          productCount: productController.allProducts.length,
+        ),
+      );
+    });
   }
 }

@@ -37,8 +37,8 @@ class CategoryRow extends DataTableSource {
                 .apply(color: TColors.primary),
           )),
 
-          DataCell(Text(
-            category.image.toString(),
+          DataCell(Text((category.productCount == null) ?'0' :
+            category.productCount.toString(),
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
@@ -52,7 +52,26 @@ class CategoryRow extends DataTableSource {
 
               Get.toNamed(TRoutes.categoryDetails, arguments: category);
             }, // TODO use get argument to send data in order detail screen
-            onDeletePressed: () {},
+            onDeletePressed: () {
+
+              Get.defaultDialog(
+                title: "Confirm Delete",
+                middleText: "Are you sure you want to delete the category ${category.categoryName}?",
+                textConfirm: "Delete",
+                textCancel: "Cancel",
+                confirmTextColor: Colors.white,
+                buttonColor: Colors.red,
+                onConfirm: () async {
+                  Navigator.of(Get.context!).pop(); // Close the dialog
+                  await categoryController.deleteCategory(category.categoryId!);
+                },
+                onCancel: () {
+                  Navigator.of(Get.context!).pop(); // Close the dialog
+                },
+              );
+
+
+            },
           ))
         ]);
   }

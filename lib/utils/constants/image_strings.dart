@@ -55,6 +55,7 @@ class TImages {
 
   // -- Lottie Animations
   static const String a11 = "assets/images/animations/11.json";
+  static const String noDataFound = "assets/images/animations/no_data_found.json";
   static String circularLoader = "assets/images/animations/12.json";
   static String spy = "assets/images/animations/13.json";
   static String animatedFile = "assets/images/animations/14.json";

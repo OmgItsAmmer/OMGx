@@ -9,8 +9,7 @@ class CategoryDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final CategoryModel category =
-        Get.arguments == null ? Get.arguments : CategoryModel.empty();
+    final CategoryModel category = Get.arguments;
 
     return TSiteTemplate(
       desktop: CategoryDetailDesktop(

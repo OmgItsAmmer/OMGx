@@ -6,74 +6,63 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../main.dart';
 
 class ProductRepository {
-
-
-  Future<List<ProductModel>> fetchProducts() async
-  {
-
-    try{
-      final data =  await supabase.from('products').select();
+  Future<List<ProductModel>> fetchProducts() async {
+    try {
+      final data = await supabase.from('products').select();
       //print(data);
 
       final productList = data.map((item) {
         return ProductModel.fromJson(item);
       }).toList();
-      if (kDebugMode) {
-        print(productList[1].name);
-      }
-      return productList;
 
-    }
-    catch(e)
-    {
-      TLoader.errorSnackBar(title: 'Product Repo',message: e.toString());
+      return productList;
+    } catch (e) {
+      TLoader.errorSnackBar(title: 'Product Repo', message: e.toString());
       return [];
     }
-
   }
 
-
-
-  Future<void> saveOrUpdateProductRepo(Map<String, dynamic> json) async {
+  Future<int> insertProductInTable(Map<String, dynamic> json) async {
     try {
+      final response = await supabase
+          .from('products')
+          .insert(json)
+          .select('product_id')
+          .single();
 
-      if (json['product_id'] != null) {
-        // Fetch the product with the given product_id
-        final response = await supabase
-            .from('products')
-            .select()
-            .eq('product_id', json['product_id'])
-            .maybeSingle(); // Avoids exception if no product is found
-
-        if (response != null) {
-          // If the product exists, update it
-          await supabase
-              .from('products')
-              .update(json)
-              .eq('product_id', json['product_id']);
-        } else {
-          // If no existing product is found, insert a new one
-          // Remove the product_id to let the database auto-generate it
-          json.remove('product_id');
-          await supabase.from('products').insert(json);
-        }
-      } else {
-        // If product_id is not provided, insert a new product
-        // Ensure product_id is not present in the json
-        json.remove('product_id');
-        await supabase.from('products').insert(json);
-      }
+      final productId = response['product_id'] as int;
+      return productId;
     } on PostgrestException catch (e) {
-      // Handle Supabase-specific errors
       TLoader.errorSnackBar(title: 'Product Repo', message: e.message);
       rethrow;
     } catch (e) {
-      // Handle other errors
       TLoader.errorSnackBar(title: 'Product Repo', message: e.toString());
       rethrow;
     }
   }
 
+  Future<void> updateProduct(Map<String, dynamic> json) async {
+    try {
+      int? productId = json['product_id'];
+      if (productId == null) {
+        throw Exception('Product ID is required for update.');
+      }
+
+      // Remove product_id from the update payload to avoid trying to update the primary key
+      final updateData = Map<String, dynamic>.from(json)..remove('product_id');
+
+      await supabase
+          .from('products')
+          .update(updateData)
+          .eq('product_id', productId);
+    } on PostgrestException catch (e) {
+      TLoader.errorSnackBar(title: 'Product Repo', message: e.message);
+      rethrow;
+    } catch (e) {
+      TLoader.errorSnackBar(title: 'Product Repo', message: e.toString());
+      rethrow;
+    }
+  }
 
   Future<int> getProductId(String productName) async {
     try {
@@ -92,26 +81,26 @@ class ProductRepository {
       return response['product_id'] as int;
     } on PostgrestException catch (e) {
       // Handle Supabase-specific errors
-      TLoader.errorSnackBar(title: 'Can\'t get Product Id!', message: e.message);
+      TLoader.errorSnackBar(
+          title: 'Can\'t get Product Id!', message: e.message);
       return -1; // Return -1 on error
     } catch (e) {
       // Handle other errors
-      TLoader.errorSnackBar(title: 'Can\'t get Product Id!', message: e.toString());
+      TLoader.errorSnackBar(
+          title: 'Can\'t get Product Id!', message: e.toString());
       return -1; // Return -1 on error
     }
   }
 
-  Future<void> updateStockQuantity({required int productId, required int quantitySold}) async {
+  Future<void> updateStockQuantity(
+      {required int productId, required int quantitySold}) async {
     try {
-      final response = await supabase
-          .from('products')
-          .update({
+      final response = await supabase.from('products').update({
         'stock_quantity': supabase.rpc('decrease_stock', params: {
           'p_id': productId,
           'qty_sold': quantitySold,
         })
-      })
-          .eq('product_id', productId);
+      }).eq('product_id', productId);
 
       if (response.error != null) {
         if (kDebugMode) {
@@ -126,8 +115,6 @@ class ProductRepository {
   }
 
   Future<void> checkLowStock(List<int> productIds) async {
-
-
     try {
       final response = await supabase.rpc('notify_low_stock', params: {
         'product_ids': productIds,
@@ -138,15 +125,10 @@ class ProductRepository {
       }
     } catch (error) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(title: 'Alert Stock Error',message: error.toString());
+        TLoader.errorSnackBar(
+            title: 'Alert Stock Error', message: error.toString());
         print("Error checking low stock: $error");
       }
     }
   }
-
-
-
-
-
-
 }

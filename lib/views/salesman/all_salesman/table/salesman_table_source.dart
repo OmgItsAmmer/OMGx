@@ -1,4 +1,5 @@
 import 'package:admin_dashboard_v3/Models/salesman/salesman_model.dart';
+import 'package:admin_dashboard_v3/Models/salesman/salesman_model.dart';
 import 'package:admin_dashboard_v3/controllers/salesman/salesman_controller.dart';
 import 'package:admin_dashboard_v3/routes/routes.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
@@ -91,11 +92,13 @@ class SalesmanRow extends DataTableSource {
                 confirmTextColor: Colors.red,
                 buttonColor: Colors.black,
                 onConfirm: () async {
-                  Get.back(); // Close the dialog
+                  Navigator.of(Get.context!).pop(); // Close the dialog
+
                   await salesmanController.deleteSalesman(salesman.salesmanId!);
                 },
                 onCancel: () {
-                  Get.back(); // Just close the dialog if cancelled
+                  Navigator.of(Get.context!).pop(); // Close the dialog
+
                 },
               );
             },

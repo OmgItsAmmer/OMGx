@@ -1,4 +1,3 @@
-import 'package:admin_dashboard_v3/Models/image/image_model.dart';
 import 'package:admin_dashboard_v3/Models/sales/sale_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
@@ -8,13 +7,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_thermal_printer/flutter_thermal_printer.dart';
 import 'package:get/get.dart';
-
+import 'package:intl/intl.dart';
 import '../../Models/orders/order_item_model.dart';
 import '../../repositories/order/order_repository.dart';
-import '../../routes/routes.dart';
 import '../customer/customer_controller.dart';
-import '../installments/installments_controller.dart';
-import '../product/product_images_controller.dart';
 import '../shop/shop_controller.dart';
 
 class SalesController extends GetxController {
@@ -23,12 +19,10 @@ class SalesController extends GetxController {
   // Other Controllers Interaction
   final OrderRepository orderRepository = Get.put(OrderRepository());
 
-  final  shopController =  Get.put(ShopController());
-
+  final shopController = Get.put(ShopController());
 
   final CustomerController customerController = Get.find<CustomerController>();
   // final InstallmentController installmentController = Get.find<InstallmentController>();
-
 
   // final AddressController addressController = Get.find<AddressController>();
   final UserController userController = Get.find<UserController>();
@@ -45,8 +39,8 @@ class SalesController extends GetxController {
   Rx<int> selectedProductId = (-1).obs;
   RxDouble netTotal = (0.0).obs;
   RxDouble originalNetTotal = (0.0).obs;
-  double buyingPriceIndividual  = 0.0;
-  double buyingPriceTotal  = 0.0;
+  double buyingPriceIndividual = 0.0;
+  double buyingPriceTotal = 0.0;
   Rx<String> discount = ''.obs;
 
   //TextForm Controllers
@@ -65,13 +59,13 @@ class SalesController extends GetxController {
   final customerCNICController = TextEditingController().obs;
   RxInt entityId = (-1).obs;
 
-
   // final customerCNICController = TextEditingController().obs;
 
   //Cashier Info
   final cashierNameController = TextEditingController().obs;
   final selectedSaleType = SaleType.cash.obs;
-  final Rx<DateTime> selectedDate = DateTime.now().obs;
+  final Rx<DateTime?> selectedDate =
+      Rx<DateTime?>(null); // Changed to nullable DateTime
 
   //Salesman Info
   final salesmanNameController = TextEditingController();
@@ -100,8 +94,6 @@ class SalesController extends GetxController {
   RxInt selectedChipIndex = (-1).obs;
   RxString selectedChipValue = ''.obs;
 
-
-
   // @override
   // void onInit() {
   //   setupUserDetails();
@@ -109,18 +101,16 @@ class SalesController extends GetxController {
   // }
 
   void setupUserDetails() {
-    try{
-     cashierNameController.value.text = userController.currentUser.value.firstName;
+    try {
+      cashierNameController.value.text =
+          userController.currentUser.value.firstName;
+    } catch (e) {
+      if (kDebugMode) {
+        TLoader.errorSnackBar(title: e.toString());
+        print(e);
+      }
     }
-    catch(e){
-      if(kDebugMode)
-        {
-          TLoader.errorSnackBar(title: e.toString());
-          print(e);
-
-        }
-    }
-}
+  }
 
   void addProduct() {
     try {
@@ -134,15 +124,14 @@ class SalesController extends GetxController {
       }
       buyingPriceTotal += buyingPriceIndividual * double.parse(quantity.text);
 
-
       final sale = SaleModel(
-          productId: selectedProductId.value,
-          name: dropdownController.text.trim(),
-          salePrice: unitPrice.value.text.trim(),
-          unit: selectedUnit.toString().trim(),
-          quantity: quantity.text,
-          totalPrice: totalPrice.value.text,
-          buyPrice: buyingPriceTotal,
+        productId: selectedProductId.value,
+        name: dropdownController.text.trim(),
+        salePrice: unitPrice.value.text.trim(),
+        unit: selectedUnit.toString().trim(),
+        quantity: quantity.text,
+        totalPrice: totalPrice.value.text,
+        buyPrice: buyingPriceTotal,
       );
       //Adding in netTotal
       netTotal.value += double.parse(totalPrice.value.text);
@@ -170,38 +159,30 @@ class SalesController extends GetxController {
     }
   }
 
-
-
   Future<int> checkOut() async {
     try {
       // Validate that there are sales to checkout
       if (allSales.isEmpty) {
         TLoader.errorSnackBar(
-            title: 'Checkout Error',
-            message: 'No products added to checkout.'
-        );
+            title: 'Checkout Error', message: 'No products added to checkout.');
         return -1;
       }
 
       // Validate required fields
       if ((!salesmanFormKey.currentState!.validate() ||
-          !customerFormKey.currentState!.validate() ||
-          !cashierFormKey.currentState!.validate()) ||
+              !customerFormKey.currentState!.validate() ||
+              !cashierFormKey.currentState!.validate()) ||
           customerNameController.text.isEmpty ||
-          selectedDate.value == 'Select Date' ||
+          selectedDate.value == null ||
           salesmanNameController.text.isEmpty) {
         TLoader.errorSnackBar(
-            title: 'Checkout Error',
-            message: 'Fill all the fields.'
-        );
+            title: 'Checkout Error', message: 'Fill all the fields.');
         return -1;
       }
 
       if (selectedAddressId == null || selectedAddressId == -1) {
         TLoader.errorSnackBar(
-            title: 'Address Error',
-            message: 'Select a valid address.'
-        );
+            title: 'Address Error', message: 'Select a valid address.');
         return -1;
       }
 
@@ -209,65 +190,87 @@ class SalesController extends GetxController {
       double paidAmountValue = double.tryParse(paidAmount.text.trim()) ?? 0.0;
       if (paidAmountValue < 0) {
         TLoader.errorSnackBar(
-            title: 'Payment Error',
-            message: 'Enter a valid paid amount.'
-        );
+            title: 'Payment Error', message: 'Enter a valid paid amount.');
         return -1;
       }
 
-      // Create an OrderModel instance
+      // Create an OrderModel instance with formatted date
       OrderModel order = OrderModel(
-        orderId: -1, // Placeholder, will be updated later
-        orderDate: (selectedDate.value is DateTime)
-            ? selectedDate.value.toIso8601String()
-            : DateTime.now().toIso8601String(),
+        orderId: -1,
+        orderDate: formatDate(selectedDate.value ?? DateTime.now()),
         totalPrice: netTotal.value,
         buyingPrice: buyingPriceTotal,
         status: statusCheck(),
         saletype: selectedSaleType.value.toString().split('.').last,
         addressId: selectedAddressId,
-        userId: 1, // Modify as needed
+        userId: 1,
         salesmanId: selectedSalesmanId,
         paidAmount: paidAmountValue,
         customerId: customerController.selectedCustomer.value.customerId,
-        orderItems: allSales.map((sale) => OrderItemModel(
-          productId: sale.productId,
-          orderId: -1, // Will be updated later
-          quantity: int.tryParse(sale.quantity) ?? 0,
-          price: double.tryParse(sale.totalPrice) ?? 0.0,
-          unit: sale.unit.toString().split('.').last,
-          totalBuyPrice: sale.buyPrice,
-        )).toList(),
+        orderItems: allSales
+            .map((sale) => OrderItemModel(
+                  productId: sale.productId,
+                  orderId: -1,
+                  quantity: int.tryParse(sale.quantity) ?? 0,
+                  price: double.tryParse(sale.totalPrice) ?? 0.0,
+                  unit: sale.unit.toString().split('.').last,
+                  totalBuyPrice: sale.buyPrice,
+                ))
+            .toList(),
       );
 
       // Upload order to repository
       int orderId = await orderRepository.uploadOrder(
-          order.toJson(isUpdate: true),
-          order.orderItems ?? []
-      );
+          order.toJson(isUpdate: true), order.orderItems ?? []);
 
       // Ensure orderId is valid before proceeding
       if (orderId > 0) {
-        // Assign actual orderId to each order item
-        for (var item in order.orderItems ?? []) {
-          item.orderId = orderId;
+        // Assign actual orderId to each order item using copyWith
+        order.orderItems = order.orderItems
+            ?.map((item) => item.copyWith(
+                  orderId: orderId,
+                ))
+            .toList();
+
+        final ProductController productController =
+            Get.find<ProductController>();
+
+        try {
+          // Update stock quantities
+          if (order.orderItems != null) {
+            await productController.updateStockQuantities(order.orderItems);
+          }
+
+          // Check for low stock notifications
+          if (order.orderItems != null) {
+            List<int> productIds =
+                order.orderItems!.map((item) => item.productId).toList();
+            await productController.checkLowStock(productIds);
+          }
+
+          // Print thermal invoice
+          final bytes = await _generateReceipt(order);
+          final service =
+              FlutterThermalPrinterNetwork('192.168.0.100', port: 9100);
+          await service.connect();
+          await service.printTicket(bytes);
+          await service.disconnect();
+
+          // Reset fields after successful checkout
+          resetField();
+
+          // Show success message
+          TLoader.successSnackBar(
+            title: 'Order Placed Successfully',
+            message: 'Order #$orderId has been placed successfully.',
+          );
+
+          return orderId;
+        } catch (e) {
+          TLoader.errorSnackBar(
+              title: 'Stock Update Error', message: e.toString());
+          return -1;
         }
-
-        final ProductController productController = Get.find<ProductController>();
-
-        // Update stock quantities
-        await productController.updateStockQuantities(order.orderItems);
-
-        // Check for low stock notifications
-        List<int> productIds = allSales.map((sale) => sale.productId).toList();
-        await productController.checkLowStock(productIds);
-
-        // Print thermal invoice
-     //   await _generateReceipt(order);
-
-        // Reset fields after successful checkout
-        resetField();
-        return orderId;
       } else {
         throw Exception("Order upload failed, checkout aborted.");
       }
@@ -277,101 +280,158 @@ class SalesController extends GetxController {
     }
   }
 
-  // Future<List<int>> _generateReceipt(OrderModel order) async {
-  //   final profile = await CapabilityProfile.load();
-  //   final generator = Generator(PaperSize.mm80, profile);
-  //   List<int> bytes = [];
-  //
-  //   // Header Section
-  //   bytes += generator.text(
-  //     "Test Network Print",
-  //     styles: const PosStyles(
-  //       bold: true,
-  //       height: PosTextSize.size3,
-  //       width: PosTextSize.size3,
-  //     ),
-  //   );
-  //
-  //   // Order Information
-  //   bytes += generator.text("Order ID: ${order.orderId}");
-  //   bytes += generator.text("Date: ${order.orderDate}");
-  //   if (order.saletype != null) {
-  //     bytes += generator.text("Sale Type: ${order.saletype!}");
-  //   }
-  //   bytes += generator.text("--------------------------------");
-  //
-  //   // Order Items
-  //   if (order.orderItems != null && order.orderItems!.isNotEmpty) {
-  //     for (var item in order.orderItems!) {
-  //       final itemTotal = item.quantity * item.price;
-  //       final productLine = item..padRight(20);
-  //       final priceLine = "x${item.quantity}".padLeft(5) +
-  //           "\$${itemTotal.toStringAsFixed(2)}".padLeft(10);
-  //       bytes += generator.text("$productLine$priceLine");
-  //     }
-  //   } else {
-  //     bytes += generator.text("No items in this order");
-  //   }
-  //
-  //   bytes += generator.text("--------------------------------");
-  //
-  //   // Calculations
-  //   final subtotal = order.orderItems?.fold<double>(
-  //       0.0,
-  //           (sum, item) => sum + (item.quantity * item.price)
-  //   ) ?? 0.0;
-  //
-  //   // Payment Summary
-  //   bytes += _buildRightAlignedText(generator, "Subtotal:", subtotal);
-  //
-  //   if (order.discount > 0) {
-  //     bytes += _buildRightAlignedText(generator, "Discount:", -order.discount);
-  //   }
-  //
-  //   bytes += _buildRightAlignedText(generator, "Tax:", order.tax);
-  //   bytes += _buildRightAlignedText(generator, "Shipping:", order.shippingFee);
-  //
-  //   if (order.salesmanComission > 0) {
-  //     bytes += _buildRightAlignedText(
-  //         generator,
-  //         "Commission:",
-  //         order.salesmanComission.toDouble()
-  //     );
-  //   }
-  //
-  //   bytes += generator.text(
-  //     "Total: \$${order.totalPrice.toStringAsFixed(2)}",
-  //     styles: const PosStyles(bold: true, align: PosAlign.right),
-  //   );
-  //
-  //   bytes += generator.cut();
-  //   return bytes;
-  // }
+  Future<List<int>> _generateReceipt(OrderModel order) async {
+    final profile = await CapabilityProfile.load();
+    final generator = Generator(PaperSize.mm80, profile);
+    List<int> bytes = [];
 
-  List<int> _buildRightAlignedText(Generator generator, String label, double value) {
-    return generator.text(
-      "$label \$${value.toStringAsFixed(2)}",
-      styles: const PosStyles(align: PosAlign.right),
+    // Print shop information
+    bytes += generator.text(
+      shopController.shopName.value.text,
+      styles: const PosStyles(
+        bold: true,
+        align: PosAlign.center,
+      ),
     );
+    bytes += generator.text(
+      'Date: ${DateFormat('dd/MM/yyyy').format(DateTime.now())}\n' +
+          'Time: ${DateFormat('HH:mm:ss').format(DateTime.now())}',
+      styles: const PosStyles(align: PosAlign.center),
+    );
+    bytes += generator.hr();
+
+    // Print order details
+    bytes += generator.text(
+      'Order #${order.orderId}',
+      styles: const PosStyles(bold: true),
+    );
+    bytes += generator.hr();
+
+    // Print items
+    for (var item in order.orderItems ?? []) {
+      bytes += generator.text(
+        '${item.productId}\n'
+        '${item.quantity} x ${item.price} = ${item.quantity * item.price}',
+      );
+    }
+
+    // Print totals
+    bytes += generator.hr();
+    bytes += generator.row([
+      PosColumn(text: 'Subtotal:', width: 6),
+      PosColumn(
+          text: '${order.totalPrice}',
+          width: 6,
+          styles: const PosStyles(align: PosAlign.right)),
+    ]);
+    bytes += generator.row([
+      PosColumn(text: 'Tax:', width: 6),
+      PosColumn(
+          text: '${order.tax}',
+          width: 6,
+          styles: const PosStyles(align: PosAlign.right)),
+    ]);
+    bytes += generator.row([
+      PosColumn(text: 'Total:', width: 6, styles: const PosStyles(bold: true)),
+      PosColumn(
+        text: '${order.totalPrice + order.tax}',
+        width: 6,
+        styles: const PosStyles(bold: true, align: PosAlign.right),
+      ),
+    ]);
+    bytes += generator.row([
+      PosColumn(text: 'Paid:', width: 6),
+      PosColumn(
+          text: '${order.paidAmount ?? 0}',
+          width: 6,
+          styles: const PosStyles(align: PosAlign.right)),
+    ]);
+    bytes += generator.row([
+      PosColumn(text: 'Change:', width: 6),
+      PosColumn(
+        text: '${(order.paidAmount ?? 0) - (order.totalPrice + order.tax)}',
+        width: 6,
+        styles: const PosStyles(align: PosAlign.right),
+      ),
+    ]);
+    bytes += generator.hr();
+    bytes += generator.text(
+      'Thank you for your purchase!',
+      styles: const PosStyles(
+        bold: true,
+        align: PosAlign.center,
+      ),
+    );
+    bytes += generator.cut();
+
+    return bytes;
   }
 
+  // Helper method to format date as dd/mm/yyyy
+  String formatDate(DateTime date) {
+    return DateFormat('dd/MM/yyyy').format(date);
+  }
 
-
-
+  // Helper method to parse date from dd/mm/yyyy string
+  DateTime? parseDate(String dateStr) {
+    try {
+      return DateFormat('dd/MM/yyyy').parse(dateStr);
+    } catch (e) {
+      return null;
+    }
+  }
 
   void resetField() {
-    allSales.clear();
-    netTotal.value = 0.0;
-    originalNetTotal.value = 0.0;
-    paidAmount.clear();
-    customerNameController.clear();
-    customerPhoneNoController.value.clear();
-    customerCNICController.value.clear();
-    salesmanNameController.clear();
-    salesmanCityController.value.clear();
-    salesmanAreaController.value.clear();
-    remainingAmount.value.clear(); // Optional if needed
-    //productImagesController.selectedImage.value = ImageModel.empty();
+    try {
+      // Clear sales list
+      allSales.clear();
+
+      // Reset totals
+      netTotal.value = 0.0;
+      originalNetTotal.value = 0.0;
+      buyingPriceTotal = 0.0;
+      buyingPriceIndividual = 0.0;
+
+      // Clear payment fields
+      paidAmount.clear();
+      remainingAmount.value.clear();
+      discount.value = '';
+      discountController.clear();
+
+      // Clear customer fields
+      customerNameController.clear();
+      customerPhoneNoController.value.clear();
+      customerAddressController.value.clear();
+      customerCNICController.value.clear();
+      selectedAddressId = -1;
+
+      // Clear salesman fields
+      salesmanNameController.clear();
+      salesmanCityController.value.clear();
+      salesmanAreaController.value.clear();
+      selectedSalesmanId = 0;
+
+      // Clear product selection
+      selectedProductName.value = '';
+      selectedProductId.value = -1;
+      selectedUnit.value = UnitType.item;
+
+      // Clear form controllers
+      unitPrice.value.clear();
+      unit.clear();
+      quantity.clear();
+      totalPrice.value.clear();
+      dropdownController.clear();
+
+      // Reset form states
+      selectedChipIndex.value = -1;
+      selectedChipValue.value = '';
+
+      // Refresh the UI
+      update();
+    } catch (e) {
+      TLoader.errorSnackBar(title: 'Reset Error', message: e.toString());
+    }
   }
 
   String statusCheck() {
@@ -413,7 +473,7 @@ class SalesController extends GetxController {
 
       // Clean the remainingAmount string to ensure it's a valid number
       String cleanedRemaining =
-      remainingAmount.value.text.replaceAll(RegExp(r'[^0-9.]'), '');
+          remainingAmount.value.text.replaceAll(RegExp(r'[^0-9.]'), '');
 
       // Extract only the first valid number (up to the first decimal point)
       if (cleanedRemaining.contains('.')) {
@@ -421,7 +481,7 @@ class SalesController extends GetxController {
         if (parts.length > 1) {
           // Take the integer part and the first two decimal places
           cleanedRemaining =
-          '${parts[0]}.${parts[1].substring(0, parts[1].length > 2 ? 2 : parts[1].length)}';
+              '${parts[0]}.${parts[1].substring(0, parts[1].length > 2 ? 2 : parts[1].length)}';
         }
       }
 
@@ -456,11 +516,11 @@ class SalesController extends GetxController {
     }
   }
 
-
   void restoreDiscount() {
     try {
       // If no discount is selected, do nothing
-      if (selectedChipIndex.value == -1 || selectedChipValue.value.isEmpty) return;
+      if (selectedChipIndex.value == -1 || selectedChipValue.value.isEmpty)
+        return;
 
       // Reset netTotal to the original value
       netTotal.value = originalNetTotal.value;
@@ -478,8 +538,8 @@ class SalesController extends GetxController {
       TLoader.errorSnackBar(title: e.toString());
     }
   }
-  int _getChipIndex(String discountText) {
 
+  int _getChipIndex(String discountText) {
     // Helper function to get the chip index based on the discount text
     if (discountText == shopController.profile1.text) return 0;
     if (discountText == shopController.profile2.text) return 1;
@@ -488,47 +548,44 @@ class SalesController extends GetxController {
   }
 
   bool SalesValidator() {
-
-    try{
+    try {
       if (allSales.isEmpty) {
         TLoader.errorSnackBar(
             title: 'Checkout Error', message: 'No products added to checkout.');
         return false;
       }
       if ((!salesmanFormKey.currentState!.validate() &&
-          !customerFormKey.currentState!.validate() &&
-          !cashierFormKey.currentState!.validate()) ||
+              !customerFormKey.currentState!.validate() &&
+              !cashierFormKey.currentState!.validate()) ||
           customerNameController.text == "" ||
-          selectedDate.value == 'Select Date' ||
+          selectedDate.value == null ||
           salesmanNameController.text == "") {
         TLoader.errorSnackBar(
             title: 'Checkout Error', message: 'Fill all the fields.');
         return false;
       }
 
-      if(selectedAddressId == -1){
+      if (selectedAddressId == -1) {
         TLoader.errorSnackBar(
             title: 'Address Error', message: 'Select Valid Address.');
         return false;
       }
 
       return true;
-
-    }
-    catch(e)
-    {
+    } catch (e) {
       if (kDebugMode) {
         print(e);
         TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
       }
       return false;
-
     }
   }
+
   void applyDiscountInChips(String discountText) {
     try {
       // If the same chip is clicked again, deselect it and restore the original value
-      if (selectedChipIndex.value != -1 && selectedChipValue.value == discountText) {
+      if (selectedChipIndex.value != -1 &&
+          selectedChipValue.value == discountText) {
         restoreDiscount();
         return;
       }
@@ -544,7 +601,9 @@ class SalesController extends GetxController {
       double? discountPercentage = double.tryParse(percentageString);
 
       // Validate the discount percentage
-      if (discountPercentage == null || discountPercentage < 0 || discountPercentage > 100) {
+      if (discountPercentage == null ||
+          discountPercentage < 0 ||
+          discountPercentage > 100) {
         TLoader.errorSnackBar(
           title: "Invalid Discount",
           message: 'Please select a valid discount percentage (0% to 100%).',
@@ -553,7 +612,8 @@ class SalesController extends GetxController {
       }
 
       // Calculate the discount amount based on the original net total
-      double discountAmount = (originalNetTotal.value * discountPercentage) / 100;
+      double discountAmount =
+          (originalNetTotal.value * discountPercentage) / 100;
 
       // Apply discount
       netTotal.value = originalNetTotal.value - discountAmount;
@@ -561,7 +621,6 @@ class SalesController extends GetxController {
       // Update the selected chip value and index
       selectedChipValue.value = discountText;
       selectedChipIndex.value = _getChipIndex(discountText);
-
     } catch (e) {
       TLoader.errorSnackBar(title: e.toString());
     }
@@ -606,15 +665,4 @@ class SalesController extends GetxController {
       netTotal.value = currentOriginalTotal - discountAmount;
     }
   }
-
-
-
-
-
-
-
-
-
-
-
 }

@@ -1,7 +1,10 @@
 import 'package:admin_dashboard_v3/Models/reports/sale_report_model.dart';
+import 'package:admin_dashboard_v3/common/date_picker/dateRangePicker.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
+import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
 import 'package:admin_dashboard_v3/controllers/salesman/salesman_controller.dart';
+import 'package:admin_dashboard_v3/views/reports/specific_reports/pnl_report/pnLReportPage.dart';
 import 'package:admin_dashboard_v3/views/reports/specific_reports/recovery_report_salesman/recovery_report_salesman.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -9,16 +12,20 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
+import '../../Models/reports/pnl_report_model.dart';
 import '../../Models/reports/recovey_salesman_report_model.dart';
 import '../../Models/salesman/salesman_model.dart';
 import '../../repositories/reports/reports_repository.dart';
+import '../../views/reports/specific_reports/installment_plans/installment_plan_report.dart';
 import '../../views/reports/specific_reports/monthly_item_sale_report/monthly_item_sale_report.dart';
+import '../../views/reports/specific_reports/products/all_product_report.dart';
 
 
 class ReportController extends GetxController {
   static ReportController get instance => Get.find();
  final  ReportsRepository reportsRepository = Get.put(ReportsRepository());
   final SalesmanController salesmanController = Get.find<SalesmanController>();
+  final ProductController productController = Get.find<ProductController>();
 
 
 
@@ -35,6 +42,11 @@ class ReportController extends GetxController {
 
   //Recovery Report
   RxList<RecoveryReportModel> salesmanRecoveryData = <RecoveryReportModel>[].obs;
+
+
+  //PnL Report
+  RxList <PnLReportModel> pnLreportList = <PnLReportModel>[].obs;
+
 
 
   //Monthly Sales Report
@@ -162,7 +174,7 @@ class ReportController extends GetxController {
 
 
 
-  void showDateRangePickerDialog(BuildContext context) {
+  void showDateRangePickerDialogSalesman(BuildContext context) {
     // Create initial values for start and end date (current date by default)
     DateTime currentDate = DateTime.now();
     DateTime? startDate;
@@ -301,6 +313,140 @@ class ReportController extends GetxController {
       }
     }
 
+  }
+
+   void getStockSummaryReport() {
+     try {
+
+      //doing locally
+       Get.to(() =>  StockSummaryReportPage(
+         products: productController.allProducts,
+       ));
+
+
+
+     }
+     catch(e)
+     {
+       TLoader.errorSnackBar(title: 'fetchRecoverySalesmanReport' ,message: e.toString());
+       if (kDebugMode) {
+         print(e);
+       }
+     }
+   }
+
+  void showDateRangePickerDialogPnL(BuildContext context) {
+    // Create initial values for start and end date (current date by default)
+    DateTime currentDate = DateTime.now();
+    DateTime? startDate;
+    DateTime? endDate;
+
+
+    // Show the date range picker dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Select Date Range"),
+          content: StatefulBuilder(
+            builder: (context, setState) {
+              return SizedBox(
+                width: 300,
+                height: 400, // Increased height to accommodate dropdown
+                child: SizedBox(
+                  width: 300,
+                  height: 250,
+                  child: SfDateRangePicker(
+                    view: DateRangePickerView.month,
+                    selectionMode: DateRangePickerSelectionMode.range,
+                    initialSelectedRange: PickerDateRange(currentDate, currentDate),
+                    onSelectionChanged: (DateRangePickerSelectionChangedArgs args) {
+                      if (args.value is PickerDateRange) {
+                        setState(() {
+                          startDate = args.value.startDate;
+                          endDate = args.value.endDate;
+                        });
+                      }
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back(); // Close the dialog without action
+              },
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+
+
+                // Validate the selected dates
+                if (startDate == null || endDate == null) {
+                  TLoader.errorSnackBar(title: "Please select a valid date range.");
+                  return;
+                }
+
+                if (startDate!.isAfter(endDate!)) {
+                  TLoader.errorSnackBar(title: "Start date cannot be after end date.");
+                  return;
+                }
+
+                if (endDate!.isAfter(currentDate)) {
+                  TLoader.errorSnackBar(title: "End date cannot exceed the current date.");
+                  return;
+                }
+
+
+                showProfitLossReport(startDate!,endDate!);
+                Get.back();
+              },
+              child: const Text("Confirm"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+  Future<void> showProfitLossReport(DateTime startDate , DateTime endDate) async {
+
+
+    try {
+
+      await fetchReportData(startDate, endDate);
+
+      Get.to(() =>  PnLReportPage(
+        reports: pnLreportList,
+      ));
+
+    } catch (e) {
+      if (kDebugMode) {
+        TLoader.errorSnackBar(title: e.toString());
+        print("Error: $e");
+      }
+    }
+  }
+
+  // Fetch the report data
+  Future<void> fetchReportData(DateTime startDate , DateTime endDate) async {
+    try {
+     final data =  await reportsRepository.fetchPnLReportData(startDate,endDate);
+      pnLreportList.assignAll(data);
+
+    } catch (e) {
+
+      if (kDebugMode) {
+        TLoader.errorSnackBar(title: e.toString());
+        print("Error: $e");
+      }
+    } finally {
+
+    }
   }
 
 

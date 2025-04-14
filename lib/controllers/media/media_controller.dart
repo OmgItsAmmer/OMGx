@@ -203,9 +203,10 @@ class MediaController extends GetxController {
   //==========================================================================
 
 
-
+RxBool isInserting = false.obs;
   Future<void> insertImagesInTableAndBucket(String bucketName) async {
     try {
+      isInserting.value = true;
       List<Map<String, dynamic>> jsonData = [];
       var uuid = const Uuid();
 
@@ -236,6 +237,9 @@ class MediaController extends GetxController {
       droppedFiles.clear();
     } catch (e) {
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+    }
+    finally {
+      isInserting.value = false;
     }
   }
 

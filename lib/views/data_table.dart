@@ -38,7 +38,7 @@ final bool showCheckBox;
     return SizedBox(
       height: tableHeight,
       child: Padding(
-        padding: EdgeInsets.all(30.0),
+        padding: const EdgeInsets.all(30.0),
         child: Center(
             child: PaginatedDataTable2(
           //source
@@ -67,10 +67,12 @@ final bool showCheckBox;
             topRight: Radius.circular(TSizes.borderRadiusMd),
           )),
 
-          empty:  TAnimationLoaderWidget(
+          empty:  const TAnimationLoaderWidget(
             text: 'Nothing Found',
-            animation: TImages.networkOut,
+            animation: TImages.noDataFound,
             showAction: false,
+            width: 200,
+            height: 200 ,
           ),
 
           //Sorting

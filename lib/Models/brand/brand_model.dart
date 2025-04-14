@@ -1,23 +1,22 @@
-import 'package:flutter/material.dart';
 
 class BrandModel {
   final String? bname;
   final bool isVerified;
   final bool? isFeatured;
-  final int brandID;
+   int? brandID; // 👈 Made nullable
   final int? productsCount;
 
   BrandModel({
     this.bname,
     this.isVerified = false,
     this.isFeatured,
-    required this.brandID,
+    this.brandID, // 👈 Removed required
     this.productsCount,
   });
 
   // Static function to create an empty brand model
   static BrandModel empty() => BrandModel(
-    brandID: -1,
+    brandID: null,
     bname: null,
     isVerified: false,
     isFeatured: null,
@@ -25,14 +24,19 @@ class BrandModel {
   );
 
   // Convert model to JSON for database insertion
-  Map<String, dynamic> toJson() {
-    return {
+  Map<String, dynamic> toJson({bool isUpdate = false}) {
+    final Map<String, dynamic> data = {
       'bname': bname,
       'isVerified': isVerified,
       'isFeatured': isFeatured,
-      'brandID': brandID,
       'products_count': productsCount,
     };
+
+    if (!isUpdate && brandID != null) {
+      data['brandID'] = brandID;
+    }
+
+    return data;
   }
 
   // Factory method to create a BrandModel from Supabase response
@@ -41,7 +45,7 @@ class BrandModel {
       bname: json['bname'] as String?,
       isVerified: json['isVerified'] as bool? ?? false,
       isFeatured: json['isFeatured'] as bool?,
-      brandID: json['brandID'] as int,
+      brandID: json['brandID'] as int?, // 👈 Made nullable
       productsCount: json['products_count'] as int?,
     );
   }

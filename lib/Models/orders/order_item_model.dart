@@ -4,8 +4,12 @@ class OrderItemModel {
   final int productId;
   final String? unit;
   final int orderId;
-  final double totalBuyPrice; // New field added
-  final DateTime? createdAt; // New field for created_at
+  final double totalBuyPrice;
+  final DateTime? createdAt;
+  final String? productName;
+  final double? discount;
+  final double? tax;
+  final double? totalPrice;
 
   OrderItemModel({
     required this.quantity,
@@ -13,19 +17,27 @@ class OrderItemModel {
     required this.productId,
     this.unit,
     required this.orderId,
-    this.totalBuyPrice = 0.0, // Default value set
-    this.createdAt, // New field added with nullable type
+    this.totalBuyPrice = 0.0,
+    this.createdAt,
+    this.productName,
+    this.discount = 0.0,
+    this.tax = 0.0,
+    this.totalPrice,
   });
 
   // Static function to create an empty order item model
   static OrderItemModel empty() => OrderItemModel(
-    quantity: 0,
-    price: 0.0,
-    productId: 0,
-    orderId: 0,
-    totalBuyPrice: 0.0,
-    createdAt: null, // Default for createdAt
-  );
+        quantity: 0,
+        price: 0.0,
+        productId: 0,
+        orderId: 0,
+        totalBuyPrice: 0.0,
+        createdAt: null,
+        productName: '',
+        discount: 0.0,
+        tax: 0.0,
+        totalPrice: 0.0,
+      );
 
   // Convert model to JSON for database insertion
   Map<String, dynamic> toJson() {
@@ -36,7 +48,11 @@ class OrderItemModel {
       'order_id': orderId,
       'unit': unit,
       'total_buy_price': totalBuyPrice,
-
+      'product_name': productName,
+      'discount': discount,
+      'tax': tax,
+      'total_price': totalPrice ?? (price * quantity),
+      'created_at': createdAt?.toIso8601String(),
     };
   }
 
@@ -49,7 +65,13 @@ class OrderItemModel {
       orderId: json['order_id'] as int,
       unit: json['unit'] as String?,
       totalBuyPrice: (json['total_buy_price'] ?? 0.0) as double,
-      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null, // Parse DateTime if available
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : null,
+      productName: json['product_name'] as String?,
+      discount: (json['discount'] ?? 0.0) as double,
+      tax: (json['tax'] ?? 0.0) as double,
+      totalPrice: (json['total_price'] ?? 0.0) as double,
     );
   }
 
@@ -67,6 +89,10 @@ class OrderItemModel {
     int? orderId,
     double? totalBuyPrice,
     DateTime? createdAt,
+    String? productName,
+    double? discount,
+    double? tax,
+    double? totalPrice,
   }) {
     return OrderItemModel(
       quantity: quantity ?? this.quantity,
@@ -76,11 +102,13 @@ class OrderItemModel {
       orderId: orderId ?? this.orderId,
       totalBuyPrice: totalBuyPrice ?? this.totalBuyPrice,
       createdAt: createdAt ?? this.createdAt,
+      productName: productName ?? this.productName,
+      discount: discount ?? this.discount,
+      tax: tax ?? this.tax,
+      totalPrice: totalPrice ?? this.totalPrice,
     );
   }
 }
-
-
 
 class OrderModel {
   final int orderId;
@@ -97,7 +125,7 @@ class OrderModel {
   final double discount;
   final double tax;
   final double shippingFee;
-  final int salesmanComission;  // Added salesman_comission field
+  final int salesmanComission; // Added salesman_comission field
   List<OrderItemModel>? orderItems;
 
   OrderModel({
@@ -115,29 +143,29 @@ class OrderModel {
     this.discount = 0.0,
     this.tax = 0.0,
     this.shippingFee = 0.0,
-    this.salesmanComission = 0,  // Default value for salesman_comission
+    this.salesmanComission = 0, // Default value for salesman_comission
     this.orderItems,
   });
 
   // Static function to create an empty order model
   static OrderModel empty() => OrderModel(
-    orderId: 0,
-    orderDate: DateTime.now().toIso8601String(),
-    totalPrice: 0.0,
-    status: "",
-    saletype: "",
-    addressId: null,
-    userId: null,
-    salesmanId: null,
-    paidAmount: null,
-    customerId: null,
-    buyingPrice: null,
-    discount: 0.0,
-    tax: 0.0,
-    shippingFee: 0.0,
-    salesmanComission: 0,  // Default value
-    orderItems: [],
-  );
+        orderId: 0,
+        orderDate: DateTime.now().toIso8601String(),
+        totalPrice: 0.0,
+        status: "",
+        saletype: "",
+        addressId: null,
+        userId: null,
+        salesmanId: null,
+        paidAmount: null,
+        customerId: null,
+        buyingPrice: null,
+        discount: 0.0,
+        tax: 0.0,
+        shippingFee: 0.0,
+        salesmanComission: 0, // Default value
+        orderItems: [],
+      );
 
   // Convert model to JSON for database insertion
   Map<String, dynamic> toJson({bool isUpdate = false}) {
@@ -155,8 +183,7 @@ class OrderModel {
       'discount': discount,
       'tax': tax,
       'shipping_fee': shippingFee,
-      'salesman_comission': salesmanComission,  // Added salesman_comission
-
+      'salesman_comission': salesmanComission, // Added salesman_comission
     };
 
     if (!isUpdate) {
@@ -187,7 +214,8 @@ class OrderModel {
       discount: (json['discount'] as num?)?.toDouble() ?? 0.0,
       tax: (json['tax'] as num?)?.toDouble() ?? 0.0,
       shippingFee: (json['shipping_fee'] as num?)?.toDouble() ?? 0.0,
-      salesmanComission: json['salesman_comission'] as int? ?? 0,  // Added salesman_comission
+      salesmanComission:
+          json['salesman_comission'] as int? ?? 0, // Added salesman_comission
       orderItems: json['order_items'] != null
           ? OrderItemModel.fromJsonList(json['order_items'] as List)
           : null,
@@ -233,5 +261,3 @@ class OrderModel {
     );
   }
 }
-
-

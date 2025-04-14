@@ -25,9 +25,7 @@ class OrderRepository extends GetxController {
       final addressList = data.map((item) {
         return OrderModel.fromJson(item);
       }).toList();
-      // if (kDebugMode) {
-      //   print(addressList[1].country);
-      // }
+
       return addressList;
     } catch (e) {
       TLoader.warningSnackBar(
@@ -105,14 +103,14 @@ class OrderRepository extends GetxController {
       final orderList = data.map((item) {
         return OrderModel.fromJson(item);
       }).toList();
-      if (kDebugMode) {
-        print(orderList[1].orderId);
-      }
+
       return orderList;
     }
     catch (e) {
-      TLoader.errorSnackBar(title: 'Order Fetch', message: e.toString());
-      print(e.toString());
+      if (kDebugMode) {
+        TLoader.errorSnackBar(title: 'Order Fetch', message: e.toString());
+        print(e.toString());
+      }
       return [];
     }
   }
