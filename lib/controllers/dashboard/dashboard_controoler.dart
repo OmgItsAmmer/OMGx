@@ -1,3 +1,5 @@
+import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
+import 'package:admin_dashboard_v3/Models/expense/expense_model.dart';
 import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -12,11 +14,14 @@ import 'services/sales_service.dart';
 
 
 
-class DashboardController extends GetxController {
+class DashboardController extends GetxController with StateMixin<dynamic> {
+  static DashboardController get instance => Get.find();
+
   final OrderController orderController = Get.find<OrderController>();
   final ExpenseController expenseController = Get.find<ExpenseController>();
   final CustomerController customerController = Get.find<CustomerController>();
   final SalesService salesService = SalesService();
+  RxBool isLoading = true.obs;
 
 
   var dataList = <Map<String, String>>[].obs;
@@ -26,6 +31,19 @@ class DashboardController extends GetxController {
   RxBool isCard1Profit = false.obs;
   RxInt card1Percentage = 0.obs;
   RxString lastMonth = 'MM//YY'.obs;
+
+  // Average Order Value
+  RxDouble averageOrderValue = 0.0.obs;
+  RxInt averageOrderPercentage = 0.obs;
+  RxBool isAverageOrderIncrease = false.obs;
+
+  // Order Status Counts
+  RxInt pendingOrders = 0.obs;
+  RxInt completedOrders = 0.obs;
+  RxInt cancelledOrders = 0.obs;
+  RxDouble pendingAmount = 0.0.obs;
+  RxDouble completedAmount = 0.0.obs;
+  RxDouble cancelledAmount = 0.0.obs;
 
 
   // Observable for the PROFIT
@@ -40,27 +58,147 @@ class DashboardController extends GetxController {
   RxBool isCustomerIncrease = false.obs;
   RxInt card4Percentage = 0.obs;
 
-  final RxList<double> weeklySales = <double>[].obs;
+  final RxList<double> weeklySales = RxList<double>.filled(7, 0.0);
 
   @override
   void onInit() {
     super.onInit();
-    _calculateWeeklySales();
-    fetchCards();
+    initializeDashboard();
   }
 
-  void fetchCards() {
+  @override
+  void onReady() {
+    super.onReady();
+    // Re-fetch data when the widget is ready
+    Future.delayed(const Duration(milliseconds: 100), () {
+      initializeDashboard();
+    });
+  }
+
+  Future<void> initializeDashboard() async {
     try {
-      fetchSalesTotalCard();
-      fetchProfit();
-      fetchCustomerCard();
+      isLoading.value = true;
+      change(null, status: RxStatus.loading());
+
+      // Reset values to show loading state
+      currentMonthSales.value = 0;
+      currentMonthProfit.value = 0;
+      customerCount.value = 0;
+      // Reset weekly sales to zeros
+    for (int i = 0; i < weeklySales.length; i++) {
+      weeklySales[i] = 0.0;
+    }
+
+      // Fetch data if not already fetched
+      if (orderController.allOrders.isEmpty) {
+        await orderController.fetchOrders();
+      }
+      if (expenseController.expenses.isEmpty) {
+        await expenseController.fetchExpenses();
+      }
+      if (customerController.allCustomers.isEmpty) {
+        await customerController.fetchAllCustomers();
+      }
+
+      // Calculate and update values
+      calculateWeeklySales1(orderController.allOrders);
+      fetchCards(orderController.allOrders, expenseController.expenses);
+      
+      change(null, status: RxStatus.success());
+    } catch (e) {
+      change(null, status: RxStatus.error(e.toString()));
+      TLoader.errorSnackBar(title: e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+
+  void fetchCards(List<OrderModel> allOrders, List<ExpenseModel> expenses) {
+    try {
+      fetchSalesTotalCard(allOrders);
+      fetchProfit(allOrders,expenses);
+      fetchCustomerCard(customerController.allCustomers);
+      calculateAverageOrderValue(allOrders);
+      calculateOrderStatusCounts(allOrders);
     } catch (e) {
       TLoader.errorSnackBar(title: e.toString());
     }
   }
 
-  void _calculateWeeklySales() {
-    weeklySales.value = calculateWeeklySales(orderController.allOrders);
+  void calculateAverageOrderValue(List<OrderModel> allOrders) {
+    try {
+      final now = DateTime.now();
+      final currentMonth = DateTime(now.year, now.month);
+      final lastMonth = DateTime(now.year, now.month - 1);
+
+      final currentMonthOrders = allOrders.where(
+          (order) => DateTime.parse(order.orderDate).isAfter(currentMonth));
+      final lastMonthOrders = allOrders.where(
+          (order) => DateTime.parse(order.orderDate).isAfter(lastMonth) && 
+                      DateTime.parse(order.orderDate).isBefore(currentMonth));
+
+      final currentAvg = currentMonthOrders.isEmpty
+          ? 0.0
+          : currentMonthOrders.map((e) => e.totalPrice).reduce((a, b) => a + b) /
+              currentMonthOrders.length;
+
+      final lastAvg = lastMonthOrders.isEmpty
+          ? 0.0
+          : lastMonthOrders.map((e) => e.totalPrice).reduce((a, b) => a + b) /
+              lastMonthOrders.length;
+
+      averageOrderValue.value = currentAvg;
+      
+      // Calculate percentage change
+      if (lastAvg == 0) {
+        averageOrderPercentage.value = currentAvg > 0 ? 100 : 0;
+        isAverageOrderIncrease.value = currentAvg > 0;
+      } else {
+        final percentageChange = ((currentAvg - lastAvg) / lastAvg * 100).round();
+        averageOrderPercentage.value = percentageChange;
+        isAverageOrderIncrease.value = currentAvg > lastAvg;
+      }
+    } catch (e) {
+      TLoader.errorSnackBar(title: 'Error calculating average order value');
+    }
+  }
+
+  void calculateOrderStatusCounts(List<OrderModel> allOrders) {
+    try {
+      pendingOrders.value = 0;
+      completedOrders.value = 0;
+      cancelledOrders.value = 0;
+      pendingAmount.value = 0;
+      completedAmount.value = 0;
+      cancelledAmount.value = 0;
+
+      for (var order in allOrders) {
+        switch (order.status.toLowerCase()) {
+          case 'pending':
+            pendingOrders.value++;
+            pendingAmount.value += order.totalPrice;
+            break;
+          case 'completed':
+            completedOrders.value++;
+            completedAmount.value += order.totalPrice;
+            break;
+          case 'cancelled':
+            cancelledOrders.value++;
+            cancelledAmount.value += order.totalPrice;
+            break;
+        }
+      }
+    } catch (e) {
+      TLoader.errorSnackBar(title: 'Error calculating order status counts');
+    }
+  }
+
+  void calculateWeeklySales1(List<OrderModel> allOrders) {
+    final newSales = calculateWeeklySales(allOrders);
+    for (int i = 0; i < weeklySales.length; i++) {
+      weeklySales[i] = newSales[i];
+    }
   }
 
   List<double> calculateWeeklySales(List<OrderModel> allOrders) {
@@ -81,9 +219,9 @@ class DashboardController extends GetxController {
     return weeklySales;
   }
 
-  void fetchSalesTotalCard() {
+  void fetchSalesTotalCard(List<OrderModel> allOrders) {
     try {
-      var result = salesService.calculateSalesTotal(orderController.allOrders);
+      var result = salesService.calculateSalesTotal(allOrders);
 
       currentMonthSales.value = result.currentMonthSales;
       card1Percentage.value = result.percentageChange;
@@ -100,10 +238,10 @@ class DashboardController extends GetxController {
     }
   }
 
-
-  void fetchProfit() {
+  //
+  void fetchProfit(List<OrderModel> allOrders, List<ExpenseModel> expenses) {
     try {
-      var result = salesService.calculateProfit(orderController.allOrders,expenseController.expenses);
+      var result = salesService.calculateProfit(allOrders,expenses);
 
       currentMonthProfit.value = result.currentMonthSales;
       card2Percentage.value = result.percentageChange;
@@ -122,7 +260,7 @@ class DashboardController extends GetxController {
 
 
 
-  void fetchCustomerCard() {
+  void fetchCustomerCard(List<CustomerModel> allCustomers) {
     try {
       DateTime now = DateTime.now();
 
@@ -135,7 +273,7 @@ class DashboardController extends GetxController {
       DateTime sameDayLastMonth = DateTime(now.year, now.month - 1, now.day);
 
       // Count current month's customers from 1st to today
-      int currentPartialCustomers = customerController.allCustomers
+      int currentPartialCustomers = allCustomers
           .where((customer) =>
       customer.createdAt != null &&
           customer.createdAt!.isAfter(startOfCurrentMonth.subtract(const Duration(seconds: 1))) &&
@@ -143,7 +281,7 @@ class DashboardController extends GetxController {
           .length;
 
       // Count previous month's customers for same period
-      int previousPartialCustomers = customerController.allCustomers
+      int previousPartialCustomers = allCustomers
           .where((customer) =>
       customer.createdAt != null &&
           customer.createdAt!.isAfter(startOfPreviousMonth.subtract(const Duration(seconds: 1))) &&

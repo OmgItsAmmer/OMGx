@@ -8,34 +8,32 @@ import '../widgets/brand_info.dart';
 
 class BrandDetailDesktop extends StatelessWidget {
   const BrandDetailDesktop({super.key, required this.brandModel});
-final BrandModel brandModel;
+  final BrandModel brandModel;
   @override
   Widget build(BuildContext context) {
-
-    return  Expanded(child: Scaffold(
-
+    return Expanded(
+        child: Scaffold(
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(TSizes.defaultSpace),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
-            
-          
             children: [
-               Expanded(
-
-
+              Expanded(
                 child: TRoundedContainer(
                   padding: const EdgeInsets.all(TSizes.defaultSpace),
-                  child: BrandInfo(brandModel: brandModel,),
+                  child: BrandInfo(
+                    brandModel: brandModel,
+                  ),
                 ),
               ),
-              Expanded(flex: TDeviceUtils.isDesktopScreen(context) ? 2 : 0, child: const SizedBox())
+              Expanded(
+                  flex: TDeviceUtils.isDesktopScreen(context) ? 2 : 0,
+                  child: const SizedBox())
             ],
           ),
         ),
-      ) ,
+      ),
     ));
   }
 }
-

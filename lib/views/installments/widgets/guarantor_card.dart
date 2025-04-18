@@ -1,6 +1,7 @@
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
 import 'package:admin_dashboard_v3/controllers/guarantors/guarantor_controller.dart';
+import 'package:admin_dashboard_v3/controllers/guarantors/guarantor_image_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 
@@ -51,6 +52,15 @@ class GuarrantorCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final MediaController mediaController = Get.find<MediaController>();
     final GuarantorController guarantorController = Get.find<GuarantorController>();
+    final GuarantorImageController guarantorImageController = Get.find<GuarantorImageController>();
+    
+    // Listen to media controller changes outside of build
+    ever(mediaController.displayImage, (imageModel) {
+      if (imageModel != null && mediaController.displayImageOwner == MediaCategory.guarantors.toString().split('.').last) {
+        guarantorImageController.setGuarantorImage(guarrantorIndex, imageModel);
+        mediaController.displayImage.value = null;
+      }
+    });
 
 
 
@@ -85,22 +95,12 @@ class GuarrantorCard extends StatelessWidget {
                         children: [
                           // Rounded Image
                           Obx(() {
-
-                            final image = mediaController.displayImage.value;
-
-                            if(guarrantorIndex == 1){
-                                  guarantorController.guarrantor1Image.value = image;
-                            }
-                            else if(guarrantorIndex == 2){
-                              guarantorController.guarrantor2Image.value = image;
-
-                            }
-
-                            if (image != null && mediaController.displayImageOwner == MediaCategory.guarantors.toString().split('.').last ) {
+                            final currentImage = guarantorImageController.getGuarantorImage(guarrantorIndex);
+                            if (currentImage != null) {
                               return FutureBuilder<String?>(
                                 future: mediaController.getImageFromBucket(
                                   MediaCategory.guarantors.toString().split('.').last,
-                                  image.filename ?? '',
+                                  currentImage.filename ?? '',
                                 ),
                                 builder: (context, snapshot) {
                                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -162,10 +162,11 @@ class GuarrantorCard extends StatelessWidget {
                             right: 0, // Adjust the position of the icon
                             bottom: 0, // Adjust the position of the icon
                             child: GestureDetector(
-                              onTap: () {
-                                // productImagesController
-                                //     .selectThumbnailImage(); // Trigger image selection
-                                mediaController.selectImagesFromMedia();
+                              onTap: () async {
+                                await mediaController.selectImagesFromMedia(
+                                    multipleSelection: false,
+                                    allowSelection: true);
+                                // The image will be updated through the Obx widget above
                               },
                               child: const TRoundedContainer(
                                 borderColor: TColors.white,

@@ -9,10 +9,10 @@ import '../../../utils/helpers/helper_functions.dart';
 
 class TLoader {
   static hideSnackBar() =>
-      ScaffoldMessenger.of(Get.context!).hideCurrentSnackBar();
+      ScaffoldMessenger.of(Get.overlayContext!).hideCurrentSnackBar();
 
   static customToast({required message}) {
-    ScaffoldMessenger.of(Get.context!).showSnackBar(
+    ScaffoldMessenger.of(Get.overlayContext!).showSnackBar(
       SnackBar(
         elevation: 0,
         duration: const Duration(seconds: 3),
@@ -22,25 +22,22 @@ class TLoader {
           margin: const EdgeInsets.symmetric(horizontal: 30),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(30),
-            color: THelperFunctions.isDarkMode(Get.context!)
+            color: THelperFunctions.isDarkMode(Get.overlayContext!)
                 ? TColors.darkerGrey.withOpacity(0.9)
                 : TColors.grey.withOpacity(0.9),
           ),
           child: Center(
               child: Text(
-                message,
-                style: Theme
-                    .of(Get.context!)
-                    .textTheme
-                    .labelLarge,
-              )),
+            message,
+            style: Theme.of(Get.overlayContext!).textTheme.labelLarge,
+          )),
         ),
       ),
     );
   }
 
-  static successSnackBar({required title, message = '', duration = 3}) {
-    Get.snackbar(title, message,
+  static successSnackBar({required dynamic title, message = '', duration = 3}) {
+    Get.snackbar(title.toString(), message.toString(),
         isDismissible: true,
         shouldIconPulse: true,
         colorText: TColors.white,
@@ -50,7 +47,7 @@ class TLoader {
         margin: const EdgeInsets.all(20),
         snackStyle: SnackStyle.FLOATING,
         // Allows width customization
-        maxWidth: !TDeviceUtils.isMobileScreen(Get.context!) ? 700 : null ,
+        maxWidth: !TDeviceUtils.isMobileScreen(Get.overlayContext!) ? 700 : null,
         icon: const Icon(
           Iconsax.warning_2,
           color: TColors.white,
@@ -71,7 +68,8 @@ class TLoader {
       icon: const Icon(Iconsax.warning_2, color: TColors.white),
       snackStyle: SnackStyle.FLOATING,
       // Allows width customization
-      maxWidth: !TDeviceUtils.isMobileScreen(Get.context!) ? 700 : null ,    );
+      maxWidth: !TDeviceUtils.isMobileScreen(Get.context!) ? 700 : null,
+    );
   }
 
   static errorSnackBar({required String title, String message = ''}) {
@@ -88,7 +86,9 @@ class TLoader {
       icon: const Icon(Iconsax.warning_2, color: TColors.white),
       snackStyle: SnackStyle.FLOATING,
       // Allows width customization
-      maxWidth: !TDeviceUtils.isMobileScreen(Get.context!) ? 700 : null , // Sets maximum width
+      maxWidth: !TDeviceUtils.isMobileScreen(Get.context!)
+          ? 700
+          : null, // Sets maximum width
     );
   }
 }

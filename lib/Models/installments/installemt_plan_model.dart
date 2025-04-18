@@ -3,7 +3,7 @@ import 'package:admin_dashboard_v3/Models/installments/installment_payment_model
 import 'installment_table_model/installment_table_model.dart';
 
 class InstallmentPlanModel {
-  final int installmentPlanId;
+  final int? installmentPlanId;
   int? orderId;
   final String totalAmount;
   final String downPayment;
@@ -16,12 +16,12 @@ class InstallmentPlanModel {
   final String? duration;
   final DateTime? firstInstallmentDate;
   final String? note;
-   List<InstallmentPayment>? installmentPaymentList;
+  List<InstallmentPayment>? installmentPaymentList;
   int? guarantor1_id;
   int? guarantor2_id;
 
   InstallmentPlanModel({
-    required this.installmentPlanId,
+    this.installmentPlanId,
     this.orderId,
     required this.totalAmount,
     required this.downPayment,
@@ -41,8 +41,8 @@ class InstallmentPlanModel {
 
   // Static function to create an empty installment plan model
   static InstallmentPlanModel empty() => InstallmentPlanModel(
-        installmentPlanId: 0,
-        orderId: 0,
+        installmentPlanId: null,
+        orderId: -1,
         totalAmount: "",
         downPayment: "",
         numberOfInstallments: "",
@@ -54,19 +54,17 @@ class InstallmentPlanModel {
         duration: null,
         firstInstallmentDate: null,
         note: null,
-        guarantor1_id: 0,
-        guarantor2_id: 0,
+        guarantor1_id: -1,
+        guarantor2_id: -1,
       );
 
   // Convert model to JSON for database insertion
   Map<String, dynamic> toJson({bool isUpdate = false}) {
     final Map<String, dynamic> data = {
-      'installment_plans_id': installmentPlanId,
       'order_id': orderId,
       'total_amount': totalAmount,
       'down_payment': downPayment,
       'number_of_installments': numberOfInstallments,
-      'created_at': createdAt?.toIso8601String(),
       'document_charges': documentCharges,
       'margin': margin,
       'frequency_in_month': frequencyInMonth,
@@ -77,9 +75,13 @@ class InstallmentPlanModel {
       'guarantor1_id': guarantor1_id,
       'guarantor2_id': guarantor2_id,
     };
+
+    // Only include installment_plans_id if it's an update
+    if (isUpdate && installmentPlanId != null) {
+      data['installment_plans_id'] = installmentPlanId;
+    }
+
     if (!isUpdate) {
-      data['installment_plans_id'] =
-          installmentPlanId; // Only include `order_id` if it's not an update
       data['installemtPaymentList'] = [];
     }
     return data;
@@ -88,7 +90,7 @@ class InstallmentPlanModel {
   // Factory method to create an InstallmentPlanModel from JSON
   factory InstallmentPlanModel.fromJson(Map<String, dynamic> json) {
     return InstallmentPlanModel(
-      installmentPlanId: json['installment_plans_id'] as int,
+      installmentPlanId: json['installment_plans_id'] as int?,
       orderId: json['order_id'] as int,
       totalAmount: (json['total_amount'] as String),
       downPayment: json['down_payment'] as String,

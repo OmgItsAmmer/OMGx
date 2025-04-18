@@ -15,6 +15,8 @@ class ExpenseController extends GetxController {
 
   RxList<ExpenseModel> expenses = <ExpenseModel>[].obs;
 
+  RxBool isExpenseFetching  = false.obs;
+
   @override
   void onInit() {
     fetchExpenses();
@@ -30,6 +32,7 @@ class ExpenseController extends GetxController {
 
   Future<void> fetchExpenses() async {
     try {
+      isExpenseFetching.value = true;
       expenses.assignAll(await expenseRepository.fetchExpenses());
     } catch (e) {
       if (kDebugMode) {
@@ -37,6 +40,9 @@ class ExpenseController extends GetxController {
             title: 'Expense Controller', message: e.toString());
         print(e);
       }
+    }
+    finally{
+      isExpenseFetching.value = false;
     }
   }
 

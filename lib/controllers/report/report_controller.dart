@@ -1,4 +1,5 @@
 import 'package:admin_dashboard_v3/Models/reports/sale_report_model.dart';
+import 'package:admin_dashboard_v3/Models/reports/simple_pnl_report_model.dart';
 import 'package:admin_dashboard_v3/common/date_picker/dateRangePicker.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
@@ -6,6 +7,7 @@ import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
 import 'package:admin_dashboard_v3/controllers/salesman/salesman_controller.dart';
 import 'package:admin_dashboard_v3/views/reports/specific_reports/pnl_report/pnLReportPage.dart';
 import 'package:admin_dashboard_v3/views/reports/specific_reports/recovery_report_salesman/recovery_report_salesman.dart';
+import 'package:admin_dashboard_v3/views/reports/specific_reports/simplePnLReport.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -46,6 +48,9 @@ class ReportController extends GetxController {
 
   //PnL Report
   RxList <PnLReportModel> pnLreportList = <PnLReportModel>[].obs;
+
+//Simple PnL Report
+RxList<SimplePnLReportModel> simplePnLReports = <SimplePnLReportModel>[].obs;
 
 
 
@@ -450,7 +455,87 @@ class ReportController extends GetxController {
   }
 
 
+  Future<void> fetchSimplePnLReport(DateTime startDate, DateTime endDate) async {
+    try {
+      simplePnLReports.assignAll(await reportsRepository.fetchSimplePnLReport(startDate, endDate));
+    } catch (e) {
+      TLoader.errorSnackBar(title: e.toString());
+    }
+  }
 
+  void showSimplePnLReport(DateTime startDate, DateTime endDate) async {
+    try {
+      await fetchSimplePnLReport(startDate, endDate);
+      Get.to(() => SimplePnLReportPage(reports: simplePnLReports));
+    } catch (e) {
+      TLoader.errorSnackBar(title: e.toString());
+    }
+  }
+  void showDateRangePickerDialogSimplePnL(BuildContext context) {
+    DateTime currentDate = DateTime.now();
+    DateTime? startDate;
+    DateTime? endDate;
 
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Select Date Range"),
+          content: StatefulBuilder(
+            builder: (context, setState) {
+              return SizedBox(
+                width: 300,
+                height: 300,
+                child: SfDateRangePicker(
+                  view: DateRangePickerView.month,
+                  selectionMode: DateRangePickerSelectionMode.range,
+                  initialSelectedRange: PickerDateRange(currentDate, currentDate),
+                  onSelectionChanged: (DateRangePickerSelectionChangedArgs args) {
+                    if (args.value is PickerDateRange) {
+                      setState(() {
+                        startDate = args.value.startDate;
+                        endDate = args.value.endDate;
+                      });
+                    }
+                  },
+                ),
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                if (startDate == null || endDate == null) {
+                  TLoader.errorSnackBar(title: "Please select a valid date range.");
+                  return;
+                }
+
+                if (startDate!.isAfter(endDate!)) {
+                  TLoader.errorSnackBar(title: "Start date cannot be after end date.");
+                  return;
+                }
+
+                if (endDate!.isAfter(currentDate)) {
+                  TLoader.errorSnackBar(title: "End date cannot exceed the current date.");
+                  return;
+                }
+
+                showSimplePnLReport(startDate!, endDate!);
+                Get.back();
+              },
+              child: const Text("Confirm"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
 }
+
+
+

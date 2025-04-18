@@ -2,7 +2,6 @@ import 'package:admin_dashboard_v3/Models/products/product_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 import '../../main.dart';
 
 class ProductRepository {
@@ -95,40 +94,69 @@ class ProductRepository {
   Future<void> updateStockQuantity(
       {required int productId, required int quantitySold}) async {
     try {
-      final response = await supabase.from('products').update({
-        'stock_quantity': supabase.rpc('decrease_stock', params: {
-          'p_id': productId,
-          'qty_sold': quantitySold,
-        })
-      }).eq('product_id', productId);
+      // First get the current stock quantity
+      final response = await supabase
+          .from('products')
+          .select('stock_quantity')
+          .eq('product_id', productId)
+          .single();
 
-      if (response.error != null) {
-        if (kDebugMode) {
-          print('Stock Update Error: ${response.error!.message}');
-        }
-      }
+      final int currentStock = response['stock_quantity'] as int;
+      final int newStock = currentStock - quantitySold;
+
+      // Update the stock quantity
+      await supabase
+          .from('products')
+          .update({'stock_quantity': newStock}).eq('product_id', productId);
     } catch (e) {
       if (kDebugMode) {
         print('Stock Update Exception: $e');
       }
+      rethrow;
     }
   }
 
   Future<void> checkLowStock(List<int> productIds) async {
     try {
-      final response = await supabase.rpc('notify_low_stock', params: {
-        'product_ids': productIds,
-      });
+      // First check if products are below alert stock
+      final response = await supabase
+          .from('products')
+          .select('product_id, name, stock_quantity, alert_stock')
+          .inFilter('product_id', productIds);
 
+      for (var product in response) {
+        final int stockQuantity = product['stock_quantity'] as int;
+        final int alertStock = product['alert_stock'] as int? ?? 0;
+        final String productName = product['name'] as String;
+
+        if (stockQuantity <= alertStock) {
+          if (kDebugMode) {
+            print('Low stock alert for product: $productName');
+            print(
+                'Current stock: $stockQuantity, Alert threshold: $alertStock');
+          }
+
+          // Trigger the notify_low_stock function
+          try {
+            await supabase.rpc('notify_low_stock', params: {
+              'product_id': product['product_id'],
+              'current_stock': stockQuantity,
+              'alert_threshold': alertStock,
+              'product_name': productName
+            });
+          } catch (e) {
       if (kDebugMode) {
-        print("Low stock check response: $response");
+              print('Error triggering low stock notification: $e');
+            }
+          }
+        }
       }
     } catch (error) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(
-            title: 'Alert Stock Error', message: error.toString());
         print("Error checking low stock: $error");
       }
+      // Don't throw the error since this is just a notification check
+      // and shouldn't affect the main order process
     }
   }
 }

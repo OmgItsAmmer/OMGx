@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
-
 import '../constants/colors.dart';
 import '../constants/enums.dart';
 
@@ -17,11 +16,7 @@ class THelperFunctions {
   static Color getOrderStatusColor(OrderStatus value) {
     if (OrderStatus.pending == value) {
       return Colors.blue;
-    } else if (OrderStatus.processing == value) {
-      return Colors.orange;
-    } else if (OrderStatus.shipped == value) {
-      return Colors.purple;
-    } else if (OrderStatus.delivered == value) {
+    } else if (OrderStatus.completed == value) {
       return Colors.green;
     } else if (OrderStatus.cancelled == value) {
       return Colors.red;

@@ -18,7 +18,7 @@ enum ImageType { asset, network, memory, file }
 
 enum MediaCategory { folders, brands, categories, products,users,customers,salesman,guarantors,shop}
 
-enum OrderStatus { pending, processing, shipped, delivered, cancelled }
+enum OrderStatus { pending, completed, cancelled }
 
 enum PaymentMethods { paypal, googlePay, applePay, visa, masterCard, creditCard, paystack, razorPay, paytm }
 

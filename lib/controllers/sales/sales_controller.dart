@@ -1,6 +1,7 @@
 import 'package:admin_dashboard_v3/Models/sales/sale_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
+import 'package:admin_dashboard_v3/controllers/salesman/salesman_controller.dart';
 import 'package:admin_dashboard_v3/controllers/user/user_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:flutter/cupertino.dart';
@@ -9,17 +10,22 @@ import 'package:flutter_thermal_printer/flutter_thermal_printer.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../Models/orders/order_item_model.dart';
+import '../../Models/products/product_model.dart';
 import '../../repositories/order/order_repository.dart';
 import '../customer/customer_controller.dart';
 import '../shop/shop_controller.dart';
+import '../../Models/salesman/salesman_model.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SalesController extends GetxController {
   static SalesController get instance => Get.find();
 
   // Other Controllers Interaction
   final OrderRepository orderRepository = Get.put(OrderRepository());
+  final SupabaseClient supabase = Supabase.instance.client;
 
   final shopController = Get.put(ShopController());
+  final SalesmanController salesmanController = Get.put(SalesmanController());
 
   final CustomerController customerController = Get.find<CustomerController>();
   // final InstallmentController installmentController = Get.find<InstallmentController>();
@@ -65,13 +71,13 @@ class SalesController extends GetxController {
   final cashierNameController = TextEditingController().obs;
   final selectedSaleType = SaleType.cash.obs;
   final Rx<DateTime?> selectedDate =
-      Rx<DateTime?>(null); // Changed to nullable DateTime
+      Rx<DateTime?>(DateTime.now()); // Set default to today's date
 
   //Salesman Info
   final salesmanNameController = TextEditingController();
   final salesmanCityController = TextEditingController().obs;
   final salesmanAreaController = TextEditingController().obs;
-  int selectedSalesmanId = 0;
+  int selectedSalesmanId = -1;
 
   //checkout pop up
   final paidAmount = TextEditingController();
@@ -112,50 +118,153 @@ class SalesController extends GetxController {
     }
   }
 
-  void addProduct() {
+  void addProduct() async {
     try {
       if ((!addUnitTotalKey.currentState!.validate() &&
               !addUnitPriceAndQuantityKey.currentState!.validate()) ||
           selectedProductId == -1) {
         TLoader.errorSnackBar(
-            title: "Empty",
-            message: 'Kindly fill all the Text fields before proceed');
+          title: "Empty Fields",
+          message: 'Kindly fill all the Text fields before proceeding',
+        );
         return;
       }
-      buyingPriceTotal += buyingPriceIndividual * double.parse(quantity.text);
 
-      final sale = SaleModel(
-        productId: selectedProductId.value,
-        name: dropdownController.text.trim(),
-        salePrice: unitPrice.value.text.trim(),
-        unit: selectedUnit.toString().trim(),
-        quantity: quantity.text,
-        totalPrice: totalPrice.value.text,
-        buyPrice: buyingPriceTotal,
+      // Get ProductController instance
+      final productController = Get.find<ProductController>();
+
+      // Find the product in allProducts list
+      final product = productController.allProducts.firstWhere(
+        (p) => p.productId == selectedProductId.value,
+        orElse: () => ProductModel.empty(),
       );
-      //Adding in netTotal
-      netTotal.value += double.parse(totalPrice.value.text);
-      originalNetTotal.value += double.parse(totalPrice.value.text);
-      // Parse the current remainingAmount and totalPrice as doubles
-      double currentRemaining =
-          double.tryParse(remainingAmount.value.text) ?? 0.0;
-      double totalPriceValue = double.tryParse(totalPrice.value.text) ?? 0.0;
 
-      // Perform the addition
-      double newRemaining = currentRemaining + totalPriceValue;
+      if (product.productId == null) {
+        TLoader.errorSnackBar(
+          title: "Product Not Found",
+          message: 'Selected product not found in inventory',
+        );
+        return;
+      }
 
-      // Update the remainingAmount with the new value
-      remainingAmount.value.text = newRemaining.toStringAsFixed(2);
+      final int availableStock = product.stockQuantity ?? 0;
+      final int requestedQuantity = int.tryParse(quantity.text) ?? 0;
+      final String productName = product.name;
 
-      allSales.add(sale);
+      if (requestedQuantity <= 0) {
+        TLoader.errorSnackBar(
+          title: "Invalid Quantity",
+          message: 'Please enter a valid quantity greater than 0',
+        );
+        return;
+      }
+
+      // Check if product already exists in sales list
+      final existingSaleIndex = allSales.indexWhere((sale) =>
+          sale.productId == selectedProductId.value &&
+          sale.unit == selectedUnit.toString().trim());
+
+      if (existingSaleIndex != -1) {
+        // Product exists, update quantity and totals
+        final existingSale = allSales[existingSaleIndex];
+        final int existingQuantity = int.tryParse(existingSale.quantity) ?? 0;
+        final int newQuantity = existingQuantity + requestedQuantity;
+
+        // Check if new total quantity exceeds available stock
+        if (newQuantity > availableStock) {
+          TLoader.errorSnackBar(
+            title: "Insufficient Stock",
+            message:
+                'Only ${availableStock - existingQuantity} more $productName available in stock',
+          );
+          return;
+        }
+
+        // Calculate new totals
+        final double unitPriceValue =
+            double.tryParse(unitPrice.value.text) ?? 0.0;
+        final double newTotalPrice = unitPriceValue * newQuantity;
+        final double newBuyPrice = buyingPriceIndividual * newQuantity;
+
+        // Update existing sale
+        allSales[existingSaleIndex] = SaleModel(
+          productId: selectedProductId.value,
+          name: dropdownController.text.trim(),
+          salePrice: unitPrice.value.text.trim(),
+          unit: selectedUnit.toString().trim(),
+          quantity: newQuantity.toString(),
+          totalPrice: newTotalPrice.toString(),
+          buyPrice: newBuyPrice,
+        );
+
+        // Update net totals
+        final double existingTotalPrice =
+            double.tryParse(existingSale.totalPrice) ?? 0.0;
+        netTotal.value = netTotal.value - existingTotalPrice + newTotalPrice;
+        originalNetTotal.value =
+            originalNetTotal.value - existingTotalPrice + newTotalPrice;
+        buyingPriceTotal =
+            buyingPriceTotal - existingSale.buyPrice + newBuyPrice;
+
+        // Update remaining amount
+        double currentRemaining =
+            double.tryParse(remainingAmount.value.text) ?? 0.0;
+        double totalPriceDiff = newTotalPrice - existingTotalPrice;
+        remainingAmount.value.text =
+            (currentRemaining + totalPriceDiff).toStringAsFixed(2);
+      } else {
+        // Product doesn't exist, add new sale
+        if (requestedQuantity > availableStock) {
+          TLoader.errorSnackBar(
+            title: "Insufficient Stock",
+            message: 'Only $availableStock $productName available in stock',
+          );
+          return;
+        }
+
+        final double unitPriceValue =
+            double.tryParse(unitPrice.value.text) ?? 0.0;
+        final double newBuyPrice = buyingPriceIndividual * requestedQuantity;
+        final double newTotalPrice = unitPriceValue * requestedQuantity;
+
+        final sale = SaleModel(
+          productId: selectedProductId.value,
+          name: dropdownController.text.trim(),
+          salePrice: unitPrice.value.text.trim(),
+          unit: selectedUnit.toString().trim(),
+          quantity: requestedQuantity.toString(),
+          totalPrice: newTotalPrice.toString(),
+          buyPrice: newBuyPrice,
+        );
+
+        // Update totals
+        netTotal.value += newTotalPrice;
+        originalNetTotal.value += newTotalPrice;
+        buyingPriceTotal += newBuyPrice;
+
+        // Update remaining amount
+        double currentRemaining =
+            double.tryParse(remainingAmount.value.text) ?? 0.0;
+        remainingAmount.value.text =
+            (currentRemaining + newTotalPrice).toStringAsFixed(2);
+
+        allSales.add(sale);
+      }
+
+      // Clear input fields
       dropdownController.clear();
       unitPrice.value.clear();
       unit.clear();
       quantity.clear();
       totalPrice.value.clear();
-      //searchDropDownKey.currentState?.resetToHint();
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Adding Data', message: e.toString());
+      if (kDebugMode) {
+        print('Error in addProduct: $e');
+      }
+      TLoader.errorSnackBar(
+        title: 'Error Adding Product',
+        message: 'An error occurred while adding the product: ${e.toString()}',
+      );
     }
   }
 
@@ -196,14 +305,24 @@ class SalesController extends GetxController {
 
       // Create an OrderModel instance with formatted date
       OrderModel order = OrderModel(
-        orderId: -1,
+        discount: double.tryParse(discount.value) ?? 0.0,
+        salesmanComission: salesmanController.allSalesman
+                .firstWhere(
+                  (salesman) => salesman.salesmanId == selectedSalesmanId,
+                  orElse: () => SalesmanModel.empty(),
+                )
+                .comission ??
+            0,
+        shippingFee: shopController.selectedShop!.value.shippingPrice,
+        tax: shopController.selectedShop!.value.taxrate,
+        orderId: -1, // Using -1 as a temporary ID instead of null
         orderDate: formatDate(selectedDate.value ?? DateTime.now()),
         totalPrice: netTotal.value,
         buyingPrice: buyingPriceTotal,
         status: statusCheck(),
         saletype: selectedSaleType.value.toString().split('.').last,
         addressId: selectedAddressId,
-        userId: 1,
+        userId: userController.currentUser.value.userId,
         salesmanId: selectedSalesmanId,
         paidAmount: paidAmountValue,
         customerId: customerController.selectedCustomer.value.customerId,
@@ -248,13 +367,19 @@ class SalesController extends GetxController {
             await productController.checkLowStock(productIds);
           }
 
-          // Print thermal invoice
-          final bytes = await _generateReceipt(order);
-          final service =
-              FlutterThermalPrinterNetwork('192.168.0.100', port: 9100);
-          await service.connect();
-          await service.printTicket(bytes);
-          await service.disconnect();
+          // Generate receipt
+          try {
+            final receiptBytes = await _generateReceipt(order);
+            // You can add code here to print the receipt or save it
+            if (kDebugMode) {
+              print('Receipt generated successfully');
+            }
+          } catch (e) {
+            if (kDebugMode) {
+              print('Error generating receipt: $e');
+            }
+            // Don't throw the error since receipt generation is not critical
+          }
 
           // Reset fields after successful checkout
           resetField();
@@ -267,14 +392,23 @@ class SalesController extends GetxController {
 
           return orderId;
         } catch (e) {
+          if (kDebugMode) {
+            print('Error updating stock: $e');
+          }
           TLoader.errorSnackBar(
               title: 'Stock Update Error', message: e.toString());
           return -1;
         }
       } else {
+        if (kDebugMode) {
+          print('Order upload failed');
+        }
         throw Exception("Order upload failed, checkout aborted.");
       }
     } catch (e) {
+      if (kDebugMode) {
+        print('Checkout error: $e');
+      }
       TLoader.errorSnackBar(title: 'Checkout Error', message: e.toString());
       return -1;
     }
@@ -367,9 +501,9 @@ class SalesController extends GetxController {
     return bytes;
   }
 
-  // Helper method to format date as dd/mm/yyyy
+  // Helper method to format date as YYYY-MM-DD
   String formatDate(DateTime date) {
-    return DateFormat('dd/MM/yyyy').format(date);
+    return DateFormat('yyyy-MM-dd').format(date);
   }
 
   // Helper method to parse date from dd/mm/yyyy string
@@ -525,6 +659,11 @@ class SalesController extends GetxController {
       // Reset netTotal to the original value
       netTotal.value = originalNetTotal.value;
 
+      // Update remaining amount to match the restored net total
+      double currentPaidAmount = double.tryParse(paidAmount.text) ?? 0.0;
+      remainingAmount.value.text =
+          (netTotal.value - currentPaidAmount).toStringAsFixed(2);
+
       // Clear the selected chip value and index
       selectedChipValue.value = '';
       selectedChipIndex.value = -1;
@@ -618,6 +757,11 @@ class SalesController extends GetxController {
       // Apply discount
       netTotal.value = originalNetTotal.value - discountAmount;
 
+      // Update remaining amount to match the new net total
+      double currentPaidAmount = double.tryParse(paidAmount.text) ?? 0.0;
+      remainingAmount.value.text =
+          (netTotal.value - currentPaidAmount).toStringAsFixed(2);
+
       // Update the selected chip value and index
       selectedChipValue.value = discountText;
       selectedChipIndex.value = _getChipIndex(discountText);
@@ -663,6 +807,11 @@ class SalesController extends GetxController {
     } else {
       discount.value = "$cleanedValue%"; // Ensure percentage format
       netTotal.value = currentOriginalTotal - discountAmount;
+
+      // Update remaining amount to match the new net total
+      double currentPaidAmount = double.tryParse(paidAmount.text) ?? 0.0;
+      remainingAmount.value.text =
+          (netTotal.value - currentPaidAmount).toStringAsFixed(2);
     }
   }
 }

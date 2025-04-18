@@ -18,9 +18,8 @@ class SalesCashierInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     final SalesController salesController = Get.find<SalesController>();
 
-
-    return  Form(
-      key:  salesController.cashierFormKey,
+    return Form(
+      key: salesController.cashierFormKey,
       child: TRoundedContainer(
         backgroundColor: TColors.primaryBackground,
         padding: const EdgeInsets.all(TSizes.defaultSpace),
@@ -39,36 +38,33 @@ class SalesCashierInfo extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: Obx(
-                  () => TextFormField(
-                    onChanged: (value){
-
-                    },
-                    readOnly: true,
+                () => TextFormField(
+                  onChanged: (value) {},
+                  readOnly: true,
                   // initialValue: 'Ammer',
-                    controller: salesController.cashierNameController.value,
-                    validator: (value) =>
-                        TValidator.validateEmptyText('Admin Name', value),
-                    decoration: const InputDecoration(labelText: 'Admin'),
-                    style: Theme.of(context).textTheme.bodyMedium,
-
-                  ),
+                  controller: salesController.cashierNameController.value,
+                  validator: (value) =>
+                      TValidator.validateEmptyText('Admin Name', value),
+                  decoration: const InputDecoration(labelText: 'Admin'),
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
               ),
             ),
 
-            const SizedBox(height: TSizes.spaceBtwItems,),
-
-
-
+            const SizedBox(
+              height: TSizes.spaceBtwItems,
+            ),
 
             //Sale Type
             TRoundedContainer(
-
               // padding: EdgeInsets.all(TSizes.defaultSpace),
               child: Obx(
-                ()=> DropdownButton<SaleType>(
+                () => DropdownButton<SaleType>(
                   padding: EdgeInsets.zero, // Remove all padding
-                  value: salesController.selectedSaleType.value, // Set the initial value from the controller
-                  underline: const SizedBox.shrink(), // Remove the default underline
+                  value: salesController.selectedSaleType
+                      .value, // Set the initial value from the controller
+                  underline:
+                      const SizedBox.shrink(), // Remove the default underline
                   isExpanded: true, // Ensures proper alignment and resizing
                   isDense: true, // Makes the dropdown less tall vertically
                   items: SaleType.values.map((SaleType sale) {
@@ -76,8 +72,10 @@ class SalesCashierInfo extends StatelessWidget {
                       value: sale,
                       child: Row(
                         children: [
-                          const Icon(Iconsax.box, size: 18), // Add your desired icon here
-                          const SizedBox(width: 8), // Space between icon and text
+                          const Icon(Iconsax.box,
+                              size: 18), // Add your desired icon here
+                          const SizedBox(
+                              width: 8), // Space between icon and text
                           Text(
                             sale.name.capitalize.toString(),
                             style: const TextStyle(),
@@ -91,87 +89,82 @@ class SalesCashierInfo extends StatelessWidget {
                       // Update the salesController.selectedSaleType value with the selected SaleType
                       salesController.selectedSaleType.value = value;
 
-
                       //salesController.updateUIBasedOnSaleType(value);
                     }
                   },
                 ),
               ),
-
             ),
 
-            const SizedBox(height: TSizes.spaceBtwItems,),
+            const SizedBox(
+              height: TSizes.spaceBtwItems,
+            ),
 
             Row(
               children: [
                 Expanded(
-                  child:Obx(
-                () => OutlinedButton(
+                  child: Obx(
+                    () => OutlinedButton(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text('Select Date'),
+                                content: SizedBox(
+                                  width: 300,
+                                  height: 300,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      SfDateRangePicker(
+                                        view: DateRangePickerView.month,
+                                        selectionMode:
+                                            DateRangePickerSelectionMode.single,
+                                        onSubmit: (val) {
+                                          // Cast val to DateTime
+                                          DateTime selectedDateTime =
+                                              val as DateTime;
 
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title:  const Text('Select Date'),
-                              content:  SizedBox(
-                                width: 300,
-                                height: 300,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    SfDateRangePicker(
-                                      // onSelectionChanged: (val) {
+                                          // Set the date in the controller
+                                          salesController.selectedDate.value =
+                                              selectedDateTime;
 
-                                      // },
-                                      onSubmit: (val) {
-                                        // Cast val to DateTime
-                                        DateTime selectedDate = val as DateTime;
-
-                                        // Format the selected DateTime to dd/MM/yyyy format
-                                        //String formattedDate = DateFormat('dd/MM/yyyy').format(selectedDate);
-
-                                        // Store the formatted date in salesController.selectedDate.value
-                                        salesController.selectedDate.value = selectedDate;
-
-
-                                        // Close the dialog
-                                        Navigator.of(context).pop();
-                                      },
-
-
-                                      onCancel: (){
-                                        Navigator.of(context).pop(); // Close the dialog
-
-                                      },
-                                      showActionButtons: true,
-                                    )
-
-
-
-                                  ],
+                                          // Close the dialog
+                                          Navigator.of(context).pop();
+                                        },
+                                        onSelectionChanged:
+                                            (DateRangePickerSelectionChangedArgs
+                                                args) {
+                                          if (args.value is DateTime) {
+                                            // Update the date immediately when selected
+                                            salesController.selectedDate.value =
+                                                args.value as DateTime;
+                                          }
+                                        },
+                                        onCancel: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        showActionButtons: true,
+                                      )
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              actions: [
-
-
-
-                              ],
-                            );
-                          },
-                        );
-                      },
-                      child:  Text(
-                        DateFormat('dd/MM/yyyy').format(salesController.selectedDate.value),
-                      )
-                    ),
+                                actions: [],
+                              );
+                            },
+                          );
+                        },
+                        child: Text(
+                          DateFormat('dd/MM/yyyy').format(
+                              salesController.selectedDate.value ??
+                                  DateTime.now()),
+                        )),
                   ),
-
                 ),
               ],
             ),
-
-
           ],
         ),
       ),

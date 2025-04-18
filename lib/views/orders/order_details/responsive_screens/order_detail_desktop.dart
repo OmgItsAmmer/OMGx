@@ -103,6 +103,7 @@ class OrderDetailDesktopScreen extends StatelessWidget {
                   ],
                 ),
                 if (saleTypeFromOrder == SaleType.installment)
+                const SizedBox(height: TSizes.spaceBtwSections),
                   TRoundedContainer(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,57 +1,42 @@
 class OrderItemModel {
-  final int quantity;
-  final double price;
   final int productId;
-  final String? unit;
+  final double price;
+  final int quantity;
   final int orderId;
+  final String? unit;
   final double totalBuyPrice;
   final DateTime? createdAt;
-  final String? productName;
-  final double? discount;
-  final double? tax;
-  final double? totalPrice;
 
   OrderItemModel({
-    required this.quantity,
-    required this.price,
     required this.productId,
-    this.unit,
+    required this.price,
+    required this.quantity,
     required this.orderId,
+    this.unit,
     this.totalBuyPrice = 0.0,
     this.createdAt,
-    this.productName,
-    this.discount = 0.0,
-    this.tax = 0.0,
-    this.totalPrice,
   });
 
   // Static function to create an empty order item model
   static OrderItemModel empty() => OrderItemModel(
-        quantity: 0,
-        price: 0.0,
         productId: 0,
+        price: 0.0,
+        quantity: 0,
         orderId: 0,
+        unit: null,
         totalBuyPrice: 0.0,
         createdAt: null,
-        productName: '',
-        discount: 0.0,
-        tax: 0.0,
-        totalPrice: 0.0,
       );
 
   // Convert model to JSON for database insertion
   Map<String, dynamic> toJson() {
     return {
-      'quantity': quantity,
-      'price': price,
       'product_id': productId,
+      'price': price,
+      'quantity': quantity,
       'order_id': orderId,
       'unit': unit,
       'total_buy_price': totalBuyPrice,
-      'product_name': productName,
-      'discount': discount,
-      'tax': tax,
-      'total_price': totalPrice ?? (price * quantity),
       'created_at': createdAt?.toIso8601String(),
     };
   }
@@ -59,19 +44,15 @@ class OrderItemModel {
   // Factory method to create an OrderItemModel from JSON response
   factory OrderItemModel.fromJson(Map<String, dynamic> json) {
     return OrderItemModel(
-      quantity: json['quantity'] as int,
-      price: (json['price'] as num).toDouble(),
       productId: json['product_id'] as int,
+      price: (json['price'] as num).toDouble(),
+      quantity: json['quantity'] as int,
       orderId: json['order_id'] as int,
       unit: json['unit'] as String?,
       totalBuyPrice: (json['total_buy_price'] ?? 0.0) as double,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
           : null,
-      productName: json['product_name'] as String?,
-      discount: (json['discount'] ?? 0.0) as double,
-      tax: (json['tax'] ?? 0.0) as double,
-      totalPrice: (json['total_price'] ?? 0.0) as double,
     );
   }
 
@@ -82,30 +63,22 @@ class OrderItemModel {
 
   // CopyWith method
   OrderItemModel copyWith({
-    int? quantity,
-    double? price,
     int? productId,
-    String? unit,
+    double? price,
+    int? quantity,
     int? orderId,
+    String? unit,
     double? totalBuyPrice,
     DateTime? createdAt,
-    String? productName,
-    double? discount,
-    double? tax,
-    double? totalPrice,
   }) {
     return OrderItemModel(
-      quantity: quantity ?? this.quantity,
-      price: price ?? this.price,
       productId: productId ?? this.productId,
-      unit: unit ?? this.unit,
+      price: price ?? this.price,
+      quantity: quantity ?? this.quantity,
       orderId: orderId ?? this.orderId,
+      unit: unit ?? this.unit,
       totalBuyPrice: totalBuyPrice ?? this.totalBuyPrice,
       createdAt: createdAt ?? this.createdAt,
-      productName: productName ?? this.productName,
-      discount: discount ?? this.discount,
-      tax: tax ?? this.tax,
-      totalPrice: totalPrice ?? this.totalPrice,
     );
   }
 }

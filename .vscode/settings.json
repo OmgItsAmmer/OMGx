@@ -1,4 +1,4 @@
 {
     "cmake.ignoreCMakeListsMissing": true,
-    "files.autoSave": "onFocusChange"
+    "files.autoSave": "afterDelay"
 }

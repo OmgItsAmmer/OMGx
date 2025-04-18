@@ -11,6 +11,7 @@ import 'package:get/get.dart';
 
 import '../controllers/category/category_controller.dart';
 import '../controllers/customer/customer_controller.dart';
+import '../controllers/guarantors/guarantor_image_controller.dart';
 import '../controllers/media/media_controller.dart';
 import '../controllers/orders/orders_controller.dart';
 import '../controllers/product/product_images_controller.dart';
@@ -38,6 +39,7 @@ class GeneralBindings extends Bindings {
    Get.put(ExpenseController());
    Get.put(NotificationController());
    Get.put(ShopController());
+   Get.put(GuarantorImageController());
 
 
    //Get.put(AuthenticationRepository());

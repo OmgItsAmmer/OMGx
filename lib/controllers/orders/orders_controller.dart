@@ -1,5 +1,6 @@
 import 'package:admin_dashboard_v3/Models/orders/order_item_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
+import 'package:admin_dashboard_v3/controllers/dashboard/dashboard_controoler.dart';
 import 'package:admin_dashboard_v3/repositories/order/order_repository.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:flutter/cupertino.dart';
@@ -26,6 +27,7 @@ class OrderController extends GetxController {
 
   final isStatusLoading = false.obs;
   final isOrderLoading = false.obs;
+  final isOrdersFetching = false.obs;
 
 //Customer Order Detail
   RxList<OrderModel> currentOrders = <OrderModel>[].obs;
@@ -44,6 +46,31 @@ class OrderController extends GetxController {
     super.onInit();
   }
 
+
+
+
+  Future<void> fetchOrders() async {
+    try {
+      isOrdersFetching.value = true;
+      final orders = await orderRepository.fetchOrders();
+      allOrders.assignAll(orders);
+      currentOrders.assignAll(orders);
+     // dashboardController.calculateWeeklySales1(allOrders);
+
+
+
+
+    } catch (e) {
+      if (kDebugMode) {
+        TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+        print(e);
+      }
+    }
+    finally{
+      isOrdersFetching.value = true;
+
+    }
+  }
   void setRemainingAmount(OrderModel order) {
     remainingAmount.value =(order.totalPrice) - (order.paidAmount ?? 0.0);
   }
@@ -273,22 +300,7 @@ class OrderController extends GetxController {
     }
   }
 
-  Future<void> fetchOrders() async {
-    try {
 
-      final orders = await orderRepository.fetchOrders();
-      allOrders.assignAll(orders);
-      currentOrders.assignAll(orders);
-
-
-
-    } catch (e) {
-      if (kDebugMode) {
-        TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
-        print(e);
-      }
-    }
-  }
 
 
   Future<List<OrderItemModel>> fetchOrderItems(int orderId) async {

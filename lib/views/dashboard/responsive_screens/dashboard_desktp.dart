@@ -42,6 +42,7 @@ class DashboardDesktop extends StatelessWidget {
                   children: [
                     Expanded(
                         child: TDashBoardCard(
+                            isLoading: dashboardController.isLoading,
                           iconWidget: const TCircularIcon(
                             width: 40,
                             height: 40,
@@ -63,6 +64,7 @@ class DashboardDesktop extends StatelessWidget {
                     Expanded(
 
                         child: TDashBoardCard(
+                          isLoading: dashboardController.isLoading,
                           iconWidget: const TCircularIcon(
                             width: 40,
                             height: 40,
@@ -83,6 +85,7 @@ class DashboardDesktop extends StatelessWidget {
                     ),
                     Expanded(
                       child: TDashBoardCard(
+                          isLoading: dashboardController.isLoading,
                         iconWidget: const TCircularIcon(
                           width: 40,
                           height: 40,
@@ -107,6 +110,7 @@ class DashboardDesktop extends StatelessWidget {
                     ),
                      Expanded(
                         child: TDashBoardCard(
+                          isLoading: dashboardController.isLoading,
                           iconWidget: const TCircularIcon(
                             width: 40,
                             height: 40,

@@ -1,5 +1,6 @@
 
 
+import 'package:admin_dashboard_v3/Models/reports/simple_pnl_report_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -57,7 +58,23 @@ class ReportsRepository extends GetxController {
       throw Exception('Error fetching report: ${e.message}');
     }
   }
-  Future<List<PnLReportModel>> fetchPnLReportData(DateTime startDate, DateTime endDate) async {
+  Future<List<SimplePnLReportModel>> fetchSimplePnLReport(DateTime startDate, DateTime endDate) async {
+    try {
+      final response = await supabase.rpc('get_simple_pnl_report', params: {
+        'start_date': startDate.toIso8601String().split('T')[0],
+        'end_date': endDate.toIso8601String().split('T')[0],
+      });
+
+      return (response as List)
+          .map((item) => SimplePnLReportModel.fromJson(item as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      TLoader.errorSnackBar(title: e.toString());
+      return [];
+    }
+  }
+
+    Future<List<PnLReportModel>> fetchPnLReportData(DateTime startDate, DateTime endDate) async {
     try {
       String startDateFormatted = startDate.toIso8601String().split("T")[0];
       String endDateFormatted = endDate.toIso8601String().split("T")[0];

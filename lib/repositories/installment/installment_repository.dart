@@ -10,24 +10,21 @@ import '../../main.dart';
 class InstallmentRepository extends GetxController {
   static InstallmentRepository get instance => Get.find();
 
-
-
-
   Future<void> updateInstallmentPayment(
-      int sequenceNo,
-      int planId,
-      String paidAmount,
-      String remainingAmount,
-      ) async {
+    int sequenceNo,
+    int planId,
+    String paidAmount,
+    String remainingAmount,
+  ) async {
     // Step 1: Mark the current installment as paid
     await supabase
         .from('installment_payments')
         .update({
-      'is_paid': true,
-      'paid_date': DateTime.now().toIso8601String(),
-      'status': 'paid',
-      'paid_amount': paidAmount,
-    })
+          'is_paid': true,
+          'paid_date': DateTime.now().toIso8601String(),
+          'status': 'paid',
+          'paid_amount': paidAmount,
+        })
         .eq('installment_plan_id', planId)
         .eq('sequence_no', sequenceNo);
 
@@ -37,8 +34,8 @@ class InstallmentRepository extends GetxController {
     await supabase
         .from('installment_payments')
         .update({
-      'amount_due': (double.tryParse(remainingAmount) ?? 0.0).toString(),
-    })
+          'amount_due': (double.tryParse(remainingAmount) ?? 0.0).toString(),
+        })
         .eq('installment_plan_id', planId)
         .eq('sequence_no', nextSequenceNo);
   }
@@ -54,7 +51,8 @@ class InstallmentRepository extends GetxController {
 
       // Format the firstInstallmentDate if it exists
       if (plan.firstInstallmentDate != null) {
-        planJson['first_installment_date'] = plan.firstInstallmentDate!.toIso8601String();
+        planJson['first_installment_date'] =
+            plan.firstInstallmentDate!.toIso8601String();
       }
 
       // Insert the installment plan
@@ -66,7 +64,7 @@ class InstallmentRepository extends GetxController {
       final installmentPlanId = response[0]['installment_plans_id'];
 
       // Convert payment list to JSON using the model's methods
-      final  paymentJsons = plan.installmentPaymentList!.map((payment) {
+      final paymentJsons = plan.installmentPaymentList!.map((payment) {
         // Convert to JSON using the payment model's method
         final paymentJson = payment.toJson();
 
@@ -79,15 +77,12 @@ class InstallmentRepository extends GetxController {
       }).toList();
 
       // Insert all payments in a single batch
-      await Supabase.instance.client
+      await supabase
           .from('installment_payments')
           .insert(paymentJsons);
-
     } catch (e) {
       TLoader.errorSnackBar(
-          title: 'Plan didn\'t upload',
-          message: e.toString()
-      );
+          title: 'Plan didn\'t upload', message: e.toString());
       if (kDebugMode) print(e);
     }
   }
@@ -95,9 +90,9 @@ class InstallmentRepository extends GetxController {
   Future<void> insertInstallmentPayment(
       Map<String, dynamic> paymentJson) async {
     try {
-
       // Insert the payment data into the 'installment_payments' table
-      await Supabase.instance.client
+     
+      await supabase
           .from('installment_payments')
           .insert(paymentJson);
 
@@ -112,10 +107,13 @@ class InstallmentRepository extends GetxController {
     }
   }
 
-  Future<List<InstallmentTableModel>> fetchSpecifcInstallmentPlanItems(int installmentPlanId) async {
-
+  Future<List<InstallmentTableModel>> fetchSpecifcInstallmentPlanItems(
+      int installmentPlanId) async {
     try {
-      final data =  await supabase.from('installment_payments').select().eq('installment_plan_id', installmentPlanId);
+      final data = await supabase
+          .from('installment_payments')
+          .select()
+          .eq('installment_plan_id', installmentPlanId);
 
       final installmentPaymentList = data.map((item) {
         return InstallmentTableModel.fromJson(item);
@@ -124,12 +122,8 @@ class InstallmentRepository extends GetxController {
         print(installmentPaymentList[1].status);
       }
       return installmentPaymentList;
-
-    }
-    catch(e)
-    {
-      TLoader.errorSnackBar(
-          title: 'Plan didn\'t fetch', message: e.toString());
+    } catch (e) {
+      TLoader.errorSnackBar(title: 'Plan didn\'t fetch', message: e.toString());
       print(e);
       return [];
     }
@@ -151,13 +145,12 @@ class InstallmentRepository extends GetxController {
     } catch (e) {
       TLoader.errorSnackBar(
           title: 'Plan ID didn\'t fetch', message: e.toString());
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
       return null; // Return null in case of an error
     }
   }
-
-
-
 }
 // Future<void> uploadInstallmentPlan(InstallmentPlanModel plan) async {
 //   try {
