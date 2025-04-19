@@ -1,5 +1,6 @@
 import 'package:admin_dashboard_v3/repositories/signup/signup_repository.dart';
 import 'package:admin_dashboard_v3/routes/routes.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -14,38 +15,18 @@ class SignUpController extends GetxController {
   static SignUpController get instance => Get.find();
   final signUpRepository = Get.put(SignUpRepository());
 
-
   //Variables
   final privacyPolicy = true.obs;
-  final hidePassword = true.obs; //Obsrable for hiding
+  final hidePassword = true.obs; //Observable for hiding
   final email = TextEditingController(); // Controller for email input :
   final lastName = TextEditingController(); // Controller for last name input
   final username = TextEditingController(); // Controller for username input
   final password = TextEditingController(); // Controller for password input
   final firstName = TextEditingController(); // Controller for first name input
-  final adminKey = TextEditingController(); // Controller for first name input
+  final adminKey = TextEditingController(); // Controller for admin key input
   final phoneNumber =
-  TextEditingController(); // Controller for phone number input
-  GlobalKey<FormState> signupFormkey =
-  GlobalKey<FormState>();
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+      TextEditingController(); // Controller for phone number input
+  GlobalKey<FormState> signupFormkey = GlobalKey<FormState>();
 
   Future<void> saveUserRecord() async {
     // Create a UserModel object
@@ -55,7 +36,7 @@ class SignUpController extends GetxController {
       lastName: lastName.text.trim(),
       phoneNumber: phoneNumber.text.trim(),
       email: email.text.trim(),
-    //  cnic: cnic.text.trim(),
+      //  cnic: cnic.text.trim(),
       pfp: null, // Optional field, can be added later
     );
 
@@ -67,22 +48,22 @@ class SignUpController extends GetxController {
 
     //insert data
     await signUpRepository.insertUserRecord(userJson);
-
   }
-
 
 //Signup
   void signup() async {
     try {
-      //Start loadin
+      //Start loading
       TFullScreenLoader.openLoadingDialog(
           "We are processing your information....", TImages.docerAnimation);
 
       //Check Internet Connectivity
       final isConnected = await NetworkManager.instance.isConnected();
       if (!isConnected) {
+        TFullScreenLoader.stopLoading();
         return;
       }
+
       //Form validation
       if (!signupFormkey.currentState!.validate()) {
         TFullScreenLoader.stopLoading();
@@ -92,34 +73,58 @@ class SignUpController extends GetxController {
 
       //privacy Policy Check
       if (!privacyPolicy.value) {
+        TFullScreenLoader.stopLoading();
         TLoader.warningSnackBar(
             title: "Accept Privacy Policy",
             message:
-            'In order to create account, you must have to read and accept privacy policy & Terms of Use');
+                'In order to create account, you must have to read and accept privacy policy & Terms of Use');
+        return;
+      }
+
+      // For debugging - print the key being used
+      if (kDebugMode) {
+        print("Attempting to verify admin key: ${adminKey.text.trim()}");
+      }
+
+      // Verify admin key - using the inputKey directly to avoid storing in variables
+      final submittedKey = adminKey.text.trim();
+      final isValid = await signUpRepository.verifyAdminKey(submittedKey);
+
+      if (kDebugMode) {
+        print("Admin key verification result: $isValid");
+      }
+
+      if (!isValid) {
+        TFullScreenLoader.stopLoading();
+        TLoader.errorSnackBar(
+            title: "Access Denied",
+            message: "You need a valid admin key to create an account.");
+
         return;
       }
 
       //Register user in the Supabase Authentication & Save user data in the
-
       await supabase.auth.signUp(
         email: email.text.trim(),
         password: password.text.trim(),
       );
 
+      saveUserRecord();
 
-     saveUserRecord();
+      // Clear sensitive data after successful signup
+      adminKey.clear();
+      password.clear();
 
       //Show Success message
       TLoader.successSnackBar(
           title: "Congratulations",
           message: "Your account has been created! verify email to continue.");
       //move to verify Email Screen
-  //    Get.to(() => VerifyEmailScreen(email: email.text.trim(),));
+      //    Get.to(() => VerifyEmailScreen(email: email.text.trim(),));
       Get.offAndToNamed(TRoutes.dashboard);
     } catch (e) {
       TFullScreenLoader.stopLoading();
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
-      print(e.toString());
     }
   }
 }

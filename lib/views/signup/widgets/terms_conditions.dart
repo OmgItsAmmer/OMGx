@@ -43,7 +43,7 @@ class TTermsAndConditions extends StatelessWidget {
                     controller.privacyPolicy.value = !controller.privacyPolicy.value,
               )),
         ),
-        SizedBox(width: TSizes.spaceBtwItems),
+        const SizedBox(width: TSizes.spaceBtwItems),
         Expanded(
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,

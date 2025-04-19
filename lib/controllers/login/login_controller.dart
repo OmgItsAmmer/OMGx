@@ -1,5 +1,6 @@
 import 'package:admin_dashboard_v3/routes/routes.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -23,12 +24,22 @@ class LoginController extends GetxController {
   final password = TextEditingController();
   GlobalKey<FormState> loginFormKey = GlobalKey<FormState>();
   final userController = Get.put(UserController());
-  final mediaController = Get.find<MediaController>();
 
   @override
   void onInit() {
+    // Check if MediaController is registered before finding
+    if (!Get.isRegistered<MediaController>()) {
+      Get.put(MediaController());
+    }
+    final mediaController = Get.find<MediaController>();
+
+    // Load saved credentials if remember me was selected
     email.text = localStorage.read('REMEMBER_ME_EMAIL') ?? "";
     password.text = localStorage.read('REMEMBER_ME_PASSWORD') ?? "";
+
+    // Load the saved remember me state
+    rememberMe.value = localStorage.read('REMEMBER_ME_CHECKED') ?? false;
+
     super.onInit();
   }
 
@@ -50,29 +61,63 @@ class LoginController extends GetxController {
         return;
       }
 
+      // Always save the current state of the remember me checkbox
+      localStorage.write('REMEMBER_ME_CHECKED', rememberMe.value);
+
       //Save Data of Remember me is Selected
       if (rememberMe.value) {
         localStorage.write('REMEMBER_ME_EMAIL', email.text.trim());
         localStorage.write('REMEMBER_ME_PASSWORD', password.text.trim());
+      } else {
+        // Clear saved credentials if remember me is not selected
+        localStorage.remove('REMEMBER_ME_EMAIL');
+        localStorage.remove('REMEMBER_ME_PASSWORD');
       }
 
+      // Log in the user
       await AuthenticationRepository.instance
           .loginWithEmailAndPassword(email.text.trim(), password.text.trim());
+
+      // Fetch user data
       await UserController.instance.fetchUserRecord();
       UserController.instance.setupProfileDetails();
 
       // Clear profile image cache to ensure fresh image load
-      mediaController.refreshUserImage();
-      clearCredentials();
+      if (Get.isRegistered<MediaController>()) {
+        final mediaController = Get.find<MediaController>();
+        mediaController.refreshUserImage();
+      }
+
+      // Clear password field for security
+      if (!rememberMe.value) {
+        clearCredentials();
+      }
+
       //Remove Loader
       TFullScreenLoader.stopLoading();
 
-      //Redirect
-      // AuthenticationRepository.instance.screenRedirect();
-      Get.toNamed(TRoutes.dashboard);
+      //Redirect to dashboard
+      Get.offAllNamed(TRoutes.dashboard);
+
+      if (kDebugMode) {
+        print("Login successful - redirecting to dashboard");
+      }
     } catch (e) {
       TFullScreenLoader.stopLoading();
       TLoader.errorSnackBar(title: 'Oh Snap', message: e.toString());
+    }
+  }
+
+  // Toggle remember me value and save it immediately
+  void toggleRememberMe() {
+    rememberMe.value = !rememberMe.value;
+    localStorage.write('REMEMBER_ME_CHECKED', rememberMe.value);
+
+    // If remember me is turned off, clear saved credentials
+    if (!rememberMe.value) {
+      localStorage.remove('REMEMBER_ME_EMAIL');
+      localStorage.remove('REMEMBER_ME_PASSWORD');
+      // Don't clear the input fields while the user is still on the login screen
     }
   }
 
@@ -104,7 +149,7 @@ class LoginController extends GetxController {
   }
 
   void clearCredentials() {
-    email.clear();
+    // Only clear password, keep email for user convenience
     password.clear();
   }
 }

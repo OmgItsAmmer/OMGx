@@ -1,14 +1,10 @@
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
-import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
 import 'package:admin_dashboard_v3/controllers/salesman/salesman_controller.dart';
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:iconsax/iconsax.dart';
-import '../../../../controllers/product/product_controller.dart';
 import '../../../../utils/validators/validation.dart';
 
 class SalesmanBasicInfo extends StatelessWidget {
@@ -17,7 +13,7 @@ class SalesmanBasicInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final SalesmanController salesmanController = Get.find<SalesmanController>();
-    final AddressController addressController = Get.find<AddressController>();
+Get.find<AddressController>();
 
     return Form(
       key: salesmanController.addSalesmanKey ,

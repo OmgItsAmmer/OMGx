@@ -17,6 +17,8 @@ class ProductTable extends StatelessWidget {
     return Obx(() {
       return TPaginatedDataTable(
         sortAscending: true,
+        
+        showCheckBox: false,
         minWidth: 700,
         columns: const [
           DataColumn2(label: Text('Product')),

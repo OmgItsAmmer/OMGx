@@ -1,5 +1,6 @@
 import 'package:admin_dashboard_v3/views/signup/widgets/terms_conditions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
@@ -8,6 +9,7 @@ import '../../../../../utils/constants/text_strings.dart';
 import '../../../../../utils/validators/validation.dart';
 import '../../../controllers/signup/signup_controller.dart';
 import '../../../routes/routes.dart';
+import '../../../utils/setup/check_admin_key.dart';
 
 class SignUpForm extends StatelessWidget {
   const SignUpForm({
@@ -80,8 +82,9 @@ class SignUpForm extends StatelessWidget {
               ),
               //UserName
               TextFormField(
-                // validator: (value)=> TValidator.validatePhoneNumber(value),
-
+                validator: (value) =>
+                    TValidator.validateEmptyText('Phone Number', value),
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 controller: controller.phoneNumber,
                 expands: false,
                 decoration: const InputDecoration(
@@ -115,14 +118,18 @@ class SignUpForm extends StatelessWidget {
               const SizedBox(
                 height: TSizes.spaceBtwInputFields,
               ),
-              TextFormField(
-                // validator: (value)=> TValidator.validatePhoneNumber(value),
 
+              // Admin Key with test button
+              TextFormField(
+                validator: (value) =>
+                    TValidator.validateEmptyText('Admin Key', value),
                 controller: controller.adminKey,
                 expands: false,
                 decoration: const InputDecoration(
-                    labelText: TTexts.adminKey, prefixIcon: Icon(Iconsax.key)),
+                    labelText: TTexts.adminKey,
+                    prefixIcon: Icon(Iconsax.key)),
               ),
+
               //Password
               const SizedBox(
                 height: TSizes.spaceBtwInputFields,
@@ -135,7 +142,15 @@ class SignUpForm extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () => controller.signup(),
+                  onPressed: () {
+                    // Test admin key directly
+                    final keyToCheck = controller.adminKey.text.trim();
+                    if (keyToCheck.isNotEmpty) {
+                      AdminKeyChecker.checkKeyExists(keyToCheck);
+                    }
+                    // Proceed with signup
+                    controller.signup();
+                  },
                   child: const Text(TTexts.createAccount),
                 ),
               ),

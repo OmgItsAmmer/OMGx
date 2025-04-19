@@ -12,7 +12,6 @@ import 'bindings/general_bindings.dart';
 // ignore: unused_import
 import 'common/widgets/containers/rounded_container.dart';
 
-
 class App extends StatefulWidget {
   const App({super.key});
 
@@ -25,18 +24,18 @@ class _AppState extends State<App> {
   Widget build(BuildContext context) {
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
     return GetMaterialApp(
-        themeMode: ThemeMode.system,
-        theme: TAppTheme.lightTheme,
-        darkTheme: TAppTheme.darkTheme,
-        initialBinding: GeneralBindings(),
-        getPages: TAppRoutes.pages,
-
+      themeMode: ThemeMode.system,
+      theme: TAppTheme.lightTheme,
+      darkTheme: TAppTheme.darkTheme,
+      initialBinding: GeneralBindings(),
+      getPages: TAppRoutes.pages,
       initialRoute: TRoutes.splashScreen,
       navigatorKey: navigatorKey,
       navigatorObservers: [TRouteObserver()],
-      unknownRoute: GetPage(name: TRoutes.UnkownRoute, page: () => const UnkownRoute(),middlewares: [TRouteMiddleware()] ),
-        );
+      unknownRoute: GetPage(
+          name: TRoutes.UnkownRoute,
+          page: () => const UnkownRoute(),
+          middlewares: [TRouteMiddleware()]),
+    );
   }
 }
-
-

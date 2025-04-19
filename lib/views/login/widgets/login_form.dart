@@ -22,7 +22,8 @@ class TLoginForm extends StatelessWidget {
     return Form(
         key: controller.loginFormKey,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: TSizes.spaceBtwSections),
+          padding:
+              const EdgeInsets.symmetric(vertical: TSizes.spaceBtwSections),
           child: Column(
             children: [
               TextFormField(
@@ -36,15 +37,21 @@ class TLoginForm extends StatelessWidget {
                 height: TSizes.spaceBtwInputFields,
               ),
               Obx(
-                    () => TextFormField(
-                  validator: (value)=> TValidator.validatePassword(value),
+                () => TextFormField(
+                  validator: (value) => TValidator.validatePassword(value),
                   obscureText: controller.hidePassword.value,
                   controller: controller.password,
                   expands: false,
                   decoration: InputDecoration(
                       labelText: TTexts.password,
-                      prefixIcon: const Icon(Iconsax.password_check ),
-                      suffixIcon: IconButton(onPressed: ()=> controller.hidePassword.value = !controller.hidePassword.value,icon:  Icon(controller.hidePassword.value ?Iconsax.eye_slash:Iconsax.eye),)),
+                      prefixIcon: const Icon(Iconsax.password_check),
+                      suffixIcon: IconButton(
+                        onPressed: () => controller.hidePassword.value =
+                            !controller.hidePassword.value,
+                        icon: Icon(controller.hidePassword.value
+                            ? Iconsax.eye_slash
+                            : Iconsax.eye),
+                      )),
                 ),
               ),
               const SizedBox(
@@ -53,14 +60,18 @@ class TLoginForm extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  //Remeber me
+                  //Remember me
                   Row(
                     children: [
-                      Obx(()=> Checkbox(value: controller.rememberMe.value, onChanged: (value) => controller.rememberMe.value = !controller.rememberMe.value)),
+                      Obx(() => Checkbox(
+                          value: controller.rememberMe.value,
+                          onChanged: (value) => controller.toggleRememberMe())),
                       const Text(TTexts.rememberMe),
                     ],
                   ),
-                  TextButton(onPressed: () => Get.to(()=>const ForgetPassword()), child: const Text(TTexts.forgetPassword)),
+                  TextButton(
+                      onPressed: () => Get.to(() => const ForgetPassword()),
+                      child: const Text(TTexts.forgetPassword)),
                 ],
               ),
               const SizedBox(
@@ -68,8 +79,9 @@ class TLoginForm extends StatelessWidget {
               ),
               SizedBox(
                   width: double.infinity,
-                  child:
-                  ElevatedButton(onPressed: () => controller.emailAndPasswordSignIn(), child: const Text(TTexts.signIn))),
+                  child: ElevatedButton(
+                      onPressed: () => controller.emailAndPasswordSignIn(),
+                      child: const Text(TTexts.signIn))),
               const SizedBox(height: TSizes.spaceBtwSections),
               SizedBox(
                   width: double.infinity,
@@ -78,15 +90,15 @@ class TLoginForm extends StatelessWidget {
                         padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
                           const EdgeInsets.symmetric(
                               vertical:
-                              16.0), // Same vertical padding as ElevatedButton
+                                  16.0), // Same vertical padding as ElevatedButton
                         ),
                         side: WidgetStateProperty.all<BorderSide>(
                           const BorderSide(
-                              color:
-                              Colors.white), // Border color to match the theme
+                              color: Colors
+                                  .white), // Border color to match the theme
                         ),
                       ),
-                      onPressed: () => Get.to(()=> const SignUpScreen()),
+                      onPressed: () => Get.to(() => const SignUpScreen()),
                       child: const Text(TTexts.createAccount))),
             ],
           ),

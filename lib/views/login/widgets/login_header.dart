@@ -1,3 +1,4 @@
+import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../utils/constants/image_strings.dart';
@@ -17,9 +18,11 @@ class TLoginHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Image(
-          image: AssetImage(dark ? TImages.lightAppLogo : TImages.darkAppLogo),
-          height: 150,
+        TRoundedImage(
+          imageurl: dark ? TImages.omgLogoShorthand : TImages.omgLogoShorthand,
+          isNetworkImage: false,
+          width: 80,
+          height: 80,
         ),
         Text(
           TTexts.loginTitle,

@@ -1,10 +1,8 @@
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
-import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/common/widgets/shimmers/shimmer.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
-import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -12,7 +10,6 @@ import 'package:iconsax/iconsax.dart';
 
 import '../../../../common/widgets/icons/t_circular_icon.dart';
 import '../../../../controllers/media/media_controller.dart';
-import '../../../../controllers/product/product_images_controller.dart';
 import '../../../../controllers/salesman/salesman_controller.dart';
 
 class SalesmanThumbnailInfo extends StatelessWidget {

@@ -1,21 +1,21 @@
-
 import 'package:admin_dashboard_v3/supabase_strings.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_strategy/url_strategy.dart';
 
 import 'app.dart';
-
-
+import 'repositories/authentication/authicatioon_repository.dart';
+import 'repositories/signup/signup_repository.dart';
 
 // Get a reference your Supabase client
 final supabase = Supabase.instance.client;
 
 Future<void> main() async {
-
   // WidgetsFlutterBinding.ensureInitialized();
   // await windowManager.ensureInitialized();
   //
@@ -28,16 +28,21 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // remove # sign from url
- setPathUrlStrategy();
+  setPathUrlStrategy();
   //Get Local Storage
   await GetStorage.init();
 
   //Await Splash until other issues Load
- // FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  // FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   await Supabase.initialize(
     url: SupabaseStrings.projectUrl,
     anonKey: SupabaseStrings.anonKey,
   );
+
+  // Initialize repositories
+  Get.put(SignUpRepository());
+  Get.put(AuthenticationRepository());
+
   // .then((_) => Get.put(AuthenticationRepository()));
   // await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)
   //     .then((FirebaseApp value) => Get.put(AuthenticationRepository()));

@@ -1,6 +1,7 @@
 import 'package:admin_dashboard_v3/common/layouts/templates/site_template.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
@@ -20,19 +21,42 @@ class AuthenticationRepository extends GetxController {
 
   //Variables
   final deviceStorage = GetStorage();
+  final _requireLoginEveryTime =
+      true; // Set to true to require login every time
 
   @override
   void onReady() {
-    // Get.put(BrandController());
-    // Get.put(ProductController());
-    // Get.put(UserController());
-    // Get.put(CheckoutController());
-    // FlutterNativeSplash.remove();
-    // screenRedirect();
-  } //Called from main.dart on app launchz
+    // Clear any existing sessions if we want to require login every time
+    if (_requireLoginEveryTime) {
+      clearSessionOnStartup();
+    }
+  }
+
+  // Clear any existing session on app startup
+  Future<void> clearSessionOnStartup() async {
+    try {
+      if (kDebugMode) {
+        print("Clearing session on startup to require new login");
+      }
+
+      // Sign out from Supabase to clear the current session
+      await supabase.auth.signOut();
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error clearing session: $e");
+      }
+    }
+  }
 
   screenRedirect() async {
     try {
+      // If we require login every time, just go to login screen
+      if (_requireLoginEveryTime) {
+        await Get.offAll(() => const LoginScreen());
+        return;
+      }
+
+      // Otherwise, check session status
       final Session? session = supabase.auth.currentSession;
       final User? user = supabase.auth.currentUser;
 
@@ -77,21 +101,6 @@ class AuthenticationRepository extends GetxController {
     }
   }
 
-  // Future<UserCredential> loginWithEmailAndpassword(
-  //     String email, String password) async {
-  //   try {
-  //     return await _auth.signInWithEmailAndPassword(
-  //         email: email, password: password);
-  //   } on FirebaseAuthException catch (e) {
-  //     throw TFirebaseAuthException(e.code).message;
-  //   } on FormatException catch (_) {
-  //     throw const TFormatException();
-  //   } on PlatformException catch (e) {
-  //     throw TPlatformException(e.code).message;
-  //   } catch (e) {
-  //     throw 'Something went wrong. Please try again';
-  //   }
-  // }
   /*-------- Email & PasSSWOrd Sign-in --------*/
   /// [EmailAuthentication] - Sign in
   Future<void> loginWithEmailAndPassword(String email, String password) async {
@@ -107,133 +116,6 @@ class AuthenticationRepository extends GetxController {
     }
   }
 
-//
-//   /// [EmailAuthentication] - REGISTER
-//   // Future<UserCredential> registeredWithEmailAndPassword(
-//   //     String email, String password) async {
-//   //   try {
-//   //     return await _auth.createUserWithEmailAndPassword(
-//   //         email: email, password: password);
-//   //   }  catch (e) {
-//   //     //throw 'Something went wrong. Please try again';
-//   //     print('Caught error: $e of type: ${e.runt  imeType}');
-//   //     throw e;
-//   //   }
-//   // }
-//
-//
-//
-//   /// [ReAuthenticate] - ReAuthenticate User
-//
-//   // Future<void> reAuthenticateWithEmailAndPassword(String email , String password) async
-//   // {
-//   //   try
-//   //       {
-//   //         //Creade a Creduitional
-//   //          AuthCredential credential = EmailAuthProvider.credential(email: email, password: password);
-//   //          //ReAuthenticate
-//   //         await _auth.currentUser!.reauthenticateWithCredential(credential);
-//   //
-//   //       }  on FirebaseAuthException catch (e) {
-//   //     throw TFirebaseAuthException(e.code).message;
-//   //   } on FirebaseException catch (e) {
-//   //     throw TFirebaseException(e.code).message;
-//   //   } on FormatException catch (_) {
-//   //     throw const TFormatException();
-//   //   } on PlatformException catch (e) {
-//   //     throw TPlatformException(e.code).message;
-//   //   } catch (e) {
-//   //     throw 'Something went wrong. Please try again';
-//   //   }
-//   //
-//   // }
-//
-//
-//
-//   /// [EmailVerification] - MAIL VERIFICATION
-//   // Future<void> sendEmailVerification() async {
-//   //   try {
-//   //
-//   //  // NO NEED SUPABASE DOES IT AUTOMATICALLY
-//   //
-//   //
-//   //
-//   //   }  on FormatException catch (_) {
-//   //     throw const TFormatException();
-//   //   } on PlatformException catch (e) {
-//   //     throw TPlatformException(e.code).message;
-//   //   } catch (e) {
-//   //     throw 'Something went wrong. Please try again';
-//   //   }
-//   // }
-//
-//   /// [EmailAuthentication] - FORGET PASSWORD
-  Future<void> sendPasswordResetEmail(String email) async {
-    try {
-      supabase.auth.updateUser(UserAttributes(
-        email: email,
-        nonce: '123456',
-      ));
-
-      await supabase.auth.reauthenticate();
-    } on FormatException catch (_) {
-      throw const TFormatException();
-    }
-  }
-
-//
-// /*=------------- Federated identity & social sign-in ------------*/
-//   /// [GoogleAuthentication] - GOOGLE
-//   // Future<UserCredential> signInWithGoogle() async {
-//   //   try {
-//   //     final GoogleSignInAccount? userAccount = await GoogleSignIn().signIn();
-//   //
-//   //     final GoogleSignInAuthentication? googleAuth =
-//   //         await userAccount?.authentication;
-//   //
-//   //
-//   //
-//   //     //Create a new creditional
-//   //     final credentials = GoogleAuthProvider.credential(
-//   //         accessToken: googleAuth?.accessToken, idToken: googleAuth?.idToken);
-//   //
-//   //     //Once signed in,return the Usercedential
-//   //     return await _auth.signInWithCredential(credentials);
-//   //
-//   //   } on FirebaseAuthException catch (e) {
-//   //     throw TFirebaseAuthException(e.code).message;
-//   //   } on FirebaseException catch (e) {
-//   //     throw TFirebaseException(e.code).message;
-//   //   } on FormatException catch (_) {
-//   //     throw const TFormatException();
-//   //   } on PlatformException catch (e) {
-//   //     throw TPlatformException(e.code).message;
-//   //   } catch (e) {
-//   //     throw 'Something went wrong. Please try again';
-//   //
-//   //   }
-//   // }
-//
-//   ///[FacebookAuthentication] - FACEBOOK |
-// // /*------------------oo ./end Federated identity & social sign-in -----------------*/
-// //   /// [Logoutuser] - Valid for any authentication.
-// //   Future<void> logout() async {
-// //     try {
-// //       await FirebaseAuth.instance.signOut();
-// //       Get.offAll(() => const LoginScreen());
-// //     } on FirebaseAuthException catch (e) {
-// //       throw TFirebaseAuthException(e.code).message;
-// //     } on FirebaseException catch (e) {
-// //       throw TFirebaseException(e.code).message;
-// //     } on FormatException catch (_) {
-// //       throw const TFormatException();
-// //     } on PlatformException catch (e) {
-// //       throw TPlatformException(e.code).message;
-// //     } catch (e) {
-// //       throw 'Something went wrong. Please try again';
-// //     }
-// //   }
-//
   Future<void> deleteAccount() async {
     try {
       // Admin client with Service Role key (store securely, e.g., in an environment variable)

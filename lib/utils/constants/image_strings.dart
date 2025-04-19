@@ -7,6 +7,8 @@ class TImages {
   // -- App Logos
   static const String darkAppLogo = "assets/logos/t-store-splash-logo-black.png";
   static const String lightAppLogo = "assets/logos/t-store-splash-logo-white.png";
+  static const String omgLogo = "assets/logos/OMG_logo.png";
+  static const String omgLogoShorthand = "assets/logos/OMG_logo_short.png";
 
   // -- Default Images
   static const String defaultImage = "assets/images/content/default_image.png";
