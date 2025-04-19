@@ -25,6 +25,7 @@ class OrderReportSection extends StatelessWidget {
           Text('Orders/Sales',style: Theme.of(context).textTheme.headlineMedium ,),
           const SizedBox(height: TSizes.spaceBtwSections,),
           Wrap(
+             clipBehavior: Clip.none,
             spacing: TSizes.spaceBtwItems, // Horizontal space between items
             runSpacing: TSizes.spaceBtwItems, // Vertical space between rows
             children: [
@@ -38,17 +39,23 @@ class OrderReportSection extends StatelessWidget {
                 },
 
               ),
-
-              HoverableCard(
-                text: 'Salesman',
+               HoverableCard(
+                text: 'Simple P&L Report',
                 animation: TImages.docerAnimation,
-                onPressed: (){
-                  reportController.showDateRangePickerDialogSalesman(context);
-
+                onPressed: () {
+                  reportController.showDateRangePickerDialogSimplePnL(context);
+                },
+              ),
+                HoverableCard(
+                text: 'Advance Profit/Loss Report',
+                animation: TImages.docerAnimation,
+                onPressed: () {
+                  reportController.showDateRangePickerDialogPnL(context);
 
                 },
-
               ),
+
+            
             ],
           ),
         ],

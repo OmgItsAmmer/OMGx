@@ -10,6 +10,7 @@ import 'package:get/get.dart';
 
 import '../../../../Models/orders/order_item_model.dart';
 import '../../../../controllers/customer/customer_controller.dart';
+import '../../../../controllers/guarantors/guarantor_controller.dart';
 import '../../../../controllers/salesman/salesman_controller.dart';
 import '../../../../utils/constants/enums.dart';
 import '../widgets/guarrantor_card.dart';
@@ -22,15 +23,20 @@ class OrderDetailDesktopScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     SaleType? saleTypeFromOrder = SaleType.values.firstWhere(
-          (e) => e.name == orderModel.saletype,
+      (e) => e.name == orderModel.saletype,
       orElse: () => SaleType.cash,
     );
 
-
     final CustomerController customerController =
-    Get.find<CustomerController>();
+        Get.find<CustomerController>();
     final SalesmanController salesmanController =
-    Get.find<SalesmanController>();
+        Get.find<SalesmanController>();
+    final GuarantorController guarantorController =
+        Get.find<GuarantorController>();
+
+    if (saleTypeFromOrder == SaleType.installment) {
+      guarantorController.fetchGuarantors(orderModel.orderId ?? -1);
+    }
 
     return Expanded(
       child: SizedBox(
@@ -62,13 +68,12 @@ class OrderDetailDesktopScreen extends StatelessWidget {
                         children: [
                           UserInfo(
                             mediaCategory: MediaCategory.customers,
-
                             title: 'Customer',
                             showAddress: true,
-                            fullName:
-                            customerController.selectedCustomer.value.fullName,
+                            fullName: customerController
+                                .selectedCustomer.value.fullName,
                             email:
-                            customerController.selectedCustomer.value.email,
+                                customerController.selectedCustomer.value.email,
                             phoneNumber: customerController
                                 .selectedCustomer.value.phoneNumber,
                             isLoading: customerController.isLoading.value,
@@ -79,13 +84,13 @@ class OrderDetailDesktopScreen extends StatelessWidget {
                             title: 'Salesman',
                             showAddress: false,
                             fullName: salesmanController
-                                .selectedSalesman?.value.fullName ??
+                                    .selectedSalesman?.value.fullName ??
                                 'Not Found',
                             email: salesmanController
-                                .selectedSalesman?.value.email ??
+                                    .selectedSalesman?.value.email ??
                                 'Not Found',
                             phoneNumber: salesmanController
-                                .selectedSalesman?.value.phoneNumber ??
+                                    .selectedSalesman?.value.phoneNumber ??
                                 'Not Found',
                             isLoading: salesmanController.isLoading.value,
                           ),
@@ -102,8 +107,8 @@ class OrderDetailDesktopScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                if (saleTypeFromOrder == SaleType.installment)
-                const SizedBox(height: TSizes.spaceBtwSections),
+                if (saleTypeFromOrder == SaleType.installment) ...[
+                  const SizedBox(height: TSizes.spaceBtwSections),
                   TRoundedContainer(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,6 +122,7 @@ class OrderDetailDesktopScreen extends StatelessWidget {
                       ],
                     ),
                   ),
+                ],
               ],
             ),
           ),

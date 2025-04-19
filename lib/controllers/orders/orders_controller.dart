@@ -20,8 +20,7 @@ class OrderController extends GetxController {
 
   RxList<OrderModel> allOrders = <OrderModel>[].obs;
 
-
-   Rx<OrderStatus> selectedStatus = OrderStatus.pending.obs;
+  Rx<OrderStatus> selectedStatus = OrderStatus.pending.obs;
 
   RxList<OrderItemModel> orderItems = <OrderItemModel>[].obs;
 
@@ -32,13 +31,10 @@ class OrderController extends GetxController {
 //Customer Order Detail
   RxList<OrderModel> currentOrders = <OrderModel>[].obs;
   String recentOrderDay = '';
-  String  averageTotalAmount= '';
-
+  String averageTotalAmount = '';
 
   TextEditingController newPaidAmount = TextEditingController();
   RxDouble remainingAmount = (0.0).obs;
-
-
 
   @override
   void onInit() {
@@ -46,33 +42,32 @@ class OrderController extends GetxController {
     super.onInit();
   }
 
-
-
-
   Future<void> fetchOrders() async {
     try {
       isOrdersFetching.value = true;
       final orders = await orderRepository.fetchOrders();
       allOrders.assignAll(orders);
       currentOrders.assignAll(orders);
-     // dashboardController.calculateWeeklySales1(allOrders);
 
-
-
-
+      // Update dashboard if it's already initialized
+      if (Get.isRegistered<DashboardController>()) {
+        final dashboardController = Get.find<DashboardController>();
+        dashboardController.calculateWeeklySales1(allOrders);
+        dashboardController.calculateAverageOrderValue(allOrders);
+        dashboardController.calculateOrderStatusCounts(allOrders);
+      }
     } catch (e) {
       if (kDebugMode) {
         TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
         print(e);
       }
-    }
-    finally{
-      isOrdersFetching.value = true;
-
+    } finally {
+      isOrdersFetching.value = false;
     }
   }
+
   void setRemainingAmount(OrderModel order) {
-    remainingAmount.value =(order.totalPrice) - (order.paidAmount ?? 0.0);
+    remainingAmount.value = (order.totalPrice) - (order.paidAmount ?? 0.0);
   }
 
   // Function to set the most recent order day with orderId
@@ -83,23 +78,23 @@ class OrderController extends GetxController {
       return;
     }
 
-
-
     // Find the most recent order
     OrderModel recentOrder = currentOrders.reduce((curr, next) =>
-    DateTime.parse(curr.orderDate).isAfter(DateTime.parse(next.orderDate))
-        ? curr
-        : next);
+        DateTime.parse(curr.orderDate).isAfter(DateTime.parse(next.orderDate))
+            ? curr
+            : next);
 
     // Format the date and set the class variable
     recentOrderDay = "${recentOrder.orderDate} (${recentOrder.orderId})";
 
     // Calculate the difference in days between the current day and the orderDate
     DateTime currentDate = DateTime.now(); // Get the current date
-    DateTime orderDate = DateTime.parse(recentOrder.orderDate); // Parse the orderDate
+    DateTime orderDate =
+        DateTime.parse(recentOrder.orderDate); // Parse the orderDate
 
     // Calculate the difference in days
-    recentOrderDay = '${currentDate.difference(orderDate).inDays} Days Ago (#${recentOrder.orderId})' ;
+    recentOrderDay =
+        '${currentDate.difference(orderDate).inDays} Days Ago (#${recentOrder.orderId})';
   }
 
   // Function to set the average of totalPrice
@@ -110,23 +105,19 @@ class OrderController extends GetxController {
     }
 
     // Calculate the sum of all total prices
-    double totalSum = currentOrders.fold(0.0, (sum, order) => sum + order.totalPrice);
+    double totalSum =
+        currentOrders.fold(0.0, (sum, order) => sum + order.totalPrice);
 
     // Calculate the average and set the class variable
     double average = totalSum / currentOrders.length;
-    averageTotalAmount = average.toStringAsFixed(2); // Format to 2 decimal places
+    averageTotalAmount =
+        average.toStringAsFixed(2); // Format to 2 decimal places
   }
 
-
-
-
   void resetCustomerOrders() {
-    try{
+    try {
       currentOrders.assignAll(allOrders);
-
-    }
-    catch(e)
-    {
+    } catch (e) {
       TLoader.errorSnackBar(title: e.toString()); //TODO remove it
       if (kDebugMode) {
         print(e);
@@ -138,22 +129,26 @@ class OrderController extends GetxController {
     try {
       // Convert the saleType and orderStatus based on the order values
       SaleType? saleTypeFromOrder = SaleType.values.firstWhere(
-            (e) => e.name == order.saletype,
+        (e) => e.name == order.saletype,
         orElse: () => SaleType.cash,
       );
 
       OrderStatus? orderStatus = OrderStatus.values.firstWhere(
-            (e) => e.name == order.status,
+        (e) => e.name == order.status,
         orElse: () => OrderStatus.pending,
       );
 
       // Fetch controllers
       final OrderController orderController = Get.find<OrderController>();
-      final InstallmentController installmentController = Get.find<InstallmentController>();
+      final InstallmentController installmentController =
+          Get.find<InstallmentController>();
       final AddressController addressController = Get.find<AddressController>();
-      final GuarantorController guarantorController = Get.find<GuarantorController>();
-      final CustomerController customerController = Get.find<CustomerController>();
-      final SalesmanController salesmanController = Get.find<SalesmanController>();
+      final GuarantorController guarantorController =
+          Get.find<GuarantorController>();
+      final CustomerController customerController =
+          Get.find<CustomerController>();
+      final SalesmanController salesmanController =
+          Get.find<SalesmanController>();
 
       // Fetch order items for the given order
       order.orderItems = await orderController.fetchOrderItems(order.orderId);
@@ -174,14 +169,14 @@ class OrderController extends GetxController {
       salesmanController.fetchSalesmanInfo(order.salesmanId ?? -1);
 
       // Fetch customer addresses
-      addressController.fetchEntityAddresses(order.customerId ?? -1, 'Customer');
+      addressController.fetchEntityAddresses(
+          order.customerId ?? -1, 'Customer');
 
       // Set remaining amount for the order
       orderController.setRemainingAmount(order);
 
       // Navigate to the order details page
       Get.toNamed(TRoutes.orderDetails, arguments: order);
-
     } catch (e) {
       TLoader.errorSnackBar(
         title: 'Error',
@@ -189,8 +184,6 @@ class OrderController extends GetxController {
       );
     }
   }
-
-
 
   // Future<void> fetchCustomerOrders(int customerId) async {
   //
@@ -236,15 +229,18 @@ class OrderController extends GetxController {
 
       if (entityName == 'Customer') {
         // Fetch and filter orders for Customer
-        final customerOrders = allOrders.where((order) => order.customerId == entityId).toList();
+        final customerOrders =
+            allOrders.where((order) => order.customerId == entityId).toList();
         currentOrders.assignAll(customerOrders);
       } else if (entityName == 'User') {
         // Fetch and filter orders for User
-        final userOrders = allOrders.where((order) => order.userId == entityId).toList();
+        final userOrders =
+            allOrders.where((order) => order.userId == entityId).toList();
         currentOrders.assignAll(userOrders);
       } else if (entityName == 'Salesman') {
         // Fetch and filter orders for Salesman
-        final salesmanOrders = allOrders.where((order) => order.salesmanId == entityId).toList();
+        final salesmanOrders =
+            allOrders.where((order) => order.salesmanId == entityId).toList();
         currentOrders.assignAll(salesmanOrders);
       } else {
         throw Exception('Invalid entity name: $entityName');
@@ -254,7 +250,8 @@ class OrderController extends GetxController {
         print("Filtered orders count for $entityName: ${currentOrders.length}");
       }
     } catch (e) {
-      TLoader.errorSnackBar(title: "Error: ${e.toString()}"); // Handle errors properly
+      TLoader.errorSnackBar(
+          title: "Error: ${e.toString()}"); // Handle errors properly
       if (kDebugMode) {
         print("Error fetching $entityName orders: $e");
       }
@@ -262,10 +259,6 @@ class OrderController extends GetxController {
       isOrderLoading.value = false;
     }
   }
-
-
-
-
 
   Future<String> updateStatus(int orderId, String status) async {
     try {
@@ -300,15 +293,10 @@ class OrderController extends GetxController {
     }
   }
 
-
-
-
   Future<List<OrderItemModel>> fetchOrderItems(int orderId) async {
     try {
-
       final orderItems = await orderRepository.fetchOrderItems(orderId);
       return orderItems;
-
     } catch (e) {
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
       if (kDebugMode) {
@@ -320,12 +308,8 @@ class OrderController extends GetxController {
 
   Future<List<int>> getOrderIdsByProductIdService(int varaintId) async {
     try {
-
       final orderIds = await orderRepository.getOrderIdsByVariantId(varaintId);
       return orderIds;
-
-
-
     } catch (e) {
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
       print(e);
@@ -335,24 +319,21 @@ class OrderController extends GetxController {
 
   Future<void> restoreQuantity(List<OrderItemModel>? orderItems) async {
     try {
-
-
       if (orderItems != null) {
         for (var item in orderItems) {
           await orderRepository.restoreQuantity(item);
         }
-        TLoader.successSnackBar(title: 'Product Quantity Restored!',message: 'stock is placed back, this order will not considered in Profit Analysis');
+        TLoader.successSnackBar(
+            title: 'Product Quantity Restored!',
+            message:
+                'stock is placed back, this order will not considered in Profit Analysis');
       } else {
-        TLoader.errorSnackBar(title: 'Oh Snap!', message: 'Order items are null');
+        TLoader.errorSnackBar(
+            title: 'Oh Snap!', message: 'Order items are null');
       }
-
-
-
     } catch (e) {
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
-
     }
-
   }
   // Future<String> updateStatus(int orderId, String status) async {
   //   try {
@@ -397,7 +378,8 @@ class OrderController extends GetxController {
         await orderRepository.subtractQuantity(item);
       }
       TLoader.successSnackBar(
-          title: 'Stock Updated!', message: 'Products have been removed from stock.');
+          title: 'Stock Updated!',
+          message: 'Products have been removed from stock.');
     } else {
       TLoader.errorSnackBar(title: 'Oh Snap!', message: 'Order items are null');
     }
@@ -409,12 +391,10 @@ class OrderController extends GetxController {
 
       if (success) {
         remainingAmount.value -= newAmount; // Update remaining amount in UI
-        TLoader.successSnackBar(title: 'Success!', message: 'paid amount updated.');
-
+        TLoader.successSnackBar(
+            title: 'Success!', message: 'paid amount updated.');
       } else {
-
         TLoader.errorSnackBar(title: 'Oh Snap!', message: 'update failed!');
-
       }
     } catch (e) {
       if (kDebugMode) {
@@ -422,7 +402,4 @@ class OrderController extends GetxController {
       }
     }
   }
-
-
-
 }

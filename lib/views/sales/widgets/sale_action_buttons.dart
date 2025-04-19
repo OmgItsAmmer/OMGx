@@ -27,7 +27,7 @@ class SaleActionButtons extends StatelessWidget {
       children: [
         OutlinedButton(
             onPressed: () {
-              salesController.resetField();
+              salesController.resetFields();
             },
             child: Text(
               'Discard',

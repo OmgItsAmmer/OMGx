@@ -15,8 +15,6 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../common/widgets/containers/rounded_container.dart';
-import '../../../../common/widgets/loaders/tloaders.dart';
-import '../../../../routes/routes.dart';
 import '../../../../utils/constants/enums.dart';
 
 

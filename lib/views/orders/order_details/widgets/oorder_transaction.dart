@@ -108,53 +108,67 @@ final OrderModel orderModel;
                        TRoundedContainer(
                          width: 60,
                            height: 60,
-                           onTap: () {
-                             showDialog(
-                               context: context,
-                               builder: (BuildContext context) {
+                          onTap: () {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      final remaining = orderController.remainingAmount.value;
 
+      return AlertDialog(
+        title: Text(remaining == 0 ? 'Paid' : 'Update Value'),
+        content: remaining == 0
+            ? const SizedBox(
+                height: 50,
+                child: Center(
+                  child: Text(
+                    'This order is already paid.',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+              )
+            : TextFormField(
+                validator: (value) =>
+                    TValidator.validateEmptyText('New Value', value),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+                ],
+                maxLines: 1,
+                controller: orderController.newPaidAmount,
+                decoration: const InputDecoration(
+                  hintText: 'Enter new value',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+        actions: [
+          Center(
+            child: SizedBox(
+              width: 100,
+              height: 50,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  if (remaining == 0) {
+                    Navigator.of(context).pop(); // Just close dialog
+                  } else {
+                    final newValue = double.parse(orderController.newPaidAmount.text);
+                    orderController.updateOrderPaidAmount(orderModel.orderId, newValue);
+                    Navigator.of(context).pop(); // Close the dialog
+                  }
+                },
+                icon: Icon(
+                  remaining == 0 ? Icons.check_circle : Icons.update,
+                  color: TColors.white,
+                ),
+                label: Text(remaining == 0 ? 'Got it' : 'Update'),
+              ),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+},
 
-
-                                 return AlertDialog(
-                                   title: const Text('Update Value'),
-                                   content: TextFormField(
-                                     validator: (value) =>
-                                         TValidator.validateEmptyText('New Value', value),
-                                     keyboardType: const TextInputType.numberWithOptions(decimal: true), // Allow decimal input
-                                     inputFormatters: [
-                                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allow numbers with one optional decimal point
-                                     ], // Allow only digits
-
-                                     maxLines: 1,
-
-                                     controller: orderController.newPaidAmount,
-                                     decoration: const InputDecoration(
-                                       hintText: 'Enter new value',
-                                       border: OutlineInputBorder(),
-                                     ),
-                                   ),
-                                   actions: [
-                                     Center(
-                                       child: SizedBox(
-                                         width: 100 ,
-                                         height: 50,
-                                         child: ElevatedButton.icon(
-                                           onPressed: () {
-                                             final newValue = double.parse(orderController.newPaidAmount.text);
-                                             orderController.updateOrderPaidAmount(orderModel.orderId,newValue);
-
-                                             Navigator.of(context).pop(); // Close the dialog
-                                           },
-                                           icon: const Icon(Icons.update,color: TColors.white,),
-                                           label: const Text('Update'),
-                                         ),
-                                       ),
-                                     ),
-                                   ],
-                                 );
-                               },
-                             );
-                           },
 
 
                           backgroundColor: TColors.primary,

@@ -382,7 +382,7 @@ class SalesController extends GetxController {
           }
 
           // Reset fields after successful checkout
-          resetField();
+          resetFields();
 
           // Show success message
           TLoader.successSnackBar(
@@ -515,29 +515,39 @@ class SalesController extends GetxController {
     }
   }
 
-  void resetField() {
+  // Reset form fields only - used internally
+  void resetFields() {
     try {
-      // Clear sales list
-      allSales.clear();
+      // Clear form controllers
+      unitPrice.value.clear();
+      unit.clear();
+      quantity.clear();
+      totalPrice.value.clear();
+      discountController.clear();
+      dropdownController.clear();
 
-      // Reset totals
-      netTotal.value = 0.0;
-      originalNetTotal.value = 0.0;
-      buyingPriceTotal = 0.0;
-      buyingPriceIndividual = 0.0;
+      // Reset form states
+      selectedChipIndex.value = -1;
+      selectedChipValue.value = '';
 
       // Clear payment fields
       paidAmount.clear();
       remainingAmount.value.clear();
-      discount.value = '';
-      discountController.clear();
+    } catch (e) {
+      TLoader.errorSnackBar(title: 'Reset Error', message: e.toString());
+    }
+  }
 
-      // Clear customer fields
+  // Clear all sales-related data after successful checkout or when needed
+  void clearSaleDetails() {
+    try {
+      // Clear customer information
       customerNameController.clear();
       customerPhoneNoController.value.clear();
-      customerAddressController.value.clear();
       customerCNICController.value.clear();
+      customerAddressController.value.clear();
       selectedAddressId = -1;
+      entityId.value = -1;
 
       // Clear salesman fields
       salesmanNameController.clear();
@@ -550,21 +560,24 @@ class SalesController extends GetxController {
       selectedProductId.value = -1;
       selectedUnit.value = UnitType.item;
 
-      // Clear form controllers
-      unitPrice.value.clear();
-      unit.clear();
-      quantity.clear();
-      totalPrice.value.clear();
-      dropdownController.clear();
+      // Clear cart
+      allSales.clear();
+      netTotal.value = 0.0;
+      originalNetTotal.value = 0.0;
+      buyingPriceTotal = 0.0;
+      buyingPriceIndividual = 0.0;
 
-      // Reset form states
-      selectedChipIndex.value = -1;
-      selectedChipValue.value = '';
+      // Reset form fields
+      resetFields();
+
+      // Reset discount
+      discount.value = '';
 
       // Refresh the UI
       update();
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Reset Error', message: e.toString());
+      TLoader.errorSnackBar(
+          title: 'Clear Details Error', message: e.toString());
     }
   }
 

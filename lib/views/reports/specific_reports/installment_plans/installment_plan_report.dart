@@ -67,6 +67,17 @@ class InstallmentReportPage extends StatelessWidget {
                   canChangePageFormat: false,
                   allowPrinting: true,
                   allowSharing: true,
+               //   showPrintedNotification: false,
+                  pdfPreviewPageDecoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        blurRadius: 5,
+                        spreadRadius: 1,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -77,7 +88,7 @@ class InstallmentReportPage extends StatelessWidget {
               onPressed: () {
                 // Clear both installment and sales fields
                 installmentController.clearAllFields();
-                salesController.resetField();
+                salesController.resetFields();
                 // Navigate back to sales screen
                 Get.offAllNamed(TRoutes.sales);
               },

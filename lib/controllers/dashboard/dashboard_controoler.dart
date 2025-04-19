@@ -12,8 +12,6 @@ import '../expenses/expense_controller.dart';
 import '../orders/orders_controller.dart';
 import 'services/sales_service.dart';
 
-
-
 class DashboardController extends GetxController with StateMixin<dynamic> {
   static DashboardController get instance => Get.find();
 
@@ -22,7 +20,6 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
   final CustomerController customerController = Get.find<CustomerController>();
   final SalesService salesService = SalesService();
   RxBool isLoading = true.obs;
-
 
   var dataList = <Map<String, String>>[].obs;
 
@@ -45,14 +42,11 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
   RxDouble completedAmount = 0.0.obs;
   RxDouble cancelledAmount = 0.0.obs;
 
-
   // Observable for the PROFIT
   // Observables for dashboard cards
   RxDouble currentMonthProfit = 0.0.obs;
   RxBool isCard2Profit = false.obs;
   RxInt card2Percentage = 0.obs;
-
-
 
   RxInt customerCount = 0.obs;
   RxBool isCustomerIncrease = false.obs;
@@ -85,9 +79,9 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
       currentMonthProfit.value = 0;
       customerCount.value = 0;
       // Reset weekly sales to zeros
-    for (int i = 0; i < weeklySales.length; i++) {
-      weeklySales[i] = 0.0;
-    }
+      for (int i = 0; i < weeklySales.length; i++) {
+        weeklySales[i] = 0.0;
+      }
 
       // Fetch data if not already fetched
       if (orderController.allOrders.isEmpty) {
@@ -103,7 +97,7 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
       // Calculate and update values
       calculateWeeklySales1(orderController.allOrders);
       fetchCards(orderController.allOrders, expenseController.expenses);
-      
+
       change(null, status: RxStatus.success());
     } catch (e) {
       change(null, status: RxStatus.error(e.toString()));
@@ -113,11 +107,10 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
     }
   }
 
-
   void fetchCards(List<OrderModel> allOrders, List<ExpenseModel> expenses) {
     try {
       fetchSalesTotalCard(allOrders);
-      fetchProfit(allOrders,expenses);
+      fetchProfit(allOrders, expenses);
       fetchCustomerCard(customerController.allCustomers);
       calculateAverageOrderValue(allOrders);
       calculateOrderStatusCounts(allOrders);
@@ -132,34 +125,62 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
       final currentMonth = DateTime(now.year, now.month);
       final lastMonth = DateTime(now.year, now.month - 1);
 
-      final currentMonthOrders = allOrders.where(
-          (order) => DateTime.parse(order.orderDate).isAfter(currentMonth));
-      final lastMonthOrders = allOrders.where(
-          (order) => DateTime.parse(order.orderDate).isAfter(lastMonth) && 
-                      DateTime.parse(order.orderDate).isBefore(currentMonth));
+      // Filter orders for current month
+      final currentMonthOrders = allOrders.where((order) =>
+          DateTime.parse(order.orderDate)
+              .isAfter(currentMonth.subtract(const Duration(seconds: 1))));
 
+      // Filter orders for previous month
+      final lastMonthOrders = allOrders.where((order) =>
+          DateTime.parse(order.orderDate)
+              .isAfter(lastMonth.subtract(const Duration(seconds: 1))) &&
+          DateTime.parse(order.orderDate).isBefore(currentMonth));
+
+      // Calculate average for current month
       final currentAvg = currentMonthOrders.isEmpty
           ? 0.0
-          : currentMonthOrders.map((e) => e.totalPrice).reduce((a, b) => a + b) /
+          : currentMonthOrders
+                  .map((e) => e.totalPrice)
+                  .reduce((a, b) => a + b) /
               currentMonthOrders.length;
 
+      // Calculate average for previous month
       final lastAvg = lastMonthOrders.isEmpty
           ? 0.0
           : lastMonthOrders.map((e) => e.totalPrice).reduce((a, b) => a + b) /
               lastMonthOrders.length;
 
+      // Set the average order value
       averageOrderValue.value = currentAvg;
-      
+
       // Calculate percentage change
       if (lastAvg == 0) {
+        // If last month had zero average, and current month has value, it's 100% increase
         averageOrderPercentage.value = currentAvg > 0 ? 100 : 0;
         isAverageOrderIncrease.value = currentAvg > 0;
       } else {
-        final percentageChange = ((currentAvg - lastAvg) / lastAvg * 100).round();
-        averageOrderPercentage.value = percentageChange;
-        isAverageOrderIncrease.value = currentAvg > lastAvg;
+        // Calculate percentage change between two months
+        final percentageChange =
+            ((currentAvg - lastAvg) / lastAvg * 100).round();
+        averageOrderPercentage.value =
+            percentageChange.abs(); // Store absolute value
+        isAverageOrderIncrease.value = currentAvg >= lastAvg; // Store direction
+      }
+
+      if (kDebugMode) {
+        print(
+            "Average Order Value - Current Month: ${averageOrderValue.value.toStringAsFixed(2)}");
+        print(
+            "Average Order Value - Previous Month: ${lastAvg.toStringAsFixed(2)}");
+        print(
+            "Average Order Value - Percentage Change: ${averageOrderPercentage.value}%");
+        print(
+            "Average Order Value - Is Increase: ${isAverageOrderIncrease.value}");
       }
     } catch (e) {
+      if (kDebugMode) {
+        print('Error calculating average order value: $e');
+      }
       TLoader.errorSnackBar(title: 'Error calculating average order value');
     }
   }
@@ -241,12 +262,12 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
   //
   void fetchProfit(List<OrderModel> allOrders, List<ExpenseModel> expenses) {
     try {
-      var result = salesService.calculateProfit(allOrders,expenses);
+      var result = salesService.calculateProfit(allOrders, expenses);
 
       currentMonthProfit.value = result.currentMonthSales;
       card2Percentage.value = result.percentageChange;
       isCard2Profit.value = result.isProfit;
-     // lastMonth.value = result.monthYear;
+      // lastMonth.value = result.monthYear;
 
       if (kDebugMode) {
         print("Previous Month Total: ${result.previousMonthSales}");
@@ -257,8 +278,6 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
       TLoader.errorSnackBar(title: "Error", message: e.toString());
     }
   }
-
-
 
   void fetchCustomerCard(List<CustomerModel> allCustomers) {
     try {
@@ -275,23 +294,30 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
       // Count current month's customers from 1st to today
       int currentPartialCustomers = allCustomers
           .where((customer) =>
-      customer.createdAt != null &&
-          customer.createdAt!.isAfter(startOfCurrentMonth.subtract(const Duration(seconds: 1))) &&
-          customer.createdAt!.isBefore(today.add(const Duration(days: 1)))) // inclusive of today
+              customer.createdAt != null &&
+              customer.createdAt!.isAfter(
+                  startOfCurrentMonth.subtract(const Duration(seconds: 1))) &&
+              customer.createdAt!.isBefore(
+                  today.add(const Duration(days: 1)))) // inclusive of today
           .length;
 
       // Count previous month's customers for same period
       int previousPartialCustomers = allCustomers
           .where((customer) =>
-      customer.createdAt != null &&
-          customer.createdAt!.isAfter(startOfPreviousMonth.subtract(const Duration(seconds: 1))) &&
-          customer.createdAt!.isBefore(sameDayLastMonth.add(const Duration(days: 1)))) // inclusive of same day
+              customer.createdAt != null &&
+              customer.createdAt!.isAfter(
+                  startOfPreviousMonth.subtract(const Duration(seconds: 1))) &&
+              customer.createdAt!.isBefore(sameDayLastMonth
+                  .add(const Duration(days: 1)))) // inclusive of same day
           .length;
 
       // Calculate percentage change
       int percentageChange = previousPartialCustomers == 0
           ? (currentPartialCustomers > 0 ? 100 : 0)
-          : (((currentPartialCustomers - previousPartialCustomers) / previousPartialCustomers) * 100).round();
+          : (((currentPartialCustomers - previousPartialCustomers) /
+                      previousPartialCustomers) *
+                  100)
+              .round();
 
       bool isIncrease = currentPartialCustomers > previousPartialCustomers;
 
@@ -303,6 +329,4 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
       TLoader.errorSnackBar(title: "Error", message: e.toString());
     }
   }
-
-
 }

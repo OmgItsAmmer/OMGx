@@ -7,8 +7,8 @@ import '../../../../common/widgets/containers/rounded_container.dart';
 import '../../../../utils/constants/image_strings.dart';
 import '../../../../utils/constants/sizes.dart';
 
-class SalesReportSection extends StatelessWidget {
-  const SalesReportSection({
+class SalesmanReportSection extends StatelessWidget {
+  const SalesmanReportSection({
     super.key,
   });
 
@@ -19,27 +19,28 @@ class SalesReportSection extends StatelessWidget {
     return TRoundedContainer(
       padding: const EdgeInsets.all(TSizes.defaultSpace),
       child: Column(
-
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Sales', style: Theme.of(context).textTheme.headlineMedium),
+          Text('Salesman', style: Theme.of(context).textTheme.headlineMedium),
           const SizedBox(height: TSizes.spaceBtwSections),
           Wrap(
+             clipBehavior: Clip.none,
             spacing: TSizes.spaceBtwItems,
             runSpacing: TSizes.spaceBtwItems,
             children: [
+              // HoverableCard(
+              //   text: 'All Products Report',
+              //   animation: TImages.docerAnimation,
+              //   onPressed: () {
+              //     // Existing functionality
+              //   },
+              // ),
+
               HoverableCard(
-                text: 'All Products Report',
+                text: 'Salesman',
                 animation: TImages.docerAnimation,
                 onPressed: () {
-                  // Existing functionality
-                },
-              ),
-              HoverableCard(
-                text: 'Simple P&L Report',
-                animation: TImages.docerAnimation,
-                onPressed: () {
-                  reportController.showDateRangePickerDialogSimplePnL(context);
+                  reportController.showDateRangePickerDialogSalesman(context);
                 },
               ),
             ],

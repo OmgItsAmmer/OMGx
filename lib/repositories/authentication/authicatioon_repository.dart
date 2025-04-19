@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../common/widgets/loaders/tloaders.dart';
+import '../../controllers/media/media_controller.dart';
 import '../../main.dart';
 
 import '../../supabase_strings.dart';
@@ -26,8 +27,8 @@ class AuthenticationRepository extends GetxController {
     // Get.put(ProductController());
     // Get.put(UserController());
     // Get.put(CheckoutController());
-   // FlutterNativeSplash.remove();
-   // screenRedirect();
+    // FlutterNativeSplash.remove();
+    // screenRedirect();
   } //Called from main.dart on app launchz
 
   screenRedirect() async {
@@ -38,13 +39,11 @@ class AuthenticationRepository extends GetxController {
       if (user != null && session != null) {
         if (user.emailConfirmedAt != null) {
           // Navigate to NavigationMenu only after confirming email is verified
-          await Get.offAll(() =>  const TSiteTemplate(
+          await Get.offAll(() => const TSiteTemplate(
                 desktop: Column(
-
                   children: [
                     Expanded(
                       child: TRoundedContainer(
-
                         child: OrderTable(),
                       ),
                     )
@@ -251,18 +250,38 @@ class AuthenticationRepository extends GetxController {
         return;
       }
 
+      // Clear the profile image cache
+      if (Get.isRegistered<MediaController>()) {
+        final mediaController = Get.find<MediaController>();
+        mediaController.refreshUserImage();
+      }
+
       // Delete user with the admin client
       await supabaseAdmin.auth.admin.deleteUser(currentUser.id);
-      TLoader.successSnackBar(title: "Account Deleted Succefully");
+      TLoader.successSnackBar(title: "Account Deleted Successfully");
       Get.to(() => const LoginScreen());
     } on FormatException catch (_) {
       throw const TFormatException();
     }
   }
-//
-//   Future<void> logOut() async {
-//
-//     await supabase.auth.signOut();
-//
-//   }
+
+  Future<void> logout() async {
+    try {
+      // Clear the profile image cache first
+      if (Get.isRegistered<MediaController>()) {
+        final mediaController = Get.find<MediaController>();
+        mediaController.refreshUserImage();
+      }
+
+      // Sign out from Supabase
+      await supabase.auth.signOut();
+
+      // Navigate to login screen
+      Get.offAll(() => const LoginScreen());
+
+      TLoader.successSnackBar(title: "Logged out successfully");
+    } catch (e) {
+      TLoader.errorSnackBar(title: "Logout Error", message: e.toString());
+    }
+  }
 }

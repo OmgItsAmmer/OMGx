@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'bindings/general_bindings.dart';
+// ignore: unused_import
 import 'common/widgets/containers/rounded_container.dart';
 
 

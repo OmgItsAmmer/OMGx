@@ -5,10 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:image_picker/image_picker.dart';
-
 import '../../../main.dart';
-import '../../Models/customer/customer_model.dart';
 import '../../common/widgets/loaders/tloaders.dart';
 import '../../repositories/authentication/authicatioon_repository.dart';
 import '../../repositories/user/user_repository.dart';
@@ -18,8 +15,6 @@ import '../../utils/constants/sizes.dart';
 import '../../utils/popups/full_screen_loader.dart';
 import '../../views/login/login.dart';
 import '../media/media_controller.dart';
-import '../product/product_images_controller.dart';
-import '../startup/startup_controller.dart';
 
 class UserController extends GetxController {
   static UserController get instance => Get.find();
@@ -79,11 +74,13 @@ class UserController extends GetxController {
 
       final userDetail = await userRespository.fetchUserDetials(user.email);
       userData.assignAll(userDetail);
+      
 
       // For debugging
       UserModel matchedUser =
           userData.firstWhere((value) => value.email == user.email);
       currentUser.value = matchedUser;
+      
 
       SalesController.instance.setupUserDetails();
 
@@ -116,29 +113,24 @@ class UserController extends GetxController {
     try {
       isUpdating.value = true;
       final userModel = UserModel(
-         userId: currentUser.value.userId,
+          userId: currentUser.value.userId,
           firstName: firstName.text,
           lastName: lastName.text,
           phoneNumber: phoneNumber.text,
-          email: email.text
-      );
+          email: email.text);
       mediaController.clearProfileImageCache();
-      await mediaController.imageAssigner(userModel.userId, MediaCategory.users.toString().split('.').last, true);
+      await mediaController.imageAssigner(userModel.userId,
+          MediaCategory.users.toString().split('.').last, true);
 
       final json = userModel.toJson(isUpdate: true);
       await userRespository.updateProfileData(json, currentUser.value.userId);
-
-
-
     } catch (e) {
       if (kDebugMode) {
         TLoader.errorSnackBar(title: e.toString());
         print(e);
       }
-    }
-    finally {
+    } finally {
       isUpdating.value = false;
-
     }
   }
 
@@ -278,6 +270,7 @@ class UserController extends GetxController {
       TFullScreenLoader.openLoadingDialog(
           'Logging Out', TImages.docerAnimation);
       await supabase.auth.signOut();
+      mediaController.clearProfileImageCache();
       TFullScreenLoader.stopLoading();
       Get.to(() => const LoginScreen());
     } catch (e) {

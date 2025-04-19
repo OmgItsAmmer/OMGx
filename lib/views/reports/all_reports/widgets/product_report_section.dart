@@ -18,8 +18,7 @@ class ProductReportSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ReportController reportController = Get.find<ReportController>();
-    final ProductController productController = Get.find<ProductController>();
-    final OrderController orderController = Get.find<OrderController>();
+  
     return TRoundedContainer(
       padding: const EdgeInsets.all(TSizes.defaultSpace),
       child: Column(
@@ -33,6 +32,7 @@ class ProductReportSection extends StatelessWidget {
             height: TSizes.spaceBtwSections,
           ),
           Wrap(
+             clipBehavior: Clip.none,
             spacing: TSizes.spaceBtwItems, // Horizontal space between items
             runSpacing: TSizes.spaceBtwItems, // Vertical space between rows
             children: [
@@ -44,14 +44,7 @@ class ProductReportSection extends StatelessWidget {
 
                 },
               ),
-              HoverableCard(
-                text: 'Stock Summary Report',
-                animation: TImages.docerAnimation,
-                onPressed: () {
-                  reportController.showDateRangePickerDialogPnL(context);
-
-                },
-              ),
+            
               // HoverableCard(
               //   text: 'Product Profitability Report',
               //   animation:

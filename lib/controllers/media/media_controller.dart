@@ -16,6 +16,18 @@ import '../../views/media/widgets/media_content.dart';
 import '../../views/media/widgets/media_uploader.dart';
 import 'package:path/path.dart' as p;
 
+class MediaOwnerImage {
+  int ownerId;
+  String ownerType;
+  ImageModel image;
+
+  MediaOwnerImage({
+    required this.ownerId,
+    required this.ownerType,
+    required this.image,
+  });
+}
+
 class MediaController extends GetxController {
   static MediaController get instance => Get.find();
   final MediaRepository mediaRepository = Get.put(MediaRepository());
@@ -39,6 +51,9 @@ class MediaController extends GetxController {
   final int limit = 10;
 
   late DropzoneViewController dropzoneViewController;
+
+  // For multiple images on the same screen (e.g., guarantors)
+  RxList<MediaOwnerImage> multipleDisplayImages = <MediaOwnerImage>[].obs;
 
   //==========================================================================
   // FILE DROPZONE AND SELECTION FUNCTIONS
@@ -73,7 +88,8 @@ class MediaController extends GetxController {
         print('No file selected.');
       }
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: 'Didn\'t get the image from explorer');
+      TLoader.errorSnackBar(
+          title: 'Oh Snap!', message: 'Didn\'t get the image from explorer');
     }
   }
 
@@ -81,14 +97,89 @@ class MediaController extends GetxController {
   // IMAGE SELECTION AND ASSIGNING/REASSIGNING FUNCTIONS
   //==========================================================================
 
-  /// Function to display a bottom sheet for image selection
+  /// Function to display a bottom sheet for image selection for multiple owner scenarios
+  Future<void> selectImagesForOwner({
+    required int ownerId,
+    required String ownerType,
+    List<String>? selectedUrls,
+    bool allowSelection = true,
+    bool multipleSelection = false,
+  }) async {
+    // Store current state to restore later
+    final previousSelectedImages = List<ImageModel>.from(selectedImages);
+
+    // Clear selected images for this operation
+    selectedImages.clear();
+    showImagesUploaderSection.value = true;
+
+    // Show the bottom sheet
+    await Get.bottomSheet<List<ImageModel>>(
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      ClipRRect(
+        borderRadius: BorderRadius.zero,
+        child: FractionallySizedBox(
+          heightFactor: 1.0,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  MediaUploader(),
+                  const SizedBox(height: TSizes.spaceBtwSections),
+                  const Text(
+                    'Select Images',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: TSizes.spaceBtwItems),
+                  MediaContent(
+                    allowSelection: allowSelection,
+                    alreadySelectedUrls: selectedUrls,
+                    allowMultipleSelection: multipleSelection,
+                    onSelectedImage: (List<ImageModel> images) {
+                      selectedImages.value = images;
+                      if (images.isNotEmpty) {
+                        // Find existing item with the same owner ID and type
+                        int existingIndex = multipleDisplayImages.indexWhere(
+                            (element) =>
+                                element.ownerId == ownerId &&
+                                element.ownerType == ownerType);
+
+                        // Update or add the new image for this owner
+                        if (existingIndex >= 0) {
+                          multipleDisplayImages[existingIndex] =
+                              MediaOwnerImage(
+                            ownerId: ownerId,
+                            ownerType: ownerType,
+                            image: images.first,
+                          );
+                        } else {
+                          multipleDisplayImages.add(MediaOwnerImage(
+                            ownerId: ownerId,
+                            ownerType: ownerType,
+                            image: images.first,
+                          ));
+                        }
+                      }
+                    },
+                  ),
+                  const SizedBox(height: TSizes.spaceBtwItems),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Function to display a bottom sheet for image selection (Original method for backwards compatibility)
   Future<void> selectImagesFromMedia({
     List<String>? selectedUrls,
     bool allowSelection = true,
     bool multipleSelection = false,
   }) async {
     // List to store selected images
-   // final selectedImages = <ImageModel>[].obs;
     selectedImages.clear();
     showImagesUploaderSection.value = true;
 
@@ -121,7 +212,6 @@ class MediaController extends GetxController {
                       selectedImages.value = images;
                       displayImage.value = selectedImages.first;
                       displayImageOwner.value = displayImage.value?.folderType;
-
                     },
                   ),
                   const SizedBox(height: TSizes.spaceBtwItems),
@@ -132,24 +222,27 @@ class MediaController extends GetxController {
         ),
       ),
     );
-
   }
 
-//Call when stuff needs to be confirmed
-  Future<void> imageAssigner(int entityId, String entityType, bool isFeatured) async {
+  //Call when stuff needs to be confirmed (Original method for backwards compatibility)
+  Future<void> imageAssigner(
+      int entityId, String entityType, bool isFeatured) async {
     try {
-
-      if(selectedImages.isEmpty)
-        {return;}
+      if (selectedImages.isEmpty) {
+        return;
+      }
 
       if (isFeatured) {
         // Make sure only one image is selected
         if (selectedImages.length > 1) {
-          TLoader.warningSnackBar(title: 'Warning', message: 'Please select exactly one image for Main Image.');
+          TLoader.warningSnackBar(
+              title: 'Warning',
+              message: 'Please select exactly one image for Main Image.');
           return;
         }
 
-        final isAlreadyAssigned = await mediaRepository.checkAssigned(entityId, entityType);
+        final isAlreadyAssigned =
+            await mediaRepository.checkAssigned(entityId, entityType);
 
         if (isAlreadyAssigned == true) {
           // Replace the existing featured image
@@ -185,7 +278,8 @@ class MediaController extends GetxController {
         }
       }
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Image Assigner Issue', message: e.toString());
+      TLoader.errorSnackBar(
+          title: 'Image Assigner Issue', message: e.toString());
     } finally {
       for (var image in allImages) {
         image.isSelected.value = false; // ✅ Reset checkbox state
@@ -193,17 +287,122 @@ class MediaController extends GetxController {
       selectedImages.clear();
       displayImage.value = null;
     }
-
   }
 
+  // Get image for a specific owner
+  ImageModel? getImageForOwner(int ownerId, String ownerType) {
+    final ownerImage = multipleDisplayImages.firstWhereOrNull((element) =>
+        element.ownerId == ownerId && element.ownerType == ownerType);
+    return ownerImage?.image;
+  }
 
+  // Method to assign images for multiple owners like guarantors
+  Future<void> assignImagesForMultipleOwners(
+      List<MediaOwnerImage> ownersWithImages) async {
+    try {
+      for (var ownerImage in ownersWithImages) {
+        final isAlreadyAssigned = await mediaRepository.checkAssigned(
+            ownerImage.ownerId, ownerImage.ownerType);
+
+        if (isAlreadyAssigned == true) {
+          // Replace the existing featured image
+          await mediaRepository.reAssignNewImage(
+            ownerImage.ownerId,
+            ownerImage.ownerType,
+            ownerImage.image.imageId,
+          );
+        } else {
+          // Assign the image for the first time
+          final imageEntityModel = ImageEntityModel(
+            imageEntityId: -1,
+            imageId: ownerImage.image.imageId,
+            isFeatured: true,
+            entityId: ownerImage.ownerId,
+            entityCategory: ownerImage.ownerType,
+          );
+          final json = imageEntityModel.toJson(isUpdate: true);
+          await mediaRepository.assignNewImage(json);
+        }
+      }
+    } catch (e) {
+      TLoader.errorSnackBar(
+          title: 'Image Assigner Issue', message: e.toString());
+    }
+  }
+
+  // Fetch image URL for a specific owner
+  Future<String?> fetchImageForOwner(int ownerId, String ownerType) async {
+    try {
+      isFetching.value = true;
+      final ImageModel image =
+          await mediaRepository.getMainImage(ownerId, ownerType);
+      if (image.filename == null || image.filename!.isEmpty) {
+        return null;
+      } else {
+        String imageUrl = await mediaRepository.fetchImageFromBucket(
+                image.filename ?? '', ownerType) ??
+            '';
+
+        // Update the local cache for this owner
+        int existingIndex = multipleDisplayImages.indexWhere((element) =>
+            element.ownerId == ownerId && element.ownerType == ownerType);
+
+        if (existingIndex >= 0) {
+          multipleDisplayImages[existingIndex] = MediaOwnerImage(
+            ownerId: ownerId,
+            ownerType: ownerType,
+            image: image,
+          );
+        } else {
+          multipleDisplayImages.add(MediaOwnerImage(
+            ownerId: ownerId,
+            ownerType: ownerType,
+            image: image,
+          ));
+        }
+
+        return imageUrl;
+      }
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('Error fetching image for owner $ownerId ($ownerType): $e');
+        print('Stack trace: $stackTrace');
+      }
+      return null;
+    } finally {
+      isFetching.value = false;
+    }
+  }
+
+  // Clear images for specific owners
+  void clearOwnerImages(List<int> ownerIds, String ownerType) {
+    multipleDisplayImages.removeWhere((element) =>
+        ownerIds.contains(element.ownerId) && element.ownerType == ownerType);
+  }
+
+  // Update owner IDs in the multipleDisplayImages list
+  void updateOwnerIds(int oldOwnerId, int newOwnerId, String ownerType) {
+    final index = multipleDisplayImages.indexWhere((element) =>
+        element.ownerId == oldOwnerId && element.ownerType == ownerType);
+
+    if (index >= 0) {
+      final image = multipleDisplayImages[index].image;
+      // Remove the old entry
+      multipleDisplayImages.removeAt(index);
+      // Add with the new ID
+      multipleDisplayImages.add(MediaOwnerImage(
+        ownerId: newOwnerId,
+        ownerType: ownerType,
+        image: image,
+      ));
+    }
+  }
 
   //==========================================================================
   // IMAGE INSERTION FUNCTIONS
   //==========================================================================
 
-
-RxBool isInserting = false.obs;
+  RxBool isInserting = false.obs;
   Future<void> insertImagesInTableAndBucket(String bucketName) async {
     try {
       isInserting.value = true;
@@ -233,16 +432,15 @@ RxBool isInserting = false.obs;
         files: droppedFiles,
       );
 
-      TLoader.successSnackBar(title: 'Success', message: 'All files uploaded successfully!');
+      TLoader.successSnackBar(
+          title: 'Success', message: 'All files uploaded successfully!');
       droppedFiles.clear();
     } catch (e) {
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
-    }
-    finally {
+    } finally {
       isInserting.value = false;
     }
   }
-
 
   //==========================================================================
   // IMAGE BUCKET AND ENTITY ID FUNCTIONS
@@ -251,7 +449,8 @@ RxBool isInserting = false.obs;
   /// Fetch image URL from the bucket
   Future<String?> getImageFromBucket(String bucketName, String fileName) async {
     try {
-      final response = mediaRepository.fetchImageFromBucket(fileName, bucketName);
+      final response =
+          mediaRepository.fetchImageFromBucket(fileName, bucketName);
       return response;
     } catch (e) {
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
@@ -260,7 +459,8 @@ RxBool isInserting = false.obs;
   }
 
   /// Update entity ID for a specific image
-  Future<void> updateEntityId(int entityId, int imageId, String mediaCategory) async {
+  Future<void> updateEntityId(
+      int entityId, int imageId, String mediaCategory) async {
     try {
       // // Step 1: Call the repository function to update the database
       // await mediaRepository.updateEntityIdRepo(entityId, imageId, mediaCategory);
@@ -287,14 +487,14 @@ RxBool isInserting = false.obs;
       //   newImage.entityId = entityId;
       // }
 
-
       if (kDebugMode) {
         print('Entity ID updated successfully for image ID: $imageId');
       }
     } catch (e) {
       // Handle errors
       if (kDebugMode) {
-        TLoader.errorSnackBar(title: 'Error updating entity ID', message: e.toString());
+        TLoader.errorSnackBar(
+            title: 'Error updating entity ID', message: e.toString());
         print('Error updating entity ID: $e');
       }
       rethrow; // Rethrow the error if needed
@@ -338,37 +538,38 @@ RxBool isInserting = false.obs;
     offset = 0; // Reset offset when changing folders
   }
 
-
-  Future<String?> fetchMainImage(int entityId , String entityType) async {
+  Future<String?> fetchMainImage(int entityId, String entityType) async {
     try {
       isFetching.value = true;
-     final ImageModel image = await mediaRepository.getMainImage(entityId,entityType);
-     if(image.filename == null || image.filename!.isEmpty){
-     //  TLoader.warningSnackBar(title: 'No Image Found!',message: 'There is No image in table');
-       return null;
-     }
-     else{
-       String imageUrl =   await mediaRepository.fetchImageFromBucket(image.filename ?? '', entityType) ?? '';
+      final ImageModel image =
+          await mediaRepository.getMainImage(entityId, entityType);
+      if (image.filename == null || image.filename!.isEmpty) {
+        //  TLoader.warningSnackBar(title: 'No Image Found!',message: 'There is No image in table');
+        return null;
+      } else {
+        String imageUrl = await mediaRepository.fetchImageFromBucket(
+                image.filename ?? '', entityType) ??
+            '';
         return imageUrl;
-     }
+      }
     } catch (e, stackTrace) {
       if (kDebugMode) {
         print('Error fetching Main Picture: $e');
         print('Stack trace: $stackTrace'); // <-- this is key
-        TLoader.errorSnackBar(title:  ' Controller Error fetching Main Picture', message: e.toString());
+        TLoader.errorSnackBar(
+            title: ' Controller Error fetching Main Picture',
+            message: e.toString());
       }
       return null;
-    }
-    finally {
+    } finally {
       isFetching.value = false;
-
     }
   }
 
   //==========================================================================
   // EXTRA FUNCTIONS(SIdeBAR)
   //==========================================================================
-  var cachedSidebarImage = Rxn<String>();   // ✅ New cache for Sidebar
+  var cachedSidebarImage = Rxn<String>(); // ✅ New cache for Sidebar
 
   Future<String?> fetchAndCacheSidebarImage(int shopId, String category) async {
     if (cachedSidebarImage.value != null) return cachedSidebarImage.value;
@@ -382,18 +583,29 @@ RxBool isInserting = false.obs;
     cachedSidebarImage.value = null;
   }
 
-  var cachedProfileImage = Rxn<String>();   // ✅ New cache for Sidebar
+  var cachedProfileImage = Rxn<String>(); // ✅ New cache for Sidebar
+  final userIdTracker = RxInt(-1); // Track current user ID for profile image
 
-  Future<String?> fetchAndCacheProfileImage(int shopId, String category) async {
-    if (cachedProfileImage.value != null) return cachedProfileImage.value;
+  Future<String?> fetchAndCacheProfileImage(int userId, String category) async {
+    // If cached profile exists and is for the same user, return it
+    if (cachedProfileImage.value != null && userIdTracker.value == userId) {
+      return cachedProfileImage.value;
+    }
 
-    final url = await fetchMainImage(shopId, category);
+    // If user changed or no cache exists, fetch the image
+    userIdTracker.value = userId;
+    final url = await fetchMainImage(userId, category);
     cachedProfileImage.value = url;
     return url;
   }
 
   void clearProfileImageCache() {
     cachedProfileImage.value = null;
+    userIdTracker.value = -1;
   }
 
+  // Call this when user changes (in login controller or when changing users)
+  void refreshUserImage() {
+    clearProfileImageCache();
+  }
 }

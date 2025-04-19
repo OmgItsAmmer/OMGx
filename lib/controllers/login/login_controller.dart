@@ -1,4 +1,3 @@
-
 import 'package:admin_dashboard_v3/routes/routes.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
@@ -12,6 +11,7 @@ import '../../network_manager.dart';
 import '../../repositories/authentication/authicatioon_repository.dart';
 import '../../utils/constants/image_strings.dart';
 import '../../utils/popups/full_screen_loader.dart';
+import '../media/media_controller.dart';
 import '../user/user_controller.dart';
 
 class LoginController extends GetxController {
@@ -23,6 +23,7 @@ class LoginController extends GetxController {
   final password = TextEditingController();
   GlobalKey<FormState> loginFormKey = GlobalKey<FormState>();
   final userController = Get.put(UserController());
+  final mediaController = Get.find<MediaController>();
 
   @override
   void onInit() {
@@ -55,16 +56,15 @@ class LoginController extends GetxController {
         localStorage.write('REMEMBER_ME_PASSWORD', password.text.trim());
       }
 
-      //Login user using Email & Password Authentication
-      // final userCreditional = await AuthenticationRepository.instance
-      //     .loginWithEmailAndpassword(email.text.trim(), password.text.trim());
-      // supabase login
-      // Login user using Email & Password Authentication (Supabase)
+      await AuthenticationRepository.instance
+          .loginWithEmailAndPassword(email.text.trim(), password.text.trim());
+      await UserController.instance.fetchUserRecord();
+      UserController.instance.setupProfileDetails();
 
-      await  AuthenticationRepository.instance.loginWithEmailAndPassword(email.text.trim(), password.text.trim());
-
+      // Clear profile image cache to ensure fresh image load
+      mediaController.refreshUserImage();
+      clearCredentials();
       //Remove Loader
-
       TFullScreenLoader.stopLoading();
 
       //Redirect
@@ -96,11 +96,15 @@ class LoginController extends GetxController {
       TFullScreenLoader.stopLoading();
       TLoader.errorSnackBar(title: "Not available at the moment");
       return;
-    //  Get.to(()=> NavigationMenu());
-
+      //  Get.to(()=> NavigationMenu());
     } catch (e) {
       TFullScreenLoader.stopLoading();
       TLoader.errorSnackBar(title: 'Oh Snap', message: e.toString());
     }
+  }
+
+  void clearCredentials() {
+    email.clear();
+    password.clear();
   }
 }

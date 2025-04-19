@@ -1,5 +1,6 @@
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/controllers/guarantors/guarantor_controller.dart';
+import 'package:admin_dashboard_v3/controllers/guarantors/guarantor_image_controller.dart';
 import 'package:admin_dashboard_v3/controllers/sales/sales_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
@@ -19,10 +20,14 @@ class InstallmentDesktop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-   // final InstallmentController installmentController = Get.find<InstallmentController>();
+    // final InstallmentController installmentController = Get.find<InstallmentController>();
     final SalesController salesController = Get.find<SalesController>();
-    final GuarantorController guarantorController = Get.put(GuarantorController());
-
+    final GuarantorController guarantorController =
+        Get.put(GuarantorController());
+    // Initialize the guarantor image controller if not already initialized
+    if (!Get.isRegistered<GuarantorImageController>()) {
+      Get.put(GuarantorImageController());
+    }
 
     return Expanded(
       child: SizedBox(
@@ -32,30 +37,30 @@ class InstallmentDesktop extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                 TRoundedContainer(
+                TRoundedContainer(
                   padding: const EdgeInsets.all(TSizes.defaultSpace),
                   child: Row(
-                   // crossAxisAlignment: CrossAxisAlignment.center,
+                    // crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-
                       Expanded(
                         flex: 1,
                         child: CustomerCard(
                           cardTitle: 'Customer Info',
                           hintText: 'Customer Name',
                           readOnly: true,
-                          userNameTextController: salesController.customerNameController,
-                          addressTextController: salesController.customerAddressController.value,
-                          cnicTextController: salesController.customerCNICController.value,
-                          phoneNoTextController: salesController.customerPhoneNoController.value,
-
+                          userNameTextController:
+                              salesController.customerNameController,
+                          addressTextController:
+                              salesController.customerAddressController.value,
+                          cnicTextController:
+                              salesController.customerCNICController.value,
+                          phoneNoTextController:
+                              salesController.customerPhoneNoController.value,
                         ),
-
                       ),
-
-
                       const SizedBox(
-                        width: TSizes.spaceBtwSections, // Replace TSizes.spaceBtwSections if needed
+                        width: TSizes
+                            .spaceBtwSections, // Replace TSizes.spaceBtwSections if needed
                       ),
                       Expanded(
                         flex: 2,
@@ -66,17 +71,20 @@ class InstallmentDesktop extends StatelessWidget {
                           namesList: const ['empty'],
                           addressList: const ['empty'],
                           readOnly: false,
-                          onSelectedName: (val){},
-                          userNameTextController: guarantorController.guraante1Name,
-                          addressTextController: guarantorController.guraante1Address,
+                          onSelectedName: (val) {},
+                          userNameTextController:
+                              guarantorController.guraante1Name,
+                          addressTextController:
+                              guarantorController.guraante1Address,
                           cnicTextController: guarantorController.guraante1CNIC,
-                          phoneNoTextController: guarantorController.guraante1PhoneNo,
+                          phoneNoTextController:
+                              guarantorController.guraante1PhoneNo,
                           formKey: guarantorController.guraante1FormKey,
-
                         ),
                       ),
                       const SizedBox(
-                        width: TSizes.spaceBtwSections, // Replace TSizes.spaceBtwSections if needed
+                        width: TSizes
+                            .spaceBtwSections, // Replace TSizes.spaceBtwSections if needed
                       ),
                       Expanded(
                         flex: 2,
@@ -87,18 +95,20 @@ class InstallmentDesktop extends StatelessWidget {
                           namesList: const ['empty'],
                           addressList: const ['empty'],
                           readOnly: false,
-                          onSelectedName: (val){},
-                          userNameTextController: guarantorController.guraante2Name,
-                          addressTextController: guarantorController.guraante2Address,
+                          onSelectedName: (val) {},
+                          userNameTextController:
+                              guarantorController.guraante2Name,
+                          addressTextController:
+                              guarantorController.guraante2Address,
                           cnicTextController: guarantorController.guraante2CNIC,
-                          phoneNoTextController: guarantorController.guraante2PhoneNo,
+                          phoneNoTextController:
+                              guarantorController.guraante2PhoneNo,
                           formKey: guarantorController.guraante2FormKey,
-
-
                         ),
                       ),
                       const SizedBox(
-                        width: TSizes.spaceBtwSections, // Replace\ TSizes.spaceBtwSections if needed
+                        width: TSizes
+                            .spaceBtwSections, // Replace\ TSizes.spaceBtwSections if needed
                       ),
                     ],
                   ),
@@ -109,7 +119,6 @@ class InstallmentDesktop extends StatelessWidget {
                 TRoundedContainer(
                   padding: const EdgeInsets.all(TSizes.defaultSpace),
                   child: Column(
-
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Header
@@ -117,43 +126,50 @@ class InstallmentDesktop extends StatelessWidget {
                         'Installment Setup',
                         style: Theme.of(context).textTheme.headlineMedium,
                       ),
-                      const SizedBox(height: TSizes.spaceBtwSections,),
+                      const SizedBox(
+                        height: TSizes.spaceBtwSections,
+                      ),
                       const Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
-
                         children: [
                           // Charges
-                          Expanded(child: SizedBox(
-                            //  height: 530,
-                              child: ChargesForm())),
+                          Expanded(
+                              child: SizedBox(
+                                  //  height: 530,
+                                  child: ChargesForm())),
 
-                          SizedBox(width: TSizes.spaceBtwSections,),
+                          SizedBox(
+                            width: TSizes.spaceBtwSections,
+                          ),
 
                           // Duration / Time
 
                           Expanded(child: DurationInfo()),
 
-                          SizedBox(width: TSizes.spaceBtwSections,),
+                          SizedBox(
+                            width: TSizes.spaceBtwSections,
+                          ),
                           // Generate Button
                           Expanded(
                             child: Column(
                               children: [
                                 AdvanceInfo(),
-                                SizedBox(height: TSizes.spaceBtwSections,),
+                                SizedBox(
+                                  height: TSizes.spaceBtwSections,
+                                ),
                                 InstallmentActionButtons()
                               ],
                             ),
                           ),
-
                         ],
                       ),
                     ],
                   ),
                 ),
-
-                const SizedBox(height: TSizes.spaceBtwSections,),
-
-                 TRoundedContainer(
+                const SizedBox(
+                  height: TSizes.spaceBtwSections,
+                ),
+                TRoundedContainer(
                   padding: const EdgeInsets.all(TSizes.defaultSpace),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -163,18 +179,18 @@ class InstallmentDesktop extends StatelessWidget {
                         'Installment Plan',
                         style: Theme.of(context).textTheme.headlineMedium,
                       ),
-                      const SizedBox(height: TSizes.spaceBtwSections,),
+                      const SizedBox(
+                        height: TSizes.spaceBtwSections,
+                      ),
                       //Table
                       const InstallmentTable(),
-
-
                     ],
-
                   ),
                 ),
-
-                const SizedBox(height: TSizes.spaceBtwSections,),
-                 const InstallmentFooterButtons()
+                const SizedBox(
+                  height: TSizes.spaceBtwSections,
+                ),
+                const InstallmentFooterButtons()
               ],
             ),
           ),
@@ -183,4 +199,3 @@ class InstallmentDesktop extends StatelessWidget {
     );
   }
 }
-

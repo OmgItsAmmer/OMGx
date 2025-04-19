@@ -1,19 +1,31 @@
 import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
+import 'package:admin_dashboard_v3/controllers/orders/orders_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../../../../controllers/media/media_controller.dart';
 import '../table/customer_order_table.dart';
 import '../widgets/customer_shipping_info.dart';
 import '../widgets/user_info.dart';
 
 class CustomerDetailDesktop extends StatelessWidget {
   const CustomerDetailDesktop({super.key, required this.customerModel});
-final CustomerModel customerModel;
+  final CustomerModel customerModel;
+
   @override
   Widget build(BuildContext context) {
+    // Initialize the order controller and fetch orders for this customer
+    final OrderController orderController = Get.find<OrderController>();
+
+    // Fetch orders for this customer when the view is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (customerModel.customerId != null) {
+        orderController.fetchEntityOrders(
+            customerModel.customerId!, 'Customer');
+        orderController.setRecentOrderDay();
+        orderController.setAverageTotalAmount();
+      }
+    });
 
     return Expanded(
       child: SizedBox(
@@ -24,7 +36,6 @@ final CustomerModel customerModel;
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 Text(
                   "Customer Detail",
                   style: Theme.of(context).textTheme.headlineMedium,
@@ -32,21 +43,25 @@ final CustomerModel customerModel;
                 const SizedBox(
                   height: TSizes.spaceBtwSections,
                 ),
-                  Row(
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                     Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           //user Info
-                          UserInfo(customerModel: customerModel,),
+                          UserInfo(
+                            customerModel: customerModel,
+                          ),
                           const SizedBox(
                             height: TSizes.spaceBtwSections,
                           ),
 
                           //shipping info
-                           CustomerShippingInfo(customerModel: customerModel ,),
+                          CustomerShippingInfo(
+                            customerModel: customerModel,
+                          ),
                         ],
                       ),
                     ),
@@ -58,17 +73,20 @@ final CustomerModel customerModel;
                         child: TRoundedContainer(
                             padding: const EdgeInsets.all(TSizes.defaultSpace),
                             child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-
-                            Text(
-                              'Orders',
-                              style: Theme.of(context).textTheme.headlineMedium,
-                            ),
-                            const SizedBox(height: TSizes.spaceBtwSections,),
-                            const CustomerOrderTable(),
-                          ],
-                        )))
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Orders',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineMedium,
+                                ),
+                                const SizedBox(
+                                  height: TSizes.spaceBtwSections,
+                                ),
+                                const CustomerOrderTable(),
+                              ],
+                            )))
                   ],
                 ),
               ],

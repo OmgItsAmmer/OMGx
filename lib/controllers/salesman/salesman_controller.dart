@@ -206,6 +206,7 @@ class SalesmanController extends GetxController {
         cnic: cnic.text,
         area: area.text,
         city: city.text,
+        comission: int.parse(commission.text),
       );
 
       final json =

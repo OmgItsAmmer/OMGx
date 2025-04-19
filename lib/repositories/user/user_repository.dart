@@ -25,6 +25,7 @@ class UserRespository extends GetxController {
 //Function to fetch user details based on user ID.
   Future<List<UserModel>> fetchUserDetials(String? email) async {
     try {
+    
       if (email == null) throw 'Email cannot be null';
       final data =  await  Supabase.instance.client
           .from('users')

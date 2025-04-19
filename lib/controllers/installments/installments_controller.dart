@@ -12,6 +12,7 @@ import '../../views/reports/specific_reports/installment_plans/installment_plan_
 import '../guarantors/guarantor_controller.dart';
 import '../guarantors/guarantor_image_controller.dart';
 import '../sales/sales_controller.dart';
+import '../media/media_controller.dart';
 
 class InstallmentController extends GetxController {
   static InstallmentController get instance => Get.find();
@@ -425,12 +426,15 @@ class InstallmentController extends GetxController {
   Future<void> savePlan() async {
     try {
       final guarantorImageController = Get.find<GuarantorImageController>();
+      final mediaController = Get.find<MediaController>();
       int orderId = await salesController.checkOut();
-      
+
       // Set the images in the guarantor controller before uploading
-      guarantorController.guarrantor1Image.value = guarantorImageController.guarantor1Image.value;
-      guarantorController.guarrantor2Image.value = guarantorImageController.guarantor2Image.value;
-      
+      guarantorController.guarrantor1Image.value =
+          guarantorImageController.guarantor1Image.value;
+      guarantorController.guarrantor2Image.value =
+          guarantorImageController.guarantor2Image.value;
+
       List<int> guarranteIds = await guarantorController.uploadGuarantors();
 
       final installmentPaymentList =
@@ -445,16 +449,23 @@ class InstallmentController extends GetxController {
 
       // Call the uploadInstallmentPlan function
       await installmentRepository.uploadInstallmentPlanAndPayment(
-        currentInstallmentPlan.value, orderId);
-      // Clear the images after successful upload
-      guarantorImageController.clearImages();
-      
+          currentInstallmentPlan.value, orderId);
+
+      // Clear the images after successful upload and save guarantor images with correct IDs
+      await guarantorImageController.saveGuarantorImages(guarranteIds);
+
       Get.to(() => InstallmentReportPage(
             installmentPlans: currentInstallmentPayments,
             cashierName: 'Ammer',
             companyName: 'OMGz',
             branchName: 'MAIN',
           ));
+
+      // Clear all variables after successful installment creation
+      clearAllFields();
+      guarantorImageController.clearGuarantorImages();
+      mediaController.displayImage.value = null;
+      salesController.clearSaleDetails();
     } catch (e) {
       if (kDebugMode) {
         print(e);

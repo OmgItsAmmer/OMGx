@@ -1,17 +1,13 @@
 import 'package:admin_dashboard_v3/repositories/signup/signup_repository.dart';
 import 'package:admin_dashboard_v3/routes/routes.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../main.dart';
 import '../../Models/user/user_model.dart';
 import '../../common/widgets/loaders/tloaders.dart';
 import '../../network_manager.dart';
 import '../../utils/constants/image_strings.dart';
-import '../../utils/exceptions/format_exceptions.dart';
-import '../../utils/exceptions/platform_exceptions.dart';
 import '../../utils/popups/full_screen_loader.dart';
 
 class SignUpController extends GetxController {
@@ -27,10 +23,13 @@ class SignUpController extends GetxController {
   final username = TextEditingController(); // Controller for username input
   final password = TextEditingController(); // Controller for password input
   final firstName = TextEditingController(); // Controller for first name input
+  final adminKey = TextEditingController(); // Controller for first name input
   final phoneNumber =
   TextEditingController(); // Controller for phone number input
   GlobalKey<FormState> signupFormkey =
-  GlobalKey<FormState>(); // Form key for form validation
+  GlobalKey<FormState>();
+
+  
 
 
 

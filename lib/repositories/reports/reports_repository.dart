@@ -1,5 +1,3 @@
-
-
 import 'package:admin_dashboard_v3/Models/reports/simple_pnl_report_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:get/get.dart';
@@ -13,7 +11,6 @@ import '../../Models/reports/sale_report_model.dart';
 
 class ReportsRepository extends GetxController {
   static ReportsRepository get instance => Get.find();
-
 
   Future<List<SalesReportModel>> fetchMonthlySalesReport({
     required int month,
@@ -37,28 +34,104 @@ class ReportsRepository extends GetxController {
     }
   }
 
-  Future<List<RecoveryReportModel>> getSalesmanRecoveryReport({
+  Future<List<SalesmanRecoveryModel>> fetchSalesmanRecoveryReport(
+      {required DateTime startDate,
+      required DateTime endDate,
+      int? salesmanId // Optional parameter for specific salesman
+      }) async {
+    try {
+      String startDateFormatted = startDate.toIso8601String().split("T")[0];
+      String endDateFormatted = endDate.toIso8601String().split("T")[0];
+
+      // Create params map
+      final params = {
+        'start_date': startDateFormatted,
+        'end_date': endDateFormatted,
+      };
+
+      // Add salesmanId parameter only if provided
+      if (salesmanId != null) {
+        params['specific_salesman_id'] = salesmanId.toString();
+      }
+
+      final response = await supabase.rpc(
+        'get_salesman_recovery_report',
+        params: params,
+      );
+
+      List<SalesmanRecoveryModel> reportList = (response as List)
+          .map((item) =>
+              SalesmanRecoveryModel.fromJson(item as Map<String, dynamic>))
+          .toList();
+
+      return reportList;
+    } catch (e) {
+      TLoader.errorSnackBar(title: e.toString());
+      print(e);
+      return [];
+    }
+  }
+
+// Fetch detailed report for a specific salesman (used in SalesmanReportPage)
+  Future<List<RecoveryReportModel>> fetchSalesmanDetailedReport({
     required int salesmanId,
     required DateTime startDate,
     required DateTime endDate,
   }) async {
     try {
-      final response = await supabase.rpc('get_salesman_recovery_report', params: {
-        'salesman_id': salesmanId,
-        'start_date': startDate.toIso8601String(),
-        'end_date': endDate.toIso8601String(),
-      });
+      String startDateFormatted = startDate.toIso8601String().split("T")[0];
+      String endDateFormatted = endDate.toIso8601String().split("T")[0];
 
-      if (response.isEmpty) return [];
+      final response = await supabase.rpc(
+        'get_salesman_detailed_report',
+        params: {
+          'start_date': startDateFormatted,
+          'end_date': endDateFormatted,
+          'salesman_id': salesmanId,
+        },
+      );
 
-      return (response as List)
-          .map((e) => RecoveryReportModel.fromJson(e))
-          .toList();
-    } on PostgrestException catch (e) {
-      throw Exception('Error fetching report: ${e.message}');
+      if (response == null) {
+        throw Exception('No data received from Supabase.');
+      }
+
+      List<RecoveryReportModel> reportList = [];
+
+      // Process each item individually to identify which specific record is causing issues
+      for (var i = 0; i < (response as List).length; i++) {
+        try {
+          var item = response[i] as Map<String, dynamic>;
+
+          // Add debug info to see what's in each record
+          print('Processing record $i: ${item.toString()}');
+
+          // Check for null values in numeric fields
+          if (item['sale_price'] == null) {
+            print('Warning: sale_price is null for record $i');
+          }
+          if (item['commission_percent'] == null) {
+            print('Warning: commission_percent is null for record $i');
+          }
+          if (item['commission_in_rs'] == null) {
+            print('Warning: commission_in_rs is null for record $i');
+          }
+
+          reportList.add(RecoveryReportModel.fromJson(item));
+        } catch (e) {
+          print('Error parsing record $i: $e');
+          // Continue processing other records instead of failing completely
+        }
+      }
+
+      return reportList;
+    } catch (e) {
+      print('Error fetching salesman detailed report: $e');
+      throw Exception('Error fetching salesman detailed report: $e');
     }
   }
-  Future<List<SimplePnLReportModel>> fetchSimplePnLReport(DateTime startDate, DateTime endDate) async {
+
+  Future<List<SimplePnLReportModel>> fetchSimplePnLReport(
+      DateTime startDate, DateTime endDate) async {
     try {
       final response = await supabase.rpc('get_simple_pnl_report', params: {
         'start_date': startDate.toIso8601String().split('T')[0],
@@ -66,7 +139,8 @@ class ReportsRepository extends GetxController {
       });
 
       return (response as List)
-          .map((item) => SimplePnLReportModel.fromJson(item as Map<String, dynamic>))
+          .map((item) =>
+              SimplePnLReportModel.fromJson(item as Map<String, dynamic>))
           .toList();
     } catch (e) {
       TLoader.errorSnackBar(title: e.toString());
@@ -74,7 +148,8 @@ class ReportsRepository extends GetxController {
     }
   }
 
-    Future<List<PnLReportModel>> fetchPnLReportData(DateTime startDate, DateTime endDate) async {
+  Future<List<PnLReportModel>> fetchPnLReportData(
+      DateTime startDate, DateTime endDate) async {
     try {
       String startDateFormatted = startDate.toIso8601String().split("T")[0];
       String endDateFormatted = endDate.toIso8601String().split("T")[0];
@@ -87,22 +162,15 @@ class ReportsRepository extends GetxController {
         },
       );
 
+      List<PnLReportModel> reportList = (response as List)
+          .map((item) => PnLReportModel.fromJson(item as Map<String, dynamic>))
+          .toList();
 
-        List<PnLReportModel> reportList = (response as List)
-            .map((item) => PnLReportModel.fromJson(item as Map<String, dynamic>))
-            .toList();
-
-        return reportList;
-
+      return reportList;
     } catch (e) {
       TLoader.errorSnackBar(title: e.toString());
       print(e);
       return [];
     }
   }
-
 }
-
-
-
-

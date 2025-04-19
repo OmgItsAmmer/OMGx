@@ -1,9 +1,8 @@
-import 'package:admin_dashboard_v3/Models/user/user_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
+import 'package:admin_dashboard_v3/common/widgets/icons/t_circular_icon.dart';
 import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
 import 'package:admin_dashboard_v3/controllers/user/user_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -11,7 +10,6 @@ import 'package:iconsax/iconsax.dart';
 
 import '../../../../common/widgets/shimmers/shimmer.dart';
 import '../../../../controllers/media/media_controller.dart';
-import '../../../../controllers/product/product_images_controller.dart';
 import '../../../../utils/constants/enums.dart';
 import '../../../../utils/validators/validation.dart';
 
@@ -20,7 +18,6 @@ class ProfileDesktop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Expanded(
         child: Scaffold(
       body: SingleChildScrollView(
@@ -47,15 +44,13 @@ class ProfileDesktop extends StatelessWidget {
                     width: TSizes.spaceBtwSections,
                   ),
                   //info card
-                  Expanded(
-                      flex: 2,
-                      child: ProfileDetails()),
-
+                  Expanded(flex: 2, child: ProfileDetails()),
                 ],
               ),
-              const SizedBox(height: TSizes.spaceBtwSections,),
-            //
-
+              const SizedBox(
+                height: TSizes.spaceBtwSections,
+              ),
+              //
             ],
           ),
         ),
@@ -71,28 +66,37 @@ class ProfileDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final UserController userController =
-    Get.find<UserController>();
+    final UserController userController = Get.find<UserController>();
     return TRoundedContainer(
       padding: const EdgeInsets.all(TSizes.defaultSpace),
       child: Column(
         children: [
           //Heading
-          Text(
-            'Profile Details',
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Profile Details',
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+               TCircularIcon(
+                icon: Iconsax.logout,
+                color: TColors.white,
+                backgroundColor: TColors.buttonPrimary,
 
+                onPressed: () {
+                  userController.logOut();
+                },
+              ),
+            ],
+          ),
 
           const SizedBox(
             height: TSizes.spaceBtwSections,
           ),
 
-
-
-
           //fields row
-           Row(
+          Row(
             children: [
               Expanded(
                 child: SizedBox(
@@ -105,8 +109,6 @@ class ProfileDetails extends StatelessWidget {
                         TValidator.validateEmptyText('First Name', value),
                     style: Theme.of(context).textTheme.bodyMedium,
                     decoration: const InputDecoration(labelText: 'First Name'),
-                
-                
                   ),
                 ),
               ),
@@ -125,12 +127,9 @@ class ProfileDetails extends StatelessWidget {
                         TValidator.validateEmptyText('Last Name', value),
                     style: Theme.of(context).textTheme.bodyMedium,
                     decoration: const InputDecoration(labelText: 'Last Name'),
-                
-                
                   ),
                 ),
               ),
-
             ],
           ),
           const SizedBox(
@@ -151,8 +150,6 @@ class ProfileDetails extends StatelessWidget {
                         TValidator.validateEmptyText('Email', value),
                     style: Theme.of(context).textTheme.bodyMedium,
                     decoration: const InputDecoration(labelText: 'Email'),
-                
-                
                   ),
                 ),
               ),
@@ -169,26 +166,36 @@ class ProfileDetails extends StatelessWidget {
                     validator: (value) =>
                         TValidator.validateEmptyText('Phone Number', value),
                     style: Theme.of(context).textTheme.bodyMedium,
-                    decoration: const InputDecoration(labelText: 'Phone Number'),
-                
-                
+                    decoration:
+                        const InputDecoration(labelText: 'Phone Number'),
                   ),
                 ),
               ),
-
             ],
           ),
           const SizedBox(
-            height    : TSizes.spaceBtwSections,
+            height: TSizes.spaceBtwSections,
           ),
           //save button
           Row(
             children: [
-              Expanded(child: Obx(
-                () => ElevatedButton(onPressed: (){
-                userController.updateProfile();
-
-                }, child: (userController.isUpdating.value) ? const CircularProgressIndicator(color: TColors.white,)  : Text('Update Profile',style: Theme.of(context).textTheme.bodyMedium!.apply(color: TColors.white),)),
+              Expanded(
+                  child: Obx(
+                () => ElevatedButton(
+                    onPressed: () {
+                      userController.updateProfile();
+                    },
+                    child: (userController.isUpdating.value)
+                        ? const CircularProgressIndicator(
+                            color: TColors.white,
+                          )
+                        : Text(
+                            'Update Profile',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .apply(color: TColors.white),
+                          )),
               )),
             ],
           )
@@ -210,52 +217,57 @@ class ProfileImageInfo extends StatelessWidget {
     final UserController userController = Get.find<UserController>();
     return TRoundedContainer(
       width: double.infinity,
-      height:   400,
+      height: 400,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         // crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-           Stack(
+          Stack(
             alignment: Alignment
                 .bottomRight, // Align the camera icon to the bottom right
             children: [
               // Rounded Image
               Obx(
-                    () {
-                      final image = mediaController.displayImage.value;
+                () {
+                  final image = mediaController.displayImage.value;
 
-                      if (image != null) {
-                        //print(image.filename);
-                        return FutureBuilder<String?>(
-                          future: mediaController.getImageFromBucket(
-                            MediaCategory.users.toString().split('.').last,
-                            image.filename ?? '',
-                          ),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return const TShimmerEffect(width: 150, height: 150);
-                            } else if (snapshot.hasError || snapshot.data == null) {
-                              return const Icon(Icons.error);
-                            } else {
-                              return TRoundedImage(
-                                isNetworkImage: true,
-                                width: 150,
-                                height: 150,
-                                imageurl: snapshot.data!,
-                              );
-                            }
-                          },
-                        );
-                      }
+                  if (image != null) {
+                    //print(image.filename);
+                    return FutureBuilder<String?>(
+                      future: mediaController.getImageFromBucket(
+                        MediaCategory.users.toString().split('.').last,
+                        image.filename ?? '',
+                      ),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const TShimmerEffect(width: 150, height: 150);
+                        } else if (snapshot.hasError || snapshot.data == null) {
+                          return const Icon(Icons.error);
+                        } else {
+                          return TRoundedImage(
+                            isNetworkImage: true,
+                            width: 150,
+                            height: 150,
+                            imageurl: snapshot.data!,
+                          );
+                        }
+                      },
+                    );
+                  }
                   // Check if selectedImages is empty
                   return FutureBuilder<String?>(
-                    future: mediaController.fetchMainImage(userController.currentUser.value.userId, MediaCategory.users.toString().split('.').last),
-
+                    future: mediaController.fetchMainImage(
+                        userController.currentUser.value.userId,
+                        MediaCategory.users.toString().split('.').last),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const TShimmerEffect(width: 350, height: 170); // Show shimmer while loading
+                        return const TShimmerEffect(
+                            width: 350,
+                            height: 170); // Show shimmer while loading
                       } else if (snapshot.hasError) {
-                        return const Text('Error loading image'); // Handle error case
+                        return const Text(
+                            'Error loading image'); // Handle error case
                       } else if (snapshot.hasData && snapshot.data != null) {
                         return TRoundedImage(
                           isNetworkImage: true,
@@ -264,14 +276,14 @@ class ProfileImageInfo extends StatelessWidget {
                           imageurl: snapshot.data!,
                         );
                       } else {
-                        return const Text('No image available'); // Handle case where no image is available
+                        return const TCircularIcon(icon: Iconsax.image,width: 150,height: 150,); // Handle case where no image is available
                       }
                     },
                   );
                 },
               ),
               // Camera Icon
-               TRoundedContainer(
+              TRoundedContainer(
                 onTap: () {
                   // productImagesController.selectThumbnailImage();
                   mediaController.selectImagesFromMedia();
@@ -279,8 +291,7 @@ class ProfileImageInfo extends StatelessWidget {
                 borderColor: TColors.white,
                 backgroundColor: TColors.primary,
 
-                padding:
-                    const EdgeInsets.all(6), // Add padding around the icon
+                padding: const EdgeInsets.all(6), // Add padding around the icon
 
                 child: const Icon(
                   Iconsax.camera, // Camera icon
@@ -294,7 +305,7 @@ class ProfileImageInfo extends StatelessWidget {
             height: TSizes.spaceBtwSections,
           ),
           Text(
-            'Ammer Saeed',
+            userController.currentUser.value.fullName,
             style: Theme.of(context).textTheme.headlineMedium,
           ),
         ],
