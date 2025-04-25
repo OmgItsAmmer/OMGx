@@ -6,37 +6,31 @@ import 'package:flutter/material.dart';
 import '../../../../common/widgets/containers/rounded_container.dart';
 import '../../all_categories/widgets/category_info.dart';
 
-
 class CategoryDetailDesktop extends StatelessWidget {
   const CategoryDetailDesktop({super.key, required this.categoryModel});
   final CategoryModel categoryModel;
   @override
   Widget build(BuildContext context) {
-
-    return  Expanded(child: Scaffold(
-
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(TSizes.defaultSpace),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-
-
-            children: [
-              Expanded(
-
-
-                child: TRoundedContainer(
-                  padding: const EdgeInsets.all(TSizes.defaultSpace),
-                  child: CategoryInfo(categoryModel: categoryModel,),
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(TSizes.defaultSpace),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: TRoundedContainer(
+                padding: const EdgeInsets.all(TSizes.defaultSpace),
+                child: CategoryInfo(
+                  categoryModel: categoryModel,
                 ),
               ),
-              Expanded(flex: TDeviceUtils.isDesktopScreen(context) ? 2 : 0, child: const SizedBox())
-            ],
-          ),
+            ),
+            Expanded(
+                flex: TDeviceUtils.isDesktopScreen(context) ? 2 : 0,
+                child: const SizedBox())
+          ],
         ),
-      ) ,
-    ));
+      ),
+    );
   }
 }
-

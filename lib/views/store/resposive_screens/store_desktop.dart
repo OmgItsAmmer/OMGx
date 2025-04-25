@@ -1,4 +1,3 @@
-import 'package:admin_dashboard_v3/Models/image/image_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
 import 'package:admin_dashboard_v3/controllers/media/media_controller.dart';
@@ -13,7 +12,6 @@ import 'package:iconsax/iconsax.dart';
 import '../../../../utils/validators/validation.dart';
 import '../../../common/widgets/icons/t_circular_icon.dart';
 import '../../../common/widgets/shimmers/shimmer.dart';
-import '../../../controllers/product/product_images_controller.dart';
 import '../../../controllers/shop/shop_controller.dart';
 
 class StoreDesktop extends StatelessWidget {
@@ -23,44 +21,41 @@ class StoreDesktop extends StatelessWidget {
   Widget build(BuildContext context) {
     final ShopController shopController = Get.find<ShopController>();
 
-    return Expanded(
-        child: Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(TSizes.defaultSpace),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              //Heading
-              Text(
-                'Store',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              const SizedBox(
-                height: TSizes.spaceBtwSections,
-              ),
-              //BRead Crumbs
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(TSizes.defaultSpace),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            //Heading
+            Text(
+              'Store',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(
+              height: TSizes.spaceBtwSections,
+            ),
+            //BRead Crumbs
 
-              const Row(
-                children: [
-                  //Image card
-                  Expanded(child: StoreImageInfo()),
-                  SizedBox(
-                    width: TSizes.spaceBtwSections,
-                  ),
-                  //info card
-                  Expanded(flex: 2, child: ProfileDetails()),
-                ],
-              ),
-              const SizedBox(
-                height: TSizes.spaceBtwSections,
-              ),
-              //
-            ],
-          ),
+            const Row(
+              children: [
+                //Image card
+                Expanded(child: StoreImageInfo()),
+                SizedBox(
+                  width: TSizes.spaceBtwSections,
+                ),
+                //info card
+                Expanded(flex: 2, child: ProfileDetails()),
+              ],
+            ),
+            const SizedBox(
+              height: TSizes.spaceBtwSections,
+            ),
+            //
+          ],
         ),
       ),
-    ));
+    );
   }
 }
 
@@ -101,7 +96,11 @@ class ProfileDetails extends StatelessWidget {
                     validator: (value) =>
                         TValidator.validateEmptyText('Store Name', value),
                     style: Theme.of(context).textTheme.bodyMedium,
-                    decoration: const InputDecoration(labelText: 'Store Name'),
+                    decoration: const InputDecoration(
+                      labelText: 'Store Name',
+                      hintText: 'Enter your store name',
+                      prefixIcon: Icon(Iconsax.shop),
+                    ),
                   ),
                 ),
               ),
@@ -126,7 +125,11 @@ class ProfileDetails extends StatelessWidget {
                   validator: (value) =>
                       TValidator.validateEmptyText('Tax Rate(%)', value),
                   style: Theme.of(context).textTheme.bodyMedium,
-                  decoration: const InputDecoration(labelText: 'Tax Rate(%)'),
+                  decoration: const InputDecoration(
+                    labelText: 'Tax Rate(%)',
+                    hintText: 'Enter the tax rate',
+                    prefixIcon: Icon(Iconsax.receipt_1),
+                  ),
                 ),
               ),
               SizedBox(
@@ -139,8 +142,11 @@ class ProfileDetails extends StatelessWidget {
                   validator: (value) =>
                       TValidator.validateEmptyText('Shipping Fee(🚵)', value),
                   style: Theme.of(context).textTheme.bodyMedium,
-                  decoration:
-                      const InputDecoration(labelText: 'Shipping Fee(🚵)'),
+                  decoration: const InputDecoration(
+                    labelText: 'Shipping Fee(🚵)',
+                    hintText: 'Enter the shipping fee',
+                    prefixIcon: Icon(Iconsax.truck_fast),
+                  ),
                 ),
               ),
               SizedBox(
@@ -154,7 +160,10 @@ class ProfileDetails extends StatelessWidget {
                       'Free Shipping Threshold(🚵)', value),
                   style: Theme.of(context).textTheme.bodyMedium,
                   decoration: const InputDecoration(
-                      labelText: 'Free Shipping Threshold(🚵)'),
+                    labelText: 'Free Shipping Threshold(🚵)',
+                    hintText: 'Enter the free shipping threshold',
+                    prefixIcon: Icon(Iconsax.truck_tick),
+                  ),
                 ),
               ),
             ],
@@ -177,7 +186,11 @@ class ProfileDetails extends StatelessWidget {
                   validator: (value) =>
                       TValidator.validateEmptyText('Profile 1', value),
                   style: Theme.of(context).textTheme.bodyMedium,
-                  decoration: const InputDecoration(labelText: 'Profile 1'),
+                  decoration: const InputDecoration(
+                    labelText: 'Profile 1',
+                    hintText: 'Enter profile 1 details',
+                    prefixIcon: Icon(Iconsax.profile_2user),
+                  ),
                 ),
               ),
               SizedBox(
@@ -190,7 +203,11 @@ class ProfileDetails extends StatelessWidget {
                   validator: (value) =>
                       TValidator.validateEmptyText('Profile 2', value),
                   style: Theme.of(context).textTheme.bodyMedium,
-                  decoration: const InputDecoration(labelText: 'Profile 2'),
+                  decoration: const InputDecoration(
+                    labelText: 'Profile 2',
+                    hintText: 'Enter profile 2 details',
+                    prefixIcon: Icon(Iconsax.profile_2user),
+                  ),
                 ),
               ),
               SizedBox(
@@ -203,7 +220,11 @@ class ProfileDetails extends StatelessWidget {
                   validator: (value) =>
                       TValidator.validateEmptyText('Profile 3', value),
                   style: Theme.of(context).textTheme.bodyMedium,
-                  decoration: const InputDecoration(labelText: 'Profile 3'),
+                  decoration: const InputDecoration(
+                    labelText: 'Profile 3',
+                    hintText: 'Enter profile 3 details',
+                    prefixIcon: Icon(Iconsax.profile_2user),
+                  ),
                 ),
               ),
             ],
@@ -273,7 +294,9 @@ class StoreImageInfo extends StatelessWidget {
               Obx(() {
                 final image = mediaController.displayImage.value;
 
-                if (image != null && mediaController.displayImageOwner == MediaCategory.shop.toString().split('.').last) {
+                if (image != null &&
+                    mediaController.displayImageOwner ==
+                        MediaCategory.shop.toString().split('.').last) {
                   //print(image.filename);
                   return FutureBuilder<String?>(
                     future: mediaController.getImageFromBucket(
@@ -307,8 +330,12 @@ class StoreImageInfo extends StatelessWidget {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const TShimmerEffect(width: 150, height: 150);
                     } else if (snapshot.hasError || snapshot.data == null) {
-                      return const TCircularIcon(icon: Iconsax.image,width: 80,height: 80,backgroundColor: TColors.primaryBackground,); // Handle case where no image is available
-
+                      return const TCircularIcon(
+                        icon: Iconsax.image,
+                        width: 80,
+                        height: 80,
+                        backgroundColor: TColors.primaryBackground,
+                      ); // Handle case where no image is available
                     } else {
                       return TRoundedImage(
                         isNetworkImage: true,
@@ -320,7 +347,6 @@ class StoreImageInfo extends StatelessWidget {
                   },
                 );
               }),
-
 
               // Camera Icon
               TRoundedContainer(

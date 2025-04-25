@@ -1,5 +1,6 @@
 import 'package:admin_dashboard_v3/Models/salesman/salesman_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
+import 'package:admin_dashboard_v3/controllers/table/table_search_controller.dart';
 import 'package:admin_dashboard_v3/routes/routes.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
@@ -11,17 +12,21 @@ import 'package:iconsax/iconsax.dart';
 
 import '../../../customer/all_customer/table/customer_table.dart';
 
-
-
-
 class SalesmanDesktop extends StatelessWidget {
   const SalesmanDesktop({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return  Expanded(
+    // Use a unique instance of TableSearchController for salesmen
+    if (!Get.isRegistered<TableSearchController>(tag: 'salesmen')) {
+      Get.put(TableSearchController(), tag: 'salesmen');
+    }
+    final tableSearchController =
+        Get.find<TableSearchController>(tag: 'salesmen');
+
+    return Expanded(
       child: SizedBox(
-      //  height: 900,
+        //  height: 900,
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(TSizes.defaultSpace),
@@ -29,12 +34,17 @@ class SalesmanDesktop extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 //Title
-                Text('Salesman',style: Theme.of(context).textTheme.headlineMedium ,),
-                const SizedBox(height: TSizes.spaceBtwSections,),
+                Text(
+                  'Salesman',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+                const SizedBox(
+                  height: TSizes.spaceBtwSections,
+                ),
                 //bread Crumbs
-      
+
                 //Table Header
-      
+
                 //Table
                 TRoundedContainer(
                   padding: const EdgeInsets.all(TSizes.defaultSpace),
@@ -44,16 +54,40 @@ class SalesmanDesktop extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          SizedBox(width: 200,
-                            child: ElevatedButton(onPressed: (){ Get.toNamed( TRoutes.addSalesman,arguments: SalesmanModel.empty());}, child: Text('Add New Salesman',style: Theme.of(context).textTheme.bodyMedium!.apply(color: TColors.white),)),),
-                          SizedBox(width: 500 ,
+                          SizedBox(
+                            width: 200,
+                            child: ElevatedButton(
+                                onPressed: () {
+                                  Get.toNamed(TRoutes.addSalesman,
+                                      arguments: SalesmanModel.empty());
+                                },
+                                child: Text(
+                                  'Add New Salesman',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium!
+                                      .apply(color: TColors.white),
+                                )),
+                          ),
+                          SizedBox(
+                            width: 500,
                             child: TextFormField(
-                              decoration: const InputDecoration(prefixIcon: Icon(Iconsax.search_normal),hintText: 'Search Anything'),
-                            ) ,
+                              controller:
+                                  tableSearchController.searchController,
+                              decoration: const InputDecoration(
+                                  prefixIcon: Icon(Iconsax.search_normal),
+                                  hintText: 'Search by name, email, or phone'),
+                              onChanged: (value) {
+                                // Update the search term
+                                tableSearchController.searchTerm.value = value;
+                              },
+                            ),
                           )
                         ],
                       ),
-                      const SizedBox(height: TSizes.spaceBtwSections,),
+                      const SizedBox(
+                        height: TSizes.spaceBtwSections,
+                      ),
                       const SalesmanTable(),
                     ],
                   ),

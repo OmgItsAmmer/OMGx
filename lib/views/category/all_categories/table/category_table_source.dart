@@ -9,14 +9,18 @@ import 'package:get/get_core/src/get_main.dart';
 import '../../../../common/widgets/icons/table_action_icon_buttons.dart';
 
 class CategoryRow extends DataTableSource {
-  CategoryRow({required this.categoryCount});
-  final CategoryController categoryController = Get.find<CategoryController>();
+  CategoryRow({
+    required this.categoryCount,
+    required this.filteredCategories,
+  });
 
-  final categoryCount;
+  final CategoryController categoryController = Get.find<CategoryController>();
+  final int categoryCount;
+  final List<dynamic> filteredCategories;
 
   @override
   DataRow? getRow(int index) {
-    final category = categoryController.allCategories[index];
+    final category = filteredCategories[index];
     return DataRow2(
         onTap: () {
           categoryController.setCategoryDetail(category);
@@ -36,9 +40,10 @@ class CategoryRow extends DataTableSource {
                 .bodyLarge!
                 .apply(color: TColors.primary),
           )),
-
-          DataCell(Text((category.productCount == null) ?'0' :
-            category.productCount.toString(),
+          DataCell(Text(
+            (category.productCount == null)
+                ? '0'
+                : category.productCount.toString(),
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
@@ -53,10 +58,10 @@ class CategoryRow extends DataTableSource {
               Get.toNamed(TRoutes.categoryDetails, arguments: category);
             }, // TODO use get argument to send data in order detail screen
             onDeletePressed: () {
-
               Get.defaultDialog(
                 title: "Confirm Delete",
-                middleText: "Are you sure you want to delete the category ${category.categoryName}?",
+                middleText:
+                    "Are you sure you want to delete the category ${category.categoryName}?",
                 textConfirm: "Delete",
                 textCancel: "Cancel",
                 confirmTextColor: Colors.white,
@@ -69,8 +74,6 @@ class CategoryRow extends DataTableSource {
                   Navigator.of(Get.context!).pop(); // Close the dialog
                 },
               );
-
-
             },
           ))
         ]);
@@ -82,7 +85,7 @@ class CategoryRow extends DataTableSource {
 
   @override
   // TODO: implement rowCount
-  int get rowCount => categoryController.allCategories.length;
+  int get rowCount => categoryCount;
 
   @override
   // TODO: implement selectedRowCount

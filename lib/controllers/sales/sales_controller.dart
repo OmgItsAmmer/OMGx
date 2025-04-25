@@ -1,11 +1,14 @@
+import 'package:admin_dashboard_v3/Models/products/product_variant_model.dart';
 import 'package:admin_dashboard_v3/Models/sales/sale_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
 import 'package:admin_dashboard_v3/controllers/salesman/salesman_controller.dart';
 import 'package:admin_dashboard_v3/controllers/user/user_controller.dart';
+import 'package:admin_dashboard_v3/repositories/products/product_variants_repository.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_thermal_printer/flutter_thermal_printer.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -38,6 +41,7 @@ class SalesController extends GetxController {
 
   // Loading state for fetching products
   final isLoading = false.obs;
+  final isCheckingOut = false.obs;
 
   //Variables
   Rx<String> selectedProductName = ''.obs;
@@ -100,11 +104,32 @@ class SalesController extends GetxController {
   RxInt selectedChipIndex = (-1).obs;
   RxString selectedChipValue = ''.obs;
 
-  // @override
-  // void onInit() {
-  //   setupUserDetails();
-  //   super.onInit();
-  // }
+  // Add these properties at the top of the SalesController class after the other Rx variables
+  RxBool isLoadingVariants = false.obs;
+  RxList<ProductVariantModel> availableVariants = <ProductVariantModel>[].obs;
+  RxInt selectedVariantId = (-1).obs;
+  RxBool isManualTextEntry = false.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+
+    // Refresh product data to ensure accurate stock information
+    try {
+      final productController = Get.find<ProductController>();
+      productController.refreshProducts();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Failed to refresh products: $e');
+      }
+    }
+
+    // Initialize values
+    remainingAmount.value.text = netTotal.value.toString();
+
+    // Set current date
+    selectedDate.value = DateTime.now();
+  }
 
   void setupUserDetails() {
     try {
@@ -120,127 +145,66 @@ class SalesController extends GetxController {
 
   void addProduct() async {
     try {
-      if ((!addUnitTotalKey.currentState!.validate() &&
-              !addUnitPriceAndQuantityKey.currentState!.validate()) ||
-          selectedProductId == -1) {
+      isLoading.value = true;
+
+      // Prevent adding products when manual text entry doesn't match a valid product
+      if (isManualTextEntry.value) {
         TLoader.errorSnackBar(
-          title: "Empty Fields",
-          message: 'Kindly fill all the Text fields before proceeding',
+          title: "Invalid Product",
+          message: 'Please select a valid product from the dropdown list',
         );
         return;
       }
 
-      // Get ProductController instance
+      // Get the product to check if it's serialized
       final productController = Get.find<ProductController>();
-
-      // Find the product in allProducts list
       final product = productController.allProducts.firstWhere(
         (p) => p.productId == selectedProductId.value,
         orElse: () => ProductModel.empty(),
       );
 
-      if (product.productId == null) {
-        TLoader.errorSnackBar(
-          title: "Product Not Found",
-          message: 'Selected product not found in inventory',
-        );
-        return;
-      }
-
-      final int availableStock = product.stockQuantity ?? 0;
-      final int requestedQuantity = int.tryParse(quantity.text) ?? 0;
-      final String productName = product.name;
-
-      if (requestedQuantity <= 0) {
-        TLoader.errorSnackBar(
-          title: "Invalid Quantity",
-          message: 'Please enter a valid quantity greater than 0',
-        );
-        return;
-      }
-
-      // Check if product already exists in sales list
-      final existingSaleIndex = allSales.indexWhere((sale) =>
-          sale.productId == selectedProductId.value &&
-          sale.unit == selectedUnit.toString().trim());
-
-      if (existingSaleIndex != -1) {
-        // Product exists, update quantity and totals
-        final existingSale = allSales[existingSaleIndex];
-        final int existingQuantity = int.tryParse(existingSale.quantity) ?? 0;
-        final int newQuantity = existingQuantity + requestedQuantity;
-
-        // Check if new total quantity exceeds available stock
-        if (newQuantity > availableStock) {
+      // For serialized products, validate selection of a variant
+      if (product.hasSerialNumbers) {
+        if (selectedVariantId.value == -1) {
           TLoader.errorSnackBar(
-            title: "Insufficient Stock",
-            message:
-                'Only ${availableStock - existingQuantity} more $productName available in stock',
+            title: "Select Serial Number",
+            message: 'Please select a specific serial number for this product',
           );
           return;
         }
 
-        // Calculate new totals
-        final double unitPriceValue =
-            double.tryParse(unitPrice.value.text) ?? 0.0;
-        final double newTotalPrice = unitPriceValue * newQuantity;
-        final double newBuyPrice = buyingPriceIndividual * newQuantity;
-
-        // Update existing sale
-        allSales[existingSaleIndex] = SaleModel(
-          productId: selectedProductId.value,
-          name: dropdownController.text.trim(),
-          salePrice: unitPrice.value.text.trim(),
-          unit: selectedUnit.toString().trim(),
-          quantity: newQuantity.toString(),
-          totalPrice: newTotalPrice.toString(),
-          buyPrice: newBuyPrice,
+        // Find the selected variant
+        final variant = availableVariants.firstWhere(
+          (v) => v.variantId == selectedVariantId.value,
+          orElse: () => ProductVariantModel.empty(),
         );
 
-        // Update net totals
-        final double existingTotalPrice =
-            double.tryParse(existingSale.totalPrice) ?? 0.0;
-        netTotal.value = netTotal.value - existingTotalPrice + newTotalPrice;
-        originalNetTotal.value =
-            originalNetTotal.value - existingTotalPrice + newTotalPrice;
-        buyingPriceTotal =
-            buyingPriceTotal - existingSale.buyPrice + newBuyPrice;
-
-        // Update remaining amount
-        double currentRemaining =
-            double.tryParse(remainingAmount.value.text) ?? 0.0;
-        double totalPriceDiff = newTotalPrice - existingTotalPrice;
-        remainingAmount.value.text =
-            (currentRemaining + totalPriceDiff).toStringAsFixed(2);
-      } else {
-        // Product doesn't exist, add new sale
-        if (requestedQuantity > availableStock) {
+        // Check if variant is valid
+        if (variant.variantId == null) {
           TLoader.errorSnackBar(
-            title: "Insufficient Stock",
-            message: 'Only $availableStock $productName available in stock',
+            title: "Invalid Selection",
+            message: 'The selected variant is no longer available',
           );
           return;
         }
 
-        final double unitPriceValue =
-            double.tryParse(unitPrice.value.text) ?? 0.0;
-        final double newBuyPrice = buyingPriceIndividual * requestedQuantity;
-        final double newTotalPrice = unitPriceValue * requestedQuantity;
-
+        // For serialized products, create a sale with quantity = 1
         final sale = SaleModel(
           productId: selectedProductId.value,
           name: dropdownController.text.trim(),
-          salePrice: unitPrice.value.text.trim(),
+          salePrice: variant.sellingPrice.toString(),
           unit: selectedUnit.toString().trim(),
-          quantity: requestedQuantity.toString(),
-          totalPrice: newTotalPrice.toString(),
-          buyPrice: newBuyPrice,
+          quantity: "1", // Always 1 for serialized products
+          totalPrice: variant.sellingPrice.toString(),
+          buyPrice: variant.purchasePrice,
+          variantId: variant.variantId,
         );
 
         // Update totals
+        final double newTotalPrice = variant.sellingPrice;
         netTotal.value += newTotalPrice;
         originalNetTotal.value += newTotalPrice;
-        buyingPriceTotal += newBuyPrice;
+        buyingPriceTotal += variant.purchasePrice;
 
         // Update remaining amount
         double currentRemaining =
@@ -248,15 +212,78 @@ class SalesController extends GetxController {
         remainingAmount.value.text =
             (currentRemaining + newTotalPrice).toStringAsFixed(2);
 
+        // Add the sale and reset fields
         allSales.add(sale);
-      }
 
-      // Clear input fields
-      dropdownController.clear();
-      unitPrice.value.clear();
-      unit.clear();
-      quantity.clear();
-      totalPrice.value.clear();
+        // Remove the used variant from available list
+        availableVariants.removeWhere((v) => v.variantId == variant.variantId);
+        selectedVariantId.value = -1;
+
+        // Clear input fields
+        dropdownController.clear();
+        unitPrice.value.clear();
+        unit.clear();
+        quantity.clear();
+        totalPrice.value.clear();
+
+        // Show success feedback
+        TLoader.successSnackBar(
+          title: "Product Added",
+          message: "Serial number ${variant.serialNumber} added to sale",
+        );
+      } else {
+        // For regular products
+
+        // Validation for quantity and price
+        if (!addUnitPriceAndQuantityKey.currentState!.validate() &&
+            !addUnitTotalKey.currentState!.validate()) {
+          TLoader.errorSnackBar(
+            title: 'Kindly Fill the Required Field',
+            message: 'Please fill all required fields to continue',
+          );
+          return;
+        }
+
+        // Create a regular sale
+        SaleModel sale = SaleModel(
+          productId: selectedProductId.value,
+          name: dropdownController.text.trim(),
+          salePrice: unitPrice.value.text.trim(),
+          unit: selectedUnit.toString().split('.').last.trim(),
+          quantity: quantity.text.trim(),
+          totalPrice: totalPrice.value.text.trim(),
+          buyPrice: buyingPriceIndividual,
+        );
+
+        // Update totals
+        double newTotalPrice = double.tryParse(totalPrice.value.text) ?? 0.0;
+        netTotal.value += newTotalPrice;
+        originalNetTotal.value += newTotalPrice;
+        buyingPriceTotal +=
+            buyingPriceIndividual * (double.tryParse(quantity.text) ?? 0.0);
+
+        // Update remaining amount
+        double currentRemaining =
+            double.tryParse(remainingAmount.value.text) ?? 0.0;
+        remainingAmount.value.text =
+            (currentRemaining + newTotalPrice).toStringAsFixed(2);
+
+        // Add the sale and reset fields
+        allSales.add(sale);
+
+        // Clear input fields
+        dropdownController.clear();
+        unitPrice.value.clear();
+        unit.clear();
+        quantity.clear();
+        totalPrice.value.clear();
+
+        // Show success feedback
+        TLoader.successSnackBar(
+          title: "Product Added",
+          message: "${sale.name} added to sale",
+        );
+      }
     } catch (e) {
       if (kDebugMode) {
         print('Error in addProduct: $e');
@@ -265,13 +292,18 @@ class SalesController extends GetxController {
         title: 'Error Adding Product',
         message: 'An error occurred while adding the product: ${e.toString()}',
       );
+    } finally {
+      isLoading.value = false;
     }
   }
 
   Future<int> checkOut() async {
     try {
+      isCheckingOut.value = true;
+
       // Validate that there are sales to checkout
       if (allSales.isEmpty) {
+        Get.back(); // Close loading dialog
         TLoader.errorSnackBar(
             title: 'Checkout Error', message: 'No products added to checkout.');
         return -1;
@@ -284,12 +316,14 @@ class SalesController extends GetxController {
           customerNameController.text.isEmpty ||
           selectedDate.value == null ||
           salesmanNameController.text.isEmpty) {
+        Get.back(); // Close loading dialog
         TLoader.errorSnackBar(
             title: 'Checkout Error', message: 'Fill all the fields.');
         return -1;
       }
 
       if (selectedAddressId == null || selectedAddressId == -1) {
+        Get.back(); // Close loading dialog
         TLoader.errorSnackBar(
             title: 'Address Error', message: 'Select a valid address.');
         return -1;
@@ -298,14 +332,23 @@ class SalesController extends GetxController {
       // Validate paid amount
       double paidAmountValue = double.tryParse(paidAmount.text.trim()) ?? 0.0;
       if (paidAmountValue < 0) {
+        Get.back(); // Close loading dialog
         TLoader.errorSnackBar(
             title: 'Payment Error', message: 'Enter a valid paid amount.');
         return -1;
       }
 
+      // Store serialized variants to mark as sold later
+      final List<int> serializedVariantIds = [];
+      for (var sale in allSales) {
+        if (sale.variantId != null) {
+          serializedVariantIds.add(sale.variantId!);
+        }
+      }
+
       // Create an OrderModel instance with formatted date
       OrderModel order = OrderModel(
-        discount: double.tryParse(discount.value) ?? 0.0,
+        discount: double.tryParse(discount.value.replaceAll('%', '')) ?? 0.0,
         salesmanComission: salesmanController.allSalesman
                 .firstWhere(
                   (salesman) => salesman.salesmanId == selectedSalesmanId,
@@ -326,17 +369,22 @@ class SalesController extends GetxController {
         salesmanId: selectedSalesmanId,
         paidAmount: paidAmountValue,
         customerId: customerController.selectedCustomer.value.customerId,
-        orderItems: allSales
-            .map((sale) => OrderItemModel(
-                  productId: sale.productId,
-                  orderId: -1,
-                  quantity: int.tryParse(sale.quantity) ?? 0,
-                  price: double.tryParse(sale.totalPrice) ?? 0.0,
-                  unit: sale.unit.toString().split('.').last,
-                  totalBuyPrice: sale.buyPrice,
-                ))
-            .toList(),
       );
+
+      // Create order items with the correct variant IDs
+      final List<OrderItemModel> orderItems = allSales
+          .map((sale) => OrderItemModel(
+                productId: sale.productId,
+                orderId: -1,
+                quantity: int.tryParse(sale.quantity) ?? 0,
+                price: double.tryParse(sale.totalPrice) ?? 0.0,
+                unit: sale.unit.toString().split('.').last,
+                totalBuyPrice: sale.buyPrice,
+                variantId: sale.variantId,
+              ))
+          .toList();
+
+      order = order.copyWith(orderItems: orderItems);
 
       // Upload order to repository
       int orderId = await orderRepository.uploadOrder(
@@ -345,17 +393,33 @@ class SalesController extends GetxController {
       // Ensure orderId is valid before proceeding
       if (orderId > 0) {
         // Assign actual orderId to each order item using copyWith
-        order.orderItems = order.orderItems
-            ?.map((item) => item.copyWith(
-                  orderId: orderId,
-                ))
-            .toList();
+        order = order.copyWith(
+          orderId: orderId,
+          orderItems: order.orderItems
+              ?.map((item) => item.copyWith(
+                    orderId: orderId,
+                  ))
+              .toList(),
+        );
 
         final ProductController productController =
             Get.find<ProductController>();
 
         try {
-          // Update stock quantities
+          // Mark serialized variants as sold
+          if (serializedVariantIds.isNotEmpty) {
+            final productVariantsRepository =
+                Get.find<ProductVariantsRepository>();
+
+            for (var variantId in serializedVariantIds) {
+              await productVariantsRepository.markVariantAsSold(variantId);
+              if (kDebugMode) {
+                print('Marked variant $variantId as sold');
+              }
+            }
+          }
+
+          // Update stock quantities for non-serialized products
           if (order.orderItems != null) {
             await productController.updateStockQuantities(order.orderItems);
           }
@@ -381,8 +445,11 @@ class SalesController extends GetxController {
             // Don't throw the error since receipt generation is not critical
           }
 
-          // Reset fields after successful checkout
-          resetFields();
+          // Close loading dialog
+          Navigator.of(Get.context!).pop();
+
+          // Clear all sales data
+          clearSaleDetails();
 
           // Show success message
           TLoader.successSnackBar(
@@ -392,25 +459,41 @@ class SalesController extends GetxController {
 
           return orderId;
         } catch (e) {
+          Get.back(); // Close loading dialog
           if (kDebugMode) {
             print('Error updating stock: $e');
           }
           TLoader.errorSnackBar(
               title: 'Stock Update Error', message: e.toString());
-          return -1;
+          return orderId; // Still return orderId as the order was created
         }
       } else {
+        Navigator.of(Get.context!).pop();
         if (kDebugMode) {
           print('Order upload failed');
         }
-        throw Exception("Order upload failed, checkout aborted.");
+        TLoader.errorSnackBar(
+          title: 'Order Creation Failed',
+          message: 'Failed to create order. Please try again.',
+        );
+        return -1;
       }
     } catch (e) {
+      // Close loading dialog if open
+      if (Get.isDialogOpen == true) {
+        Get.back();
+      }
+
       if (kDebugMode) {
         print('Checkout error: $e');
       }
-      TLoader.errorSnackBar(title: 'Checkout Error', message: e.toString());
+      TLoader.errorSnackBar(
+        title: 'Checkout Error',
+        message: 'An error occurred during checkout: ${e.toString()}',
+      );
       return -1;
+    } finally {
+      isCheckingOut.value = false;
     }
   }
 
@@ -825,6 +908,63 @@ class SalesController extends GetxController {
       double currentPaidAmount = double.tryParse(paidAmount.text) ?? 0.0;
       remainingAmount.value.text =
           (netTotal.value - currentPaidAmount).toStringAsFixed(2);
+    }
+  }
+
+  // Add this method after the onInit method
+  void selectVariant(ProductVariantModel variant) {
+    selectedVariantId.value = variant.variantId ?? -1;
+
+    // Update the unit price and total price fields with the variant's selling price
+    if (variant.variantId != null) {
+      unitPrice.value.text = variant.sellingPrice.toString();
+      quantity.text = "1"; // For serialized products, quantity is always 1
+      totalPrice.value.text = variant.sellingPrice.toString();
+      buyingPriceIndividual = variant.purchasePrice;
+    }
+  }
+
+  // Add this method after the setupUserDetails method
+  Future<void> loadAvailableVariants(int productId) async {
+    try {
+      isLoadingVariants.value = true;
+      selectedVariantId.value = -1;
+
+      // Reset fields
+      availableVariants.clear();
+
+      if (productId <= 0) return;
+
+      // Get the product
+      final productController = Get.find<ProductController>();
+      final product = productController.allProducts.firstWhere(
+        (p) => p.productId == productId,
+        orElse: () => ProductModel.empty(),
+      );
+
+      // Only load variants for serialized products
+      if (!product.hasSerialNumbers) return;
+
+      // Load available variants
+      final variants = await productController.getAvailableVariants(productId);
+      availableVariants.assignAll(variants);
+
+      // If variants are available, update the UI
+      if (variants.isNotEmpty) {
+        unitPrice.value.text = "";
+        quantity.text = "1"; // For serialized products, quantity is always 1
+        totalPrice.value.text = "";
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error loading variants: $e');
+      }
+      TLoader.errorSnackBar(
+        title: 'Error',
+        message: 'Failed to load product variants: $e',
+      );
+    } finally {
+      isLoadingVariants.value = false;
     }
   }
 }

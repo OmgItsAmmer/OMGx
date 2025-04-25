@@ -14,8 +14,10 @@ import '../../../../controllers/product/product_images_controller.dart';
 import '../../../../utils/constants/enums.dart';
 
 class SalesmanRow extends DataTableSource {
-  SalesmanRow({required this.itemCount});
-  final itemCount;
+  SalesmanRow({required this.itemCount, required this.filteredSalesmen});
+
+  final int itemCount;
+  final List<SalesmanModel> filteredSalesmen;
   final AddressController addressController = Get.find<AddressController>();
   final OrderController orderController = Get.find<OrderController>();
   // final ProductImagesController productImagesController = Get.find<ProductImagesController>();
@@ -23,16 +25,16 @@ class SalesmanRow extends DataTableSource {
 
   @override
   DataRow? getRow(int index) {
-    final SalesmanModel salesman = salesmanController.allSalesman[index];
+    final SalesmanModel salesman = filteredSalesmen[index];
     return DataRow2(
-
         onTap: () async {
-
-          await addressController.fetchEntityAddresses(salesman.salesmanId!,'Salesman');
-          await orderController.fetchEntityOrders(salesman.salesmanId!,'Salesman');
+          await addressController.fetchEntityAddresses(
+              salesman.salesmanId!, 'Salesman');
+          await orderController.fetchEntityOrders(
+              salesman.salesmanId!, 'Salesman');
           orderController.setRecentOrderDay();
-         // orderController.setAverageTotalAmount();
-         //  productImagesController.setDesiredImage(MediaCategory.salesman, salesman.salesmanId);
+          // orderController.setAverageTotalAmount();
+          //  productImagesController.setDesiredImage(MediaCategory.salesman, salesman.salesmanId);
           Get.toNamed(TRoutes.salesmanDetails, arguments: salesman);
         },
         selected: false,
@@ -70,23 +72,21 @@ class SalesmanRow extends DataTableSource {
                 .bodyLarge!
                 .apply(color: TColors.primary),
           )),
-
           DataCell(TTableActionButtons(
             view: false,
             edit: true,
             delete: true,
-
             onEditPressed: () async {
-             // await addressController.fetchEntityAddresses(salesman.salesmanId,'Salesman');
+              // await addressController.fetchEntityAddresses(salesman.salesmanId,'Salesman');
               salesmanController.setSalesmanDetail(salesman);
               // productImagesController.setDesiredImage(MediaCategory.salesman, salesman.salesmanId);
               Get.toNamed(TRoutes.addSalesman, arguments: salesman);
-
             },
             onDeletePressed: () async {
               Get.defaultDialog(
                 title: "Confirm Delete",
-                middleText: "Are you sure you want to delete ${salesman.fullName}?",
+                middleText:
+                    "Are you sure you want to delete ${salesman.fullName}?",
                 textConfirm: "Delete",
                 textCancel: "Cancel",
                 confirmTextColor: Colors.red,
@@ -98,11 +98,9 @@ class SalesmanRow extends DataTableSource {
                 },
                 onCancel: () {
                   Navigator.of(Get.context!).pop(); // Close the dialog
-
                 },
               );
             },
-
           ))
         ]);
   }

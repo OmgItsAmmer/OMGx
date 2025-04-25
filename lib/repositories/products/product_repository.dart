@@ -104,6 +104,10 @@ class ProductRepository {
       final int currentStock = response['stock_quantity'] as int;
       final int newStock = currentStock - quantitySold;
 
+      if (newStock < 0) {
+        throw Exception('Insufficient stock. Cannot have negative inventory.');
+      }
+
       // Update the stock quantity
       await supabase
           .from('products')
@@ -112,6 +116,9 @@ class ProductRepository {
       if (kDebugMode) {
         print('Stock Update Exception: $e');
       }
+      TLoader.errorSnackBar(
+          title: 'Stock Update Error',
+          message: 'Failed to update stock: ${e.toString()}');
       rethrow;
     }
   }
@@ -145,7 +152,7 @@ class ProductRepository {
               'product_name': productName
             });
           } catch (e) {
-      if (kDebugMode) {
+            if (kDebugMode) {
               print('Error triggering low stock notification: $e');
             }
           }
@@ -153,10 +160,9 @@ class ProductRepository {
       }
     } catch (error) {
       if (kDebugMode) {
-        print("Error checking low stock: $error");
+        print('Error checking low stock: $error');
       }
-      // Don't throw the error since this is just a notification check
-      // and shouldn't affect the main order process
+      rethrow;
     }
   }
 }

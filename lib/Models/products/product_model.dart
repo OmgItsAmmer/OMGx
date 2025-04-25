@@ -11,6 +11,7 @@ class ProductModel {
   DateTime? createdAt;
   int? brandID;
   int? alertStock;
+  bool hasSerialNumbers;
 
   ProductModel({
     this.productId,
@@ -23,6 +24,7 @@ class ProductModel {
     this.createdAt,
     this.brandID,
     this.alertStock,
+    this.hasSerialNumbers = false,
   });
 
   // Static function to create an empty product model
@@ -37,6 +39,7 @@ class ProductModel {
         createdAt: null,
         brandID: null,
         alertStock: null,
+        hasSerialNumbers: false,
       );
 
   // Convert model to JSON for database insertion
@@ -50,6 +53,7 @@ class ProductModel {
       'stock_quantity': stockQuantity ?? 0,
       'brandID': brandID,
       'alert_stock': alertStock,
+      'has_serial_numbers': hasSerialNumbers,
     };
 
     if (isUpdate && productId != null) {
@@ -74,6 +78,36 @@ class ProductModel {
           : null,
       brandID: json['brandID'] as int?,
       alertStock: json['alert_stock'] as int?,
+      hasSerialNumbers: json['has_serial_numbers'] as bool? ?? false,
+    );
+  }
+
+  // CopyWith method
+  ProductModel copyWith({
+    int? productId,
+    String? name,
+    String? description,
+    String? basePrice,
+    String? salePrice,
+    int? categoryId,
+    int? stockQuantity,
+    DateTime? createdAt,
+    int? brandID,
+    int? alertStock,
+    bool? hasSerialNumbers,
+  }) {
+    return ProductModel(
+      productId: productId ?? this.productId,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      basePrice: basePrice ?? this.basePrice,
+      salePrice: salePrice ?? this.salePrice,
+      categoryId: categoryId ?? this.categoryId,
+      stockQuantity: stockQuantity ?? this.stockQuantity,
+      createdAt: createdAt ?? this.createdAt,
+      brandID: brandID ?? this.brandID,
+      alertStock: alertStock ?? this.alertStock,
+      hasSerialNumbers: hasSerialNumbers ?? this.hasSerialNumbers,
     );
   }
 }

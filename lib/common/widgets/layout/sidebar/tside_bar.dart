@@ -1,4 +1,5 @@
 import 'package:admin_dashboard_v3/common/widgets/images/t_circular_image.dart';
+import 'package:admin_dashboard_v3/common/widgets/loaders/strip_loader.dart';
 import 'package:admin_dashboard_v3/common/widgets/shimmers/shimmer.dart';
 import 'package:admin_dashboard_v3/routes/routes.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
@@ -24,36 +25,39 @@ class TSideBar extends StatelessWidget {
     final ShopController shopController = Get.find<ShopController>();
     final MediaController mediaController = Get.find<MediaController>();
 
-
     return Drawer(
-      shape:  const BeveledRectangleBorder(),
+      shape: const BeveledRectangleBorder(),
       child: Container(
         decoration: const BoxDecoration(
             color: TColors.white,
             border: Border(right: BorderSide(color: TColors.grey, width: 1))),
-        child:   SingleChildScrollView(
+        child: SingleChildScrollView(
           child: Column(
             children: [
-
-              const SizedBox(height: TSizes.spaceBtwSections,),
-               Row(
+              const SizedBox(
+                height: TSizes.spaceBtwSections,
+              ),
+              Column(
                 // crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-
                   Obx(() {
                     final image = mediaController.displayImage.value;
 
-                    if (image != null  && mediaController.displayImageOwner == MediaCategory.shop.toString().split('.').last) {
+                    if (image != null &&
+                        mediaController.displayImageOwner ==
+                            MediaCategory.shop.toString().split('.').last) {
                       return FutureBuilder<String?>(
                         future: mediaController.getImageFromBucket(
                           MediaCategory.shop.toString().split('.').last,
                           image.filename ?? '',
                         ),
                         builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
                             return const TShimmerEffect(width: 80, height: 80);
-                          } else if (snapshot.hasError || snapshot.data == null) {
+                          } else if (snapshot.hasError ||
+                              snapshot.data == null) {
                             return const Icon(Icons.error);
                           } else {
                             return TRoundedImage(
@@ -84,9 +88,11 @@ class TSideBar extends StatelessWidget {
                           MediaCategory.shop.toString().split('.').last,
                         ),
                         builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
                             return const TShimmerEffect(width: 80, height: 80);
-                          } else if (snapshot.hasError || snapshot.data == null) {
+                          } else if (snapshot.hasError ||
+                              snapshot.data == null) {
                             return const Text('No image available');
                           } else {
                             return TCircularImage(
@@ -100,22 +106,27 @@ class TSideBar extends StatelessWidget {
                       );
                     });
                   }),
-
-                  const SizedBox(width: TSizes.spaceBtwItems,),
-                  Obx((){
-
-                    if(shopController.isLoading.value){
-                      return const TShimmerEffect(width: 80, height: 40);
+                  const SizedBox(
+                    height: TSizes.spaceBtwItems,
+                  ),
+                  Obx(() {
+                    if (shopController.isLoading.value) {
+                      return const TStripLoader(width: 80, height: 40);
                     }
 
-                    return Text(shopController.selectedShop?.value.shopname ?? '',style: Theme.of(context).textTheme.headlineLarge,);
-
+                    return Text(
+                      shopController.selectedShop?.value.shopname ?? '',
+                      style: Theme.of(context).textTheme.headlineLarge,
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.visible,
+                      softWrap: true,
+                      maxLines: 2,
+                    );
                   })
                 ],
               ),
               const SizedBox(
                 height: TSizes.spaceBtwSections,
-
               ),
               Padding(
                 padding: const EdgeInsets.all(TSizes.md),
@@ -123,28 +134,88 @@ class TSideBar extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('MENU',style: Theme.of(context).textTheme.bodySmall!.apply(letterSpacingDelta: 1.2),),
-
+                    Text(
+                      'MENU',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall!
+                          .apply(letterSpacingDelta: 1.2),
+                    ),
 
                     //Menu Items
-                 const TMenuItem(icon: Iconsax.status,itemName: 'DashBoard', route: TRoutes.dashboard,),
-                 const TMenuItem(icon: Iconsax.money,itemName: 'Sales', route: TRoutes.sales,),
-                 const TMenuItem(icon: Iconsax.receipt_item,itemName: 'Orders', route: TRoutes.orders,),
-                 const TMenuItem(icon: Iconsax.box,itemName: 'Products', route: TRoutes.products,),
-                 const TMenuItem(icon: Iconsax.people,itemName: 'Customers', route: TRoutes.customer,),
-                 const TMenuItem(icon: Iconsax.profile_2user,itemName: 'Salesman', route: TRoutes.salesman,),
-                 const TMenuItem(icon: Iconsax.convert_3d_cube,itemName: 'Brands', route: TRoutes.brand,),
-                 const TMenuItem(icon: Iconsax.folder_open,itemName: 'Categories', route: TRoutes.category,),
+                    const TMenuItem(
+                      icon: Iconsax.status,
+                      itemName: 'DashBoard',
+                      route: TRoutes.dashboard,
+                    ),
+                    const TMenuItem(
+                      icon: Iconsax.money,
+                      itemName: 'Sales',
+                      route: TRoutes.sales,
+                    ),
+                    const TMenuItem(
+                      icon: Iconsax.receipt_item,
+                      itemName: 'Orders',
+                      route: TRoutes.orders,
+                    ),
+                    const TMenuItem(
+                      icon: Iconsax.box,
+                      itemName: 'Products',
+                      route: TRoutes.products,
+                    ),
+                    const TMenuItem(
+                      icon: Iconsax.people,
+                      itemName: 'Customers',
+                      route: TRoutes.customer,
+                    ),
+                    const TMenuItem(
+                      icon: Iconsax.profile_2user,
+                      itemName: 'Salesman',
+                      route: TRoutes.salesman,
+                    ),
+                    const TMenuItem(
+                      icon: Iconsax.convert_3d_cube,
+                      itemName: 'Brands',
+                      route: TRoutes.brand,
+                    ),
+                    const TMenuItem(
+                      icon: Iconsax.folder_open,
+                      itemName: 'Categories',
+                      route: TRoutes.category,
+                    ),
 
-                   Text('OTHER',style: Theme.of(context).textTheme.bodySmall!.apply(letterSpacingDelta: 1.2),),
-                    const TMenuItem(icon: Iconsax.image,itemName: 'Media', route: TRoutes.mediaScreen,),
-                    const TMenuItem(icon: Iconsax.note ,itemName: 'Reports', route: TRoutes.reportScreen,),
-                    const TMenuItem(icon: Iconsax.note ,itemName: 'Expenses', route: TRoutes.expenseScreen,),
-                    const TMenuItem(icon: Iconsax.profile_circle,itemName: 'Profile', route: TRoutes.profileScreen,),
-                    const TMenuItem(icon: Iconsax.shop,itemName: 'Store', route: TRoutes.storeScreen,),
-
-
-
+                    Text(
+                      'OTHER',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall!
+                          .apply(letterSpacingDelta: 1.2),
+                    ),
+                    const TMenuItem(
+                      icon: Iconsax.image,
+                      itemName: 'Media',
+                      route: TRoutes.mediaScreen,
+                    ),
+                    const TMenuItem(
+                      icon: Iconsax.note,
+                      itemName: 'Reports',
+                      route: TRoutes.reportScreen,
+                    ),
+                    const TMenuItem(
+                      icon: Iconsax.note,
+                      itemName: 'Expenses',
+                      route: TRoutes.expenseScreen,
+                    ),
+                    const TMenuItem(
+                      icon: Iconsax.profile_circle,
+                      itemName: 'Profile',
+                      route: TRoutes.profileScreen,
+                    ),
+                    const TMenuItem(
+                      icon: Iconsax.shop,
+                      itemName: 'Store',
+                      route: TRoutes.storeScreen,
+                    ),
                   ],
                 ),
               )
@@ -155,4 +226,3 @@ class TSideBar extends StatelessWidget {
     );
   }
 }
-

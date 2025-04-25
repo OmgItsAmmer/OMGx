@@ -217,13 +217,19 @@ class SaleActionButtons extends StatelessWidget {
                                           salesController.checkOut();
                                           Navigator.of(context).pop();
                                         },
-                                        child: Text(
-                                          'Confirm',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium!
-                                              .apply(color: TColors.white),
-                                        ))),
+                                        child: (salesController
+                                                .isCheckingOut.value)
+                                            ? const CircularProgressIndicator(
+                                                color: TColors.white,
+                                              )
+                                            : Text(
+                                                'Confirm',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyMedium!
+                                                    .apply(
+                                                        color: TColors.white),
+                                              ))),
                               ],
                             )
                           ],

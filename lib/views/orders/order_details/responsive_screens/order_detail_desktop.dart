@@ -38,94 +38,89 @@ class OrderDetailDesktopScreen extends StatelessWidget {
       guarantorController.fetchGuarantors(orderModel.orderId ?? -1);
     }
 
-    return Expanded(
-      child: SizedBox(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(TSizes.defaultSpace),
-            child: Column(
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(TSizes.defaultSpace),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: Column(
-                        children: [
-                          OrderInfo(orderModel: orderModel),
-                          const SizedBox(height: TSizes.spaceBtwSections),
-                          OrderItems(order: orderModel),
-                          const SizedBox(height: TSizes.spaceBtwSections),
-                          OrderTransaction(orderModel: orderModel),
-                          const SizedBox(height: TSizes.spaceBtwSections),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: TSizes.spaceBtwSections),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          UserInfo(
-                            mediaCategory: MediaCategory.customers,
-                            title: 'Customer',
-                            showAddress: true,
-                            fullName: customerController
-                                .selectedCustomer.value.fullName,
-                            email:
-                                customerController.selectedCustomer.value.email,
-                            phoneNumber: customerController
-                                .selectedCustomer.value.phoneNumber,
-                            isLoading: customerController.isLoading.value,
-                          ),
-                          const SizedBox(height: TSizes.spaceBtwSections),
-                          UserInfo(
-                            mediaCategory: MediaCategory.salesman,
-                            title: 'Salesman',
-                            showAddress: false,
-                            fullName: salesmanController
-                                    .selectedSalesman?.value.fullName ??
-                                'Not Found',
-                            email: salesmanController
-                                    .selectedSalesman?.value.email ??
-                                'Not Found',
-                            phoneNumber: salesmanController
-                                    .selectedSalesman?.value.phoneNumber ??
-                                'Not Found',
-                            isLoading: salesmanController.isLoading.value,
-                          ),
-                          const SizedBox(height: TSizes.spaceBtwSections),
-                          if (saleTypeFromOrder == SaleType.installment) ...[
-                            const GuarantorCard(
-                                title: 'Guarantor 1', guarantorIndex: 0),
-                            const SizedBox(height: TSizes.spaceBtwSections),
-                            const GuarantorCard(
-                                title: 'Guarantor 2', guarantorIndex: 1),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                if (saleTypeFromOrder == SaleType.installment) ...[
-                  const SizedBox(height: TSizes.spaceBtwSections),
-                  TRoundedContainer(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Installment Plans',
-                          style: Theme.of(context).textTheme.headlineMedium,
-                        ),
-                        const SizedBox(height: TSizes.spaceBtwSections),
-                        const InstallmentTable(),
-                      ],
-                    ),
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    children: [
+                      OrderInfo(orderModel: orderModel),
+                      const SizedBox(height: TSizes.spaceBtwSections),
+                      OrderItems(order: orderModel),
+                      const SizedBox(height: TSizes.spaceBtwSections),
+                      OrderTransaction(orderModel: orderModel),
+                      const SizedBox(height: TSizes.spaceBtwSections),
+                    ],
                   ),
-                ],
+                ),
+                const SizedBox(width: TSizes.spaceBtwSections),
+                Expanded(
+                  child: Column(
+                    children: [
+                      UserInfo(
+                        mediaCategory: MediaCategory.customers,
+                        title: 'Customer',
+                        showAddress: true,
+                        fullName:
+                            customerController.selectedCustomer.value.fullName,
+                        email: customerController.selectedCustomer.value.email,
+                        phoneNumber: customerController
+                            .selectedCustomer.value.phoneNumber,
+                        isLoading: customerController.isLoading.value,
+                      ),
+                      const SizedBox(height: TSizes.spaceBtwSections),
+                      UserInfo(
+                        mediaCategory: MediaCategory.salesman,
+                        title: 'Salesman',
+                        showAddress: false,
+                        fullName: salesmanController
+                                .selectedSalesman?.value.fullName ??
+                            'Not Found',
+                        email:
+                            salesmanController.selectedSalesman?.value.email ??
+                                'Not Found',
+                        phoneNumber: salesmanController
+                                .selectedSalesman?.value.phoneNumber ??
+                            'Not Found',
+                        isLoading: salesmanController.isLoading.value,
+                      ),
+                      const SizedBox(height: TSizes.spaceBtwSections),
+                      if (saleTypeFromOrder == SaleType.installment) ...[
+                        const GuarantorCard(
+                            title: 'Guarantor 1', guarantorIndex: 0),
+                        const SizedBox(height: TSizes.spaceBtwSections),
+                        const GuarantorCard(
+                            title: 'Guarantor 2', guarantorIndex: 1),
+                      ],
+                    ],
+                  ),
+                ),
               ],
             ),
-          ),
+            if (saleTypeFromOrder == SaleType.installment) ...[
+              const SizedBox(height: TSizes.spaceBtwSections),
+              TRoundedContainer(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Installment Plans',
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                    const SizedBox(height: TSizes.spaceBtwSections),
+                    const InstallmentTable(),
+                  ],
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );

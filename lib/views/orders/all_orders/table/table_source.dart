@@ -14,44 +14,75 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../Models/orders/order_item_model.dart';
+import '../../../../Models/customer/customer_model.dart';
 import '../../../../common/widgets/containers/rounded_container.dart';
 import '../../../../utils/constants/enums.dart';
 
-
 class OrderRows extends DataTableSource {
-  OrderRows({required this.ordersCount});
-  int ordersCount;
+  OrderRows({
+    required this.ordersCount,
+    required this.filteredOrders,
+  });
+
+  final int ordersCount;
+  final List<OrderModel> filteredOrders;
+  final OrderController orderController = Get.find<OrderController>();
+  final CustomerController customerController = Get.find<CustomerController>();
+
+  // Get customer name by ID
+  String getCustomerName(int? customerId) {
+    if (customerId == null) return 'Unknown';
+
+    final customer = customerController.allCustomers
+        .firstWhereOrNull((customer) => customer.customerId == customerId);
+
+    return customer?.fullName ?? 'Unknown';
+  }
+
+  // Format date to dd/mm/yyyy
+  String formatDate(String dateStr) {
+    try {
+      final date = DateTime.parse(dateStr);
+      return DateFormat('dd/MM/yyyy').format(date);
+    } catch (e) {
+      return dateStr;
+    }
+  }
+
   @override
   DataRow? getRow(int index) {
-    final OrderController orderController = Get.find<OrderController>();
-    final InstallmentController installmentController = Get.find<InstallmentController>();
+    final InstallmentController installmentController =
+        Get.find<InstallmentController>();
     final AddressController addressController = Get.find<AddressController>();
-    final GuarantorController guarantorController = Get.find<GuarantorController>();
-    final CustomerController customerController = Get.find<CustomerController>();
-    final SalesmanController salesmanController = Get.find<SalesmanController>();
-    //order model
-    final order = orderController.allOrders[index];
+    final GuarantorController guarantorController =
+        Get.find<GuarantorController>();
+    final SalesmanController salesmanController =
+        Get.find<SalesmanController>();
+
+    // Use the filtered orders list
+    final OrderModel order = filteredOrders[index];
+
     SaleType? saleTypeFromOrder = SaleType.values.firstWhere(
-          (e) => e.name == order.saletype,
+      (e) => e.name == order.saletype,
       orElse: () => SaleType.cash,
     );
 
     OrderStatus? orderStatus = OrderStatus.values.firstWhere(
-          (e) => e.name == order.status,
+      (e) => e.name == order.status,
       orElse: () => OrderStatus.pending,
     );
+
     return DataRow2(
-        onTap: () async  {
-         orderController.setUpOrderDetails(order);
-
-
+        onTap: () async {
+          orderController.setUpOrderDetails(order);
         },
         selected: false,
         onSelectChanged: (value) {},
         cells: [
           DataCell(
             Text(
-              orderController.allOrders[index].orderId.toString(),
+              order.orderId.toString(),
               style: Theme.of(Get.context!)
                   .textTheme
                   .bodyLarge!
@@ -60,53 +91,48 @@ class OrderRows extends DataTableSource {
           ),
           DataCell(
             Text(
-              DateFormat('dd-MM-yyyy').format(DateTime.parse(orderController.allOrders[index].orderDate)),
+              formatDate(order.orderDate),
             ),
           ),
-          //  DataCell(
-          //
-          //     Text('Item length')
-          //
-          // ),
+          DataCell(
+            Text(
+              getCustomerName(order.customerId),
+              style: Theme.of(Get.context!)
+                  .textTheme
+                  .bodyLarge!
+                  .apply(color: TColors.primary),
+            ),
+          ),
           DataCell(TRoundedContainer(
             radius: TSizes.cardRadiusSm,
             padding: const EdgeInsets.symmetric(
                 vertical: TSizes.sm, horizontal: TSizes.md),
-            backgroundColor:
-                THelperFunctions.getOrderStatusColor(orderStatus)
-                    .withValues(alpha: 0.1),
+            backgroundColor: THelperFunctions.getOrderStatusColor(orderStatus)
+                .withValues(alpha: 0.1),
             child: Text(
-               orderController.allOrders[index].status.toString(),
+              order.status.toString(),
               style: TextStyle(
-                  color: THelperFunctions.getOrderStatusColor(
-                      orderStatus)),
+                  color: THelperFunctions.getOrderStatusColor(orderStatus)),
             ),
-
           )),
-           DataCell(Text(orderController.allOrders[index].totalPrice.toString(),)),
-          DataCell(
-            TTableActionButtons(
-              delete: false,
-              view: true,
-              edit: false,
-              onViewPressed: () async {
-                orderController.setUpOrderDetails(order);
-              },
-
-            )
-          )//orderid
+          DataCell(Text(order.totalPrice.toString())),
+          DataCell(TTableActionButtons(
+            delete: false,
+            view: true,
+            edit: false,
+            onViewPressed: () async {
+              orderController.setUpOrderDetails(order);
+            },
+          ))
         ]);
   }
 
   @override
-  // TODO: implement isRowCountApproximate
   bool get isRowCountApproximate => false;
 
   @override
-  // TODO: implement rowCount
   int get rowCount => ordersCount;
 
   @override
-  // TODO: implement selectedRowCount
   int get selectedRowCount => 0;
 }

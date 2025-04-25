@@ -11,29 +11,26 @@ class BrandDetailDesktop extends StatelessWidget {
   final BrandModel brandModel;
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-        child: Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(TSizes.defaultSpace),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: TRoundedContainer(
-                  padding: const EdgeInsets.all(TSizes.defaultSpace),
-                  child: BrandInfo(
-                    brandModel: brandModel,
-                  ),
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(TSizes.defaultSpace),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: TRoundedContainer(
+                padding: const EdgeInsets.all(TSizes.defaultSpace),
+                child: BrandInfo(
+                  brandModel: brandModel,
                 ),
               ),
-              Expanded(
-                  flex: TDeviceUtils.isDesktopScreen(context) ? 2 : 0,
-                  child: const SizedBox())
-            ],
-          ),
+            ),
+            Expanded(
+                flex: TDeviceUtils.isDesktopScreen(context) ? 2 : 0,
+                child: const SizedBox())
+          ],
         ),
       ),
-    ));
+    );
   }
 }

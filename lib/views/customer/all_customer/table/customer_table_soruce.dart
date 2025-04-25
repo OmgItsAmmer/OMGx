@@ -11,22 +11,29 @@ import 'package:get/get_core/src/get_main.dart';
 import '../../../../common/widgets/icons/table_action_icon_buttons.dart';
 
 class CustomerRow extends DataTableSource {
-  CustomerRow({required this.customerCount});
+  CustomerRow({
+    required this.customerCount,
+    required this.filteredCustomers,
+  });
 
   final CustomerController customerController = Get.find<CustomerController>();
   final AddressController addressController = Get.find<AddressController>();
   // final ProductImagesController productImagesController = Get.find<ProductImagesController>();
 
   final OrderController orderController = Get.find<OrderController>();
-  final customerCount;
+
+  final int customerCount;
+  final List<dynamic> filteredCustomers;
+
   @override
   DataRow? getRow(int index) {
-    final customer = customerController.allCustomers[index];
+    final customer = filteredCustomers[index];
     return DataRow2(
         onTap: () async {
-
-          await addressController.fetchEntityAddresses(customer.customerId!,'Customer');
-          await orderController.fetchEntityOrders(customer.customerId!,'Customer');
+          await addressController.fetchEntityAddresses(
+              customer.customerId!, 'Customer');
+          await orderController.fetchEntityOrders(
+              customer.customerId!, 'Customer');
           orderController.currentOrders.refresh();
           orderController.setRecentOrderDay();
           orderController.setAverageTotalAmount();
@@ -69,34 +76,30 @@ class CustomerRow extends DataTableSource {
             view: false,
             edit: true,
             delete: true,
-
             onEditPressed: () async {
-              await addressController.fetchEntityAddresses(customer.customerId!,'Customer');
+              await addressController.fetchEntityAddresses(
+                  customer.customerId!, 'Customer');
               customerController.setCustomerDetail(customer);
               // productImagesController.setDesiredImage(MediaCategory.customers, customer.customerId);
               Get.toNamed(TRoutes.addCustomer, arguments: customer);
-
             },
-
-              onDeletePressed: () async {
-                Get.defaultDialog(
-                  title: "Confirm Delete",
-                  middleText: "Are you sure you want to delete ${customer.fullName}?",
-                  textConfirm: "Delete",
-                  textCancel: "Cancel",
-                  confirmTextColor: Colors.white,
-                  buttonColor: Colors.red,
-                  onConfirm: () async {
-                    Navigator.of(Get.context!).pop(); // Close the dialog
-                    await customerController.deleteCustomer(customer.customerId!);
-                  },
-                  onCancel: () {
-                    Navigator.of(Get.context!).pop(); // Close the dialog
-
-                  },
-                );
-
-
+            onDeletePressed: () async {
+              Get.defaultDialog(
+                title: "Confirm Delete",
+                middleText:
+                    "Are you sure you want to delete ${customer.fullName}?",
+                textConfirm: "Delete",
+                textCancel: "Cancel",
+                confirmTextColor: Colors.white,
+                buttonColor: Colors.red,
+                onConfirm: () async {
+                  Navigator.of(Get.context!).pop(); // Close the dialog
+                  await customerController.deleteCustomer(customer.customerId!);
+                },
+                onCancel: () {
+                  Navigator.of(Get.context!).pop(); // Close the dialog
+                },
+              );
             },
           ))
         ]);

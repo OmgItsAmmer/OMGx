@@ -38,7 +38,7 @@ class TLoginForm extends StatelessWidget {
               ),
               Obx(
                 () => TextFormField(
-                  validator: (value) => TValidator.validatePassword(value),
+                  validator: (value) => TValidator.validateEmptyText(value, 'Password'),
                   obscureText: controller.hidePassword.value,
                   controller: controller.password,
                   expands: false,
@@ -70,7 +70,8 @@ class TLoginForm extends StatelessWidget {
                     ],
                   ),
                   TextButton(
-                      onPressed: () => Get.to(() => const ForgetPassword()),
+                      onPressed: () =>
+                          Get.to(() => const ForgetPasswordScreen()),
                       child: const Text(TTexts.forgetPassword)),
                 ],
               ),

@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_strategy/url_strategy.dart';
+import 'package:window_manager/window_manager.dart';
 
 import 'app.dart';
 import 'repositories/authentication/authicatioon_repository.dart';
@@ -16,16 +17,18 @@ import 'repositories/signup/signup_repository.dart';
 final supabase = Supabase.instance.client;
 
 Future<void> main() async {
-  // WidgetsFlutterBinding.ensureInitialized();
-  // await windowManager.ensureInitialized();
-  //
-  // // Set the window to be fullscreen
-  // windowManager.waitUntilReadyToShow().then((_) async {
-  //   await windowManager.setFullScreen(true);
-  // });
-  //Widget Binding
-
   WidgetsFlutterBinding.ensureInitialized();
+  await windowManager.ensureInitialized();
+
+  // WindowOptions windowOptions = const WindowOptions(
+  //   //minimumSize: Size(800, 800),
+  //   center: true,
+  //   title: "OMG POS : NEXUS",
+  // );
+  // windowManager.waitUntilReadyToShow(windowOptions, () async {
+  //   await windowManager.show();
+  //   await windowManager.focus();
+  // });
 
   // remove # sign from url
   setPathUrlStrategy();
@@ -43,8 +46,5 @@ Future<void> main() async {
   Get.put(SignUpRepository());
   Get.put(AuthenticationRepository());
 
-  // .then((_) => Get.put(AuthenticationRepository()));
-  // await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)
-  //     .then((FirebaseApp value) => Get.put(AuthenticationRepository()));
   runApp(const App());
 }

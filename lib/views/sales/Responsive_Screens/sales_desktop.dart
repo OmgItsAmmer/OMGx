@@ -4,6 +4,7 @@ import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
 import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:admin_dashboard_v3/views/sales/widgets/sale_action_buttons.dart';
+import 'package:admin_dashboard_v3/views/sales/widgets/serial_variant_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -19,194 +20,228 @@ import '../widgets/sales_summary.dart';
 import '../widgets/unit_price_quantity.dart';
 import '../widgets/unit_total_price.dart';
 
-class SalesDesktop extends StatelessWidget {
+class SalesDesktop extends GetView<SalesController> {
   const SalesDesktop({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final SalesController salesController = Get.find<SalesController>();
-    final CustomerController customerController =
-        Get.find<CustomerController>();
-    final AddressController addressController = Get.find<AddressController>();
-    // final ProductImagesController productImagesController =
-    //     Get.find<ProductImagesController>();
-   final MediaController mediaController = Get.find<MediaController>();
+    final customerController = Get.find<CustomerController>();
+    final addressController = Get.find<AddressController>();
+    final mediaController = Get.find<MediaController>();
 
+    // Mark ready for GetX to manage reactive rebuilds
+    final isContentReady = true.obs;
 
-    return Expanded(
-      child: SizedBox(
-        // height: 900,
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(TSizes.defaultSpace),
-            child: Column(
-              children: [
-                ExpansionTile(
-                  title: const Text(
-                    "Sales Details",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+    return Obx(() => isContentReady.value
+        ? SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(TSizes.defaultSpace),
+              child: Column(
+                children: [
+                  // Page title
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Sales',
+                      style: Theme.of(context).textTheme.headlineMedium,
                     ),
                   ),
-                  // Bind the expansion state to the controller's observable
-                  initiallyExpanded: salesController.isExpanded.value,
-                  onExpansionChanged: (value) {
-                    salesController.toggleExpanded(); // Update the state
-                  },
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(TSizes.defaultSpace),
-                      child: TRoundedContainer(
+                  const SizedBox(height: TSizes.spaceBtwSections),
+
+                  ExpansionTile(
+                    title: const Text(
+                      "Sales Details",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    // Bind the expansion state to the controller's observable
+                    initiallyExpanded: controller.isExpanded.value,
+                    onExpansionChanged: (value) {
+                      controller.toggleExpanded(); // Update the state
+                    },
+                    children: [
+                      Padding(
                         padding: const EdgeInsets.all(TSizes.defaultSpace),
-                        //backgroundColor: TColors.primary,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Cashier Info
-                            const Expanded(flex: 1, child: SalesCashierInfo()),
-                            const SizedBox(
-                              width: TSizes
-                                  .spaceBtwSections, // Replace TSizes.spaceBtwSections if needed
-                            ),
+                        child: TRoundedContainer(
+                          padding: const EdgeInsets.all(TSizes.defaultSpace),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Cashier Info
+                              const Expanded(
+                                  flex: 1, child: SalesCashierInfo()),
+                              const SizedBox(
+                                width: TSizes.spaceBtwSections,
+                              ),
 
-                            // Customer Info
-                            Expanded(
-                                flex: 2,
-                                child: SaleCustomerInfo(
-                                  namesList:
-                                  customerController.allCustomers.map((e) => e.fullName).toList(),
-                                  hintText: 'Customer Name',
-                                  userNameTextController:
-                                      salesController.customerNameController,
+                              // Customer Info
+                              Expanded(
+                                  flex: 2,
+                                  child: SaleCustomerInfo(
+                                    namesList: customerController.allCustomers
+                                        .map((e) => e.fullName)
+                                        .toList(),
+                                    hintText: 'Customer Name',
+                                    userNameTextController:
+                                        controller.customerNameController,
 
-                                  onSelectedName: (val) async {
-                                    if (val.isEmpty) {
-                                      customerController.selectedCustomer.value = CustomerModel.empty(); // or null
-                                      salesController.customerPhoneNoController.value.clear();
-                                      salesController.customerCNICController.value.clear();
-                                      addressController.selectedCustomerAddress.value = AddressModel.empty(); // or null
-                                      salesController.customerAddressController.value.clear(); // ← THIS clears the address field
-                                      salesController.selectedAddressId = null;
-                                      mediaController.displayImage.value = null;
-                                      return;
-                                    }
-
-
-
-                                    // Continue normal logic
-                                    customerController.selectedCustomer.value =
-                                        customerController.allCustomers.firstWhere((user) => user.fullName == val);
-                                    addressController.fetchEntityAddresses(
-                                        customerController.selectedCustomer.value.customerId!, 'Customer');
-                                    salesController.entityId.value = customerController.selectedCustomer.value.customerId!;
-                                    salesController.customerPhoneNoController.value.text =
-                                        customerController.selectedCustomer.value.phoneNumber;
-                                    salesController.customerCNICController.value.text =
-                                        customerController.selectedCustomer.value.cnic;
-                                  },
-
-
-                                  ///ADDRESS RELATED
-                                  addressList: addressController
-                                      .allCustomerAddressesLocation,
-                                  addressTextController: salesController
-                                      .customerAddressController.value,
-                                  onSelectedAddress: (val) {
-                                    addressController
-                                            .selectedCustomerAddress.value =
-                                        addressController.allCustomerAddresses
-                                            .firstWhere((address) =>
-                                                address.location == val);
-
-                                    salesController.selectedAddressId =
+                                    onSelectedName: (val) async {
+                                      if (val.isEmpty) {
+                                        customerController.selectedCustomer
+                                            .value = CustomerModel.empty();
+                                        controller
+                                            .customerPhoneNoController.value
+                                            .clear();
+                                        controller.customerCNICController.value
+                                            .clear();
                                         addressController
                                             .selectedCustomerAddress
-                                            .value
-                                            .addressId;
-                                    // print(salesController.selectedAddressId);
-                                  },
+                                            .value = AddressModel.empty();
+                                        controller
+                                            .customerAddressController.value
+                                            .clear();
+                                        controller.selectedAddressId = null;
+                                        mediaController.displayImage.value =
+                                            null;
+                                        return;
+                                      }
 
-                                )),
+                                      // Continue normal logic
+                                      customerController
+                                              .selectedCustomer.value =
+                                          customerController.allCustomers
+                                              .firstWhere((user) =>
+                                                  user.fullName == val);
+                                      addressController.fetchEntityAddresses(
+                                          customerController.selectedCustomer
+                                              .value.customerId!,
+                                          'Customer');
+                                      controller.entityId.value =
+                                          customerController.selectedCustomer
+                                              .value.customerId!;
+                                      controller.customerPhoneNoController.value
+                                              .text =
+                                          customerController.selectedCustomer
+                                              .value.phoneNumber;
+                                      controller.customerCNICController.value
+                                              .text =
+                                          customerController
+                                              .selectedCustomer.value.cnic;
+                                    },
 
-                            const SizedBox(
-                              width: TSizes
-                                  .spaceBtwSections, // Replace TSizes.spaceBtwSections if needed
-                            ),
+                                    ///ADDRESS RELATED
+                                    addressList: addressController
+                                        .allCustomerAddressesLocation,
+                                    addressTextController: controller
+                                        .customerAddressController.value,
+                                    onSelectedAddress: (val) {
+                                      addressController
+                                              .selectedCustomerAddress.value =
+                                          addressController.allCustomerAddresses
+                                              .firstWhere((address) =>
+                                                  address.location == val);
 
-                            // Salesman Info
-                            const Expanded(flex: 1, child: SalesSalemanInfo()),
-                          ],
+                                      controller.selectedAddressId =
+                                          addressController
+                                              .selectedCustomerAddress
+                                              .value
+                                              .addressId;
+                                    },
+                                  )),
+
+                              const SizedBox(
+                                width: TSizes.spaceBtwSections,
+                              ),
+
+                              // Salesman Info
+                              const Expanded(
+                                  flex: 1, child: SalesSalemanInfo()),
+                            ],
+                          ),
                         ),
                       ),
+                    ],
+                  ),
+
+                  const SizedBox(
+                    height: TSizes.spaceBtwSections,
+                  ),
+                  TRoundedContainer(
+                    padding: const EdgeInsets.all(TSizes.defaultSpace),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        // Product Bar
+                        const Expanded(child: ProductSearchBar()),
+                        const SizedBox(
+                          width: TSizes.spaceBtwItems,
+                        ),
+
+                        // Unit Price Quantity
+                        const Expanded(child: UnitPriceQuantity()),
+
+                        const SizedBox(
+                          width: TSizes.spaceBtwItems,
+                        ),
+
+                        // Unit(Kg/etc) Total Price
+                        const Expanded(child: UnitTotalPrice()),
+
+                        // Button
+                        const SizedBox(
+                          width: TSizes.spaceBtwItems,
+                        ),
+
+                        Expanded(
+                          child: Obx(() => ElevatedButton(
+                                onPressed: controller.isLoading.value
+                                    ? null
+                                    : () => controller.addProduct(),
+                                child: controller.isLoading.value
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(),
+                                      )
+                                    : const Text('Add'),
+                              )),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-
-                const SizedBox(
-                  height: TSizes.spaceBtwSections,
-                ),
-                TRoundedContainer(
-                  padding: const EdgeInsets.all(TSizes.defaultSpace),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      // Product Bar
-                      const Expanded(child: ProductSearchBar()),
-                      const SizedBox(
-                        width: TSizes.spaceBtwItems,
-                      ),
-
-                      // Unit Price Quantity
-                      const Expanded(child: UnitPriceQuantity()),
-
-                      const SizedBox(
-                        width: TSizes.spaceBtwItems,
-                      ),
-
-                      // Unit(Kg/etc) Total Price
-                      const Expanded(child: UnitTotalPrice()),
-
-                      // Button
-                      const SizedBox(
-                        width: TSizes.spaceBtwItems,
-                      ),
-
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            salesController.addProduct();
-                          },
-                          child: const Text('Add'),
-                        ),
-                      ),
-                    ],
                   ),
-                ),
-                const SizedBox(
-                  height: TSizes.spaceBtwSections / 2,
-                ),
-                // Sale Table
-                const TRoundedContainer(height: 530, child: SaleTable()),
-                const SizedBox(
-                  height: TSizes.spaceBtwSections / 2,
-                ),
-                const TRoundedContainer(
-                  padding: EdgeInsets.all(TSizes.defaultSpace / 2),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(child: SaleActionButtons()),
-                      Expanded(flex: 2, child: SalesSummary()),
-                    ],
+                  const SizedBox(
+                    height: TSizes.spaceBtwSections / 2,
                   ),
-                ),
-              ],
+
+                  // Serial Numbers Selector (for products with serial numbers)
+                  const SerialVariantSelector(),
+
+                  const SizedBox(
+                    height: TSizes.spaceBtwSections / 2,
+                  ),
+
+                  // Sale Table
+                  const TRoundedContainer(height: 530, child: SaleTable()),
+                  const SizedBox(
+                    height: TSizes.spaceBtwSections / 2,
+                  ),
+                  const TRoundedContainer(
+                    padding: EdgeInsets.all(TSizes.defaultSpace / 2),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(child: SaleActionButtons()),
+                        Expanded(flex: 2, child: SalesSummary()),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ),
-      ),
-    );
+          )
+        : const Center(child: CircularProgressIndicator()));
   }
 }

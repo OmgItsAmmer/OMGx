@@ -6,21 +6,31 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 
+import '../../../../Models/products/product_model.dart';
 import '../../../../common/widgets/icons/table_action_icon_buttons.dart';
 import '../../../../controllers/media/media_controller.dart';
 
 class ProductRow extends DataTableSource {
-  ProductRow({required this.productCount});
+  ProductRow({
+    required this.productCount,
+    this.filteredProducts,
+  });
+
   final ProductController productController = Get.find<ProductController>();
   // final ProductImagesController productImagesController = Get.find<ProductImagesController>();
   final MediaController mediaController = Get.find<MediaController>();
   final BrandController brandController = Get.find<BrandController>();
 
-  final productCount;
+  final int productCount;
+  final List<ProductModel>? filteredProducts;
 
   @override
   DataRow? getRow(int index) {
-    final product = productController.allProducts[index];
+    // Use filtered list if provided, otherwise use all products
+    final product = filteredProducts != null && filteredProducts!.isNotEmpty
+        ? filteredProducts![index]
+        : productController.allProducts[index];
+
     return DataRow2(
         onTap: () async {
           productController.onProductTap(product);
@@ -39,14 +49,21 @@ class ProductRow extends DataTableSource {
                 .apply(color: TColors.primary),
           )),
           DataCell(Text(
-            product.salePrice.toString(),
+            product.basePrice?.toString() ?? '',
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
                 .apply(color: TColors.primary),
           )),
           DataCell(Text(
-            product.stockQuantity.toString(),
+            product.salePrice?.toString() ?? '',
+            style: Theme.of(Get.context!)
+                .textTheme
+                .bodyLarge!
+                .apply(color: TColors.primary),
+          )),
+          DataCell(Text(
+            product.stockQuantity?.toString() ?? '',
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
@@ -54,9 +71,11 @@ class ProductRow extends DataTableSource {
           )),
           DataCell(Text(
             brandController.allBrands
-                .firstWhere((element) => element.brandID == product.brandID)
-                .bname
-                .toString(),
+                    .firstWhereOrNull(
+                        (element) => element.brandID == product.brandID)
+                    ?.bname
+                    ?.toString() ??
+                '',
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
@@ -79,7 +98,7 @@ class ProductRow extends DataTableSource {
 
   @override
   // TODO: implement rowCount
-  int get rowCount => productController.allProducts.length;
+  int get rowCount => productCount;
 
   @override
   // TODO: implement selectedRowCount

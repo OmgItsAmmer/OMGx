@@ -1,6 +1,8 @@
 import 'package:admin_dashboard_v3/common/widgets/loaders/loader_animation.dart';
+import 'package:admin_dashboard_v3/routes/routes.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
 import '../common/widgets/loaders/animation_loader.dart';
@@ -11,7 +13,7 @@ class UnkownRoute extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  Expanded(
+    return Expanded(
         child: Scaffold(
       body: SingleChildScrollView(
         child: Padding(
@@ -24,8 +26,14 @@ class UnkownRoute extends StatelessWidget {
                 animation: TImages.networkOut,
                 showAction: false,
               ),
-              const SizedBox(height: TSizes.spaceBtwSections,),
-              ElevatedButton(onPressed: () {}, child: const Text("Take me Home!"))
+              const SizedBox(
+                height: TSizes.spaceBtwSections,
+              ),
+              ElevatedButton(
+                  onPressed: () {
+                    Get.offAllNamed(TRoutes.login);
+                  },
+                  child: const Text("Take me Home!"))
             ],
           ),
         ),

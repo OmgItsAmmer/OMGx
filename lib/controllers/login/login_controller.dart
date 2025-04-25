@@ -35,7 +35,7 @@ class LoginController extends GetxController {
 
     // Load saved credentials if remember me was selected
     email.text = localStorage.read('REMEMBER_ME_EMAIL') ?? "";
-    password.text = localStorage.read('REMEMBER_ME_PASSWORD') ?? "";
+    //password.text = localStorage.read('REMEMBER_ME_PASSWORD') ?? "";
 
     // Load the saved remember me state
     rememberMe.value = localStorage.read('REMEMBER_ME_CHECKED') ?? false;
@@ -67,11 +67,11 @@ class LoginController extends GetxController {
       //Save Data of Remember me is Selected
       if (rememberMe.value) {
         localStorage.write('REMEMBER_ME_EMAIL', email.text.trim());
-        localStorage.write('REMEMBER_ME_PASSWORD', password.text.trim());
+        //   localStorage.write('REMEMBER_ME_PASSWORD', password.text.trim());
       } else {
         // Clear saved credentials if remember me is not selected
         localStorage.remove('REMEMBER_ME_EMAIL');
-        localStorage.remove('REMEMBER_ME_PASSWORD');
+        //     localStorage.remove('REMEMBER_ME_PASSWORD');
       }
 
       // Log in the user
@@ -104,7 +104,9 @@ class LoginController extends GetxController {
       }
     } catch (e) {
       TFullScreenLoader.stopLoading();
-      TLoader.errorSnackBar(title: 'Oh Snap', message: e.toString());
+      TLoader.errorSnackBar(
+          title: 'Login Failed',
+          message: 'Please check your credentials and try again.');
     }
   }
 
@@ -116,7 +118,7 @@ class LoginController extends GetxController {
     // If remember me is turned off, clear saved credentials
     if (!rememberMe.value) {
       localStorage.remove('REMEMBER_ME_EMAIL');
-      localStorage.remove('REMEMBER_ME_PASSWORD');
+      //  localStorage.remove('REMEMBER_ME_PASSWORD');
       // Don't clear the input fields while the user is still on the login screen
     }
   }
@@ -139,12 +141,18 @@ class LoginController extends GetxController {
       //Save user Record
       //  await userController.saveUserRecord(userCredentional);
       TFullScreenLoader.stopLoading();
-      TLoader.errorSnackBar(title: "Not available at the moment");
+      TLoader.errorSnackBar(
+          title: "Google Sign-In",
+          message:
+              "Google sign-in is currently unavailable. Please try another method.");
       return;
       //  Get.to(()=> NavigationMenu());
     } catch (e) {
       TFullScreenLoader.stopLoading();
-      TLoader.errorSnackBar(title: 'Oh Snap', message: e.toString());
+      TLoader.errorSnackBar(
+          title: 'Login Failed',
+          message:
+              'An error occurred during Google sign-in. Please try again.');
     }
   }
 

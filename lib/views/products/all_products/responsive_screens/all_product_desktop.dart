@@ -1,5 +1,5 @@
-
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
+import 'package:admin_dashboard_v3/controllers/table/table_search_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
@@ -10,74 +10,79 @@ import '../../../../controllers/product/product_controller.dart';
 import '../../../../routes/routes.dart';
 import '../table/product_table.dart';
 
-class AllProductDesktopScreen extends StatelessWidget {
+class AllProductDesktopScreen extends GetView<ProductController> {
   const AllProductDesktopScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final ProductController productController = Get.find<ProductController>();
+    // Initialize the table search controller if not already initialized
+    if (!Get.isRegistered<TableSearchController>(tag: 'products')) {
+      Get.put(TableSearchController(), tag: 'products');
+    }
+    final tableSearchController =
+        Get.find<TableSearchController>(tag: 'products');
 
-    return   Expanded(
-      child: SizedBox(
-        // height: 900,
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(TSizes.defaultSpace),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Products',style: Theme.of(context).textTheme.headlineMedium ,),
-                const SizedBox(height: TSizes.spaceBtwSections,),
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(TSizes.defaultSpace),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Products', style: Theme.of(context).textTheme.headlineMedium),
+            const SizedBox(height: TSizes.spaceBtwSections),
 
-                //Bread Crumbs
+            //Bread Crumbs
 
-                //Table Body
-                 TRoundedContainer(
-                  padding: const EdgeInsets.all(TSizes.defaultSpace),
-                  child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-
+            //Table Body
+            TRoundedContainer(
+              padding: const EdgeInsets.all(TSizes.defaultSpace),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      SizedBox(width: TSizes.buttonWidth*1.5,
-                      child: ElevatedButton(onPressed: (){
-                        productController.cleanProductDetail();
-                        Get.toNamed(TRoutes.productsDetail);
-                      }, child:  Text('Add Products',style: Theme.of(context).textTheme.bodyMedium!.apply(color: TColors.white) ,),),),
-                    //  Expanded(child: HoverableCard()),
-                      // SizedBox(width: TSizes.buttonWidth*1.5,
-                      //   child: ElevatedButton(onPressed: (){
-                      //  //   _exportToPdf(productController.allProducts);
-                      //     Get.to(() => ReportPage(
-                      //       products: productController.allProducts,
-                      //       companyName: 'AUTOBOTs',
-                      //       branchName: 'Main',
-                      //       cashierName: 'Ammer Saeed',
-                      //     ));
-                      //
-                      //   }, child:  Text('Export',style: Theme.of(context).textTheme.bodyMedium!.apply(color: TColors.white) ,),),),
-                      SizedBox(width: 500 ,
+                      SizedBox(
+                        width: TSizes.buttonWidth * 1.5,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            controller.cleanProductDetail();
+                            Get.toNamed(TRoutes.productsDetail);
+                          },
+                          child: Text(
+                            'Add Products',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .apply(color: TColors.white),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 500,
                         child: TextFormField(
-                          decoration: const InputDecoration(prefixIcon: Icon(Iconsax.search_normal),hintText: 'Search Anything'),
-                        ) ,
+                          controller: tableSearchController.searchController,
+                          decoration: const InputDecoration(
+                            prefixIcon: Icon(Iconsax.search_normal),
+                            hintText: 'Search Anything',
+                          ),
+                          onChanged: (value) {
+                            // This will trigger the Rx variable update through the listener
+                            tableSearchController.searchTerm.value = value;
+                          },
+                        ),
                       )
                     ],
                   ),
-                    const SizedBox(height: TSizes.spaceBtwSections,),
+                  const SizedBox(height: TSizes.spaceBtwSections),
 
-                    //Table body
-                    const ProductTable()
-
-
-                  ],
-                          ),
-                ),
-              ],
+                  //Table body
+                  const ProductTable()
+                ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -141,4 +146,3 @@ class AllProductDesktopScreen extends StatelessWidget {
   //   return tableData;
   // }
 }
-

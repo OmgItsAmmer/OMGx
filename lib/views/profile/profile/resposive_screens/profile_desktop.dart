@@ -79,11 +79,10 @@ class ProfileDetails extends StatelessWidget {
                 'Profile Details',
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
-               TCircularIcon(
+              TCircularIcon(
                 icon: Iconsax.logout,
                 color: TColors.white,
                 backgroundColor: TColors.buttonPrimary,
-
                 onPressed: () {
                   userController.logOut();
                 },
@@ -108,7 +107,11 @@ class ProfileDetails extends StatelessWidget {
                     validator: (value) =>
                         TValidator.validateEmptyText('First Name', value),
                     style: Theme.of(context).textTheme.bodyMedium,
-                    decoration: const InputDecoration(labelText: 'First Name'),
+                    decoration: const InputDecoration(
+                      labelText: 'First Name',
+                      hintText: 'Enter your first name',
+                      prefixIcon: Icon(Iconsax.user),
+                    ),
                   ),
                 ),
               ),
@@ -126,7 +129,11 @@ class ProfileDetails extends StatelessWidget {
                     validator: (value) =>
                         TValidator.validateEmptyText('Last Name', value),
                     style: Theme.of(context).textTheme.bodyMedium,
-                    decoration: const InputDecoration(labelText: 'Last Name'),
+                    decoration: const InputDecoration(
+                      labelText: 'Last Name',
+                      hintText: 'Enter your last name',
+                      prefixIcon: Icon(Iconsax.user),
+                    ),
                   ),
                 ),
               ),
@@ -146,10 +153,13 @@ class ProfileDetails extends StatelessWidget {
                     controller: userController.email,
 
                     // salesController.customerCNICController.value,
-                    validator: (value) =>
-                        TValidator.validateEmptyText('Email', value),
+                    validator: (value) => TValidator.validateEmail('Email'),
                     style: Theme.of(context).textTheme.bodyMedium,
-                    decoration: const InputDecoration(labelText: 'Email'),
+                    decoration: const InputDecoration(
+                      labelText: 'Email',
+                      hintText: 'Enter your email address',
+                      prefixIcon: Icon(Iconsax.sms),
+                    ),
                   ),
                 ),
               ),
@@ -166,8 +176,11 @@ class ProfileDetails extends StatelessWidget {
                     validator: (value) =>
                         TValidator.validateEmptyText('Phone Number', value),
                     style: Theme.of(context).textTheme.bodyMedium,
-                    decoration:
-                        const InputDecoration(labelText: 'Phone Number'),
+                    decoration: const InputDecoration(
+                      labelText: 'Phone Number',
+                      hintText: 'Enter your phone number',
+                      prefixIcon: Icon(Iconsax.call),
+                    ),
                   ),
                 ),
               ),
@@ -276,7 +289,11 @@ class ProfileImageInfo extends StatelessWidget {
                           imageurl: snapshot.data!,
                         );
                       } else {
-                        return const TCircularIcon(icon: Iconsax.image,width: 150,height: 150,); // Handle case where no image is available
+                        return const TCircularIcon(
+                          icon: Iconsax.image,
+                          width: 150,
+                          height: 150,
+                        ); // Handle case where no image is available
                       }
                     },
                   );

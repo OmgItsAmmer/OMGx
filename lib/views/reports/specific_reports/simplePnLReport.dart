@@ -1,11 +1,15 @@
 import 'dart:typed_data';
+import 'dart:io';
 
 import 'package:admin_dashboard_v3/Models/reports/simple_pnl_report_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
+import 'package:admin_dashboard_v3/controllers/shop/shop_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+import 'package:admin_dashboard_v3/views/reports/common/report_footer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -17,6 +21,8 @@ class SimplePnLReportPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ShopController shopController = Get.find<ShopController>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Simple P&L Report'),
@@ -35,7 +41,15 @@ class SimplePnLReportPage extends StatelessWidget {
           child: reports.isEmpty
               ? const Text('No data to display')
               : PdfPreview(
-                  build: (format) => generatePdf(format),
+                  build: (format) => generatePdf(
+                    format,
+                    shopController.selectedShop?.value.shopname ?? 'No Name',
+                    shopController.selectedShop?.value.softwareCompanyName ??
+                        'OMGz',
+                    shopController.selectedShop?.value.softwareWebsiteLink ??
+                        'https://www.omgz.com',
+                    shopController.selectedShop?.value.softwareContactNo ?? '',
+                  ),
                   canDebug: false,
                   initialPageFormat: PdfPageFormat.a4,
                 ),
@@ -44,7 +58,13 @@ class SimplePnLReportPage extends StatelessWidget {
     );
   }
 
-  Future<Uint8List> generatePdf(PdfPageFormat format) async {
+  Future<Uint8List> generatePdf(
+    PdfPageFormat format,
+    String companyName,
+    String softwareCompanyName,
+    String softwareWebsiteLink,
+    String softwareContactNo,
+  ) async {
     final pdf = pw.Document();
 
     pdf.addPage(
@@ -54,8 +74,21 @@ class SimplePnLReportPage extends StatelessWidget {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Text('Simple Profit & Loss Report', 
-                  style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Text(companyName,
+                      style: pw.TextStyle(
+                          fontSize: 16, fontWeight: pw.FontWeight.bold)),
+                  pw.Text('Simple Profit & Loss Report',
+                      style: pw.TextStyle(
+                          fontSize: 14, fontWeight: pw.FontWeight.bold)),
+                ],
+              ),
+              pw.SizedBox(height: 6),
+              pw.Text('Date: ${DateTime.now().toString().split(' ')[0]}',
+                  style: const pw.TextStyle(fontSize: 10)),
+              pw.Divider(),
               pw.SizedBox(height: 20),
               pw.Table(
                 border: pw.TableBorder.all(),
@@ -65,15 +98,20 @@ class SimplePnLReportPage extends StatelessWidget {
                 },
                 children: [
                   pw.TableRow(
-                    decoration: const pw.BoxDecoration(color: PdfColors.grey300),
+                    decoration:
+                        const pw.BoxDecoration(color: PdfColors.grey300),
                     children: [
                       pw.Padding(
                         padding: const pw.EdgeInsets.all(8),
-                        child: pw.Text('Category', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                        child: pw.Text('Category',
+                            style:
+                                pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                       ),
                       pw.Padding(
                         padding: const pw.EdgeInsets.all(8),
-                        child: pw.Text('Amount', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                        child: pw.Text('Amount',
+                            style:
+                                pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                       ),
                     ],
                   ),
@@ -92,6 +130,14 @@ class SimplePnLReportPage extends StatelessWidget {
                     ),
                 ],
               ),
+              pw.SizedBox(height: 30),
+              // Add the footer with company information and signature box
+              ReportFooter.buildReportFooter(
+                signatureTitle: 'Signature by Accountant',
+                softwareCompanyName: softwareCompanyName,
+                softwareWebsiteLink: softwareWebsiteLink,
+                softwareContactNo: softwareContactNo,
+              ),
             ],
           );
         },
@@ -103,9 +149,28 @@ class SimplePnLReportPage extends StatelessWidget {
 
   Future<void> savePdf(BuildContext context) async {
     try {
-      final pdfBytes = await generatePdf(PdfPageFormat.a4);
-      // Add your file saving logic here
-      TLoader.successSnackBar(title: "PDF saved successfully!");
+      final ShopController shopController = Get.find<ShopController>();
+
+      final pdfBytes = await generatePdf(
+        PdfPageFormat.a4,
+        shopController.selectedShop?.value.shopname ?? 'No Name',
+        shopController.selectedShop?.value.softwareCompanyName ?? 'OMGz',
+        shopController.selectedShop?.value.softwareWebsiteLink ??
+            'https://www.omgz.com',
+        shopController.selectedShop?.value.softwareContactNo ?? '',
+      );
+
+      final directory = Platform.isIOS || Platform.isAndroid
+          ? await getApplicationDocumentsDirectory()
+          : await getDownloadsDirectory();
+
+      final file = File('${directory!.path}/simple_pnl_report.pdf');
+      await file.writeAsBytes(pdfBytes);
+
+      TLoader.successSnackBar(
+        title: 'PDF Saved',
+        message: 'File saved to: ${file.path}',
+      );
     } catch (e) {
       TLoader.errorSnackBar(title: "Error saving PDF", message: e.toString());
     }

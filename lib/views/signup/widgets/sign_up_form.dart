@@ -111,7 +111,7 @@ class SignUpForm extends StatelessWidget {
                             !controller.hidePassword.value,
                         icon: Icon(controller.hidePassword.value
                             ? Iconsax.eye_slash
-                            : Iconsax.eye_slash),
+                            : Iconsax.eye),
                       )),
                 ),
               ),
@@ -126,8 +126,7 @@ class SignUpForm extends StatelessWidget {
                 controller: controller.adminKey,
                 expands: false,
                 decoration: const InputDecoration(
-                    labelText: TTexts.adminKey,
-                    prefixIcon: Icon(Iconsax.key)),
+                    labelText: TTexts.adminKey, prefixIcon: Icon(Iconsax.key)),
               ),
 
               //Password

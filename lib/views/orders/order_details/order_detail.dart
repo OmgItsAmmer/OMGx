@@ -14,8 +14,12 @@ class OrderDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final order = Get.arguments;
-    return   TSiteTemplate(
-      desktop: OrderDetailDesktopScreen(orderModel: order,) ,
+    return TSiteTemplate(
+      desktop: OrderDetailDesktopScreen(orderModel: order),
+      // Using the same desktop screen for tablet and mobile for now
+      // If you create tablet and mobile-specific screens later, you can replace these
+      tablet: OrderDetailDesktopScreen(orderModel: order),
+      mobile: OrderDetailDesktopScreen(orderModel: order),
     );
   }
 }

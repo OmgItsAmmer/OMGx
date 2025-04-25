@@ -1,0 +1,19 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# IMPORTANT:
+
+# Always read ADMIN_DASHBOARD_V3.md before writing any code.
+
+# After adding a major feature or completing a milestone, update  ADMIN_DASHBOARD_V3.md.
+
+# Document the entire database schema in  ADMIN_DASHBOARD_V3.md.
+
+
+
+
+
+
+# For new migrations, make sure to add them to the same file

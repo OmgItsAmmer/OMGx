@@ -5,80 +5,76 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
-
-
 class UnitPriceQuantity extends StatelessWidget {
   const UnitPriceQuantity({super.key});
-
 
   @override
   Widget build(BuildContext context) {
     final SalesController salesController = Get.find<SalesController>();
 
     return Form(
-         key: salesController.addUnitPriceAndQuantityKey,
+      key: salesController.addUnitPriceAndQuantityKey,
       child: Row(
-         // crossAxisAlignment: CrossAxisAlignment.end,
+        // crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Expanded(
             child: SizedBox(
-                       width: double.infinity,
+              width: double.infinity,
               //  height: 80,
 
               child: Obx(
                 () => TextFormField(
-                  onChanged: (value){
-                    salesController.totalPrice.value.text =
-                        (double.parse(salesController.unitPrice.value.text) *
-                            double.parse(salesController.quantity.value.text)).toStringAsFixed(2);
-
-
+                  onChanged: (value) {
+                    salesController.totalPrice.value.text = (double.parse(
+                                salesController.unitPrice.value.text) *
+                            double.parse(salesController.quantity.value.text))
+                        .toStringAsFixed(2);
                   },
                   controller: salesController.unitPrice.value,
                   validator: (value) =>
                       TValidator.validateEmptyText('Unit Price', value),
                   decoration: const InputDecoration(labelText: 'Unit Price'),
                   style: Theme.of(context).textTheme.bodyMedium,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(
-                      RegExp(r'^\d*\.?\d{0,2}'), // Allows numbers with up to 2 decimal places
+                      RegExp(
+                          r'^\d*\.?\d{0,2}'), // Allows numbers with up to 2 decimal places
                     ),
                   ],
                 ),
               ),
-
             ),
           ),
-          const SizedBox(width: TSizes.spaceBtwItems,),
+          const SizedBox(
+            width: TSizes.spaceBtwItems,
+          ),
           Expanded(
             child: SizedBox(
               width: double.infinity,
 
               //  height: 80,
               child: TextFormField(
-                onChanged: (value){
+                onChanged: (value) {
                   salesController.totalPrice.value.text =
                       (double.parse(salesController.unitPrice.value.text) *
-                          double.parse(salesController.quantity.value.text)).toStringAsFixed(2);
-
+                              double.parse(salesController.quantity.value.text))
+                          .toStringAsFixed(2);
                 },
                 validator: (value) =>
                     TValidator.validateEmptyText('quantity ', value),
                 controller: salesController.quantity,
                 decoration: const InputDecoration(labelText: 'Quantity'),
-                style: Theme
-                    .of(context)
-                    .textTheme
-                    .bodyMedium,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                style: Theme.of(context).textTheme.bodyMedium,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(
-                    RegExp(r'^\d*\.?\d{0,2}'), // Allows numbers with up to 2 decimal places
+                    RegExp(
+                        r'^\d*\.?\d{0,2}'), // Allows numbers with up to 2 decimal places
                   ),
                 ],
-
-
               ),
             ),
           )

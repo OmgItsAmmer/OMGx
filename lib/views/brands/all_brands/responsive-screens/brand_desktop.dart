@@ -1,5 +1,6 @@
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/controllers/brands/brand_controller.dart';
+import 'package:admin_dashboard_v3/controllers/table/table_search_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:admin_dashboard_v3/views/brands/all_brands/table/brand_table.dart';
@@ -17,55 +18,81 @@ class AllBrandsDesktopScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final BrandController brandController = Get.find<BrandController>();
 
-    return   Expanded(
-      child: SizedBox(
-        // height: 900,
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(TSizes.defaultSpace),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Brands',style: Theme.of(context).textTheme.headlineMedium ,),
-                const SizedBox(height: TSizes.spaceBtwSections,),
+    // Initialize the table search controller with a tag for brands
+    if (!Get.isRegistered<TableSearchController>(tag: 'brands')) {
+      Get.put(TableSearchController(), tag: 'brands');
+    }
+    final tableSearchController =
+        Get.find<TableSearchController>(tag: 'brands');
 
-                //Bread Crumbs
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(TSizes.defaultSpace),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Brands',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(
+              height: TSizes.spaceBtwSections,
+            ),
 
-                //Table Body
-                TRoundedContainer(
-                  padding: const EdgeInsets.all(TSizes.defaultSpace),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            //Bread Crumbs
+
+            //Table Body
+            TRoundedContainer(
+              padding: const EdgeInsets.all(TSizes.defaultSpace),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          SizedBox(width: 200,
-                            child: ElevatedButton(onPressed: (){
-                              brandController.cleanBrandDetail();
-                              Get.toNamed(TRoutes.brandDetails,arguments: BrandModel.empty());
-                            }, child:  Text('Add New Brand',style: Theme.of(context).textTheme.bodyMedium!.apply(color: TColors.white) ,),),),
-                          SizedBox(width: 500 ,
-                            child: TextFormField(
-                              decoration: const InputDecoration(prefixIcon: Icon(Iconsax.search_normal),hintText: 'Search Anything'),
-                            ) ,
-                          )
-                        ],
+                      SizedBox(
+                        width: 200,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            brandController.cleanBrandDetail();
+                            Get.toNamed(TRoutes.brandDetails,
+                                arguments: BrandModel.empty());
+                          },
+                          child: Text(
+                            'Add New Brand',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .apply(color: TColors.white),
+                          ),
+                        ),
                       ),
-                      const SizedBox(height: TSizes.spaceBtwSections,),
-
-                      //Table body
-                      const BrandTable()
-
-
+                      SizedBox(
+                        width: 500,
+                        child: TextFormField(
+                          controller: tableSearchController.searchController,
+                          decoration: const InputDecoration(
+                              prefixIcon: Icon(Iconsax.search_normal),
+                              hintText: 'Search by brand name'),
+                          onChanged: (value) {
+                            // Update the search term in the controller
+                            tableSearchController.searchTerm.value = value;
+                          },
+                        ),
+                      )
                     ],
                   ),
-                ),
-              ],
+                  const SizedBox(
+                    height: TSizes.spaceBtwSections,
+                  ),
+
+                  //Table body
+                  const BrandTable()
+                ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

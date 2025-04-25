@@ -1,6 +1,9 @@
 import 'package:admin_dashboard_v3/Models/orders/order_item_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/controllers/dashboard/dashboard_controoler.dart';
+import 'package:admin_dashboard_v3/controllers/expenses/expense_controller.dart';
+import 'package:admin_dashboard_v3/controllers/installments/installments_controller.dart';
+import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
 import 'package:admin_dashboard_v3/repositories/order/order_repository.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,7 +14,6 @@ import '../../routes/routes.dart';
 import '../address/address_controller.dart';
 import '../customer/customer_controller.dart';
 import '../guarantors/guarantor_controller.dart';
-import '../installments/installments_controller.dart';
 import '../salesman/salesman_controller.dart';
 
 class OrderController extends GetxController {
@@ -273,6 +275,14 @@ class OrderController extends GetxController {
         allOrders.refresh(); // Notify UI about the update
       }
 
+      // Update dashboard if it's already initialized
+      if (Get.isRegistered<DashboardController>()) {
+        final dashboardController = Get.find<DashboardController>();
+        dashboardController.calculateOrderStatusCounts(allOrders);
+        // dashboardController.fetchCards(
+        //     allOrders, Get.find<ExpenseController>().expenses);
+      }
+
       return status;
     } catch (e) {
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
@@ -323,6 +333,17 @@ class OrderController extends GetxController {
         for (var item in orderItems) {
           await orderRepository.restoreQuantity(item);
         }
+
+        // Refresh product list to ensure consistent data
+        try {
+          final productController = Get.find<ProductController>();
+          await productController.refreshProducts();
+        } catch (e) {
+          if (kDebugMode) {
+            print('Error refreshing products: $e');
+          }
+        }
+
         TLoader.successSnackBar(
             title: 'Product Quantity Restored!',
             message:
@@ -377,6 +398,17 @@ class OrderController extends GetxController {
       for (var item in orderItems) {
         await orderRepository.subtractQuantity(item);
       }
+
+      // Refresh product list to ensure consistent data
+      try {
+        final productController = Get.find<ProductController>();
+        await productController.refreshProducts();
+      } catch (e) {
+        if (kDebugMode) {
+          print('Error refreshing products: $e');
+        }
+      }
+
       TLoader.successSnackBar(
           title: 'Stock Updated!',
           message: 'Products have been removed from stock.');

@@ -1,6 +1,8 @@
 import 'package:admin_dashboard_v3/common/layouts/templates/site_template.dart';
 import 'package:admin_dashboard_v3/controllers/report/report_controller.dart';
 import 'package:admin_dashboard_v3/views/reports/all_reports/responsive_screens/all_reports_desktop.dart';
+import 'package:admin_dashboard_v3/views/reports/all_reports/responsive_screens/all_reports_mobile.dart';
+import 'package:admin_dashboard_v3/views/reports/all_reports/responsive_screens/all_reports_tablet.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -9,10 +11,15 @@ class ReportScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(ReportController());
+    // Initialize the controller
+    if (!Get.isRegistered<ReportController>()) {
+      Get.put(ReportController());
+    }
 
     return const TSiteTemplate(
       desktop: AllReportsDesktop(),
+      tablet: AllReportsTablet(),
+      mobile: AllReportsMobile(),
     );
   }
 }

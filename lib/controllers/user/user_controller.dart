@@ -59,8 +59,6 @@ class UserController extends GetxController {
     try {
       profileLoading.value = true;
 
-      // Wait for Supabase to restore the session
-      await supabase.auth.refreshSession();
       final user = supabase.auth.currentUser;
 
       if (user == null) {
@@ -74,13 +72,11 @@ class UserController extends GetxController {
 
       final userDetail = await userRespository.fetchUserDetials(user.email);
       userData.assignAll(userDetail);
-      
 
       // For debugging
       UserModel matchedUser =
           userData.firstWhere((value) => value.email == user.email);
       currentUser.value = matchedUser;
-      
 
       SalesController.instance.setupUserDetails();
 
@@ -89,7 +85,8 @@ class UserController extends GetxController {
       //Setting UserDetails in App
       //   startUpController.setupUserDetails(currentUser.value);
     } catch (e) {
-      TLoader.errorSnackBar(title: "Oh Snap!", message: e.toString());
+      
+      TLoader.errorSnackBar(title: "Oh Snap!", message: "Something went wrong while fetching user details");
     } finally {
       profileLoading.value = false;
     }
@@ -124,6 +121,7 @@ class UserController extends GetxController {
 
       final json = userModel.toJson(isUpdate: true);
       await userRespository.updateProfileData(json, currentUser.value.userId);
+      currentUser.value = userModel;
     } catch (e) {
       if (kDebugMode) {
         TLoader.errorSnackBar(title: e.toString());

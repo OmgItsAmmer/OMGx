@@ -9,21 +9,26 @@ import 'package:iconsax/iconsax.dart';
 import '../controllers/dashboard/dashboard_controoler.dart';
 import '../utils/constants/image_strings.dart';
 
-class TPaginatedDataTable extends StatelessWidget {
-  const TPaginatedDataTable(
-      {super.key,
-      required this.sortAscending,
-      this.sortColumnIndex,
-      this.rowsperPage = 10,
-      required this.source,
-      required this.columns,
-      this.onPageChanged,
-      this.dataRowHeight = TSizes.xl * 2,
-      this.tableHeight = 760,
-      this.minWidth = 1000,
-        this.showCheckBox = true});
+class TPaginatedDataTable extends StatefulWidget {
+  const TPaginatedDataTable({
+    super.key,
+    required this.sortAscending,
+    this.sortColumnIndex,
+    this.rowsperPage = 10,
+    required this.source,
+    required this.columns,
+    this.onPageChanged,
+    this.dataRowHeight = TSizes.xl * 2,
+    this.tableHeight = 760,
+    this.minWidth = 1000,
+    this.showCheckBox = true,
+    this.availableRowsPerPage = const [10, 20, 50, 100],
+    this.onSortChanged,
+    this.searchQuery = '',
+  });
+
   // Dynamic column names
-final bool showCheckBox;
+  final bool showCheckBox;
   final bool sortAscending;
   final int? sortColumnIndex;
   final int rowsperPage;
@@ -33,65 +38,127 @@ final bool showCheckBox;
   final double dataRowHeight;
   final double tableHeight;
   final double? minWidth;
+  final List<int> availableRowsPerPage;
+  final Function(int, bool)? onSortChanged;
+  final String searchQuery;
+
+  @override
+  State<TPaginatedDataTable> createState() => _TPaginatedDataTableState();
+}
+
+class _TPaginatedDataTableState extends State<TPaginatedDataTable> {
+  late int _rowsPerPage;
+  late int? _sortColumnIndex;
+  late bool _sortAscending;
+
+  @override
+  void initState() {
+    super.initState();
+    _rowsPerPage = widget.rowsperPage;
+    _sortColumnIndex = widget.sortColumnIndex;
+    _sortAscending = widget.sortAscending;
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: tableHeight,
+      height: widget.tableHeight,
       child: Padding(
         padding: const EdgeInsets.all(30.0),
         child: Center(
-            child: PaginatedDataTable2(
-          //source
-          source: source,
+          child: PaginatedDataTable2(
+            // Source
+            source: widget.source,
 
-          //columms & rows
-          columns: columns,
-          columnSpacing: 12,
-          minWidth: minWidth,
-          dividerThickness: 0,
-          horizontalMargin: 12,
-          rowsPerPage: rowsperPage,
-          dataRowHeight: dataRowHeight,
+            // Columns & rows
+            columns: widget.columns.map((column) {
+              if (column is DataColumn2) {
+                return DataColumn2(
+                  label: column.label,
+                  numeric: column.numeric,
+                  tooltip: column.tooltip,
+                  size: column.size,
+                  fixedWidth: column.fixedWidth,
+                  onSort: widget.onSortChanged != null
+                      ? (columnIndex, ascending) {
+                          setState(() {
+                            _sortColumnIndex = columnIndex;
+                            _sortAscending = ascending;
+                          });
+                          widget.onSortChanged!(columnIndex, ascending);
+                        }
+                      : null,
+                );
+              } else {
+                return DataColumn(
+                  label: column.label,
+                  numeric: column.numeric,
+                  tooltip: column.tooltip,
+                  onSort: widget.onSortChanged != null
+                      ? (columnIndex, ascending) {
+                          setState(() {
+                            _sortColumnIndex = columnIndex;
+                            _sortAscending = ascending;
+                          });
+                          widget.onSortChanged!(columnIndex, ascending);
+                        }
+                      : null,
+                );
+              }
+            }).toList(),
+            columnSpacing: 12,
+            minWidth: widget.minWidth,
+            dividerThickness: 0,
+            horizontalMargin: 12,
+            rowsPerPage: _rowsPerPage,
+            onRowsPerPageChanged: (value) {
+              if (value != null) {
+                setState(() {
+                  _rowsPerPage = value;
+                });
+                if (widget.onPageChanged != null) {
+                  widget.onPageChanged!(0); // Reset to first page
+                }
+              }
+            },
+            availableRowsPerPage: widget.availableRowsPerPage,
+            dataRowHeight: widget.dataRowHeight,
+            onPageChanged: widget.onPageChanged,
 
-          //checkbox
-          showCheckboxColumn: showCheckBox,
+            // Checkbox
+            showCheckboxColumn: widget.showCheckBox,
 
-          //Header Design
+            // Header Design
+            headingTextStyle: Theme.of(context).textTheme.titleMedium,
+            headingRowColor:
+                WidgetStateProperty.resolveWith((states) => TColors.white),
+            headingRowDecoration: const BoxDecoration(
+                borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(TSizes.borderRadiusMd),
+              topRight: Radius.circular(TSizes.borderRadiusMd),
+            )),
 
-          headingTextStyle: Theme.of(context).textTheme.titleMedium,
-          headingRowColor:
-              WidgetStateProperty.resolveWith((states) => TColors.white),
-          headingRowDecoration: const BoxDecoration(
-              borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(TSizes.borderRadiusMd),
-            topRight: Radius.circular(TSizes.borderRadiusMd),
-          )),
+            empty: const TAnimationLoaderWidget(
+              text: 'Nothing Found',
+              animation: TImages.noDataFound,
+              showAction: false,
+              width: 200,
+              height: 200,
+            ),
 
-          empty:  const TAnimationLoaderWidget(
-            text: 'Nothing Found',
-            animation: TImages.noDataFound,
-            showAction: false,
-            width: 200,
-            height: 200 ,
-          ),
-
-          //Sorting
-          sortArrowAlwaysVisible: sortAscending,
-          sortColumnIndex: sortColumnIndex,
-          sortArrowBuilder: (bool ascending, bool sorted) {
-            if (sorted) {
+            // Sorting
+            sortAscending: _sortAscending,
+            sortColumnIndex: _sortColumnIndex,
+            sortArrowBuilder: (bool ascending, bool sorted) {
+              if (!sorted)
+                return Container(); // Don't show arrow if column is not sorted
               return Icon(
                 ascending ? Iconsax.arrow_up_3 : Iconsax.arrow_down,
                 size: TSizes.iconSm,
               );
-            } else {
-              return Icon(
-                ascending ? Iconsax.arrow_up_3 : Iconsax.arrow_down,
-                size: TSizes.iconSm,
-              ); // idk whats here
-            }
-          },
-        )),
+            },
+          ),
+        ),
       ),
     );
   }
@@ -120,16 +187,11 @@ class MyData extends DataTableSource {
   }
 
   @override
-  // TODO: implement isRowCountApproximate
   bool get isRowCountApproximate => false;
 
   @override
-  // TODO: implement rowCount
   int get rowCount => dashboardController.dataList.length;
 
   @override
-  // TODO: implement selectedRowCount
   int get selectedRowCount => 0;
 }
-
-

@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'dart:io';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+import 'package:admin_dashboard_v3/views/reports/common/report_footer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pdf/pdf.dart';
@@ -44,31 +45,44 @@ class StockSummaryReportPage extends StatelessWidget {
           child: products.isEmpty
               ? const Text('No data to display')
               : PdfPreview(
-            build: (format) => generatePdfInBackground({
-              'products': products,
-              'companyName': shopController.selectedShop?.value.shopname ?? 'No Name',
-              'branchName': 'MAIN',
-              'cashierName': userController.currentUser.value.fullName,
-              'softwareCompanyName': 'OMGz',
-              'format': format,
-            }),
-            loadingWidget: const TShimmerEffect(width: 80, height: 80),
-            canDebug: false,
-            canChangeOrientation: false,
-            canChangePageFormat: false,
-            initialPageFormat: PdfPageFormat.a4,
-          ),
+                  build: (format) => generatePdfInBackground({
+                    'products': products,
+                    'companyName':
+                        shopController.selectedShop?.value.shopname ??
+                            'No Name',
+                    'branchName': 'MAIN',
+                    'cashierName': userController.currentUser.value.fullName,
+                    'softwareCompanyName': shopController
+                            .selectedShop?.value.softwareCompanyName ??
+                        'OMGz',
+                    'softwareWebsiteLink': shopController
+                            .selectedShop?.value.softwareWebsiteLink ??
+                        'https://www.omgz.com',
+                    'softwareContactNo':
+                        shopController.selectedShop?.value.softwareContactNo ??
+                            '',
+                    'format': format,
+                  }),
+                  loadingWidget: const TShimmerEffect(width: 80, height: 80),
+                  canDebug: false,
+                  canChangeOrientation: false,
+                  canChangePageFormat: false,
+                  initialPageFormat: PdfPageFormat.a4,
+                ),
         ),
       ),
     );
   }
 
-  static Future<Uint8List> generatePdfInBackground(Map<String, dynamic> params) async {
+  static Future<Uint8List> generatePdfInBackground(
+      Map<String, dynamic> params) async {
     final List<ProductModel> products = params['products'];
     final String companyName = params['companyName'];
     final String branchName = params['branchName'];
     final String cashierName = params['cashierName'];
     final String softwareCompanyName = params['softwareCompanyName'];
+    final String softwareWebsiteLink = params['softwareWebsiteLink'];
+    final String softwareContactNo = params['softwareContactNo'];
     final PdfPageFormat format = params['format'];
 
     final pdf = pw.Document();
@@ -83,12 +97,21 @@ class StockSummaryReportPage extends StatelessWidget {
             pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
-                pw.Text(companyName, style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+                pw.Text(companyName,
+                    style: pw.TextStyle(
+                        fontSize: 16, fontWeight: pw.FontWeight.bold)),
+                pw.Text('Stock Summary Report',
+                    style: pw.TextStyle(
+                        fontSize: 14, fontWeight: pw.FontWeight.bold)),
               ],
             ),
             pw.SizedBox(height: 6),
-            pw.Text('Branch: $branchName', style: const pw.TextStyle(fontSize: 10)),
-            pw.Text('Cashier: $cashierName', style: const pw.TextStyle(fontSize: 10)),
+            pw.Text('Branch: $branchName',
+                style: const pw.TextStyle(fontSize: 10)),
+            pw.Text('Prepared By: $cashierName',
+                style: const pw.TextStyle(fontSize: 10)),
+            pw.Text('Date: ${DateTime.now().toString().split(' ')[0]}',
+                style: const pw.TextStyle(fontSize: 10)),
             pw.Divider(),
             pw.SizedBox(height: 6),
             pw.Table(
@@ -116,8 +139,8 @@ class StockSummaryReportPage extends StatelessWidget {
                 for (var product in chunk)
                   pw.TableRow(
                     decoration: (product.alertStock != null &&
-                        product.stockQuantity != null &&
-                        product.stockQuantity! < product.alertStock!)
+                            product.stockQuantity != null &&
+                            product.stockQuantity! < product.alertStock!)
                         ? const pw.BoxDecoration(color: PdfColors.amber100)
                         : null,
                     children: [
@@ -127,14 +150,16 @@ class StockSummaryReportPage extends StatelessWidget {
                       _tableCell(product.basePrice?.toString() ?? '0.0'),
                       pw.Container(
                         color: (product.basePrice != null &&
-                            product.salePrice != null &&
-                            double.tryParse(product.salePrice!) != null &&
-                            double.tryParse(product.basePrice!) != null &&
-                            double.parse(product.salePrice!) < double.parse(product.basePrice!))
+                                product.salePrice != null &&
+                                double.tryParse(product.salePrice!) != null &&
+                                double.tryParse(product.basePrice!) != null &&
+                                double.parse(product.salePrice!) <
+                                    double.parse(product.basePrice!))
                             ? PdfColors.red100
                             : null,
                         padding: const pw.EdgeInsets.all(4),
-                        child: pw.Text(product.salePrice?.toString() ?? '0.0'),
+                        child: pw.Text(product.salePrice?.toString() ?? '0.0',
+                            style: const pw.TextStyle(fontSize: 8)),
                       ),
                       _tableCell(product.stockQuantity?.toString() ?? '0'),
                     ],
@@ -142,40 +167,12 @@ class StockSummaryReportPage extends StatelessWidget {
               ],
             ),
             pw.SizedBox(height: 20),
-            pw.Align(
-              alignment: pw.Alignment.bottomCenter,
-              child: pw.Column(
-                children: [
-                  pw.Text(softwareCompanyName, style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
-                  pw.SizedBox(height: 6),
-                  pw.Row(
-                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                    children: [
-                      pw.Text("Software By: $softwareCompanyName", style: const pw.TextStyle(fontSize: 8)),
-                      pw.Row(
-                        crossAxisAlignment: pw.CrossAxisAlignment.start,
-                        children: [
-                          pw.Text("Contact Us:", style: const pw.TextStyle(fontSize: 8)),
-                          pw.SizedBox(width: TSizes.spaceBtwItems,),
-                          pw.BarcodeWidget(
-                            data: 'https://www.yourcompany.com',
-                            barcode: pw.Barcode.qrCode(),
-                            width: 50,
-                            height: 50,
-                          ),
-
-                        ]
-                      ),
-
-                    ],
-                  ),
-                  pw.SizedBox(height: 20),
-                  // Signature area in footer
-                  pw.Divider(),
-                  pw.SizedBox(height: 6),
-                  pw.Text('Signature by Owner', style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
-                ],
-              ),
+            // Add the footer with company information and signature box
+            ReportFooter.buildReportFooter(
+              signatureTitle: 'Signature by Inventory Manager',
+              softwareCompanyName: softwareCompanyName,
+              softwareWebsiteLink: softwareWebsiteLink,
+              softwareContactNo: softwareContactNo,
             ),
           ],
         ),
@@ -185,11 +182,11 @@ class StockSummaryReportPage extends StatelessWidget {
     return pdf.save();
   }
 
-
   static List<List<T>> _chunkList<T>(List<T> list, int chunkSize) {
     List<List<T>> chunks = [];
     for (var i = 0; i < list.length; i += chunkSize) {
-      chunks.add(list.sublist(i, i + chunkSize > list.length ? list.length : i + chunkSize));
+      chunks.add(list.sublist(
+          i, i + chunkSize > list.length ? list.length : i + chunkSize));
     }
     return chunks;
   }
@@ -203,27 +200,34 @@ class StockSummaryReportPage extends StatelessWidget {
         generatePdfInBackground,
         {
           'products': products,
-          'companyName': shopController.selectedShop?.value.shopname ?? 'No Name',
+          'companyName':
+              shopController.selectedShop?.value.shopname ?? 'No Name',
           'branchName': 'MAIN',
           'cashierName': userController.currentUser.value.fullName,
-          'softwareCompanyName': 'OMGz',
+          'softwareCompanyName':
+              shopController.selectedShop?.value.softwareCompanyName ?? 'OMGz',
+          'softwareWebsiteLink':
+              shopController.selectedShop?.value.softwareWebsiteLink ??
+                  'https://www.omgz.com',
+          'softwareContactNo':
+              shopController.selectedShop?.value.softwareContactNo ?? '',
           'format': PdfPageFormat.a4,
         },
       );
 
-      Directory? downloadsDir = await getDownloadsDirectory();
-      if (downloadsDir == null) {
-        throw Exception("Could not find downloads directory");
-      }
+      final directory = Platform.isIOS || Platform.isAndroid
+          ? await getApplicationDocumentsDirectory()
+          : await getDownloadsDirectory();
 
-      final filePath = '${downloadsDir.path}/Product_Report.pdf';
-      final file = File(filePath);
+      final file = File('${directory!.path}/Stock_Summary_Report.pdf');
       await file.writeAsBytes(pdfBytes);
 
-      TLoader.successSnackBar(title: "PDF saved in Downloads folder!");
+      TLoader.successSnackBar(
+        title: 'PDF Saved',
+        message: 'File saved to: ${file.path}',
+      );
     } catch (e) {
-      print("Error generating or saving PDF: $e");
-      TLoader.errorSnackBar(title: "Error generating or saving PDF", message: e.toString());
+      TLoader.errorSnackBar(title: "Error saving PDF", message: e.toString());
     }
   }
 

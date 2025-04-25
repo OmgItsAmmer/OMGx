@@ -1,70 +1,76 @@
-
 import 'package:admin_dashboard_v3/controllers/forget_password/widgets/reset_password.dart';
+import 'package:admin_dashboard_v3/main.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
 import '../../common/widgets/loaders/tloaders.dart';
 import '../../network_manager.dart';
-import '../../repositories/authentication/authicatioon_repository.dart';
 import '../../utils/constants/image_strings.dart';
 import '../../utils/popups/full_screen_loader.dart';
 
-class ForgetPasswordController extends GetxController{
+class ForgetPasswordController extends GetxController {
   static ForgetPasswordController get instance => Get.find();
 
   //Variables
   final email = TextEditingController();
   GlobalKey<FormState> forgetPasswordFormKey = GlobalKey<FormState>();
+  RxBool isAvaliable = false.obs;
 
 //Send Reset Passwoed Email
   sendPasswordResetEmail() async {
     try {
-      TFullScreenLoader.openLoadingDialog("Processing your request...", TImages.verifyIllustration);
+      TFullScreenLoader.openLoadingDialog(
+          "Processing your request...", TImages.verifyIllustration);
       final isConnected = await NetworkManager.instance.isConnected();
-      if(!isConnected) {TFullScreenLoader.stopLoading(); return;}
-
-//form validatiom
-      if(!forgetPasswordFormKey.currentState!.validate()){
+      if (!isConnected) {
         TFullScreenLoader.stopLoading();
         return;
       }
-//Send mail to reset password
-  //    await AuthenticationRepository.instance.sendPasswordResetEmail(email.text.trim());
+
+      // Form validation
+      if (!forgetPasswordFormKey.currentState!.validate()) {
+        TFullScreenLoader.stopLoading();
+        return;
+      }
+
+      // Send mail to reset password using Supabase
+      await supabase.auth.resetPasswordForEmail(email.text.trim());
 
       TFullScreenLoader.stopLoading();
 
-      TLoader.successSnackBar(title: 'Email snap',message: "Email Link send to Reset your Password".tr);
+      TLoader.successSnackBar(
+          title: 'Email Sent',
+          message: "Email Link sent to Reset your Password".tr);
 
-      //Redirect
-      Get.to(()=> ResetPassword(email: email.text.trim(),));
-    }
-    catch(e)
-    {
+      // Redirect
+      Get.to(() => ResetPassword(email: email.text.trim()));
+    } catch (e) {
       TFullScreenLoader.stopLoading();
-
-      TLoader.errorSnackBar(title: "Oh Snap!",message: e.toString());
+      TLoader.errorSnackBar(title: "Oh Snap!", message: e.toString());
     }
   }
 
   resendPasswordResetEmail(String email) async {
     try {
-      TFullScreenLoader.openLoadingDialog("Processing your request...", TImages.docerAnimation);
+      TFullScreenLoader.openLoadingDialog(
+          "Processing your request...", TImages.docerAnimation);
       final isConnected = await NetworkManager.instance.isConnected();
-      if(!isConnected) {TFullScreenLoader.stopLoading(); return;}
-
+      if (!isConnected) {
+        TFullScreenLoader.stopLoading();
+        return;
+      }
 
 //Send mail to reset password
 //      await AuthenticationRepository.instance.sendPasswordResetEmail(email);
 
       TFullScreenLoader.stopLoading();
 
-      TLoader.successSnackBar(title: 'Email sent',message: "Email Link send to Reset your Password".tr);
-
-    }
-    catch(e)
-    {
+      TLoader.successSnackBar(
+          title: 'Email sent',
+          message: "Email Link send to Reset your Password".tr);
+    } catch (e) {
       TFullScreenLoader.stopLoading();
-      TLoader.errorSnackBar(title: "Oh Snap!",message: e.toString());
+      TLoader.errorSnackBar(title: "Oh Snap!", message: e.toString());
     }
   }
 }

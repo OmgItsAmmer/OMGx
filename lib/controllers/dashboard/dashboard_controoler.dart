@@ -12,14 +12,38 @@ import '../expenses/expense_controller.dart';
 import '../orders/orders_controller.dart';
 import 'services/sales_service.dart';
 
+// Define possible data fetch states
+enum DataFetchState { initial, loading, success, error }
+
 class DashboardController extends GetxController with StateMixin<dynamic> {
   static DashboardController get instance => Get.find();
+
+  // State management variables for each card
+  final Rx<DataFetchState> salesCardState =
+      Rx<DataFetchState>(DataFetchState.initial);
+  final Rx<DataFetchState> avgOrderState =
+      Rx<DataFetchState>(DataFetchState.initial);
+  final Rx<DataFetchState> profitCardState =
+      Rx<DataFetchState>(DataFetchState.initial);
+  final Rx<DataFetchState> customerCardState =
+      Rx<DataFetchState>(DataFetchState.initial);
+  final Rx<DataFetchState> chartState =
+      Rx<DataFetchState>(DataFetchState.initial);
+  final Rx<DataFetchState> pieChartState =
+      Rx<DataFetchState>(DataFetchState.initial);
+
+  // Track if initialization is complete for each section
+  final RxBool orderDataInitialized = false.obs;
+  final RxBool expenseDataInitialized = false.obs;
+  final RxBool customerDataInitialized = false.obs;
+
+  // Legacy loading state (keep for backward compatibility)
+  RxBool isLoading = true.obs;
 
   final OrderController orderController = Get.find<OrderController>();
   final ExpenseController expenseController = Get.find<ExpenseController>();
   final CustomerController customerController = Get.find<CustomerController>();
   final SalesService salesService = SalesService();
-  RxBool isLoading = true.obs;
 
   var dataList = <Map<String, String>>[].obs;
 
@@ -43,7 +67,6 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
   RxDouble cancelledAmount = 0.0.obs;
 
   // Observable for the PROFIT
-  // Observables for dashboard cards
   RxDouble currentMonthProfit = 0.0.obs;
   RxBool isCard2Profit = false.obs;
   RxInt card2Percentage = 0.obs;
@@ -57,66 +80,193 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
   @override
   void onInit() {
     super.onInit();
-    initializeDashboard();
+
+    // Set all cards to loading state
+    salesCardState.value = DataFetchState.loading;
+    avgOrderState.value = DataFetchState.loading;
+    profitCardState.value = DataFetchState.loading;
+    customerCardState.value = DataFetchState.loading;
+    chartState.value = DataFetchState.loading;
+    pieChartState.value = DataFetchState.loading;
+
+    // Start loading data
+    loadDashboardData();
   }
 
   @override
   void onReady() {
     super.onReady();
-    // Re-fetch data when the widget is ready
-    Future.delayed(const Duration(milliseconds: 100), () {
-      initializeDashboard();
-    });
+    // Double-check data load on ready
+    if (!orderDataInitialized.value ||
+        !expenseDataInitialized.value ||
+        !customerDataInitialized.value) {
+      // If any data is not loaded, try again with a slight delay
+      Future.delayed(const Duration(milliseconds: 500), () {
+        loadDashboardData();
+      });
+    }
   }
 
-  Future<void> initializeDashboard() async {
+  Future<void> loadDashboardData() async {
     try {
       isLoading.value = true;
-      change(null, status: RxStatus.loading());
 
-      // Reset values to show loading state
-      currentMonthSales.value = 0;
-      currentMonthProfit.value = 0;
-      customerCount.value = 0;
-      // Reset weekly sales to zeros
-      for (int i = 0; i < weeklySales.length; i++) {
-        weeklySales[i] = 0.0;
+      // Load order data if needed
+      if (!orderDataInitialized.value) {
+        await loadOrderData();
       }
 
-      // Fetch data if not already fetched
-      if (orderController.allOrders.isEmpty) {
-        await orderController.fetchOrders();
-      }
-      if (expenseController.expenses.isEmpty) {
-        await expenseController.fetchExpenses();
-      }
-      if (customerController.allCustomers.isEmpty) {
-        await customerController.fetchAllCustomers();
+      // Load expense data if needed
+      if (!expenseDataInitialized.value) {
+        await loadExpenseData();
       }
 
-      // Calculate and update values
-      calculateWeeklySales1(orderController.allOrders);
-      fetchCards(orderController.allOrders, expenseController.expenses);
+      // Load customer data if needed
+      if (!customerDataInitialized.value) {
+        await loadCustomerData();
+      }
 
-      change(null, status: RxStatus.success());
+      // Calculate dashboard metrics
+      await calculateDashboardMetrics();
     } catch (e) {
-      change(null, status: RxStatus.error(e.toString()));
-      TLoader.errorSnackBar(title: e.toString());
+      handleError(e);
     } finally {
       isLoading.value = false;
     }
   }
 
-  void fetchCards(List<OrderModel> allOrders, List<ExpenseModel> expenses) {
+  Future<void> loadOrderData() async {
     try {
-      fetchSalesTotalCard(allOrders);
-      fetchProfit(allOrders, expenses);
-      fetchCustomerCard(customerController.allCustomers);
-      calculateAverageOrderValue(allOrders);
-      calculateOrderStatusCounts(allOrders);
+      if (orderController.allOrders.isEmpty) {
+        await orderController.fetchOrders();
+      }
+      orderDataInitialized.value = true;
     } catch (e) {
-      TLoader.errorSnackBar(title: e.toString());
+      if (kDebugMode) {
+        print('Error loading order data: $e');
+      }
     }
+  }
+
+  Future<void> loadExpenseData() async {
+    try {
+      if (expenseController.expenses.isEmpty) {
+        await expenseController.fetchExpenses();
+      }
+      expenseDataInitialized.value = true;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error loading expense data: $e');
+      }
+    }
+  }
+
+  Future<void> loadCustomerData() async {
+    try {
+      if (customerController.allCustomers.isEmpty) {
+        await customerController.fetchAllCustomers();
+      }
+      customerDataInitialized.value = true;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error loading customer data: $e');
+      }
+    }
+  }
+
+  Future<void> calculateDashboardMetrics() async {
+    try {
+      // Calculate weekly sales (for chart)
+      chartState.value = DataFetchState.loading;
+      try {
+        calculateWeeklySales1(orderController.allOrders);
+        chartState.value = DataFetchState.success;
+      } catch (e) {
+        chartState.value = DataFetchState.error;
+        if (kDebugMode) {
+          print('Error calculating weekly sales: $e');
+        }
+      }
+
+      // Calculate sales total
+      salesCardState.value = DataFetchState.loading;
+      try {
+        var result =
+            salesService.calculateSalesTotal(orderController.allOrders);
+        currentMonthSales.value = result.currentMonthSales;
+        card1Percentage.value = result.percentageChange;
+        isCard1Profit.value = result.isProfit;
+        lastMonth.value = result.monthYear;
+        salesCardState.value = DataFetchState.success;
+      } catch (e) {
+        salesCardState.value = DataFetchState.error;
+        if (kDebugMode) {
+          print('Error calculating sales total: $e');
+        }
+      }
+
+      // Calculate profit
+      profitCardState.value = DataFetchState.loading;
+      try {
+        var result = salesService.calculateProfit(
+            orderController.allOrders, expenseController.expenses);
+        currentMonthProfit.value = result.currentMonthSales;
+        card2Percentage.value = result.percentageChange;
+        isCard2Profit.value = result.isProfit;
+        profitCardState.value = DataFetchState.success;
+      } catch (e) {
+        profitCardState.value = DataFetchState.error;
+        if (kDebugMode) {
+          print('Error calculating profit: $e');
+        }
+      }
+
+      // Calculate customer metrics
+      customerCardState.value = DataFetchState.loading;
+      try {
+        fetchCustomerCard(customerController.allCustomers);
+        customerCardState.value = DataFetchState.success;
+      } catch (e) {
+        customerCardState.value = DataFetchState.error;
+        if (kDebugMode) {
+          print('Error calculating customer metrics: $e');
+        }
+      }
+
+      // Calculate average order value
+      avgOrderState.value = DataFetchState.loading;
+      try {
+        calculateAverageOrderValue(orderController.allOrders);
+        avgOrderState.value = DataFetchState.success;
+      } catch (e) {
+        avgOrderState.value = DataFetchState.error;
+        if (kDebugMode) {
+          print('Error calculating average order value: $e');
+        }
+      }
+
+      // Calculate order status counts
+      pieChartState.value = DataFetchState.loading;
+      try {
+        calculateOrderStatusCounts(orderController.allOrders);
+        pieChartState.value = DataFetchState.success;
+      } catch (e) {
+        pieChartState.value = DataFetchState.error;
+        if (kDebugMode) {
+          print('Error calculating order status counts: $e');
+        }
+      }
+    } catch (e) {
+      handleError(e);
+    }
+  }
+
+  void handleError(dynamic error) {
+    if (kDebugMode) {
+      print('Dashboard error: $error');
+    }
+    TLoader.errorSnackBar(title: 'Dashboard Error', message: error.toString());
+    change(null, status: RxStatus.error(error.toString()));
   }
 
   void calculateAverageOrderValue(List<OrderModel> allOrders) {
@@ -181,7 +331,7 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
       if (kDebugMode) {
         print('Error calculating average order value: $e');
       }
-      TLoader.errorSnackBar(title: 'Error calculating average order value');
+      throw Exception('Error calculating average order value: $e');
     }
   }
 
@@ -211,7 +361,7 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
         }
       }
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Error calculating order status counts');
+      throw Exception('Error calculating order status counts: $e');
     }
   }
 
@@ -238,45 +388,6 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
       }
     }
     return weeklySales;
-  }
-
-  void fetchSalesTotalCard(List<OrderModel> allOrders) {
-    try {
-      var result = salesService.calculateSalesTotal(allOrders);
-
-      currentMonthSales.value = result.currentMonthSales;
-      card1Percentage.value = result.percentageChange;
-      isCard1Profit.value = result.isProfit;
-      lastMonth.value = result.monthYear;
-
-      if (kDebugMode) {
-        print("Previous Month Total: ${result.previousMonthSales}");
-        print("Is Profit: ${isCard1Profit.value}");
-        print("Current Month Total: ${currentMonthSales.value}");
-      }
-    } catch (e) {
-      TLoader.errorSnackBar(title: "Error", message: e.toString());
-    }
-  }
-
-  //
-  void fetchProfit(List<OrderModel> allOrders, List<ExpenseModel> expenses) {
-    try {
-      var result = salesService.calculateProfit(allOrders, expenses);
-
-      currentMonthProfit.value = result.currentMonthSales;
-      card2Percentage.value = result.percentageChange;
-      isCard2Profit.value = result.isProfit;
-      // lastMonth.value = result.monthYear;
-
-      if (kDebugMode) {
-        print("Previous Month Total: ${result.previousMonthSales}");
-        print("Is Profit: ${isCard1Profit.value}");
-        print("Current Month Total: ${currentMonthSales.value}");
-      }
-    } catch (e) {
-      TLoader.errorSnackBar(title: "Error", message: e.toString());
-    }
   }
 
   void fetchCustomerCard(List<CustomerModel> allCustomers) {
@@ -326,7 +437,7 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
       card4Percentage.value = percentageChange;
       isCustomerIncrease.value = isIncrease;
     } catch (e) {
-      TLoader.errorSnackBar(title: "Error", message: e.toString());
+      throw Exception('Error calculating customer stats: $e');
     }
   }
 }

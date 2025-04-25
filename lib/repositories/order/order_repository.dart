@@ -1,5 +1,3 @@
-
-
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -9,18 +7,17 @@ import '../../../main.dart';
 
 import '../../Models/orders/order_item_model.dart';
 import '../../Models/salesman/salesman_model.dart';
+import '../../controllers/product/product_controller.dart';
 
 class OrderRepository extends GetxController {
   static OrderRepository get instance => Get.find();
 
-
   //fetch
   Future<List<OrderModel>> fetchCustomerOrders(int customerId) async {
     try {
-      final data = await supabase
-          .from('orders')
-          .select().eq('customer_id', customerId);
-     // print(data.length);
+      final data =
+          await supabase.from('orders').select().eq('customer_id', customerId);
+      // print(data.length);
 
       final addressList = data.map((item) {
         return OrderModel.fromJson(item);
@@ -38,9 +35,7 @@ class OrderRepository extends GetxController {
     try {
       await supabase
           .from('orders')
-          .update({ 'status': newStatus})
-          .eq('order_id', orderId);
-
+          .update({'status': newStatus}).eq('order_id', orderId);
 
       TLoader.successSnackBar(
           title: 'Status Updated', message: 'Status is Updated to$newStatus');
@@ -53,16 +48,12 @@ class OrderRepository extends GetxController {
     }
   }
 
-
-  Future<int> uploadOrder(Map<String, dynamic> json, List<OrderItemModel> orderItems) async {
+  Future<int> uploadOrder(
+      Map<String, dynamic> json, List<OrderItemModel> orderItems) async {
     try {
-
-
       // ✅ Insert the order into the 'orders' table
-      final response = await Supabase.instance.client
-          .from('orders')
-          .insert(json)
-          .select();
+      final response =
+          await Supabase.instance.client.from('orders').insert(json).select();
 
       final orderId = response[0]['order_id'];
 
@@ -70,12 +61,12 @@ class OrderRepository extends GetxController {
       if (orderItems.isNotEmpty) {
         // Make sure to add the order_id to each item before inserting
         await Supabase.instance.client.from('order_items').insert(
-          orderItems.map((item) {
-            var itemJson = item.toJson();
-            itemJson['order_id'] = orderId; // Assign the order_id here
-            return itemJson;
-          }).toList(),
-        );
+              orderItems.map((item) {
+                var itemJson = item.toJson();
+                itemJson['order_id'] = orderId; // Assign the order_id here
+                return itemJson;
+              }).toList(),
+            );
       }
 
       TLoader.successSnackBar(
@@ -84,18 +75,15 @@ class OrderRepository extends GetxController {
     } catch (e) {
       // ❌ Handle errors
       if (kDebugMode) {
-        TLoader.errorSnackBar(title: 'Update Order Error', message: e.toString());
+        TLoader.errorSnackBar(
+            title: 'Update Order Error', message: e.toString());
         print(e);
       }
       return -1;
     }
   }
 
-
-
-
-  Future<List<OrderModel>> fetchOrders() async
-  {
+  Future<List<OrderModel>> fetchOrders() async {
     try {
       final data = await supabase.from('orders').select();
       //print(data);
@@ -105,8 +93,7 @@ class OrderRepository extends GetxController {
       }).toList();
 
       return orderList;
-    }
-    catch (e) {
+    } catch (e) {
       if (kDebugMode) {
         TLoader.errorSnackBar(title: 'Order Fetch', message: e.toString());
         print(e.toString());
@@ -120,7 +107,7 @@ class OrderRepository extends GetxController {
       final data = await supabase
           .from('order_items')
           .select(
-          '*, products(product_id, name)') // Joining with product_variant
+              '*, products(product_id, name)') // Joining with product_variant
           .eq('order_id', orderId);
 
       if (kDebugMode) {
@@ -162,22 +149,42 @@ class OrderRepository extends GetxController {
       final int newStock = currentStock + item.quantity;
 
       // Step 2: Update the stock quantity
-      final updateResponse = await supabase
-          .from('products')
-          .update({'stock_quantity': newStock})
-          .eq('product_id', item.productId);
+      final updateResponse = await supabase.from('products').update(
+          {'stock_quantity': newStock}).eq('product_id', item.productId);
 
       if (updateResponse.error != null) {
         TLoader.errorSnackBar(
-            title: 'Restore Quantity Error', message: updateResponse.error!.message);
+            title: 'Restore Quantity Error',
+            message: updateResponse.error!.message);
       } else {
         TLoader.successSnackBar(
             title: 'Success', message: 'Quantity restored successfully');
+
+        // Update local product list in ProductController
+        try {
+          final productController = Get.find<ProductController>();
+          final productIndex = productController.allProducts
+              .indexWhere((p) => p.productId == item.productId);
+          if (productIndex != -1) {
+            final currentProduct = productController.allProducts[productIndex];
+            final updatedProduct = currentProduct.copyWith(
+              stockQuantity: currentProduct.stockQuantity! + item.quantity,
+            );
+            productController.allProducts[productIndex] = updatedProduct;
+            productController.update();
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print('Failed to update local product list: $e');
+          }
+        }
       }
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Restore Quantity Error', message: e.toString());
+      TLoader.errorSnackBar(
+          title: 'Restore Quantity Error', message: e.toString());
     }
   }
+
   Future<void> subtractQuantity(OrderItemModel item) async {
     try {
       // Step 1: Fetch the current stock quantity
@@ -192,17 +199,36 @@ class OrderRepository extends GetxController {
       final int newStock = currentStock - item.quantity; // Subtract quantity
 
       // Step 2: Update the stock quantity
-      final updateResponse = await supabase
-          .from('products')
-          .update({'stock_quantity': newStock})
-          .eq('product_id', item.productId);
+      final updateResponse = await supabase.from('products').update(
+          {'stock_quantity': newStock}).eq('product_id', item.productId);
 
       if (updateResponse.error != null) {
         TLoader.errorSnackBar(
-            title: 'Subtract Quantity Error', message: updateResponse.error!.message);
+            title: 'Subtract Quantity Error',
+            message: updateResponse.error!.message);
+      } else {
+        // Update local product list in ProductController
+        try {
+          final productController = Get.find<ProductController>();
+          final productIndex = productController.allProducts
+              .indexWhere((p) => p.productId == item.productId);
+          if (productIndex != -1) {
+            final currentProduct = productController.allProducts[productIndex];
+            final updatedProduct = currentProduct.copyWith(
+              stockQuantity: currentProduct.stockQuantity! - item.quantity,
+            );
+            productController.allProducts[productIndex] = updatedProduct;
+            productController.update();
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print('Failed to update local product list: $e');
+          }
+        }
       }
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Subtract Quantity Error', message: e.toString());
+      TLoader.errorSnackBar(
+          title: 'Subtract Quantity Error', message: e.toString());
     }
   }
 
@@ -215,7 +241,8 @@ class OrderRepository extends GetxController {
           .eq('order_id', orderId)
           .single();
 
-      double existingAmount = (response['paid_amount'] as num?)?.toDouble() ?? 0.0;
+      double existingAmount =
+          (response['paid_amount'] as num?)?.toDouble() ?? 0.0;
       double updatedAmount = existingAmount + newAmount;
 
       // Update order with new paid amount
@@ -232,6 +259,4 @@ class OrderRepository extends GetxController {
       return false;
     }
   }
-
-
 }

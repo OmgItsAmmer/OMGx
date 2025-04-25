@@ -14,7 +14,6 @@ class ShopController extends GetxController {
   final ShopRepository shopRepository = Get.put(ShopRepository());
   final MediaController mediaController = Get.find<MediaController>();
 
-
   Rx<ShopModel>? selectedShop = ShopModel.empty().obs;
 
   final shopName = TextEditingController().obs;
@@ -37,17 +36,13 @@ class ShopController extends GetxController {
 
   Future<void> fetchShop() async {
     try {
-     isLoading.value = true;
+      isLoading.value = true;
       final shopData = await shopRepository.fetchShopDetails();
       selectedShop?.value = shopData;
       setShopDetail();
-
-
-
     } catch (e) {
       TLoader.errorSnackBar(title: 'Oh Snap', message: e.toString());
-    }
-    finally {
+    } finally {
       isLoading.value = false;
     }
   }
@@ -62,8 +57,7 @@ class ShopController extends GetxController {
       profile1.text = selectedShop?.value.profile1.toString() ?? ' ';
       profile2.text = selectedShop?.value.profile2.toString() ?? ' ';
       profile3.text = selectedShop?.value.profile3.toString() ?? ' ';
-    //  productImagesController.setDesiredImage(MediaCategory.shop);
-
+      //  productImagesController.setDesiredImage(MediaCategory.shop);
     } catch (e) {
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
@@ -76,33 +70,36 @@ class ShopController extends GetxController {
       final shopModel = ShopModel(
         shopId: selectedShop?.value.shopId ?? -1,
         shopname: shopName.value.text,
-        shippingPrice: double.tryParse(shippingFee.text) ?? 0.0, // Convert String to double
-        taxrate: double.tryParse(taxRate.text) ?? 0.0, // Convert String to double
-        thresholdFreeShipping: double.tryParse(shippingThreshold.text) ?? 0.0, // Convert String to double
-        profile1: double.tryParse(profile1.text) ?? 0.0, // Convert String to double
-        profile2: double.tryParse(profile2.text) ?? 0.0, // Convert String to double
-        profile3: double.tryParse(profile3.text) ?? 0.0, // Convert String to double
+        shippingPrice: double.tryParse(shippingFee.text) ??
+            0.0, // Convert String to double
+        taxrate:
+            double.tryParse(taxRate.text) ?? 0.0, // Convert String to double
+        thresholdFreeShipping: double.tryParse(shippingThreshold.text) ??
+            0.0, // Convert String to double
+        profile1:
+            double.tryParse(profile1.text) ?? 0.0, // Convert String to double
+        profile2:
+            double.tryParse(profile2.text) ?? 0.0, // Convert String to double
+        profile3:
+            double.tryParse(profile3.text) ?? 0.0, // Convert String to double
       );
 
       final json = shopModel.toJson();
 
-
-     /// await mediaController.updateEntityId(selectedShop?.value.shopId ?? -1, productImagesController.selectedImage.value!.imageId,MediaCategory.shop.toString().split('.').last);
-      await mediaController.imageAssigner(shopModel.shopId,MediaCategory.shop.toString().split('.').last,true);
+      /// await mediaController.updateEntityId(selectedShop?.value.shopId ?? -1, productImagesController.selectedImage.value!.imageId,MediaCategory.shop.toString().split('.').last);
+      await mediaController.imageAssigner(shopModel.shopId,
+          MediaCategory.shop.toString().split('.').last, true);
       mediaController.clearSidebarImageCache();
-      await shopRepository.updateShopData(json, selectedShop?.value.shopId ?? -1);
-
-
+      await shopRepository.updateShopData(
+          json, selectedShop?.value.shopId ?? -1);
+      selectedShop?.value = shopModel;
     } catch (e) {
       if (kDebugMode) {
         TLoader.errorSnackBar(title: e.toString());
         print(e);
       }
-    }
-    finally {
+    } finally {
       isUpdating.value = false;
-
     }
   }
-
 }
