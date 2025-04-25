@@ -60,6 +60,8 @@ class StoreImageInfoMobile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mediaController = Get.find<MediaController>();
+    final ShopController shopController = Get.find<ShopController>();
+
     return TRoundedContainer(
       padding: const EdgeInsets.all(TSizes.sm),
       child: Column(
@@ -104,20 +106,49 @@ class StoreImageInfoMobile extends StatelessWidget {
                           fit: BoxFit.cover,
                           padding: const EdgeInsets.all(0),
                         )
-                      : TRoundedImage(
-                          imageurl: '',
-                          width: 150,
-                          height: 150,
-                          border: Border.all(
-                            color: TColors.primary,
-                            width: 0.5,
+                      : FutureBuilder<String?>(
+                          future: mediaController.fetchMainImage(
+                            shopController.selectedShop?.value.shopId ?? -1,
+                            MediaCategory.shop.toString().split('.').last,
                           ),
-                          borderRadius: 100,
-                          fit: BoxFit.cover,
-                          padding: const EdgeInsets.all(0),
-                          applyImageRadius: true,
-                          backgroundColor: Colors.white,
-                          isNetworkImage: false,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const TShimmerEffect(
+                                  width: 150, height: 150, radius: 100);
+                            } else if (snapshot.hasData &&
+                                snapshot.data != null) {
+                              return TRoundedImage(
+                                imageurl: snapshot.data!,
+                                width: 150,
+                                height: 150,
+                                border: Border.all(
+                                  color: TColors.primary,
+                                  width: 0.5,
+                                ),
+                                isNetworkImage: true,
+                                borderRadius: 100,
+                                fit: BoxFit.cover,
+                                padding: const EdgeInsets.all(0),
+                              );
+                            } else {
+                              return TRoundedImage(
+                                imageurl: '',
+                                width: 150,
+                                height: 150,
+                                border: Border.all(
+                                  color: TColors.primary,
+                                  width: 0.5,
+                                ),
+                                borderRadius: 100,
+                                fit: BoxFit.cover,
+                                padding: const EdgeInsets.all(0),
+                                applyImageRadius: true,
+                                backgroundColor: Colors.white,
+                                isNetworkImage: false,
+                              );
+                            }
+                          },
                         ),
 
                   // Edit Button Overlay
@@ -127,7 +158,8 @@ class StoreImageInfoMobile extends StatelessWidget {
                     child: TCircularIcon(
                       icon: Iconsax.edit,
                       onPressed: () {
-                        // Handle image upload here
+                        // Handle image upload
+                        mediaController.selectImagesFromMedia();
                       },
                       backgroundColor: TColors.primary,
                       width: 40,
@@ -268,15 +300,34 @@ class ProfileDetailsMobile extends StatelessWidget {
             height: TSizes.spaceBtwItems,
           ),
 
+          // Profile 3
+          TextFormField(
+            controller: shopController.profile3,
+            style: Theme.of(context).textTheme.bodyMedium,
+            decoration: const InputDecoration(
+              labelText: 'Profile 3',
+              hintText: 'Enter profile 3 details',
+              prefixIcon: Icon(Iconsax.profile_2user),
+            ),
+          ),
+
+          const SizedBox(
+            height: TSizes.spaceBtwItems,
+          ),
+
           // Save Button
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                // Save changes
-                shopController.updateStore();
-              },
-              child: const Text('Save Changes'),
+            child: Obx(
+              () => ElevatedButton(
+                onPressed: () {
+                  // Save changes
+                  shopController.updateStore();
+                },
+                child: shopController.isUpdating.value
+                    ? const CircularProgressIndicator(color: TColors.white)
+                    : const Text('Save Changes'),
+              ),
             ),
           ),
         ],

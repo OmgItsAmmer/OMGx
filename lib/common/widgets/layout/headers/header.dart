@@ -78,14 +78,14 @@ class THeader extends StatelessWidget implements PreferredSizeWidget {
                       });
                     },
                     icon: const Icon(Iconsax.search_normal)),
-              Obx(() => IconButton(
+             (TDeviceUtils.isDesktopScreen(context)) ? Obx(() => IconButton(
                     icon: Icon(
                       fullscreenController.isFullscreen.value
                           ? Icons.fullscreen_exit
                           : Icons.fullscreen,
                     ),
                     onPressed: fullscreenController.toggleFullscreen,
-                  )),
+                  )) : const SizedBox.shrink(),
 
               const SizedBox(
                 width: TSizes.spaceBtwItems / 2,

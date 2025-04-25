@@ -11,6 +11,7 @@ import 'package:iconsax/iconsax.dart';
 import '../../../common/widgets/icons/t_circular_icon.dart';
 import '../../../common/widgets/shimmers/shimmer.dart';
 import '../../../controllers/shop/shop_controller.dart';
+import '../../../utils/constants/enums.dart';
 
 class StoreTablet extends StatelessWidget {
   const StoreTablet({super.key});
@@ -34,7 +35,7 @@ class StoreTablet extends StatelessWidget {
               height: TSizes.spaceBtwSections,
             ),
 
-            //Layout for tablet - image and top details side by side
+            //Layout for tablet - image and details side by side
             const Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -43,17 +44,10 @@ class StoreTablet extends StatelessWidget {
                 SizedBox(
                   width: TSizes.spaceBtwItems,
                 ),
-                //Store name
-                Expanded(flex: 2, child: StoreNameTablet()),
+                //Store details
+                Expanded(flex: 2, child: StoreDetailsTablet()),
               ],
             ),
-
-            const SizedBox(
-              height: TSizes.spaceBtwSections,
-            ),
-
-            //Settings in a grid layout
-            const SettingsGridTablet(),
           ],
         ),
       ),
@@ -69,6 +63,8 @@ class StoreImageInfoTablet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mediaController = Get.find<MediaController>();
+    final ShopController shopController = Get.find<ShopController>();
+
     return TRoundedContainer(
       padding: const EdgeInsets.all(TSizes.md),
       child: Column(
@@ -113,20 +109,49 @@ class StoreImageInfoTablet extends StatelessWidget {
                           fit: BoxFit.cover,
                           padding: const EdgeInsets.all(0),
                         )
-                      : TRoundedImage(
-                          imageurl: '',
-                          width: 180,
-                          height: 180,
-                          border: Border.all(
-                            color: TColors.primary,
-                            width: 0.5,
+                      : FutureBuilder<String?>(
+                          future: mediaController.fetchMainImage(
+                            shopController.selectedShop?.value.shopId ?? -1,
+                            MediaCategory.shop.toString().split('.').last,
                           ),
-                          borderRadius: 100,
-                          fit: BoxFit.cover,
-                          padding: const EdgeInsets.all(0),
-                          applyImageRadius: true,
-                          backgroundColor: Colors.white,
-                          isNetworkImage: false,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const TShimmerEffect(
+                                  width: 180, height: 180, radius: 100);
+                            } else if (snapshot.hasData &&
+                                snapshot.data != null) {
+                              return TRoundedImage(
+                                imageurl: snapshot.data!,
+                                width: 180,
+                                height: 180,
+                                border: Border.all(
+                                  color: TColors.primary,
+                                  width: 0.5,
+                                ),
+                                isNetworkImage: true,
+                                borderRadius: 100,
+                                fit: BoxFit.cover,
+                                padding: const EdgeInsets.all(0),
+                              );
+                            } else {
+                              return TRoundedImage(
+                                imageurl: '',
+                                width: 180,
+                                height: 180,
+                                border: Border.all(
+                                  color: TColors.primary,
+                                  width: 0.5,
+                                ),
+                                borderRadius: 100,
+                                fit: BoxFit.cover,
+                                padding: const EdgeInsets.all(0),
+                                applyImageRadius: true,
+                                backgroundColor: Colors.white,
+                                isNetworkImage: false,
+                              );
+                            }
+                          },
                         ),
 
                   // Edit Button Overlay
@@ -136,7 +161,8 @@ class StoreImageInfoTablet extends StatelessWidget {
                     child: TCircularIcon(
                       icon: Iconsax.edit,
                       onPressed: () {
-                        // Handle image upload here
+                        // Handle image upload
+                        mediaController.selectImagesFromMedia();
                       },
                       backgroundColor: TColors.primary,
                       width: 40,
@@ -163,8 +189,8 @@ class StoreImageInfoTablet extends StatelessWidget {
   }
 }
 
-class StoreNameTablet extends StatelessWidget {
-  const StoreNameTablet({
+class StoreDetailsTablet extends StatelessWidget {
+  const StoreDetailsTablet({
     super.key,
   });
 
@@ -183,9 +209,7 @@ class StoreNameTablet extends StatelessWidget {
             style: Theme.of(context).textTheme.titleLarge,
           ),
 
-          const SizedBox(
-            height: TSizes.spaceBtwItems,
-          ),
+          const SizedBox(height: TSizes.spaceBtwItems),
 
           // Store Name
           TextFormField(
@@ -197,35 +221,8 @@ class StoreNameTablet extends StatelessWidget {
               prefixIcon: Icon(Iconsax.shop),
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
 
-class SettingsGridTablet extends StatelessWidget {
-  const SettingsGridTablet({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final ShopController shopController = Get.find<ShopController>();
-
-    return TRoundedContainer(
-      padding: const EdgeInsets.all(TSizes.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Heading
-          Text(
-            'Store Settings',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-
-          const SizedBox(
-            height: TSizes.spaceBtwItems,
-          ),
+          const SizedBox(height: TSizes.spaceBtwItems),
 
           // Settings in a grid layout
           Wrap(
@@ -320,19 +317,21 @@ class SettingsGridTablet extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(
-            height: TSizes.spaceBtwSections,
-          ),
+          const SizedBox(height: TSizes.spaceBtwSections),
 
           // Save Button
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                // Save changes
-                shopController.updateStore();
-              },
-              child: const Text('Save Changes'),
+            child: Obx(
+              () => ElevatedButton(
+                onPressed: () {
+                  // Save changes
+                  shopController.updateStore();
+                },
+                child: shopController.isUpdating.value
+                    ? const CircularProgressIndicator(color: TColors.white)
+                    : const Text('Save Changes'),
+              ),
             ),
           ),
         ],

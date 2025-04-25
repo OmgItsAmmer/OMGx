@@ -5,13 +5,16 @@ import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
 import 'package:admin_dashboard_v3/controllers/salesman/salesman_controller.dart';
 import 'package:admin_dashboard_v3/controllers/user/user_controller.dart';
 import 'package:admin_dashboard_v3/repositories/products/product_variants_repository.dart';
+import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
+import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_thermal_printer/flutter_thermal_printer.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../../Models/orders/order_item_model.dart';
 import '../../Models/products/product_model.dart';
 import '../../repositories/order/order_repository.dart';
@@ -19,6 +22,9 @@ import '../customer/customer_controller.dart';
 import '../shop/shop_controller.dart';
 import '../../Models/salesman/salesman_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'package:url_launcher/url_launcher.dart';
+import 'package:iconsax/iconsax.dart';
 
 class SalesController extends GetxController {
   static SalesController get instance => Get.find();
@@ -966,5 +972,94 @@ class SalesController extends GetxController {
     } finally {
       isLoadingVariants.value = false;
     }
+  }
+}
+
+class SoftwareCompanyInfo extends StatelessWidget {
+  const SoftwareCompanyInfo({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final ShopController shopController = Get.find<ShopController>();
+    final companyName = shopController.selectedShop?.value.softwareCompanyName;
+    final websiteLink = shopController.selectedShop?.value.softwareWebsiteLink;
+    final contactNo = shopController.selectedShop?.value.softwareContactNo;
+
+    // If no company info exists, don't show anything
+    if (companyName == null && websiteLink == null && contactNo == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      width: 180,
+      padding: const EdgeInsets.all(TSizes.sm),
+      decoration: BoxDecoration(
+        color: TColors.lightContainer,
+        borderRadius: BorderRadius.circular(TSizes.borderRadiusSm),
+        border: Border.all(color: TColors.grey.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Company Name
+          if (companyName != null && companyName.isNotEmpty)
+            Text(
+              companyName,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+
+          // Contact Number
+          if (contactNo != null && contactNo.isNotEmpty) ...[
+            const SizedBox(height: TSizes.xs),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Iconsax.call, size: 12),
+                const SizedBox(width: 4),
+                Text(
+                  contactNo,
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+              ],
+            ),
+          ],
+
+          // QR Code for website
+          if (websiteLink != null && websiteLink.isNotEmpty) ...[
+            const SizedBox(height: TSizes.sm),
+            GestureDetector(
+              onTap: () async {
+                final Uri url = Uri.parse(websiteLink);
+                if (await canLaunchUrl(url)) {
+                  await launchUrl(url);
+                }
+              },
+              child: Column(
+                children: [
+                  QrImageView(
+                    data: websiteLink,
+                    version: QrVersions.auto,
+                    size: 80.0,
+                    backgroundColor: Colors.white,
+                    errorStateBuilder: (context, error) => const Center(
+                      child: Text('Error generating QR'),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Scan to visit',
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 }

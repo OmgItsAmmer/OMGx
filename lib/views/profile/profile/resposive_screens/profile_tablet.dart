@@ -33,7 +33,7 @@ class ProfileTablet extends StatelessWidget {
               height: TSizes.spaceBtwSections,
             ),
 
-            // In tablet view, we can show the image and top profile info side by side
+            // In tablet view, we can show the image and all profile info side by side
             const Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -42,17 +42,10 @@ class ProfileTablet extends StatelessWidget {
                 SizedBox(
                   width: TSizes.spaceBtwItems,
                 ),
-                // Profile header and top two fields
-                Expanded(flex: 2, child: ProfileHeaderTablet()),
+                // Profile info
+                Expanded(flex: 2, child: ProfileAllDetailsTablet()),
               ],
             ),
-
-            const SizedBox(
-              height: TSizes.spaceBtwSections,
-            ),
-
-            // Additional profile fields below
-            const ProfileDetailsTablet(),
           ],
         ),
       ),
@@ -68,6 +61,7 @@ class ProfileImageInfoTablet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mediaController = Get.find<MediaController>();
+    final UserController userController = Get.find<UserController>();
 
     return TRoundedContainer(
       padding: const EdgeInsets.all(TSizes.md),
@@ -106,17 +100,48 @@ class ProfileImageInfoTablet extends StatelessWidget {
                         fit: BoxFit.cover,
                         padding: const EdgeInsets.all(0),
                       )
-                    : TRoundedImage(
-                        imageurl: '',
-                        width: 180,
-                        height: 180,
-                        border: Border.all(color: TColors.primary, width: 0.5),
-                        borderRadius: 100,
-                        fit: BoxFit.cover,
-                        padding: const EdgeInsets.all(0),
-                        applyImageRadius: true,
-                        backgroundColor: Colors.white,
-                        isNetworkImage: false,
+                    : FutureBuilder<String?>(
+                        future: mediaController.fetchMainImage(
+                          userController.currentUser.value.userId,
+                          MediaCategory.users.toString().split('.').last,
+                        ),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const TShimmerEffect(
+                              width: 180,
+                              height: 180,
+                              radius: 100,
+                            );
+                          } else if (snapshot.hasData &&
+                              snapshot.data != null) {
+                            return TRoundedImage(
+                              imageurl: snapshot.data!,
+                              width: 180,
+                              height: 180,
+                              border: Border.all(
+                                  color: TColors.primary, width: 0.5),
+                              isNetworkImage: true,
+                              borderRadius: 100,
+                              fit: BoxFit.cover,
+                              padding: const EdgeInsets.all(0),
+                            );
+                          } else {
+                            return TRoundedImage(
+                              imageurl: '',
+                              width: 180,
+                              height: 180,
+                              border: Border.all(
+                                  color: TColors.primary, width: 0.5),
+                              borderRadius: 100,
+                              fit: BoxFit.cover,
+                              padding: const EdgeInsets.all(0),
+                              applyImageRadius: true,
+                              backgroundColor: Colors.white,
+                              isNetworkImage: false,
+                            );
+                          }
+                        },
                       ),
 
                 // Edit button
@@ -126,7 +151,8 @@ class ProfileImageInfoTablet extends StatelessWidget {
                   child: TCircularIcon(
                     icon: Iconsax.edit,
                     onPressed: () {
-                      // Handle image upload here
+                      // Handle image upload
+                      mediaController.selectImagesFromMedia();
                     },
                     backgroundColor: TColors.primary,
                     width: 40,
@@ -151,8 +177,8 @@ class ProfileImageInfoTablet extends StatelessWidget {
   }
 }
 
-class ProfileHeaderTablet extends StatelessWidget {
-  const ProfileHeaderTablet({
+class ProfileAllDetailsTablet extends StatelessWidget {
+  const ProfileAllDetailsTablet({
     super.key,
   });
 
@@ -184,9 +210,7 @@ class ProfileHeaderTablet extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(
-            height: TSizes.spaceBtwItems,
-          ),
+          const SizedBox(height: TSizes.spaceBtwItems),
 
           // First Name and Last Name
           Row(
@@ -204,9 +228,7 @@ class ProfileHeaderTablet extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(
-                width: TSizes.spaceBtwItems,
-              ),
+              const SizedBox(width: TSizes.spaceBtwItems),
               Expanded(
                 child: TextFormField(
                   controller: userController.lastName,
@@ -222,34 +244,8 @@ class ProfileHeaderTablet extends StatelessWidget {
               ),
             ],
           ),
-        ],
-      ),
-    );
-  }
-}
 
-class ProfileDetailsTablet extends StatelessWidget {
-  const ProfileDetailsTablet({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final UserController userController = Get.find<UserController>();
-
-    return TRoundedContainer(
-      padding: const EdgeInsets.all(TSizes.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Contact Details',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-
-          const SizedBox(
-            height: TSizes.spaceBtwItems,
-          ),
+          const SizedBox(height: TSizes.spaceBtwItems),
 
           // Email and Phone in a row
           Row(
@@ -266,9 +262,7 @@ class ProfileDetailsTablet extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(
-                width: TSizes.spaceBtwItems,
-              ),
+              const SizedBox(width: TSizes.spaceBtwItems),
               Expanded(
                 child: TextFormField(
                   controller: userController.phoneNumber,
@@ -285,9 +279,7 @@ class ProfileDetailsTablet extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(
-            height: TSizes.spaceBtwItems,
-          ),
+          const SizedBox(height: TSizes.spaceBtwItems),
 
           // Update Button
           SizedBox(
@@ -298,9 +290,7 @@ class ProfileDetailsTablet extends StatelessWidget {
                   userController.updateProfile();
                 },
                 child: userController.isUpdating.value
-                    ? const CircularProgressIndicator(
-                        color: Colors.white,
-                      )
+                    ? const CircularProgressIndicator(color: TColors.white)
                     : const Text('Update Profile'),
               ),
             ),

@@ -56,6 +56,7 @@ class ProfileImageInfoMobile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mediaController = Get.find<MediaController>();
+    final UserController userController = Get.find<UserController>();
 
     return TRoundedContainer(
       padding: const EdgeInsets.all(TSizes.sm),
@@ -69,63 +70,98 @@ class ProfileImageInfoMobile extends StatelessWidget {
           const SizedBox(height: TSizes.spaceBtwItems),
 
           // Profile image
-          Obx(() {
-            final isLoading = mediaController.isLoading.value;
-            final img = mediaController.displayImage.value;
+          Center(
+            child: Obx(() {
+              final isLoading = mediaController.isLoading.value;
+              final img = mediaController.displayImage.value;
 
-            if (isLoading) {
-              return const TShimmerEffect(
-                width: 150,
-                height: 150,
-                radius: 100,
-              );
-            }
+              if (isLoading) {
+                return const TShimmerEffect(
+                  width: 150,
+                  height: 150,
+                  radius: 100,
+                );
+              }
 
-            return Stack(
-              children: [
-                img != null
-                    ? TRoundedImage(
-                        imageurl: img.toString(),
-                        width: 150,
-                        height: 150,
-                        border: Border.all(color: TColors.primary, width: 0.5),
-                        isNetworkImage: true,
-                        borderRadius: 100,
-                        fit: BoxFit.cover,
-                        padding: const EdgeInsets.all(0),
-                      )
-                    : TRoundedImage(
-                        imageurl: '',
-                        width: 150,
-                        height: 150,
-                        border: Border.all(color: TColors.primary, width: 0.5),
-                        borderRadius: 100,
-                        fit: BoxFit.cover,
-                        padding: const EdgeInsets.all(0),
-                        applyImageRadius: true,
-                        backgroundColor: Colors.white,
-                        isNetworkImage: false,
-                      ),
+              return Stack(
+                children: [
+                  img != null
+                      ? TRoundedImage(
+                          imageurl: img.toString(),
+                          width: 150,
+                          height: 150,
+                          border:
+                              Border.all(color: TColors.primary, width: 0.5),
+                          isNetworkImage: true,
+                          borderRadius: 100,
+                          fit: BoxFit.cover,
+                          padding: const EdgeInsets.all(0),
+                        )
+                      : FutureBuilder<String?>(
+                          future: mediaController.fetchMainImage(
+                            userController.currentUser.value.userId,
+                            MediaCategory.users.toString().split('.').last,
+                          ),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const TShimmerEffect(
+                                width: 150,
+                                height: 150,
+                                radius: 100,
+                              );
+                            } else if (snapshot.hasData &&
+                                snapshot.data != null) {
+                              return TRoundedImage(
+                                imageurl: snapshot.data!,
+                                width: 150,
+                                height: 150,
+                                border: Border.all(
+                                    color: TColors.primary, width: 0.5),
+                                isNetworkImage: true,
+                                borderRadius: 100,
+                                fit: BoxFit.cover,
+                                padding: const EdgeInsets.all(0),
+                              );
+                            } else {
+                              return TRoundedImage(
+                                imageurl: '',
+                                width: 150,
+                                height: 150,
+                                border: Border.all(
+                                    color: TColors.primary, width: 0.5),
+                                borderRadius: 100,
+                                fit: BoxFit.cover,
+                                padding: const EdgeInsets.all(0),
+                                applyImageRadius: true,
+                                backgroundColor: Colors.white,
+                                isNetworkImage: false,
+                              );
+                            }
+                          },
+                        ),
 
-                // Edit button
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: TCircularIcon(
-                    icon: Iconsax.edit,
-                    onPressed: () {
-                      // Handle image upload here
-                    },
-                    backgroundColor: TColors.primary,
-                    width: 40,
-                    height: 40,
-                    size: 20,
-                    color: TColors.white,
+                  // Edit button
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: TCircularIcon(
+                      icon: Iconsax.edit,
+                      onPressed: () {
+                        // Handle image upload
+                        mediaController.selectImagesFromMedia();
+                      },
+                      backgroundColor: TColors.primary,
+                      width: 40,
+                      height: 40,
+                      size: 20,
+                      color: TColors.white,
+                    ),
                   ),
-                ),
-              ],
-            );
-          }),
+                ],
+              );
+            }),
+          ),
 
           const SizedBox(height: TSizes.spaceBtwItems),
 
@@ -252,9 +288,7 @@ class ProfileDetailsMobile extends StatelessWidget {
                   userController.updateProfile();
                 },
                 child: userController.isUpdating.value
-                    ? const CircularProgressIndicator(
-                        color: Colors.white,
-                      )
+                    ? const CircularProgressIndicator(color: TColors.white)
                     : const Text('Update Profile'),
               ),
             ),
