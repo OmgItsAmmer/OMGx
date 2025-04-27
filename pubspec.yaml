@@ -34,6 +34,7 @@ dependencies:
   flutter_thermal_printer: ^1.1.0
   animated_text_kit: ^4.2.2
   qr_flutter: ^4.1.0
+  flutter_secure_storage: ^9.0.0
   
   
 
@@ -86,6 +87,16 @@ dev_dependencies:
     sdk: flutter
 
   flutter_lints: ^4.0.0
+  flutter_launcher_icons: 0.14.3
+
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  windows:
+    generate: true
+    image_path: "assets/logos/OMG_logo.png"
+  image_path: "assets/logos/OMG_logo.png"
 
 flutter:
   uses-material-design: true

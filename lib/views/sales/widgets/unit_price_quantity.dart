@@ -25,10 +25,7 @@ class UnitPriceQuantity extends StatelessWidget {
               child: Obx(
                 () => TextFormField(
                   onChanged: (value) {
-                    salesController.totalPrice.value.text = (double.parse(
-                                salesController.unitPrice.value.text) *
-                            double.parse(salesController.quantity.value.text))
-                        .toStringAsFixed(2);
+                    salesController.calculateTotalPrice();
                   },
                   controller: salesController.unitPrice.value,
                   validator: (value) =>
@@ -57,10 +54,7 @@ class UnitPriceQuantity extends StatelessWidget {
               //  height: 80,
               child: TextFormField(
                 onChanged: (value) {
-                  salesController.totalPrice.value.text =
-                      (double.parse(salesController.unitPrice.value.text) *
-                              double.parse(salesController.quantity.value.text))
-                          .toStringAsFixed(2);
+                  salesController.calculateTotalPrice();
                 },
                 validator: (value) =>
                     TValidator.validateEmptyText('quantity ', value),

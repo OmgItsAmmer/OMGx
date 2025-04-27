@@ -15,6 +15,7 @@ import '../../../controllers/sales/sales_controller.dart';
 import '../../../utils/constants/colors.dart';
 import '../../../utils/constants/enums.dart';
 import '../../../utils/validators/validation.dart';
+import '../../../common/widgets/dropdown_search/enhanced_autocomplete.dart';
 
 class SaleCustomerInfo extends StatelessWidget {
   final String hintText;
@@ -26,17 +27,16 @@ class SaleCustomerInfo extends StatelessWidget {
   final userNameTextController;
   final addressTextController;
 
-
-  const SaleCustomerInfo(
-      {super.key,
-      required this.hintText,
-      required this.namesList,
-      required this.onSelectedName,
-      required this.userNameTextController,
-      required this.onSelectedAddress,
-      required this.addressList,
-      required this.addressTextController,
-      });
+  const SaleCustomerInfo({
+    super.key,
+    required this.hintText,
+    required this.namesList,
+    required this.onSelectedName,
+    required this.userNameTextController,
+    required this.onSelectedAddress,
+    required this.addressList,
+    required this.addressTextController,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -71,19 +71,26 @@ class SaleCustomerInfo extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Obx(() {
-                        final id = salesController.entityId.value; // 👈 This makes Obx react to changes
+                        final id = salesController.entityId
+                            .value; // 👈 This makes Obx react to changes
                         final image = mediaController.displayImage.value;
 
                         if (image != null) {
                           return FutureBuilder<String?>(
                             future: mediaController.getImageFromBucket(
-                              MediaCategory.customers.toString().split('.').last,
+                              MediaCategory.customers
+                                  .toString()
+                                  .split('.')
+                                  .last,
                               image.filename ?? '',
                             ),
                             builder: (context, snapshot) {
-                              if (snapshot.connectionState == ConnectionState.waiting) {
-                                return const TShimmerEffect(width: 120, height: 120);
-                              } else if (snapshot.hasError || snapshot.data == null) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const TShimmerEffect(
+                                    width: 120, height: 120);
+                              } else if (snapshot.hasError ||
+                                  snapshot.data == null) {
                                 return const Icon(Icons.error);
                               } else {
                                 return TRoundedImage(
@@ -104,9 +111,12 @@ class SaleCustomerInfo extends StatelessWidget {
                             MediaCategory.customers.toString().split('.').last,
                           ),
                           builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return const TShimmerEffect(width: 120, height: 120);
-                            } else if (snapshot.hasError || snapshot.data == null) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const TShimmerEffect(
+                                  width: 120, height: 120);
+                            } else if (snapshot.hasError ||
+                                snapshot.data == null) {
                               return const TCircularIcon(
                                 icon: Iconsax.image,
                                 width: 120,
@@ -130,12 +140,15 @@ class SaleCustomerInfo extends StatelessWidget {
                       ),
                       SizedBox(
                         width: 300,
-                        //  height: 60,
-                        child: AutoCompleteTextField(
-                          titleText: hintText,
-                          optionList: namesList,
-                          textController: userNameTextController,
-                          parameterFunc: onSelectedName,
+                        child: EnhancedAutocomplete<String>(
+                          labelText: hintText,
+                          hintText: 'Select a customer',
+                          options: namesList,
+                          externalController: userNameTextController,
+                          displayStringForOption: (String option) => option,
+                          onSelected: onSelectedName,
+                          validator: (value) =>
+                              TValidator.validateEmptyText(hintText, value),
                         ),
                       ),
                       // const SizedBox(
@@ -177,14 +190,15 @@ class SaleCustomerInfo extends StatelessWidget {
                           width: double.infinity,
                           // height: 80,
 
-                          child: AutoCompleteTextField(
-                              titleText: 'Address',
-                              optionList: addressList,
-
-                              // key: salesController.searchDropDownKey,
-
-                              textController: addressTextController,
-                              parameterFunc: onSelectedAddress),
+                          child: EnhancedAutocomplete<String>(
+                            labelText: 'Address',
+                            hintText: 'Enter address',
+                            options: addressList,
+                            externalController: addressTextController,
+                            displayStringForOption: (String option) => option,
+                            onSelected: onSelectedAddress,
+                            showOptionsOnFocus: true,
+                          ),
                         ),
                         const SizedBox(
                           height: TSizes.spaceBtwInputFields / 2,

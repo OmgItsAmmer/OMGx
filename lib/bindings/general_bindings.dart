@@ -9,6 +9,7 @@ import 'package:admin_dashboard_v3/controllers/salesman/salesman_controller.dart
 import 'package:admin_dashboard_v3/controllers/search/search_controller.dart';
 import 'package:admin_dashboard_v3/controllers/shop/shop_controller.dart';
 import 'package:admin_dashboard_v3/controllers/user/user_controller.dart';
+import 'package:admin_dashboard_v3/utils/network/supabase_network_manager.dart';
 import 'package:get/get.dart';
 
 import '../controllers/category/category_controller.dart';
@@ -22,6 +23,7 @@ class GeneralBindings extends Bindings {
   @override
   void dependencies() {
     Get.put(NetworkManager());
+    Get.put(SupabaseNetworkManager.instance);
 
     // Register controllers
     Get.put(UserController());

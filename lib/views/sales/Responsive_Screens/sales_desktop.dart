@@ -2,6 +2,7 @@ import 'package:admin_dashboard_v3/Models/address/address_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
 import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
+import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:admin_dashboard_v3/views/sales/widgets/sale_action_buttons.dart';
 import 'package:admin_dashboard_v3/views/sales/widgets/serial_variant_selector.dart';
@@ -170,43 +171,112 @@ class SalesDesktop extends GetView<SalesController> {
                   ),
                   TRoundedContainer(
                     padding: const EdgeInsets.all(TSizes.defaultSpace),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                    child: Column(
                       children: [
-                        // Product Bar
-                        const Expanded(child: ProductSearchBar()),
-                        const SizedBox(
-                          width: TSizes.spaceBtwItems,
+                        // Toggle switch for merging products
+                        Padding(
+                          padding: const EdgeInsets.only(
+                              bottom: TSizes.spaceBtwItems),
+                          child: Row(
+                            children: [
+                              const Spacer(),
+                              Tooltip(
+                                message:
+                                    'When ON: Add quantities to existing products with same ID and unit\nWhen OFF: Add as separate items even if same product exists',
+                                textStyle: const TextStyle(
+                                    color: TColors.white, fontSize: 12),
+                                decoration: BoxDecoration(
+                                  color: TColors.dark.withOpacity(0.8),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Text(
+                                      'Merge identical items',
+                                      style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Obx(() => Switch(
+                                          value: controller
+                                              .mergeIdenticalProducts.value,
+                                          activeColor: TColors.primary,
+                                          activeTrackColor:
+                                              TColors.primary.withOpacity(0.5),
+                                          inactiveThumbColor: TColors.grey,
+                                          inactiveTrackColor:
+                                              TColors.grey.withOpacity(0.5),
+                                          onChanged: (value) {
+                                            controller.mergeIdenticalProducts
+                                                .value = value;
+                                          },
+                                        )),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
 
-                        // Unit Price Quantity
-                        const Expanded(child: UnitPriceQuantity()),
+                        // Product search and add bar
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            // Product Bar
+                            const Expanded(child: ProductSearchBar()),
+                            const SizedBox(
+                              width: TSizes.spaceBtwItems,
+                            ),
 
-                        const SizedBox(
-                          width: TSizes.spaceBtwItems,
-                        ),
+                            // Unit Price Quantity
+                            const Expanded(child: UnitPriceQuantity()),
 
-                        // Unit(Kg/etc) Total Price
-                        const Expanded(child: UnitTotalPrice()),
+                            const SizedBox(
+                              width: TSizes.spaceBtwItems,
+                            ),
 
-                        // Button
-                        const SizedBox(
-                          width: TSizes.spaceBtwItems,
-                        ),
+                            // Unit(Kg/etc) Total Price
+                            const Expanded(child: UnitTotalPrice()),
 
-                        Expanded(
-                          child: Obx(() => ElevatedButton(
-                                onPressed: controller.isLoading.value
-                                    ? null
-                                    : () => controller.addProduct(),
-                                child: controller.isLoading.value
-                                    ? const SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(),
-                                      )
-                                    : const Text('Add'),
-                              )),
+                            // Button
+                            const SizedBox(
+                              width: TSizes.spaceBtwItems,
+                            ),
+
+                            Expanded(
+                              child: Obx(() => ElevatedButton(
+                                    onPressed: controller.isLoading.value
+                                        ? null
+                                        : () => controller.addProduct(),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: TColors.primary,
+                                      foregroundColor: TColors.white,
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 16),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                    child: controller.isLoading.value
+                                        ? const SizedBox(
+                                            height: 20,
+                                            width: 20,
+                                            child: CircularProgressIndicator(
+                                              color: TColors.white,
+                                              strokeWidth: 2,
+                                            ),
+                                          )
+                                        : const Text(
+                                            'Add',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                  )),
+                            ),
+                          ],
                         ),
                       ],
                     ),

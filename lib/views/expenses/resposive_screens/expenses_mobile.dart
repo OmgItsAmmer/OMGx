@@ -70,7 +70,7 @@ class ExpensesMobile extends StatelessWidget {
                       onPressed: () {
                         expenseController.addExpense();
                       },
-                      icon: const Icon(Iconsax.add),
+                      icon: const Icon(Iconsax.add, color: TColors.white),
                       label: const Text('Add Expense'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: TColors.primary,

@@ -10,6 +10,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../common/widgets/loaders/tloaders.dart';
 import '../../controllers/media/media_controller.dart';
 import '../../main.dart';
+import '../../utils/security/secure_keys.dart';
 
 import '../../supabase_strings.dart';
 import '../../utils/exceptions/format_exceptions.dart';
@@ -118,10 +119,25 @@ class AuthenticationRepository extends GetxController {
 
   Future<void> deleteAccount() async {
     try {
-      // Admin client with Service Role key (store securely, e.g., in an environment variable)
+      // Get secure service key
+      final serviceKey = await SecureKeys.instance.getSupabaseServiceKey();
+
+      if (serviceKey == null) {
+        if (kDebugMode) {
+          print("Error: Service key not available for admin operations");
+        }
+        TLoader.errorSnackBar(
+            title: "Error",
+            message:
+                "This operation is not available in release mode. Please contact support.");
+        return;
+      }
+
+      // Admin client with Service Role key (retrieved securely)
       final supabaseAdmin = SupabaseClient(
-        SupabaseStrings.projectUrl,
-        SupabaseStrings.service_role_key,
+        await SecureKeys.instance.getSupabaseUrl() ??
+            SupabaseStrings.projectUrl,
+        serviceKey,
       );
 
       final User? currentUser = Supabase.instance.client.auth.currentUser;
@@ -144,6 +160,13 @@ class AuthenticationRepository extends GetxController {
       Get.to(() => const LoginScreen());
     } on FormatException catch (_) {
       throw const TFormatException();
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error deleting account: $e");
+      }
+      TLoader.errorSnackBar(
+          title: "Error",
+          message: "Could not delete account. Please try again later.");
     }
   }
 

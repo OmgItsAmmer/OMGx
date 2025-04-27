@@ -11,7 +11,7 @@ import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-import '../../../../common/widgets/dropdown_search/searchable_text_field.dart';
+import '../../../../common/widgets/dropdown_search/enhanced_autocomplete.dart';
 import '../../../../utils/constants/enums.dart';
 
 class ProductBrandcCategory extends StatelessWidget {
@@ -21,7 +21,8 @@ class ProductBrandcCategory extends StatelessWidget {
   Widget build(BuildContext context) {
     final BrandController brandController = Get.find<BrandController>();
     final ProductController productController = Get.find<ProductController>();
-    final CategoryController categoryController = Get.find<CategoryController>();
+    final CategoryController categoryController =
+        Get.find<CategoryController>();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,35 +39,41 @@ class ProductBrandcCategory extends StatelessWidget {
                     'Category',
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
-                   TCircularIcon(icon: Icons.add,backgroundColor: TColors.primary,color: TColors.white,
-
+                  TCircularIcon(
+                    icon: Icons.add,
+                    backgroundColor: TColors.primary,
+                    color: TColors.white,
                     onPressed: () {
-                    Get.toNamed(TRoutes.categoryDetails,arguments: CategoryModel.empty());
-                  },),
-
+                      Get.toNamed(TRoutes.categoryDetails,
+                          arguments: CategoryModel.empty());
+                    },
+                  ),
                 ],
               ),
-                const SizedBox(
-                  height: TSizes.spaceBtwSections,
-                ),
-              AutoCompleteTextField(
-                  titleText: 'Select Category',
-                  optionList: categoryController.allCategories
-                      .map((e) => e.categoryName)
-                      .whereType<String>()
-                      .toList(),
-                  textController:
-                  productController.selectedCategoryNameController,
-                  parameterFunc: (val) async {
-                    if (val.isEmpty) {
-                      resetCategorySelection();
-                      return;
-                    }
-
-                    productController.selectedCategoryNameController.text = val;
-                    productController.selectedCategoryId =
-                    await categoryController.fetchCategoryId(val);
+              const SizedBox(
+                height: TSizes.spaceBtwSections,
+              ),
+              EnhancedAutocomplete<String>(
+                labelText: 'Select Category',
+                hintText: 'Choose a category',
+                options: categoryController.allCategories
+                    .map((e) => e.categoryName)
+                    .whereType<String>()
+                    .toList(),
+                externalController:
+                    productController.selectedCategoryNameController,
+                displayStringForOption: (String option) => option,
+                onSelected: (val) async {
+                  productController.selectedCategoryNameController.text = val;
+                  productController.selectedCategoryId =
+                      await categoryController.fetchCategoryId(val);
+                },
+                onManualTextEntry: (String text) {
+                  if (text.isEmpty) {
+                    resetCategorySelection();
                   }
+                },
+                showOptionsOnFocus: true,
               ),
             ],
           ),
@@ -88,11 +95,13 @@ class ProductBrandcCategory extends StatelessWidget {
                     'Brand',
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
-                   TCircularIcon(icon: Icons.add,backgroundColor: TColors.primary,color: TColors.white,
-
+                  TCircularIcon(
+                    icon: Icons.add,
+                    backgroundColor: TColors.primary,
+                    color: TColors.white,
                     onPressed: () {
-                      Get.toNamed(TRoutes.brandDetails,arguments: BrandModel.empty());
-
+                      Get.toNamed(TRoutes.brandDetails,
+                          arguments: BrandModel.empty());
                     },
                   ),
                 ],
@@ -100,24 +109,27 @@ class ProductBrandcCategory extends StatelessWidget {
               const SizedBox(
                 height: TSizes.spaceBtwSections,
               ),
-              AutoCompleteTextField(
-                  titleText: 'Select Brand',
-                optionList: brandController.allBrands
+              EnhancedAutocomplete<String>(
+                labelText: 'Select Brand',
+                hintText: 'Choose a brand',
+                options: brandController.allBrands
                     .map((e) => e.bname)
                     .whereType<String>()
                     .toList(),
-                textController:
-                      productController.selectedBrandNameController,
-                parameterFunc: (val) async {
-                  if (val.isEmpty) {
+                externalController:
+                    productController.selectedBrandNameController,
+                displayStringForOption: (String option) => option,
+                onSelected: (val) async {
+                  productController.selectedBrandId =
+                      await brandController.fetchBrandId(val);
+                },
+                onManualTextEntry: (String text) {
+                  if (text.isEmpty) {
                     productController.selectedBrandId = -1;
                     productController.selectedBrandNameController.clear();
-                    return;
                   }
-
-                  productController.selectedBrandId =
-                  await brandController.fetchBrandId(val);
                 },
+                showOptionsOnFocus: true,
               ),
             ],
           ),
@@ -159,13 +171,11 @@ class ProductBrandcCategory extends StatelessWidget {
       ],
     );
   }
-
 }
+
 void resetCategorySelection() {
   final ProductController productController = Get.find<ProductController>();
 
   productController.selectedCategoryId = -1;
   productController.selectedCategoryNameController.clear();
 }
-
-

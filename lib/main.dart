@@ -1,7 +1,12 @@
+import 'package:admin_dashboard_v3/utils/security/secure_keys.dart';
 import 'package:admin_dashboard_v3/supabase_strings.dart';
+import 'package:admin_dashboard_v3/utils/network/supabase_network_manager.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
+import 'dart:async';
 
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -18,29 +23,78 @@ final supabase = Supabase.instance.client;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await windowManager.ensureInitialized();
 
-  // WindowOptions windowOptions = const WindowOptions(
-  //   //minimumSize: Size(800, 800),
-  //   center: true,
-  //   title: "OMG POS : NEXUS",
-  // );
-  // windowManager.waitUntilReadyToShow(windowOptions, () async {
-  //   await windowManager.show();
-  //   await windowManager.focus();
-  // });
+  // Only initialize window_manager for desktop platforms
+  if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+    await windowManager.ensureInitialized();
+
+    // WindowOptions windowOptions = const WindowOptions(
+    //   //minimumSize: Size(800, 800),
+    //   center: true,
+    //   title: "OMG POS : NEXUS",
+    // );
+    // windowManager.waitUntilReadyToShow(windowOptions, () async {
+    //   await windowManager.show();
+    //   await windowManager.focus();
+    // });
+  }
 
   // remove # sign from url
   setPathUrlStrategy();
   //Get Local Storage
   await GetStorage.init();
 
+  // Initialize SecureKeys instance
+  final secureKeys = SecureKeys.instance;
+  await secureKeys.initialize();
+
+  // Get Supabase credentials securely
+  final supabaseUrl =
+      await secureKeys.getSupabaseUrl() ?? SupabaseStrings.projectUrl;
+  final supabaseAnonKey =
+      await secureKeys.getSupabaseAnonKey() ?? SupabaseStrings.anonKey;
+
+  // Initialize SupabaseNetworkManager first for better connection handling
+  final networkManager = SupabaseNetworkManager.instance;
+  networkManager.initialize();
+
   //Await Splash until other issues Load
   // FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-  await Supabase.initialize(
-    url: SupabaseStrings.projectUrl,
-    anonKey: SupabaseStrings.anonKey,
-  );
+  try {
+    await Supabase.initialize(
+      url: supabaseUrl,
+      anonKey: supabaseAnonKey,
+      realtimeClientOptions: const RealtimeClientOptions(
+        eventsPerSecond: 10,
+      ),
+    );
+
+    // Check connection after initialization
+    if (!kDebugMode) {
+      await networkManager.checkSupabaseConnection();
+    }
+
+    if (kDebugMode) {
+      print('Supabase initialized successfully');
+    }
+  } catch (e) {
+    if (kDebugMode) {
+      print('Error initializing Supabase: $e');
+    }
+    // Add fallback initialization with increased timeout for release mode
+    if (!kDebugMode) {
+      try {
+        await Supabase.initialize(
+          url: supabaseUrl,
+          anonKey: supabaseAnonKey,
+        );
+      } catch (retryError) {
+        if (kDebugMode) {
+          print('Error on retry: $retryError');
+        }
+      }
+    }
+  }
 
   // Initialize repositories
   Get.put(SignUpRepository());

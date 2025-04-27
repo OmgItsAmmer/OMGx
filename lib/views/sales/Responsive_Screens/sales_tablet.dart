@@ -49,18 +49,18 @@ class SalesTablet extends GetView<SalesController> {
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
                   ),
-                  const SizedBox(height: TSizes.spaceBtwSections),
+                  // const SizedBox(height: TSizes.spaceBtwSections),
 
-                  // Sales Stats
-                  const SalesStats(),
-                  const SizedBox(height: TSizes.spaceBtwSections),
+                  // // Sales Stats
+                  // const SalesStats(),
+                  // const SizedBox(height: TSizes.spaceBtwSections),
 
-                  // Sales Chart
-                  const SalesChart(),
-                  const SizedBox(height: TSizes.spaceBtwSections),
+                  // // Sales Chart
+                  // const SalesChart(),
+                  // const SizedBox(height: TSizes.spaceBtwSections),
 
-                  // Recent Sales
-                  const RecentSales(),
+                  // // Recent Sales
+                  // const RecentSales(),
 
                   ExpansionTile(
                     title: const Text(

@@ -1,6 +1,7 @@
 import 'package:admin_dashboard_v3/Models/products/product_variant_model.dart';
 import 'package:admin_dashboard_v3/Models/sales/sale_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
+import 'package:admin_dashboard_v3/controllers/media/media_controller.dart';
 import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
 import 'package:admin_dashboard_v3/controllers/salesman/salesman_controller.dart';
 import 'package:admin_dashboard_v3/controllers/user/user_controller.dart';
@@ -25,6 +26,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:admin_dashboard_v3/utils/popups/loaders.dart';
+import 'package:admin_dashboard_v3/views/sales/sales.dart';
 
 class SalesController extends GetxController {
   static SalesController get instance => Get.find();
@@ -58,6 +61,34 @@ class SalesController extends GetxController {
   double buyingPriceIndividual = 0.0;
   double buyingPriceTotal = 0.0;
   Rx<String> discount = ''.obs;
+
+  // Custom units support
+  RxString customUnitName = ''.obs;
+  RxList<String> customUnits = <String>[].obs;
+  RxMap<String, double> customUnitFactors =
+      <String, double>{}.obs; // Conversion factors for custom units
+
+  // Toggle for merging products with same ID and unit
+  RxBool mergeIdenticalProducts = true.obs;
+
+  // Unit conversion factors (relative to base unit)
+  final Map<UnitType, double> unitConversionFactors = {
+    UnitType.item: 1.0,
+    UnitType.dozen: 12.0,
+    UnitType.gross: 144.0,
+    UnitType.kilogram: 1.0, // base unit for weight
+    UnitType.gram: 0.001, // 1 gram = 0.001 kg
+    UnitType.liter: 1.0, // base unit for volume
+    UnitType.milliliter: 0.001, // 1 ml = 0.001 L
+    UnitType.meter: 1.0, // base unit for length
+    UnitType.centimeter: 0.01, // 1 cm = 0.01 m
+    UnitType.inch: 0.0254, // 1 inch = 0.0254 m
+    UnitType.foot: 0.3048, // 1 foot = 0.3048 m
+    UnitType.yard: 0.9144, // 1 yard = 0.9144 m
+    UnitType.box: 1.0, // depends on context
+    UnitType.pallet: 1.0, // depends on context
+    UnitType.custom: 1.0, // will be determined by customUnitFactors
+  };
 
   //TextForm Controllers
   final unitPrice = TextEditingController().obs;
@@ -143,7 +174,7 @@ class SalesController extends GetxController {
           userController.currentUser.value.firstName;
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(title: e.toString());
+        TLoaders.errorSnackBar(title: e.toString());
         print(e);
       }
     }
@@ -153,9 +184,18 @@ class SalesController extends GetxController {
     try {
       isLoading.value = true;
 
-      // Prevent adding products when manual text entry doesn't match a valid product
+      // VALIDATION CHECK 1: Product selection
+      if (dropdownController.text.isEmpty || selectedProductId.value < 0) {
+        SalesSnackbars.errorSnackBar(
+          title: "Product Selection Required",
+          message: 'Please select a valid product from the dropdown list',
+        );
+        return;
+      }
+
+      // VALIDATION CHECK 2: Manual text entry
       if (isManualTextEntry.value) {
-        TLoader.errorSnackBar(
+        SalesSnackbars.errorSnackBar(
           title: "Invalid Product",
           message: 'Please select a valid product from the dropdown list',
         );
@@ -164,32 +204,51 @@ class SalesController extends GetxController {
 
       // Get the product to check if it's serialized
       final productController = Get.find<ProductController>();
+
+      // VALIDATION CHECK 3: Product exists
       final product = productController.allProducts.firstWhere(
         (p) => p.productId == selectedProductId.value,
         orElse: () => ProductModel.empty(),
       );
 
-      // For serialized products, validate selection of a variant
+      if (product.productId == null) {
+        SalesSnackbars.errorSnackBar(
+          title: "Product Not Found",
+          message: 'The selected product no longer exists in the database',
+        );
+        return;
+      }
+
+      // For serialized products handling
       if (product.hasSerialNumbers) {
+        // VALIDATION CHECK 4: Serial number selected
         if (selectedVariantId.value == -1) {
-          TLoader.errorSnackBar(
+          SalesSnackbars.errorSnackBar(
             title: "Select Serial Number",
             message: 'Please select a specific serial number for this product',
           );
           return;
         }
 
-        // Find the selected variant
+        // VALIDATION CHECK 5: Valid variant
         final variant = availableVariants.firstWhere(
           (v) => v.variantId == selectedVariantId.value,
           orElse: () => ProductVariantModel.empty(),
         );
 
-        // Check if variant is valid
         if (variant.variantId == null) {
-          TLoader.errorSnackBar(
+          SalesSnackbars.errorSnackBar(
             title: "Invalid Selection",
             message: 'The selected variant is no longer available',
+          );
+          return;
+        }
+
+        // VALIDATION CHECK 6: Valid price
+        if (variant.sellingPrice <= 0) {
+          SalesSnackbars.errorSnackBar(
+            title: "Invalid Price",
+            message: 'The selected product has an invalid selling price',
           );
           return;
         }
@@ -226,31 +285,174 @@ class SalesController extends GetxController {
         selectedVariantId.value = -1;
 
         // Clear input fields
-        dropdownController.clear();
-        unitPrice.value.clear();
-        unit.clear();
-        quantity.clear();
-        totalPrice.value.clear();
+        _clearInputFields();
 
         // Show success feedback
-        TLoader.successSnackBar(
+        SalesSnackbars.successSnackBar(
           title: "Product Added",
           message: "Serial number ${variant.serialNumber} added to sale",
         );
       } else {
         // For regular products
 
-        // Validation for quantity and price
-        if (!addUnitPriceAndQuantityKey.currentState!.validate() &&
+        // VALIDATION CHECK 7: Form validation
+        if (!addUnitPriceAndQuantityKey.currentState!.validate() ||
             !addUnitTotalKey.currentState!.validate()) {
-          TLoader.errorSnackBar(
-            title: 'Kindly Fill the Required Field',
+          SalesSnackbars.errorSnackBar(
+            title: 'Required Fields Missing',
             message: 'Please fill all required fields to continue',
           );
           return;
         }
 
-        // Create a regular sale
+        // VALIDATION CHECK 8: Empty values
+        if (unitPrice.value.text.isEmpty ||
+            quantity.text.isEmpty ||
+            totalPrice.value.text.isEmpty) {
+          SalesSnackbars.errorSnackBar(
+            title: 'Missing Values',
+            message: 'Please enter price and quantity values',
+          );
+          return;
+        }
+
+        // VALIDATION CHECK 9: Numeric values
+        double? unitPriceValue = double.tryParse(unitPrice.value.text);
+        double? quantityValue = double.tryParse(quantity.text);
+        double? totalPriceValue = double.tryParse(totalPrice.value.text);
+
+        if (unitPriceValue == null ||
+            quantityValue == null ||
+            totalPriceValue == null) {
+          SalesSnackbars.errorSnackBar(
+            title: 'Invalid Values',
+            message: 'Price and quantity must be valid numbers',
+          );
+          return;
+        }
+
+        // VALIDATION CHECK 10: Non-negative values
+        if (unitPriceValue <= 0) {
+          SalesSnackbars.errorSnackBar(
+            title: 'Invalid Unit Price',
+            message: 'Unit price must be greater than zero',
+          );
+          return;
+        }
+
+        if (quantityValue <= 0) {
+          SalesSnackbars.errorSnackBar(
+            title: 'Invalid Quantity',
+            message: 'Quantity must be greater than zero',
+          );
+          return;
+        }
+
+        if (totalPriceValue <= 0) {
+          SalesSnackbars.errorSnackBar(
+            title: 'Invalid Total Price',
+            message: 'Total price must be greater than zero',
+          );
+          return;
+        }
+
+        // VALIDATION CHECK 11: Stock availability
+        int currentStock = product.stockQuantity ?? 0;
+        double requiredStock = quantityValue;
+
+        // Consider the unit conversion factor for stock calculation
+        if (selectedUnit.value != UnitType.item) {
+          double factor = getCurrentUnitFactor();
+          requiredStock = quantityValue * factor;
+        }
+
+        // Check if product is already in cart, and adjust existing quantities
+        double existingQuantity = 0;
+        for (var sale in allSales) {
+          if (sale.productId == selectedProductId.value &&
+              sale.variantId == null) {
+            double saleQty = double.tryParse(sale.quantity) ?? 0;
+
+            // Convert to base unit for comparison
+            String unitString = sale.unit;
+            UnitType? saleUnitType;
+
+            try {
+              saleUnitType = UnitType.values.firstWhere(
+                  (u) => u.toString().split('.').last.trim() == unitString);
+            } catch (e) {
+              // Use default if not found
+              saleUnitType = UnitType.item;
+            }
+
+            double factor = 1.0;
+            if (saleUnitType != UnitType.item) {
+              factor = unitConversionFactors[saleUnitType] ?? 1.0;
+            }
+
+            existingQuantity += (saleQty * factor);
+          }
+        }
+
+        if (currentStock < requiredStock + existingQuantity) {
+          SalesSnackbars.errorSnackBar(
+            title: 'Insufficient Stock',
+            message: 'Only $currentStock ${product.name} available in stock',
+          );
+          return;
+        }
+
+        // VALIDATION CHECK 12: Price consistency
+        double calculatedTotal = unitPriceValue * quantityValue;
+        double tolerance = 0.01; // Allow small rounding differences
+
+        if ((calculatedTotal - totalPriceValue).abs() > tolerance) {
+          SalesSnackbars.warningSnackBar(
+            title: 'Price Discrepancy',
+            message:
+                'Total price doesn\'t match unit price × quantity. Continuing anyway.',
+          );
+        }
+
+        // Try to find existing product with same ID and unit if merging is enabled
+        if (mergeIdenticalProducts.value) {
+          int index = _findExistingProductIndex(
+              selectedProductId.value, selectedUnit.value);
+
+          if (index >= 0) {
+            // Check if merging would exceed stock
+            SaleModel existingSale = allSales[index];
+            double existingQuantity =
+                double.tryParse(existingSale.quantity) ?? 0;
+            double newTotalQuantity = existingQuantity + quantityValue;
+
+            // Convert to base unit for stock comparison
+            double factor = 1.0;
+            if (selectedUnit.value != UnitType.item) {
+              factor = getCurrentUnitFactor();
+            }
+
+            double totalRequiredStock = newTotalQuantity * factor;
+
+            if (currentStock < totalRequiredStock) {
+              SalesSnackbars.errorSnackBar(
+                title: 'Insufficient Stock',
+                message:
+                    'Merging would exceed available stock. Only $currentStock ${product.name} available',
+              );
+              return;
+            }
+
+            // Existing product found, update its quantity and total price
+            _mergeWithExistingProduct(index, quantityValue, totalPriceValue);
+
+            // Clear input fields after merging
+            _clearInputFields();
+            return;
+          }
+        }
+
+        // Create a regular sale as a new entry
         SaleModel sale = SaleModel(
           productId: selectedProductId.value,
           name: dropdownController.text.trim(),
@@ -278,14 +480,10 @@ class SalesController extends GetxController {
         allSales.add(sale);
 
         // Clear input fields
-        dropdownController.clear();
-        unitPrice.value.clear();
-        unit.clear();
-        quantity.clear();
-        totalPrice.value.clear();
+        _clearInputFields();
 
         // Show success feedback
-        TLoader.successSnackBar(
+        SalesSnackbars.successSnackBar(
           title: "Product Added",
           message: "${sale.name} added to sale",
         );
@@ -294,7 +492,7 @@ class SalesController extends GetxController {
       if (kDebugMode) {
         print('Error in addProduct: $e');
       }
-      TLoader.errorSnackBar(
+      SalesSnackbars.errorSnackBar(
         title: 'Error Adding Product',
         message: 'An error occurred while adding the product: ${e.toString()}',
       );
@@ -303,44 +501,153 @@ class SalesController extends GetxController {
     }
   }
 
+  // Find index of an existing product with matching productId and unit
+  int _findExistingProductIndex(int productId, UnitType unit) {
+    String unitString = unit.toString().split('.').last.trim();
+
+    for (int i = 0; i < allSales.length; i++) {
+      // Skip serialized products (with variantId)
+      if (allSales[i].variantId != null) continue;
+
+      if (allSales[i].productId == productId &&
+          allSales[i].unit == unitString) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  // Merge new product with existing one
+  void _mergeWithExistingProduct(
+      int index, double newQuantity, double newTotalPrice) {
+    try {
+      // Get existing sale
+      SaleModel existingSale = allSales[index];
+
+      // Parse existing values
+      double existingQuantity = double.tryParse(existingSale.quantity) ?? 0;
+      double existingTotalPrice = double.tryParse(existingSale.totalPrice) ?? 0;
+
+      // Calculate new values
+      double updatedQuantity = existingQuantity + newQuantity;
+      double updatedTotalPrice = existingTotalPrice + newTotalPrice;
+
+      // Create updated sale model
+      SaleModel updatedSale = SaleModel(
+        productId: existingSale.productId,
+        name: existingSale.name,
+        salePrice: existingSale.salePrice,
+        unit: existingSale.unit,
+        quantity: updatedQuantity.toString(),
+        totalPrice: updatedTotalPrice.toString(),
+        buyPrice: existingSale.buyPrice,
+      );
+
+      // Update in list
+      allSales[index] = updatedSale;
+
+      // Update totals
+      netTotal.value += newTotalPrice;
+      originalNetTotal.value += newTotalPrice;
+      buyingPriceTotal += buyingPriceIndividual * newQuantity;
+
+      // Update remaining amount
+      double currentRemaining =
+          double.tryParse(remainingAmount.value.text) ?? 0.0;
+      remainingAmount.value.text =
+          (currentRemaining + newTotalPrice).toStringAsFixed(2);
+
+      // Show success message
+      SalesSnackbars.successSnackBar(
+        title: "Product Updated",
+        message: "Added quantity to existing ${existingSale.name}",
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error merging products: $e');
+      }
+      SalesSnackbars.errorSnackBar(
+        title: 'Error Updating Product',
+        message: 'Failed to update quantity: ${e.toString()}',
+      );
+    }
+  }
+
+  // Helper method to clear input fields after adding/updating products
+  void _clearInputFields() {
+    dropdownController.clear();
+    unitPrice.value.clear();
+    unit.clear();
+    quantity.clear();
+    totalPrice.value.clear();
+  }
+
   Future<int> checkOut() async {
     try {
       isCheckingOut.value = true;
 
       // Validate that there are sales to checkout
       if (allSales.isEmpty) {
-        Get.back(); // Close loading dialog
-        TLoader.errorSnackBar(
+        SalesSnackbars.errorSnackBar(
             title: 'Checkout Error', message: 'No products added to checkout.');
         return -1;
       }
 
-      // Validate required fields
-      if ((!salesmanFormKey.currentState!.validate() ||
-              !customerFormKey.currentState!.validate() ||
-              !cashierFormKey.currentState!.validate()) ||
-          customerNameController.text.isEmpty ||
-          selectedDate.value == null ||
-          salesmanNameController.text.isEmpty) {
-        Get.back(); // Close loading dialog
-        TLoader.errorSnackBar(
-            title: 'Checkout Error', message: 'Fill all the fields.');
+      // Validate customer form fields
+      if (!customerFormKey.currentState!.validate()) {
+        SalesSnackbars.errorSnackBar(
+            title: 'Customer Information Error',
+            message: 'Please fill all required customer fields.');
+        return -1;
+      }
+
+      // Validate salesman form fields
+      if (!salesmanFormKey.currentState!.validate()) {
+        SalesSnackbars.errorSnackBar(
+            title: 'Salesman Information Error',
+            message: 'Please fill all required salesman fields.');
+        return -1;
+      }
+
+      // Validate cashier form fields
+      if (!cashierFormKey.currentState!.validate()) {
+        SalesSnackbars.errorSnackBar(
+            title: 'Cashier Information Error',
+            message: 'Please fill all required cashier fields.');
+        return -1;
+      }
+
+      // Validate specific critical fields
+      if (customerNameController.text.isEmpty) {
+        SalesSnackbars.errorSnackBar(
+            title: 'Customer Error', message: 'Please select a customer.');
+        return -1;
+      }
+
+      if (selectedDate.value == null) {
+        SalesSnackbars.errorSnackBar(
+            title: 'Date Error', message: 'Please select a valid date.');
+        return -1;
+      }
+
+      if (salesmanNameController.text.isEmpty) {
+        SalesSnackbars.errorSnackBar(
+            title: 'Salesman Error', message: 'Please select a salesman.');
         return -1;
       }
 
       if (selectedAddressId == null || selectedAddressId == -1) {
-        Get.back(); // Close loading dialog
-        TLoader.errorSnackBar(
-            title: 'Address Error', message: 'Select a valid address.');
+        SalesSnackbars.errorSnackBar(
+            title: 'Address Error', message: 'Please select a valid address.');
         return -1;
       }
 
       // Validate paid amount
       double paidAmountValue = double.tryParse(paidAmount.text.trim()) ?? 0.0;
       if (paidAmountValue < 0) {
-        Get.back(); // Close loading dialog
-        TLoader.errorSnackBar(
-            title: 'Payment Error', message: 'Enter a valid paid amount.');
+        SalesSnackbars.errorSnackBar(
+            title: 'Payment Error',
+            message: 'Please enter a valid paid amount.');
         return -1;
       }
 
@@ -458,7 +765,7 @@ class SalesController extends GetxController {
           clearSaleDetails();
 
           // Show success message
-          TLoader.successSnackBar(
+          SalesSnackbars.successSnackBar(
             title: 'Order Placed Successfully',
             message: 'Order #$orderId has been placed successfully.',
           );
@@ -469,7 +776,7 @@ class SalesController extends GetxController {
           if (kDebugMode) {
             print('Error updating stock: $e');
           }
-          TLoader.errorSnackBar(
+          SalesSnackbars.errorSnackBar(
               title: 'Stock Update Error', message: e.toString());
           return orderId; // Still return orderId as the order was created
         }
@@ -478,7 +785,7 @@ class SalesController extends GetxController {
         if (kDebugMode) {
           print('Order upload failed');
         }
-        TLoader.errorSnackBar(
+        SalesSnackbars.errorSnackBar(
           title: 'Order Creation Failed',
           message: 'Failed to create order. Please try again.',
         );
@@ -493,7 +800,7 @@ class SalesController extends GetxController {
       if (kDebugMode) {
         print('Checkout error: $e');
       }
-      TLoader.errorSnackBar(
+      SalesSnackbars.errorSnackBar(
         title: 'Checkout Error',
         message: 'An error occurred during checkout: ${e.toString()}',
       );
@@ -623,7 +930,7 @@ class SalesController extends GetxController {
       paidAmount.clear();
       remainingAmount.value.clear();
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Reset Error', message: e.toString());
+      SalesSnackbars.errorSnackBar(title: 'Reset Error', message: e.toString());
     }
   }
 
@@ -637,6 +944,16 @@ class SalesController extends GetxController {
       customerAddressController.value.clear();
       selectedAddressId = -1;
       entityId.value = -1;
+
+      // Clear customer image from media controller
+      try {
+        final mediaController = Get.find<MediaController>();
+        mediaController.displayImage.value = null;
+      } catch (e) {
+        if (kDebugMode) {
+          print('Error clearing media controller: $e');
+        }
+      }
 
       // Clear salesman fields
       salesmanNameController.clear();
@@ -665,7 +982,7 @@ class SalesController extends GetxController {
       // Refresh the UI
       update();
     } catch (e) {
-      TLoader.errorSnackBar(
+      SalesSnackbars.errorSnackBar(
           title: 'Clear Details Error', message: e.toString());
     }
   }
@@ -678,7 +995,7 @@ class SalesController extends GetxController {
         return 'PENDING';
       }
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      SalesSnackbars.errorSnackBar(title: 'Oh Snap!', message: e.toString());
       return '';
     }
   }
@@ -748,7 +1065,7 @@ class SalesController extends GetxController {
       allSales.removeAt(index);
     } catch (e) {
       print("Error: $e"); // Debugging
-      TLoader.errorSnackBar(title: e.toString());
+      SalesSnackbars.errorSnackBar(title: e.toString());
     }
   }
 
@@ -776,7 +1093,7 @@ class SalesController extends GetxController {
       //   message: 'Discount restored successfully.',
       // );
     } catch (e) {
-      TLoader.errorSnackBar(title: e.toString());
+      SalesSnackbars.errorSnackBar(title: e.toString());
     }
   }
 
@@ -791,7 +1108,7 @@ class SalesController extends GetxController {
   bool SalesValidator() {
     try {
       if (allSales.isEmpty) {
-        TLoader.errorSnackBar(
+        SalesSnackbars.errorSnackBar(
             title: 'Checkout Error', message: 'No products added to checkout.');
         return false;
       }
@@ -801,13 +1118,13 @@ class SalesController extends GetxController {
           customerNameController.text == "" ||
           selectedDate.value == null ||
           salesmanNameController.text == "") {
-        TLoader.errorSnackBar(
+        SalesSnackbars.errorSnackBar(
             title: 'Checkout Error', message: 'Fill all the fields.');
         return false;
       }
 
       if (selectedAddressId == -1) {
-        TLoader.errorSnackBar(
+        SalesSnackbars.errorSnackBar(
             title: 'Address Error', message: 'Select Valid Address.');
         return false;
       }
@@ -816,7 +1133,7 @@ class SalesController extends GetxController {
     } catch (e) {
       if (kDebugMode) {
         print(e);
-        TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+        SalesSnackbars.errorSnackBar(title: 'Oh Snap!', message: e.toString());
       }
       return false;
     }
@@ -845,7 +1162,7 @@ class SalesController extends GetxController {
       if (discountPercentage == null ||
           discountPercentage < 0 ||
           discountPercentage > 100) {
-        TLoader.errorSnackBar(
+        SalesSnackbars.errorSnackBar(
           title: "Invalid Discount",
           message: 'Please select a valid discount percentage (0% to 100%).',
         );
@@ -868,7 +1185,7 @@ class SalesController extends GetxController {
       selectedChipValue.value = discountText;
       selectedChipIndex.value = _getChipIndex(discountText);
     } catch (e) {
-      TLoader.errorSnackBar(title: e.toString());
+      SalesSnackbars.errorSnackBar(title: e.toString());
     }
   }
 
@@ -902,7 +1219,7 @@ class SalesController extends GetxController {
       discount.value = "0.0";
       netTotal.value = currentOriginalTotal;
 
-      TLoader.errorSnackBar(
+      SalesSnackbars.errorSnackBar(
         title: "Invalid Discount",
         message: "Discount cannot exceed 100%.",
       );
@@ -965,12 +1282,79 @@ class SalesController extends GetxController {
       if (kDebugMode) {
         print('Error loading variants: $e');
       }
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: 'Error',
         message: 'Failed to load product variants: $e',
       );
     } finally {
       isLoadingVariants.value = false;
+    }
+  }
+
+  // Add this method to handle custom unit additions
+  void addCustomUnit(String unitName, {double conversionFactor = 1.0}) {
+    if (unitName.isEmpty) return;
+
+    // Check if the unit already exists
+    if (!customUnits.contains(unitName)) {
+      customUnits.add(unitName);
+      customUnitFactors[unitName] = conversionFactor;
+    }
+
+    // Set the current custom unit name
+    customUnitName.value = unitName;
+    selectedUnit.value = UnitType.custom;
+
+    // Show success message
+    TLoaders.successSnackBar(
+      title: "Custom Unit Added",
+      message: "The unit '$unitName' has been added successfully",
+    );
+  }
+
+  // Method to select a custom unit
+  void selectCustomUnit(String unitName) {
+    if (unitName.isEmpty) return;
+
+    customUnitName.value = unitName;
+    selectedUnit.value = UnitType.custom;
+  }
+
+  // Clear custom unit selection
+  void clearCustomUnit() {
+    customUnitName.value = '';
+    selectedUnit.value = UnitType.item; // Reset to default unit
+  }
+
+  // Get the current unit conversion factor
+  double getCurrentUnitFactor() {
+    if (selectedUnit.value == UnitType.custom &&
+        customUnitName.value.isNotEmpty) {
+      return customUnitFactors[customUnitName.value] ?? 1.0;
+    }
+    return unitConversionFactors[selectedUnit.value] ?? 1.0;
+  }
+
+  // Method to calculate total price based on unit, quantity and unit price
+  void calculateTotalPrice() {
+    try {
+      // Get values from controllers
+      double unitPriceValue = double.tryParse(unitPrice.value.text) ?? 0.0;
+      double quantityValue = double.tryParse(quantity.text) ?? 0.0;
+
+      // Apply unit conversion if needed
+      double factor = getCurrentUnitFactor();
+      double convertedQuantity = quantityValue * factor;
+
+      // Calculate total price
+      double totalPriceValue = unitPriceValue * convertedQuantity;
+
+      // Update the total price field
+      totalPrice.value.text = totalPriceValue.toStringAsFixed(2);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error calculating total price: $e');
+      }
     }
   }
 }

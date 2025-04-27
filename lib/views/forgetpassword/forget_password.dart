@@ -37,7 +37,7 @@ class ForgetPasswordScreen extends StatelessWidget {
                   const SizedBox(height: TSizes.spaceBtwItems),
                   SizedBox(
                     width: TSizes.buttonWidth,
-                    height: 40,
+                    height: 60,
                     child: ElevatedButton.icon(
                       onPressed: () {
                         // Optionally, you can add navigation or other actions here

@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
 import '../../../common/widgets/dropdown_search/dropdown_search.dart';
-import '../../../common/widgets/dropdown_search/searchable_text_field.dart';
+import '../../../common/widgets/dropdown_search/enhanced_autocomplete.dart';
 import '../../../controllers/sales/sales_controller.dart';
 import '../../../utils/constants/colors.dart';
 import '../../../utils/constants/enums.dart';
@@ -18,14 +18,13 @@ class SalesSalemanInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final SalesController salesController = Get.find<SalesController>();
-    final SalesmanController salesmanController = Get.find<SalesmanController>();
+    final SalesmanController salesmanController =
+        Get.find<SalesmanController>();
 
     return Form(
       key: salesController.salesmanFormKey,
-
       child: TRoundedContainer(
         backgroundColor: TColors.primaryBackground,
-
         padding: const EdgeInsets.all(TSizes.defaultSpace),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,71 +38,74 @@ class SalesSalemanInfo extends StatelessWidget {
             ),
             SizedBox(
               width: 300,
-              //  height: 60,
-              child: AutoCompleteTextField(
-
-                // key: salesController.searchDropDownKey,
-                titleText: 'Salesman',
-                optionList: salesmanController.allSalesmanNames,
-                textController: salesController.salesmanNameController,
-                parameterFunc: (val) {
+              child: EnhancedAutocomplete<String>(
+                labelText: 'Salesman',
+                hintText: 'Select a salesman',
+                options: salesmanController.allSalesmanNames,
+                externalController: salesController.salesmanNameController,
+                displayStringForOption: (String option) => option,
+                validator: (value) =>
+                    TValidator.validateEmptyText('Salesman', value),
+                onSelected: (String val) {
                   if (val.isEmpty) {
-                    // Reset logic when field is cleared
-                    salesController.selectedSalesmanId = -1;
-                    salesController.salesmanCityController.value.text = '';
-                    salesController.salesmanAreaController.value.text = '';
                     return;
                   }
 
                   final selectedSalesman = salesmanController.allSalesman
                       .firstWhere((user) => user.fullName == val);
 
-                  salesController.selectedSalesmanId = selectedSalesman.salesmanId!;
-                  salesController.salesmanCityController.value.text = selectedSalesman.city;
-                  salesController.salesmanAreaController.value.text = selectedSalesman.area;
+                  salesController.selectedSalesmanId =
+                      selectedSalesman.salesmanId!;
+                  salesController.salesmanCityController.value.text =
+                      selectedSalesman.city;
+                  salesController.salesmanAreaController.value.text =
+                      selectedSalesman.area;
                 },
-
+                onManualTextEntry: (String text) {
+                  if (text.isEmpty) {
+                    // Reset logic when field is cleared
+                    salesController.selectedSalesmanId = -1;
+                    salesController.salesmanCityController.value.text = '';
+                    salesController.salesmanAreaController.value.text = '';
+                  }
+                },
               ),
             ),
-            const SizedBox(height: TSizes.spaceBtwItems,),
+            const SizedBox(
+              height: TSizes.spaceBtwItems,
+            ),
             SizedBox(
               width: double.infinity,
               child: Obx(
-                  () => TextFormField(
-                  onChanged: (value){
-
-
-                  },
+                () => TextFormField(
+                  onChanged: (value) {},
                   readOnly: true,
-                 controller: salesController.salesmanCityController.value,
+                  controller: salesController.salesmanCityController.value,
                   validator: (value) =>
                       TValidator.validateEmptyText('City', value),
                   decoration: const InputDecoration(labelText: 'City'),
                   style: Theme.of(context).textTheme.bodyMedium,
-
                 ),
               ),
             ),
-            const SizedBox(height: TSizes.spaceBtwItems,),
+            const SizedBox(
+              height: TSizes.spaceBtwItems,
+            ),
             SizedBox(
               width: double.infinity,
               child: Obx(
-                  ()=> TextFormField(
-                  onChanged: (value){
-
-
-                  },
+                () => TextFormField(
+                  onChanged: (value) {},
                   readOnly: true,
-                 controller: salesController.salesmanAreaController.value,
+                  controller: salesController.salesmanAreaController.value,
                   validator: (value) =>
                       TValidator.validateEmptyText('Area', value),
                   decoration: const InputDecoration(labelText: 'Area'),
                   style: Theme.of(context).textTheme.bodyMedium,
-
                 ),
               ),
             ),
-         //   const SizedBox(height: TSizes.spaceBtwItems,),
+            //   const SizedBox(height: TSizes.spaceBtwItems,),
           ],
         ),
       ),

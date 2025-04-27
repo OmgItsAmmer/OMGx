@@ -77,15 +77,19 @@ class ExpensesTablet extends StatelessWidget {
                   // Add button - Right aligned for tablet
                   Align(
                     alignment: Alignment.centerRight,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        expenseController.addExpense();
-                      },
-                      icon: const Icon(Iconsax.add),
-                      label: const Text('Add Expense'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: TColors.primary,
-                        foregroundColor: TColors.white,
+                    child: SizedBox(
+                      height: 60,
+                      width: 200,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          expenseController.addExpense();
+                        },
+                        icon: const Icon(Iconsax.add, color: TColors.white),
+                        label: const Text('Add Expense'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: TColors.primary,
+                          foregroundColor: TColors.white,
+                        ),
                       ),
                     ),
                   ),

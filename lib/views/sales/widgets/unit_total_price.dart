@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
 import '../../../common/widgets/containers/rounded_container.dart';
+import '../../../common/widgets/loaders/tloaders.dart';
 import '../../../controllers/sales/sales_controller.dart';
 import '../../../utils/validators/validation.dart';
 
@@ -23,65 +24,257 @@ class UnitTotalPrice extends StatelessWidget {
         children: [
           Expanded(
             child: SizedBox(
-                width: double.infinity  ,
-              //  height: 60,
-                child: TRoundedContainer(
-                  // padding: EdgeInsets.all(TSizes.defaultSpace),
-                  child: DropdownButton<UnitType>(
-                    padding: EdgeInsets.zero, // Remove all padding
-                    value: UnitType.item,
-                    underline: const SizedBox.shrink(), // Remove the default underline
-                    isExpanded: true, // Ensures proper alignment and resizing
-                    isDense: true, // Makes the dropdown less tall vertically
-                    items: UnitType.values.map((UnitType unit) {
-                      return DropdownMenuItem<UnitType>(
-                        value: unit,
-                        child: Row(
-                          children: [
-                            const Icon(Iconsax.box, size: 18), // Add your desired icon here
-                            const SizedBox(width: 8), // Space between icon and text
-                            Text(
-                              unit.name.capitalize.toString(),
-                              style: const TextStyle(),
+                width: double.infinity,
+                child: Obx(() => TRoundedContainer(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Standard units dropdown
+                          DropdownButtonHideUnderline(
+                            child: DropdownButton<UnitType>(
+                              padding: EdgeInsets.zero,
+                              value: salesController.selectedUnit.value,
+                              isExpanded: true,
+                              isDense: true,
+                              items:
+                                  _buildDropdownItems(salesController, context),
+                              onChanged: (value) {
+                                if (value != null) {
+                                  salesController.selectedUnit.value = value;
+                                  // Recalculate price when unit changes
+                                  salesController.calculateTotalPrice();
+                                }
+                              },
                             ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      salesController.selectedUnit.value = value ?? UnitType.item;
-                    },
-                  ),
-                )
-            
-            ),
+                          ),
+
+                          // Custom unit label (visible when custom unit is selected)
+                          if (salesController.selectedUnit.value ==
+                                  UnitType.custom &&
+                              salesController.customUnitName.value.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Text(
+                                "Custom: ${salesController.customUnitName.value}",
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ))),
           ),
-          const SizedBox(width: TSizes.spaceBtwItems,),
+          const SizedBox(
+            width: TSizes.spaceBtwItems,
+          ),
           Expanded(
             child: SizedBox(
-              width: double.infinity  ,
-            
-              //  height: 80,
+              width: double.infinity,
               child: Obx(
                 () => TextFormField(
-                  validator: (value)=> TValidator.validateEmptyText('Total Price',value),
+                  validator: (value) =>
+                      TValidator.validateEmptyText('Total Price', value),
                   controller: salesController.totalPrice.value,
                   decoration: const InputDecoration(labelText: 'Total Price'),
                   style: Theme.of(context).textTheme.bodyMedium,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(
-                      RegExp(r'^\d*\.?\d{0,2}'), // Allows numbers with up to 2 decimal places
+                      RegExp(
+                          r'^\d*\.?\d{0,2}'), // Allows numbers with up to 2 decimal places
                     ),
                   ],
-
-
                 ),
               ),
             ),
           )
         ],
       ),
+    );
+  }
+
+  // Extract the dropdown items building into a separate method
+  List<DropdownMenuItem<UnitType>> _buildDropdownItems(
+      SalesController salesController, BuildContext context) {
+    // Standard unit types (excluding 'custom' to prevent duplicates)
+    final standardItems = UnitType.values
+        .where((unit) =>
+            unit != UnitType.custom) // Exclude custom from standard items
+        .map((unit) => DropdownMenuItem<UnitType>(
+              value: unit,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Iconsax.box, size: 18),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      unit.name.capitalize.toString(),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ))
+        .toList();
+
+    // Add the custom unit option at the end
+    standardItems.add(
+      DropdownMenuItem<UnitType>(
+        // Adding an empty value to prevent duplicate values issue
+        value: UnitType.custom,
+        // Use a GestureDetector instead of InkWell to handle tap without affecting navigation
+        child: GestureDetector(
+          // Using behavior to avoid issue with nested DropdownButton
+          behavior: HitTestBehavior.translucent,
+          onTap: () {
+            // Delay dialog opening to avoid dropdown navigation conflicts
+            Future.delayed(Duration.zero, () {
+              _showCustomUnitDialog(context, salesController);
+            });
+          },
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Iconsax.add_circle, size: 18, color: Colors.blue),
+              SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  'Add Custom Unit',
+                  style: TextStyle(color: Colors.blue),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    return standardItems;
+  }
+
+  // Extract dialog to a separate method for cleaner code
+  void _showCustomUnitDialog(
+      BuildContext context, SalesController salesController) {
+    // Controllers for the dialog
+    final TextEditingController nameController = TextEditingController();
+    final TextEditingController factorController =
+        TextEditingController(text: '1.0');
+
+    showDialog(
+      context: context,
+      barrierDismissible: true, // Allow dismissing by tapping outside
+      useRootNavigator: true, // Use root navigator to prevent navigation issues
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Custom Unit'),
+          content: SizedBox(
+            width: 300, // Fixed width to prevent overflow
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: nameController,
+                    autofocus: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Unit Name',
+                      hintText: 'Enter custom unit (e.g., kg, box, etc.)',
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: factorController,
+                    decoration: const InputDecoration(
+                      labelText: 'Conversion Factor',
+                      hintText: 'E.g., 1.0 for base unit, 12.0 for dozen',
+                    ),
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'^\d*\.?\d{0,6}'), // Allow decimal numbers
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Conversion factor defines how this unit relates to the base unit. '
+                    'For example, if your base unit is "item", then a dozen would have '
+                    'a factor of 12.0 (12 items in a dozen).',
+                    style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                  ),
+                  const SizedBox(height: 16),
+                  // Show existing custom units
+                  Obx(
+                    () => salesController.customUnits.isEmpty
+                        ? const Text('No custom units yet')
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('Select Existing Custom Unit:'),
+                              const SizedBox(height: 8),
+                              SizedBox(
+                                height: 100,
+                                child: ListView(
+                                  shrinkWrap: true,
+                                  children: salesController.customUnits
+                                      .map((unit) => ListTile(
+                                            dense: true,
+                                            title: Text(unit),
+                                            subtitle: Text(
+                                              'Factor: ${salesController.customUnitFactors[unit] ?? 1.0}',
+                                              style:
+                                                  const TextStyle(fontSize: 12),
+                                            ),
+                                            onTap: () {
+                                              salesController
+                                                  .selectCustomUnit(unit);
+                                              Navigator.of(context).pop();
+                                            },
+                                          ))
+                                      .toList(),
+                                ),
+                              ),
+                            ],
+                          ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                // Save the custom unit with conversion factor
+                final name = nameController.text.trim();
+                final factor = double.tryParse(factorController.text) ?? 1.0;
+
+                if (name.isNotEmpty) {
+                  salesController.addCustomUnit(name, conversionFactor: factor);
+                  Navigator.of(context).pop();
+                  // Recalculate price after changing unit
+                  salesController.calculateTotalPrice();
+                } else {
+                  TLoader.errorSnackBar(
+                    title: 'Invalid Unit Name',
+                    message: 'Please enter a valid unit name',
+                  );
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
