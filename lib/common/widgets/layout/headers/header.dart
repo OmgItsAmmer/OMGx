@@ -168,7 +168,7 @@ class THeader extends StatelessWidget implements PreferredSizeWidget {
                   if (userController.profileLoading.value) {
                     return const TShimmerEffect(width: 20, height: 20);
                   }
-                  return Column(
+                  return (TDeviceUtils.isMobileScreen(context)) ? const SizedBox.shrink() : Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

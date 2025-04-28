@@ -15,22 +15,35 @@ class GuarantorImageController extends GetxController {
   RxInt guarantor2Id = 2.obs;
   Rx<ImageModel?> guarantor2Image = Rx<ImageModel?>(null);
 
+  // Flag to determine if we should fetch images from database
+  RxBool shouldFetchFromDatabase = false.obs;
+
   // The guarantor entity type for all guarantors
   final String entityType = MediaCategory.guarantors.toString().split('.').last;
 
   @override
   void onInit() {
     super.onInit();
-    fetchGuarantorImages();
+    // We no longer automatically fetch images on init
+    // Images will only be fetched when explicitly requested
   }
 
-  // Method to fetch guarantor images on initial load
+  // Method to fetch guarantor images from the database if needed
   Future<void> fetchGuarantorImages() async {
-    await mediaController.fetchImageForOwner(guarantor1Id.value, entityType);
-    await mediaController.fetchImageForOwner(guarantor2Id.value, entityType);
+    if (shouldFetchFromDatabase.value) {
+      await mediaController.fetchImageForOwner(guarantor1Id.value, entityType);
+      await mediaController.fetchImageForOwner(guarantor2Id.value, entityType);
+      // Get images from the controller's cache if available
+      updateGuarantorImagesFromCache();
+    }
+  }
 
-    // Get images from the controller's cache if available
-    updateGuarantorImagesFromCache();
+  // Set whether to fetch images from database and optionally fetch them immediately
+  void setFetchFromDatabase(bool fetch, {bool fetchNow = false}) {
+    shouldFetchFromDatabase.value = fetch;
+    if (fetch && fetchNow) {
+      fetchGuarantorImages();
+    }
   }
 
   // Get images from the MediaController's cache
@@ -113,5 +126,24 @@ class GuarantorImageController extends GetxController {
         .clearOwnerImages([guarantor1Id.value, guarantor2Id.value], entityType);
     guarantor1Image.value = null;
     guarantor2Image.value = null;
+  }
+
+  // Method to load existing guarantor images with actual guarantor IDs
+  Future<void> loadExistingGuarantorImages(List<int> guarantorIds) async {
+    if (guarantorIds.length >= 2) {
+      // Update the guarantor IDs
+      guarantor1Id.value = guarantorIds[0];
+      guarantor2Id.value = guarantorIds[1];
+
+      // Enable database fetching
+      shouldFetchFromDatabase.value = true;
+
+      // Fetch images for both guarantors
+      await mediaController.fetchImageForOwner(guarantor1Id.value, entityType);
+      await mediaController.fetchImageForOwner(guarantor2Id.value, entityType);
+
+      // Update the local cache
+      updateGuarantorImagesFromCache();
+    }
   }
 }

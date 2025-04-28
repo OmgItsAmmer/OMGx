@@ -5,6 +5,7 @@ import 'package:admin_dashboard_v3/controllers/guarantors/guarantor_image_contro
 import 'package:admin_dashboard_v3/controllers/media/media_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
+import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
@@ -14,6 +15,7 @@ class GuarantorImage extends StatelessWidget {
   final String guarantorType;
   final double width;
   final double height;
+  final bool useDefaultImage;
 
   const GuarantorImage({
     Key? key,
@@ -21,6 +23,7 @@ class GuarantorImage extends StatelessWidget {
     required this.guarantorType,
     this.width = 150,
     this.height = 150,
+    this.useDefaultImage = true,
   }) : super(key: key);
 
   @override
@@ -47,7 +50,11 @@ class GuarantorImage extends StatelessWidget {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return TShimmerEffect(width: width, height: height);
                 } else if (snapshot.hasError || snapshot.data == null) {
-                  return const Icon(Icons.error);
+                  return Icon(
+                    Iconsax.profile_circle,
+                    size: width * 0.7,
+                    color: TColors.primary,
+                  );
                 } else {
                   return TRoundedImage(
                     isNetworkImage: true,
@@ -60,7 +67,16 @@ class GuarantorImage extends StatelessWidget {
             );
           }
 
-          // Fallback to future-based image if no image is selected
+          // If useDefaultImage is true, show default profile icon
+          if (useDefaultImage) {
+            return Icon(
+              Iconsax.profile_circle,
+              size: width * 0.7,
+              color: TColors.primary,
+            );
+          }
+
+          // Fallback to future-based image if no image is selected and not using default
           return FutureBuilder<String?>(
             future: mediaController.fetchImageForOwner(
               guarantorId,
@@ -70,9 +86,9 @@ class GuarantorImage extends StatelessWidget {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return TShimmerEffect(width: width, height: height);
               } else if (snapshot.hasError || snapshot.data == null) {
-                return const Icon(
+                return Icon(
                   Iconsax.profile_circle,
-                  size: 80,
+                  size: width * 0.7,
                   color: TColors.primary,
                 );
               } else {

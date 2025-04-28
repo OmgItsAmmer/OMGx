@@ -6,8 +6,7 @@ import 'package:admin_dashboard_v3/common/widgets/search/search_overlay.dart';
 import 'package:flutter/material.dart';
 
 class TSiteTemplate extends StatelessWidget {
-  const 
-  TSiteTemplate(
+  const TSiteTemplate(
       {super.key,
       this.desktop,
       this.tablet,
@@ -23,24 +22,22 @@ class TSiteTemplate extends StatelessWidget {
     final desktopContent = desktop ?? Container();
     final tabletContent = tablet ?? desktop ?? Container();
     final mobileContent = mobile ?? tablet ?? desktop ?? Container();
-    
+
     return Scaffold(
       body: Stack(
         children: [
           TResponsiveWidget(
-            desktop: useLayout 
-                ? DesktopLayout(body: desktopContent) 
+            desktop: useLayout
+                ? DesktopLayout(body: desktopContent)
                 : desktopContent,
-            tablet: useLayout 
-                ? TabletLayout(body: tabletContent) 
-                : tabletContent,
-            mobile: useLayout 
-                ? MobileLayout(body: mobileContent) 
-                : mobileContent,
+            tablet:
+                useLayout ? TabletLayout(body: tabletContent) : tabletContent,
+            mobile:
+                useLayout ? MobileLayout(body: mobileContent) : mobileContent,
           ),
 
           // Search overlay at the highest level
-          const TSearchOverlay(),
+       //   const TSearchOverlay(),
         ],
       ),
     );

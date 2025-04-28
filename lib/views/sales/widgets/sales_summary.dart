@@ -1,5 +1,3 @@
-
-
 import 'package:admin_dashboard_v3/common/widgets/chips/rounded_choice_chips.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
@@ -19,9 +17,8 @@ class SalesSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final SalesController salesController = Get.find<SalesController>();
-  final  shopController =  Get.put(ShopController());
+    final shopController = Get.put(ShopController());
     shopController.fetchShop();
-
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -35,7 +32,7 @@ class SalesSummary extends StatelessWidget {
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    title: const Text('Discounts'),
+                    title: const Text('Discounts(%)'),
                     content: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -44,11 +41,14 @@ class SalesSummary extends StatelessWidget {
                           child: SizedBox(
                             width: 150,
                             child: Obx(
-                                  () => TChoiceChip(
+                              () => TChoiceChip(
                                 text: '${shopController.profile1.text}%',
-                                selected: salesController.selectedChipIndex.value == 0,
+                                selected:
+                                    salesController.selectedChipIndex.value ==
+                                        0,
                                 onSelected: (val) {
-                                  salesController.applyDiscountInChips(shopController.profile1.text);
+                                  salesController.applyDiscountInChips(
+                                      shopController.profile1.text);
                                 },
                               ),
                             ),
@@ -59,11 +59,13 @@ class SalesSummary extends StatelessWidget {
                         // Profile 2 Chip
                         Expanded(
                           child: Obx(
-                                () => TChoiceChip(
+                            () => TChoiceChip(
                               text: '${shopController.profile2.text}%',
-                              selected: salesController.selectedChipIndex.value == 1,
+                              selected:
+                                  salesController.selectedChipIndex.value == 1,
                               onSelected: (val) {
-                                salesController.applyDiscountInChips(shopController.profile2.text);
+                                salesController.applyDiscountInChips(
+                                    shopController.profile2.text);
                               },
                             ),
                           ),
@@ -73,11 +75,13 @@ class SalesSummary extends StatelessWidget {
                         // Profile 3 Chip
                         Expanded(
                           child: Obx(
-                                () => TChoiceChip(
+                            () => TChoiceChip(
                               text: '${shopController.profile3.text}%',
-                              selected: salesController.selectedChipIndex.value == 2,
+                              selected:
+                                  salesController.selectedChipIndex.value == 2,
                               onSelected: (val) {
-                                salesController.applyDiscountInChips(shopController.profile3.text);
+                                salesController.applyDiscountInChips(
+                                    shopController.profile3.text);
                               },
                             ),
                           ),
@@ -99,8 +103,8 @@ class SalesSummary extends StatelessWidget {
             child: Text(
               'Profile',
               style: Theme.of(context).textTheme.bodyMedium!.apply(
-                color: TColors.white,
-              ),
+                    color: TColors.white,
+                  ),
             ),
           ),
         ),
@@ -110,7 +114,8 @@ class SalesSummary extends StatelessWidget {
         SizedBox(
           width: 200,
           child: TextFormField(
-            controller: salesController.discountController, // Attach the controller
+            controller:
+                salesController.discountController, // Attach the controller
             onChanged: (value) {
               salesController.applyDiscountInField(value);
             },
@@ -129,12 +134,12 @@ class SalesSummary extends StatelessWidget {
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [
               FilteringTextInputFormatter.allow(
-                RegExp(r'^\d*\.?\d{0,2}'), // Allows numbers with up to 2 decimal places
+                RegExp(
+                    r'^\d*\.?\d{0,2}'), // Allows numbers with up to 2 decimal places
               ),
             ],
             decoration: const InputDecoration(labelText: 'Discount'),
           ),
-
         ),
         const SizedBox(
           width: TSizes.spaceBtwItems,
@@ -156,8 +161,7 @@ class SalesSummary extends StatelessWidget {
                   width: 150,
                   height: 50,
                   child: Text(
-                    (salesController.netTotal.value)
-                        .toStringAsFixed(2),
+                    (salesController.netTotal.value).toStringAsFixed(2),
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                 ),
@@ -167,7 +171,5 @@ class SalesSummary extends StatelessWidget {
         ),
       ],
     );
-
   }
-
 }

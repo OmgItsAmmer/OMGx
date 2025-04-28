@@ -6,7 +6,14 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 class UnitPriceQuantity extends StatelessWidget {
-  const UnitPriceQuantity({super.key});
+  const UnitPriceQuantity({
+    super.key,
+    required this.unitPriceFocus,
+    required this.quantityFocus,
+  });
+
+  final FocusNode unitPriceFocus;
+  final FocusNode quantityFocus;
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +31,7 @@ class UnitPriceQuantity extends StatelessWidget {
 
               child: Obx(
                 () => TextFormField(
+                  focusNode: unitPriceFocus,
                   onChanged: (value) {
                     salesController.calculateTotalPrice();
                   },
@@ -53,6 +61,7 @@ class UnitPriceQuantity extends StatelessWidget {
 
               //  height: 80,
               child: TextFormField(
+                focusNode: quantityFocus,
                 onChanged: (value) {
                   salesController.calculateTotalPrice();
                 },

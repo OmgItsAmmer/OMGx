@@ -4,6 +4,7 @@ import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
+import 'package:admin_dashboard_v3/utils/popups/loaders.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -27,7 +28,38 @@ class SaleActionButtons extends StatelessWidget {
       children: [
         OutlinedButton(
             onPressed: () {
-              salesController.resetFields();
+              // Show confirmation dialog before discarding changes
+              Get.defaultDialog(
+                title: "Confirm Discard",
+                titleStyle: const TextStyle(fontWeight: FontWeight.bold),
+                content: const Text(
+                  "Are you sure you want to discard all changes? This will clear all fields and reset the page.",
+                  textAlign: TextAlign.center,
+                ),
+                confirm: ElevatedButton(
+                  onPressed: () {
+                    // Call the comprehensive reset method that clears everything
+                    salesController.clearSaleDetails();
+                    Navigator.of(context).pop(); // Close the dialog
+
+                    // Show success message
+                    TLoaders.successSnackBar(
+                      title: "Reset Complete",
+                      message: "All fields have been cleared successfully.",
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: TColors.primary,
+                    foregroundColor: TColors.white,
+                  ),
+                  child: const Text("Yes, Discard All"),
+                ),
+                cancel: OutlinedButton(
+                  onPressed: () =>
+                      Navigator.of(context).pop(), // Close the dialog,
+                  child: const Text("Cancel"),
+                ),
+              );
             },
             child: Text(
               'Discard',
@@ -42,7 +74,7 @@ class SaleActionButtons extends StatelessWidget {
                 onPressed: () {
                   // Validate all required fields before proceeding
                   if (salesController.allSales.isEmpty) {
-                    TLoader.errorSnackBar(
+                    TLoaders.errorSnackBar(
                       title: 'Checkout Error',
                       message: 'No products added to checkout.',
                     );
@@ -54,7 +86,7 @@ class SaleActionButtons extends StatelessWidget {
                           .validate() ||
                       !salesController.cashierFormKey.currentState!
                           .validate()) {
-                    TLoader.errorSnackBar(
+                    TLoaders.errorSnackBar(
                       title: 'Form Validation Error',
                       message: 'Please fill all required fields correctly.',
                     );
@@ -62,7 +94,7 @@ class SaleActionButtons extends StatelessWidget {
                   }
 
                   if (salesController.customerNameController.text.isEmpty) {
-                    TLoader.errorSnackBar(
+                    TLoaders.errorSnackBar(
                       title: 'Customer Error',
                       message: 'Please enter customer name.',
                     );
@@ -70,7 +102,7 @@ class SaleActionButtons extends StatelessWidget {
                   }
 
                   if (salesController.selectedDate.value == null) {
-                    TLoader.errorSnackBar(
+                    TLoaders.errorSnackBar(
                       title: 'Date Error',
                       message: 'Please select a valid date.',
                     );
@@ -78,7 +110,7 @@ class SaleActionButtons extends StatelessWidget {
                   }
 
                   if (salesController.salesmanNameController.text.isEmpty) {
-                    TLoader.errorSnackBar(
+                    TLoaders.errorSnackBar(
                       title: 'Salesman Error',
                       message: 'Please enter salesman name.',
                     );
@@ -86,7 +118,7 @@ class SaleActionButtons extends StatelessWidget {
                   }
 
                   if (salesController.selectedAddressId == -1) {
-                    TLoader.errorSnackBar(
+                    TLoaders.errorSnackBar(
                       title: 'Address Error',
                       message: 'Please select a valid address.',
                     );
@@ -134,7 +166,7 @@ class SaleActionButtons extends StatelessWidget {
                                         netTotal.toStringAsFixed(2);
 
                                     // Show error message
-                                    TLoader.errorSnackBar(
+                                    TLoaders.errorSnackBar(
                                       title: "Invalid Payment",
                                       message:
                                           "Paid amount cannot exceed the total amount.",

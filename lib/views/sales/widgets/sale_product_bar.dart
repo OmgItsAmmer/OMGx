@@ -7,58 +7,68 @@ import 'package:get/get.dart';
 import '../../../common/widgets/dropdown_search/enhanced_autocomplete.dart';
 
 class ProductSearchBar extends StatelessWidget {
-  const ProductSearchBar({super.key});
+  const ProductSearchBar({super.key, required this.productNameFocus});
+
+  final FocusNode productNameFocus;
 
   @override
   Widget build(BuildContext context) {
     final productController = Get.find<ProductController>();
     final salesController = Get.find<SalesController>();
 
-    return EnhancedAutocomplete<ProductModel>(
-      labelText: 'Product Name',
-      hintText: 'Select a product',
-      displayStringForOption: (ProductModel product) => product.name,
-      options: productController.allProducts,
-      externalController: salesController.dropdownController,
-      isManualTextEntry: salesController.isManualTextEntry,
-      selectedItemName: salesController.selectedProductName,
-      selectedItemId: salesController.selectedProductId,
-      getItemId: (ProductModel product) => product.productId,
-      onManualTextEntry: (String text) {
-        // Clear variants and product id if the user is typing manually
-        salesController.availableVariants.clear();
-        salesController.selectedVariantId.value = -1;
-      },
-      onSelected: (ProductModel selectedProduct) async {
-        final isSerializedProduct = selectedProduct.hasSerialNumbers;
-
-        // Load variants for serialized products
-        if (isSerializedProduct) {
-          await salesController
-              .loadAvailableVariants(selectedProduct.productId ?? -1);
-
-          // For serialized products, quantity is always 1
-          salesController.quantity.text = "1";
-          salesController.unitPrice.value
-              .clear(); // Will be set when variant is selected
-          salesController.totalPrice.value
-              .clear(); // Will be set when variant is selected
-        } else {
-          // For non-serialized products
-          salesController.unitPrice.value.text =
-              selectedProduct.salePrice ?? "0";
-
-          // Calculate buying price for profit calculation
-          salesController.buyingPriceIndividual = double.tryParse(
-                selectedProduct.basePrice ?? "0",
-              ) ??
-              0.0;
-
-          // Clear any previously loaded variants
+    // Wrap EnhancedAutocomplete with a Focus widget for external traversal
+    return Focus(
+      focusNode: productNameFocus,
+      child: EnhancedAutocomplete<ProductModel>(
+        // No focusNode passed internally anymore
+        labelText: 'Product Name',
+        hintText: 'Select a product',
+        displayStringForOption: (ProductModel product) => product.name,
+        options: productController.allProducts,
+        externalController: salesController.dropdownController,
+        isManualTextEntry: salesController.isManualTextEntry,
+        selectedItemName: salesController.selectedProductName,
+        selectedItemId: salesController.selectedProductId,
+        getItemId: (ProductModel product) => product.productId,
+        onManualTextEntry: (String text) {
+          // Clear variants and product id if the user is typing manually
           salesController.availableVariants.clear();
           salesController.selectedVariantId.value = -1;
-        }
-      },
+        },
+        onSelected: (ProductModel selectedProduct) async {
+          final isSerializedProduct = selectedProduct.hasSerialNumbers;
+
+          // Load variants for serialized products
+          if (isSerializedProduct) {
+            await salesController
+                .loadAvailableVariants(selectedProduct.productId ?? -1);
+
+            // For serialized products, quantity is always 1
+            salesController.quantity.text = "1";
+            salesController.unitPrice.value
+                .clear(); // Will be set when variant is selected
+            salesController.totalPrice.value
+                .clear(); // Will be set when variant is selected
+          } else {
+            // For non-serialized products
+            salesController.unitPrice.value.text =
+                selectedProduct.salePrice ?? "0";
+
+            // Calculate buying price for profit calculation
+            salesController.buyingPriceIndividual = double.tryParse(
+                  selectedProduct.basePrice ?? "0",
+                ) ??
+                0.0;
+
+            // Clear any previously loaded variants
+            salesController.availableVariants.clear();
+            salesController.selectedVariantId.value = -1;
+          }
+
+          // Request focus on the unit price field after selection logic is complete
+          salesController.unitPriceFocus.requestFocus();
+        },
+      ),
     );
   }
 }

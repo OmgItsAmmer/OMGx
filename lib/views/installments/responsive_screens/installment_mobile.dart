@@ -25,7 +25,9 @@ class InstallmentMobile extends StatelessWidget {
         Get.put(GuarantorController());
 
     if (!Get.isRegistered<GuarantorImageController>()) {
-      Get.put(GuarantorImageController());
+      final guarantorImageController = Get.put(GuarantorImageController());
+      // Set to not fetch images from database by default
+      guarantorImageController.setFetchFromDatabase(false);
     }
 
     return SingleChildScrollView(

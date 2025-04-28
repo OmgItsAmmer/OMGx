@@ -1,94 +1,185 @@
-import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:iconsax/iconsax.dart';
 
 import '../../../utils/constants/colors.dart';
 import '../../../utils/helpers/helper_functions.dart';
 
 class TLoader {
-  static hideSnackBar() =>
-      ScaffoldMessenger.of(Get.overlayContext!).hideCurrentSnackBar();
-
-  static customToast({required message}) {
-    ScaffoldMessenger.of(Get.overlayContext!).showSnackBar(
-      SnackBar(
-        elevation: 0,
-        duration: const Duration(seconds: 3),
-        backgroundColor: Colors.transparent,
-        content: Container(
-          padding: const EdgeInsets.all(12.0),
-          margin: const EdgeInsets.symmetric(horizontal: 30),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(30),
-            color: THelperFunctions.isDarkMode(Get.overlayContext!)
-                ? TColors.darkerGrey.withOpacity(0.9)
-                : TColors.grey.withOpacity(0.9),
-          ),
-          child: Center(
-              child: Text(
-            message,
-            style: Theme.of(Get.overlayContext!).textTheme.labelLarge,
-          )),
-        ),
-      ),
-    );
+  /// Gets a safe context for showing snackbars, preferring overlay context if available
+  static BuildContext? _getSafeContext() {
+    try {
+      // Try to get the overlay context first (better for dialogs/modals)
+      if (Get.overlayContext != null) return Get.overlayContext!;
+      // Fall back to normal context
+      if (Get.context != null) return Get.context!;
+      return null;
+    } catch (e) {
+      debugPrint('Error getting safe context: $e');
+      return null;
+    }
   }
 
-  static successSnackBar({required dynamic title, message = '', duration = 3}) {
-    Get.snackbar(title.toString(), message.toString(),
+  /// Hides any currently visible snackbar
+  static hideSnackBar() {
+    try {
+      if (Get.isSnackbarOpen) {
+        Get.closeCurrentSnackbar();
+      } else {
+        final context = _getSafeContext();
+        if (context != null) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        }
+      }
+    } catch (e) {
+      debugPrint('Error hiding snackbar: $e');
+    }
+  }
+
+  /// Shows a custom toast message
+  static customToast({required String message}) {
+    try {
+      final context = _getSafeContext();
+      if (context == null) {
+        debugPrint('Cannot show custom toast: No valid context');
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          elevation: 0,
+          duration: const Duration(seconds: 3),
+          backgroundColor: Colors.transparent,
+          content: Container(
+            padding: const EdgeInsets.all(12.0),
+            margin: const EdgeInsets.symmetric(horizontal: 30),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(30),
+              color: THelperFunctions.isDarkMode(context)
+                  ? TColors.darkerGrey.withOpacity(0.9)
+                  : TColors.grey.withOpacity(0.9),
+            ),
+            child: Center(
+                child: Text(
+              message,
+              style: Theme.of(context).textTheme.labelLarge,
+            )),
+          ),
+        ),
+      );
+    } catch (e) {
+      debugPrint('Error showing custom toast: $e');
+      // Fallback to GetX snackbar if traditional snackbar fails
+      _fallbackGetSnackbar(message: message);
+    }
+  }
+
+  /// Shows a success snackbar using Get.rawSnackbar for better compatibility
+  static successSnackBar(
+      {required String title, String message = '', int duration = 3}) {
+    try {
+      // hideSnackBar(); // Temporarily comment out
+
+      Get.rawSnackbar(
+        titleText: Text(title,
+            style: const TextStyle(
+                color: TColors.white, fontWeight: FontWeight.bold)),
+        messageText:
+            Text(message, style: const TextStyle(color: TColors.white)),
+        icon: const Icon(Iconsax.check, color: TColors.white, size: 20),
         isDismissible: true,
         shouldIconPulse: true,
-        colorText: TColors.white,
         backgroundColor: TColors.primary,
         snackPosition: SnackPosition.BOTTOM,
         duration: Duration(seconds: duration),
         margin: const EdgeInsets.all(20),
-        snackStyle: SnackStyle.FLOATING,
-        // Allows width customization
-        maxWidth: !TDeviceUtils.isMobileScreen(Get.overlayContext!) ? 700 : null,
-        icon: const Icon(
-          Iconsax.warning_2,
-          color: TColors.white,
-        ));
+        borderRadius: 10,
+        maxWidth: 600, // Keep max width for consistency
+      );
+    } catch (e) {
+      debugPrint('Error showing success snackbar (raw): $e');
+      // Minimal fallback if even raw fails
+      _fallbackGetSnackbar(title: title, message: message, isSuccess: true);
+    }
   }
 
-  static warningSnackBar({required title, message = ''}) {
-    Get.snackbar(
-      title,
-      message,
-      isDismissible: true,
-      shouldIconPulse: true,
-      colorText: TColors.white,
-      backgroundColor: Colors.orange,
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 3),
-      margin: const EdgeInsets.all(20),
-      icon: const Icon(Iconsax.warning_2, color: TColors.white),
-      snackStyle: SnackStyle.FLOATING,
-      // Allows width customization
-      maxWidth: !TDeviceUtils.isMobileScreen(Get.context!) ? 700 : null,
-    );
+  /// Shows a warning snackbar using Get.rawSnackbar
+  static warningSnackBar({required String title, String message = ''}) {
+    try {
+      // hideSnackBar(); // Temporarily comment out
+
+      Get.rawSnackbar(
+        titleText: Text(title,
+            style: const TextStyle(
+                color: TColors.white, fontWeight: FontWeight.bold)),
+        messageText:
+            Text(message, style: const TextStyle(color: TColors.white)),
+        icon: const Icon(Iconsax.warning_2, color: TColors.white, size: 20),
+        isDismissible: true,
+        shouldIconPulse: true,
+        backgroundColor: Colors.orange,
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.all(20),
+        borderRadius: 10,
+        maxWidth: 600,
+      );
+    } catch (e) {
+      debugPrint('Error showing warning snackbar (raw): $e');
+      _fallbackGetSnackbar(title: title, message: message, isWarning: true);
+    }
   }
 
+  /// Shows an error snackbar using Get.rawSnackbar
   static errorSnackBar({required String title, String message = ''}) {
-    Get.snackbar(
-      title,
-      message,
-      isDismissible: true,
-      shouldIconPulse: true,
-      colorText: TColors.white,
-      backgroundColor: Colors.red.shade600,
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 3),
-      margin: const EdgeInsets.all(20),
-      icon: const Icon(Iconsax.warning_2, color: TColors.white),
-      snackStyle: SnackStyle.FLOATING,
-      // Allows width customization
-      maxWidth: !TDeviceUtils.isMobileScreen(Get.context!)
-          ? 700
-          : null, // Sets maximum width
-    );
+    try {
+      // hideSnackBar(); // Temporarily comment out
+
+      Get.rawSnackbar(
+        titleText: Text(title,
+            style: const TextStyle(
+                color: TColors.white, fontWeight: FontWeight.bold)),
+        messageText:
+            Text(message, style: const TextStyle(color: TColors.white)),
+        icon: const Icon(Iconsax.warning_2, color: TColors.white, size: 20),
+        isDismissible: true,
+        shouldIconPulse: true,
+        backgroundColor: Colors.red.shade600,
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.all(20),
+        borderRadius: 10,
+        maxWidth: 600,
+      );
+    } catch (e) {
+      debugPrint('Error showing error snackbar (raw): $e');
+      _fallbackGetSnackbar(title: title, message: message, isError: true);
+    }
+  }
+
+  /// Fallback method that tries to show a simpler snackbar when the main one fails
+  static void _fallbackGetSnackbar(
+      {String title = '',
+      String message = '',
+      bool isSuccess = false,
+      bool isWarning = false,
+      bool isError = false}) {
+    try {
+      Color bgColor = Colors.grey;
+      if (isSuccess) bgColor = TColors.primary;
+      if (isWarning) bgColor = Colors.orange;
+      if (isError) bgColor = Colors.red.shade600;
+
+      Get.rawSnackbar(
+        title: title,
+        message: message,
+        backgroundColor: bgColor,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(20),
+        duration: const Duration(seconds: 3),
+      );
+    } catch (e) {
+      debugPrint('Even fallback snackbar failed: $e');
+    }
   }
 }

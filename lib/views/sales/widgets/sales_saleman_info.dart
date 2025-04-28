@@ -7,6 +7,7 @@ import 'package:iconsax/iconsax.dart';
 
 import '../../../common/widgets/dropdown_search/dropdown_search.dart';
 import '../../../common/widgets/dropdown_search/enhanced_autocomplete.dart';
+import '../../../common/widgets/icons/t_circular_icon.dart';
 import '../../../controllers/sales/sales_controller.dart';
 import '../../../utils/constants/colors.dart';
 import '../../../utils/constants/enums.dart';
@@ -29,9 +30,24 @@ class SalesSalemanInfo extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Salesman Information',
-              style: Theme.of(context).textTheme.headlineMedium,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Salesman Information',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+                TCircularIcon(
+                  icon: Iconsax.refresh,
+                  backgroundColor: TColors.primary.withOpacity(0.1),
+                  color: TColors.primary,
+                  onPressed: () {
+                    // Use the dedicated method for resetting salesman fields
+                    // This is a safer implementation that won't cause navigation issues
+                    salesController.resetSalesmanFields();
+                  },
+                ),
+              ],
             ),
             const SizedBox(
               height: TSizes.spaceBtwItems,

@@ -84,11 +84,32 @@ class _EnhancedAutocompleteState<T extends Object>
     super.initState();
     _innerController = TextEditingController();
     _isMounted = true;
+
+    // Listen to changes in the external controller
+    if (widget.externalController != null) {
+      widget.externalController!.addListener(_updateInnerFromExternal);
+    }
+  }
+
+  // Method to update inner controller when external changes
+  void _updateInnerFromExternal() {
+    if (!_isMounted) return;
+
+    if (widget.externalController != null &&
+        _innerController.text != widget.externalController!.text) {
+      // Need to use setState to update the UI
+      setState(() {
+        _innerController.text = widget.externalController!.text;
+      });
+    }
   }
 
   @override
   void dispose() {
     _isMounted = false;
+    if (widget.externalController != null) {
+      widget.externalController!.removeListener(_updateInnerFromExternal);
+    }
     if (widget.externalController == null) {
       _innerController.dispose();
     }
@@ -130,11 +151,18 @@ class _EnhancedAutocompleteState<T extends Object>
         // Store reference to the text controller
         _innerController = textEditingController;
 
-        // Set the initial value of the text field from external controller if available
+        // This is crucial: Always ensure the internal controller matches the external
+        // regardless of whether they're empty or not
         if (widget.externalController != null &&
-            widget.externalController!.text.isNotEmpty &&
-            textEditingController.text.isEmpty) {
-          textEditingController.text = widget.externalController!.text;
+            textEditingController.text != widget.externalController!.text) {
+          // Use WidgetsBinding to avoid text input issues
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (_isMounted) {
+              textEditingController.text = widget.externalController!.text;
+              textEditingController.selection = TextSelection.fromPosition(
+                  TextPosition(offset: textEditingController.text.length));
+            }
+          });
         }
 
         // Set up a listener to keep the controllers in sync

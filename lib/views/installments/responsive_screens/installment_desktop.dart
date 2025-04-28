@@ -26,7 +26,9 @@ class InstallmentDesktop extends StatelessWidget {
         Get.put(GuarantorController());
     // Initialize the guarantor image controller if not already initialized
     if (!Get.isRegistered<GuarantorImageController>()) {
-      Get.put(GuarantorImageController());
+      final guarantorImageController = Get.put(GuarantorImageController());
+      // Set to not fetch images from database by default
+      guarantorImageController.setFetchFromDatabase(false);
     }
 
     return Expanded(

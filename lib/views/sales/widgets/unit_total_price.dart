@@ -11,7 +11,9 @@ import '../../../controllers/sales/sales_controller.dart';
 import '../../../utils/validators/validation.dart';
 
 class UnitTotalPrice extends StatelessWidget {
-  const UnitTotalPrice({super.key});
+  const UnitTotalPrice({super.key, required this.totalPriceFocus});
+
+  final FocusNode totalPriceFocus;
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +76,7 @@ class UnitTotalPrice extends StatelessWidget {
               width: double.infinity,
               child: Obx(
                 () => TextFormField(
+                  focusNode: totalPriceFocus,
                   validator: (value) =>
                       TValidator.validateEmptyText('Total Price', value),
                   controller: salesController.totalPrice.value,
@@ -143,7 +146,7 @@ class UnitTotalPrice extends StatelessWidget {
               SizedBox(width: 8),
               Flexible(
                 child: Text(
-                  'Add Custom Unit',
+                  'Custom',
                   style: TextStyle(color: Colors.blue),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -266,7 +269,7 @@ class UnitTotalPrice extends StatelessWidget {
                 } else {
                   TLoader.errorSnackBar(
                     title: 'Invalid Unit Name',
-                    message: 'Please enter a valid unit name',
+                    message: 'Please enter a valid  name',
                   );
                 }
               },

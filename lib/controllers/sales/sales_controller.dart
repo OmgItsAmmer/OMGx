@@ -1,6 +1,6 @@
 import 'package:admin_dashboard_v3/Models/products/product_variant_model.dart';
 import 'package:admin_dashboard_v3/Models/sales/sale_model.dart';
-import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
+import 'package:admin_dashboard_v3/utils/popups/loaders.dart';
 import 'package:admin_dashboard_v3/controllers/media/media_controller.dart';
 import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
 import 'package:admin_dashboard_v3/controllers/salesman/salesman_controller.dart';
@@ -26,7 +26,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:admin_dashboard_v3/utils/popups/loaders.dart';
 import 'package:admin_dashboard_v3/views/sales/sales.dart';
 
 class SalesController extends GetxController {
@@ -147,6 +146,13 @@ class SalesController extends GetxController {
   RxInt selectedVariantId = (-1).obs;
   RxBool isManualTextEntry = false.obs;
 
+  // Focus Nodes for Tab Order
+  final FocusNode productNameFocus = FocusNode();
+  final FocusNode unitPriceFocus = FocusNode();
+  final FocusNode quantityFocus = FocusNode();
+  final FocusNode totalPriceFocus = FocusNode();
+  final FocusNode addButtonFocus = FocusNode();
+
   @override
   void onInit() {
     super.onInit();
@@ -186,7 +192,7 @@ class SalesController extends GetxController {
 
       // VALIDATION CHECK 1: Product selection
       if (dropdownController.text.isEmpty || selectedProductId.value < 0) {
-        SalesSnackbars.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: "Product Selection Required",
           message: 'Please select a valid product from the dropdown list',
         );
@@ -195,7 +201,7 @@ class SalesController extends GetxController {
 
       // VALIDATION CHECK 2: Manual text entry
       if (isManualTextEntry.value) {
-        SalesSnackbars.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: "Invalid Product",
           message: 'Please select a valid product from the dropdown list',
         );
@@ -212,7 +218,7 @@ class SalesController extends GetxController {
       );
 
       if (product.productId == null) {
-        SalesSnackbars.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: "Product Not Found",
           message: 'The selected product no longer exists in the database',
         );
@@ -223,7 +229,7 @@ class SalesController extends GetxController {
       if (product.hasSerialNumbers) {
         // VALIDATION CHECK 4: Serial number selected
         if (selectedVariantId.value == -1) {
-          SalesSnackbars.errorSnackBar(
+          TLoaders.errorSnackBar(
             title: "Select Serial Number",
             message: 'Please select a specific serial number for this product',
           );
@@ -237,7 +243,7 @@ class SalesController extends GetxController {
         );
 
         if (variant.variantId == null) {
-          SalesSnackbars.errorSnackBar(
+          TLoaders.errorSnackBar(
             title: "Invalid Selection",
             message: 'The selected variant is no longer available',
           );
@@ -246,7 +252,7 @@ class SalesController extends GetxController {
 
         // VALIDATION CHECK 6: Valid price
         if (variant.sellingPrice <= 0) {
-          SalesSnackbars.errorSnackBar(
+          TLoaders.errorSnackBar(
             title: "Invalid Price",
             message: 'The selected product has an invalid selling price',
           );
@@ -288,7 +294,7 @@ class SalesController extends GetxController {
         _clearInputFields();
 
         // Show success feedback
-        SalesSnackbars.successSnackBar(
+        TLoaders.successSnackBar(
           title: "Product Added",
           message: "Serial number ${variant.serialNumber} added to sale",
         );
@@ -298,7 +304,7 @@ class SalesController extends GetxController {
         // VALIDATION CHECK 7: Form validation
         if (!addUnitPriceAndQuantityKey.currentState!.validate() ||
             !addUnitTotalKey.currentState!.validate()) {
-          SalesSnackbars.errorSnackBar(
+          TLoaders.errorSnackBar(
             title: 'Required Fields Missing',
             message: 'Please fill all required fields to continue',
           );
@@ -309,7 +315,7 @@ class SalesController extends GetxController {
         if (unitPrice.value.text.isEmpty ||
             quantity.text.isEmpty ||
             totalPrice.value.text.isEmpty) {
-          SalesSnackbars.errorSnackBar(
+          TLoaders.errorSnackBar(
             title: 'Missing Values',
             message: 'Please enter price and quantity values',
           );
@@ -324,7 +330,7 @@ class SalesController extends GetxController {
         if (unitPriceValue == null ||
             quantityValue == null ||
             totalPriceValue == null) {
-          SalesSnackbars.errorSnackBar(
+          TLoaders.errorSnackBar(
             title: 'Invalid Values',
             message: 'Price and quantity must be valid numbers',
           );
@@ -333,7 +339,7 @@ class SalesController extends GetxController {
 
         // VALIDATION CHECK 10: Non-negative values
         if (unitPriceValue <= 0) {
-          SalesSnackbars.errorSnackBar(
+          TLoaders.errorSnackBar(
             title: 'Invalid Unit Price',
             message: 'Unit price must be greater than zero',
           );
@@ -341,7 +347,7 @@ class SalesController extends GetxController {
         }
 
         if (quantityValue <= 0) {
-          SalesSnackbars.errorSnackBar(
+          TLoaders.errorSnackBar(
             title: 'Invalid Quantity',
             message: 'Quantity must be greater than zero',
           );
@@ -349,7 +355,7 @@ class SalesController extends GetxController {
         }
 
         if (totalPriceValue <= 0) {
-          SalesSnackbars.errorSnackBar(
+          TLoaders.errorSnackBar(
             title: 'Invalid Total Price',
             message: 'Total price must be greater than zero',
           );
@@ -395,7 +401,7 @@ class SalesController extends GetxController {
         }
 
         if (currentStock < requiredStock + existingQuantity) {
-          SalesSnackbars.errorSnackBar(
+          TLoaders.errorSnackBar(
             title: 'Insufficient Stock',
             message: 'Only $currentStock ${product.name} available in stock',
           );
@@ -407,7 +413,7 @@ class SalesController extends GetxController {
         double tolerance = 0.01; // Allow small rounding differences
 
         if ((calculatedTotal - totalPriceValue).abs() > tolerance) {
-          SalesSnackbars.warningSnackBar(
+          TLoaders.warningSnackBar(
             title: 'Price Discrepancy',
             message:
                 'Total price doesn\'t match unit price × quantity. Continuing anyway.',
@@ -435,7 +441,7 @@ class SalesController extends GetxController {
             double totalRequiredStock = newTotalQuantity * factor;
 
             if (currentStock < totalRequiredStock) {
-              SalesSnackbars.errorSnackBar(
+              TLoaders.errorSnackBar(
                 title: 'Insufficient Stock',
                 message:
                     'Merging would exceed available stock. Only $currentStock ${product.name} available',
@@ -483,7 +489,7 @@ class SalesController extends GetxController {
         _clearInputFields();
 
         // Show success feedback
-        SalesSnackbars.successSnackBar(
+        TLoaders.successSnackBar(
           title: "Product Added",
           message: "${sale.name} added to sale",
         );
@@ -492,7 +498,7 @@ class SalesController extends GetxController {
       if (kDebugMode) {
         print('Error in addProduct: $e');
       }
-      SalesSnackbars.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: 'Error Adding Product',
         message: 'An error occurred while adding the product: ${e.toString()}',
       );
@@ -558,7 +564,7 @@ class SalesController extends GetxController {
           (currentRemaining + newTotalPrice).toStringAsFixed(2);
 
       // Show success message
-      SalesSnackbars.successSnackBar(
+      TLoaders.successSnackBar(
         title: "Product Updated",
         message: "Added quantity to existing ${existingSale.name}",
       );
@@ -566,7 +572,7 @@ class SalesController extends GetxController {
       if (kDebugMode) {
         print('Error merging products: $e');
       }
-      SalesSnackbars.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: 'Error Updating Product',
         message: 'Failed to update quantity: ${e.toString()}',
       );
@@ -578,7 +584,7 @@ class SalesController extends GetxController {
     dropdownController.clear();
     unitPrice.value.clear();
     unit.clear();
-    quantity.clear();
+    quantity.text = '';
     totalPrice.value.clear();
   }
 
@@ -588,14 +594,14 @@ class SalesController extends GetxController {
 
       // Validate that there are sales to checkout
       if (allSales.isEmpty) {
-        SalesSnackbars.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Checkout Error', message: 'No products added to checkout.');
         return -1;
       }
 
       // Validate customer form fields
       if (!customerFormKey.currentState!.validate()) {
-        SalesSnackbars.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Customer Information Error',
             message: 'Please fill all required customer fields.');
         return -1;
@@ -603,7 +609,7 @@ class SalesController extends GetxController {
 
       // Validate salesman form fields
       if (!salesmanFormKey.currentState!.validate()) {
-        SalesSnackbars.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Salesman Information Error',
             message: 'Please fill all required salesman fields.');
         return -1;
@@ -611,7 +617,7 @@ class SalesController extends GetxController {
 
       // Validate cashier form fields
       if (!cashierFormKey.currentState!.validate()) {
-        SalesSnackbars.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Cashier Information Error',
             message: 'Please fill all required cashier fields.');
         return -1;
@@ -619,25 +625,25 @@ class SalesController extends GetxController {
 
       // Validate specific critical fields
       if (customerNameController.text.isEmpty) {
-        SalesSnackbars.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Customer Error', message: 'Please select a customer.');
         return -1;
       }
 
       if (selectedDate.value == null) {
-        SalesSnackbars.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Date Error', message: 'Please select a valid date.');
         return -1;
       }
 
       if (salesmanNameController.text.isEmpty) {
-        SalesSnackbars.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Salesman Error', message: 'Please select a salesman.');
         return -1;
       }
 
       if (selectedAddressId == null || selectedAddressId == -1) {
-        SalesSnackbars.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Address Error', message: 'Please select a valid address.');
         return -1;
       }
@@ -645,7 +651,7 @@ class SalesController extends GetxController {
       // Validate paid amount
       double paidAmountValue = double.tryParse(paidAmount.text.trim()) ?? 0.0;
       if (paidAmountValue < 0) {
-        SalesSnackbars.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Payment Error',
             message: 'Please enter a valid paid amount.');
         return -1;
@@ -765,18 +771,18 @@ class SalesController extends GetxController {
           clearSaleDetails();
 
           // Show success message
-          SalesSnackbars.successSnackBar(
+          TLoaders.successSnackBar(
             title: 'Order Placed Successfully',
             message: 'Order #$orderId has been placed successfully.',
           );
 
           return orderId;
         } catch (e) {
-          Get.back(); // Close loading dialog
+          Navigator.of(Get.context!).pop();
           if (kDebugMode) {
             print('Error updating stock: $e');
           }
-          SalesSnackbars.errorSnackBar(
+          TLoaders.errorSnackBar(
               title: 'Stock Update Error', message: e.toString());
           return orderId; // Still return orderId as the order was created
         }
@@ -785,7 +791,7 @@ class SalesController extends GetxController {
         if (kDebugMode) {
           print('Order upload failed');
         }
-        SalesSnackbars.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: 'Order Creation Failed',
           message: 'Failed to create order. Please try again.',
         );
@@ -794,13 +800,13 @@ class SalesController extends GetxController {
     } catch (e) {
       // Close loading dialog if open
       if (Get.isDialogOpen == true) {
-        Get.back();
+        Navigator.of(Get.context!).pop();
       }
 
       if (kDebugMode) {
         print('Checkout error: $e');
       }
-      SalesSnackbars.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: 'Checkout Error',
         message: 'An error occurred during checkout: ${e.toString()}',
       );
@@ -914,23 +920,43 @@ class SalesController extends GetxController {
   // Reset form fields only - used internally
   void resetFields() {
     try {
-      // Clear form controllers
-      unitPrice.value.clear();
-      unit.clear();
-      quantity.clear();
-      totalPrice.value.clear();
-      discountController.clear();
-      dropdownController.clear();
+      // Clear form controllers - ensure direct text assignment
+      unitPrice.value.text = '';
+      unit.text = '';
+      quantity.text = '';
+      totalPrice.value.text = '';
+      discountController.text = '';
+
+      // Important: To properly clear autocomplete, we need a direct text assignment
+      // rather than just calling clear()
+      dropdownController.text = '';
+
+      // Reset product selection
+      selectedProductName.value = '';
+      selectedProductId.value = -1;
+      isManualTextEntry.value = false;
+
+      // Reset variant selection
+      selectedVariantId.value = -1;
+      if (availableVariants.isNotEmpty) {
+        availableVariants.clear();
+      }
 
       // Reset form states
       selectedChipIndex.value = -1;
       selectedChipValue.value = '';
+      selectedUnit.value = UnitType.item;
 
       // Clear payment fields
-      paidAmount.clear();
-      remainingAmount.value.clear();
+      paidAmount.text = '';
+      remainingAmount.value.text = '';
+
+      // Force UI update - use microtask to ensure this happens after the current frame
+      Future.microtask(() {
+        update();
+      });
     } catch (e) {
-      SalesSnackbars.errorSnackBar(title: 'Reset Error', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Reset Error', message: e.toString());
     }
   }
 
@@ -956,10 +982,7 @@ class SalesController extends GetxController {
       }
 
       // Clear salesman fields
-      salesmanNameController.clear();
-      salesmanCityController.value.clear();
-      salesmanAreaController.value.clear();
-      selectedSalesmanId = 0;
+      resetSalesmanFields();
 
       // Clear product selection
       selectedProductName.value = '';
@@ -982,7 +1005,7 @@ class SalesController extends GetxController {
       // Refresh the UI
       update();
     } catch (e) {
-      SalesSnackbars.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'Clear Details Error', message: e.toString());
     }
   }
@@ -995,7 +1018,7 @@ class SalesController extends GetxController {
         return 'PENDING';
       }
     } catch (e) {
-      SalesSnackbars.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
       return '';
     }
   }
@@ -1008,7 +1031,7 @@ class SalesController extends GetxController {
   //     }
   //     catch(e)
   //   {
-  //     TLoader.errorsnackBar(title: 'Oh Snap!', message: e.toString());
+  //     TLoaders.errorsnackBar(title: 'Oh Snap!', message: e.toString());
   //
   //   }
   // }
@@ -1065,7 +1088,7 @@ class SalesController extends GetxController {
       allSales.removeAt(index);
     } catch (e) {
       print("Error: $e"); // Debugging
-      SalesSnackbars.errorSnackBar(title: e.toString());
+      TLoaders.errorSnackBar(title: e.toString());
     }
   }
 
@@ -1088,12 +1111,12 @@ class SalesController extends GetxController {
       selectedChipIndex.value = -1;
 
       // Show success message
-      // TLoader.successSnackBar(
+      // TLoaders.successSnackBar(
       //   title: "Discount Restored",
       //   message: 'Discount restored successfully.',
       // );
     } catch (e) {
-      SalesSnackbars.errorSnackBar(title: e.toString());
+      TLoaders.errorSnackBar(title: e.toString());
     }
   }
 
@@ -1108,7 +1131,7 @@ class SalesController extends GetxController {
   bool SalesValidator() {
     try {
       if (allSales.isEmpty) {
-        SalesSnackbars.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Checkout Error', message: 'No products added to checkout.');
         return false;
       }
@@ -1118,13 +1141,13 @@ class SalesController extends GetxController {
           customerNameController.text == "" ||
           selectedDate.value == null ||
           salesmanNameController.text == "") {
-        SalesSnackbars.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Checkout Error', message: 'Fill all the fields.');
         return false;
       }
 
       if (selectedAddressId == -1) {
-        SalesSnackbars.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Address Error', message: 'Select Valid Address.');
         return false;
       }
@@ -1133,7 +1156,7 @@ class SalesController extends GetxController {
     } catch (e) {
       if (kDebugMode) {
         print(e);
-        SalesSnackbars.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+        TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
       }
       return false;
     }
@@ -1162,7 +1185,7 @@ class SalesController extends GetxController {
       if (discountPercentage == null ||
           discountPercentage < 0 ||
           discountPercentage > 100) {
-        SalesSnackbars.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: "Invalid Discount",
           message: 'Please select a valid discount percentage (0% to 100%).',
         );
@@ -1185,7 +1208,7 @@ class SalesController extends GetxController {
       selectedChipValue.value = discountText;
       selectedChipIndex.value = _getChipIndex(discountText);
     } catch (e) {
-      SalesSnackbars.errorSnackBar(title: e.toString());
+      TLoaders.errorSnackBar(title: e.toString());
     }
   }
 
@@ -1219,7 +1242,7 @@ class SalesController extends GetxController {
       discount.value = "0.0";
       netTotal.value = currentOriginalTotal;
 
-      SalesSnackbars.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: "Invalid Discount",
         message: "Discount cannot exceed 100%.",
       );
@@ -1354,6 +1377,28 @@ class SalesController extends GetxController {
     } catch (e) {
       if (kDebugMode) {
         print('Error calculating total price: $e');
+      }
+    }
+  }
+
+  // Reset salesman fields - safer implementation
+  void resetSalesmanFields() {
+    try {
+      // Reset all fields in a controlled way
+      salesmanNameController.text = '';
+      salesmanCityController.value.text = '';
+      salesmanAreaController.value.text = '';
+      selectedSalesmanId = -1;
+
+      // Make sure selection position is updated to trigger listeners
+      salesmanNameController.selection =
+          TextSelection.fromPosition(const TextPosition(offset: 0));
+
+      // Update UI state without forcing app refresh
+      update();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error resetting salesman fields: $e');
       }
     }
   }
