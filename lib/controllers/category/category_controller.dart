@@ -28,57 +28,103 @@ class CategoryController extends GetxController {
 
   RxBool isUpdating = false.obs;
 
+  // Method to check if a category name already exists
+  bool _categoryNameExists(String name, {int? excludeCategoryId}) {
+    final trimmedName = name.trim().toLowerCase();
+
+    return allCategories.any((category) {
+      // Skip the current category when updating
+      if (excludeCategoryId != null &&
+          category.categoryId == excludeCategoryId) {
+        return false;
+      }
+
+      // Compare names case insensitive after trimming
+      final existingName = category.categoryName.trim().toLowerCase();
+      return existingName == trimmedName;
+    });
+  }
+
+  // Methods to update product count for categories
+  void incrementProductCount(int categoryId) async {
+    try {
+      // Find the category in our list
+      final index = allCategories
+          .indexWhere((category) => category.categoryId == categoryId);
+      if (index != -1) {
+        // Update the local model
+        final category = allCategories[index];
+        final currentCount = category.productCount ?? 0;
+        final newCount = currentCount + 1;
+
+        // Create a new category model with updated count
+        final updatedCategory = CategoryModel(
+          categoryId: category.categoryId,
+          categoryName: category.categoryName,
+          isFeatured: category.isFeatured,
+          productCount: newCount,
+        );
+
+        // Update in local list
+        allCategories[index] = updatedCategory;
+
+        // Update the database
+        await categoryRepository.updateCategoryProductCount(
+            categoryId, newCount);
+
+        // Force UI update to reflect changes immediately
+        update();
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error incrementing category product count: $e");
+      }
+    }
+  }
+
+  void decrementProductCount(int categoryId) async {
+    try {
+      // Find the category in our list
+      final index = allCategories
+          .indexWhere((category) => category.categoryId == categoryId);
+      if (index != -1) {
+        // Update the local model
+        final category = allCategories[index];
+        final currentCount = category.productCount ?? 0;
+        if (currentCount <= 0) return; // Prevent negative counts
+
+        final newCount = currentCount - 1;
+
+        // Create a new category model with updated count
+        final updatedCategory = CategoryModel(
+          categoryId: category.categoryId,
+          categoryName: category.categoryName,
+          isFeatured: category.isFeatured,
+          productCount: newCount,
+        );
+
+        // Update in local list
+        allCategories[index] = updatedCategory;
+
+        // Update the database
+        await categoryRepository.updateCategoryProductCount(
+            categoryId, newCount);
+
+        // Force UI update to reflect changes immediately
+        update();
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error decrementing category product count: $e");
+      }
+    }
+  }
+
   @override
   void onInit() {
     fetchCategories();
     super.onInit();
   }
-
-  // Future<void> saveOrUpdate(int categoryId) async {
-  //   final MediaController mediaController = Get.find<MediaController>();
-  //
-  //
-  //   try {
-  //     // Validate the form
-  //     if (!categoryDetail.currentState!.validate()) {
-  //       TLoader.errorSnackBar(
-  //         title: "Empty Fields",
-  //         message: 'Kindly fill all the fields before proceeding.',
-  //       );
-  //       return;
-  //     }
-  //
-  //     final categoryModel = CategoryModel(
-  //       categoryId: categoryId,
-  //       categoryName: categoryName.text.trim(),
-  //     );
-  //
-  //     final json = categoryModel.toJson();
-  //     await mediaController.imageAssigner(
-  //       categoryId,
-  //       MediaCategory.categories.toString().split('.').last,
-  //       true,
-  //     );
-  //
-  //     await categoryRepository.saveOrUpdateCategoryRepo(json); // 👈 Make sure it's awaited
-  //
-  //     // 🔁 Update or Add locally
-  //     final index = allCategories.indexWhere((c) => c.categoryId == categoryId);
-  //     if (index != -1) {
-  //       allCategories[index] = categoryModel; // Update
-  //     } else {
-  //       allCategories.add(categoryModel); // Add
-  //     }
-  //
-  //     cleanCategoryDetail();
-  //     TLoader.successSnackBar(title: 'Category Uploaded!');
-  //   } catch (e) {
-  //     TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
-  //     if (kDebugMode) {
-  //       print(e);
-  //     }
-  //   }
-  // }
 
   Future<void> insertCategory() async {
     final MediaController mediaController = Get.find<MediaController>();
@@ -93,9 +139,21 @@ class CategoryController extends GetxController {
         return;
       }
 
+      // Check for duplicate category name
+      final categoryNameText = categoryName.text.trim();
+      if (_categoryNameExists(categoryNameText)) {
+        TLoader.errorSnackBar(
+          title: "Duplicate Category",
+          message:
+              'A category with the name "$categoryNameText" already exists.',
+        );
+        return;
+      }
+
       final categoryModel = CategoryModel(
         categoryId: null,
-        categoryName: categoryName.text.trim(),
+        categoryName: categoryNameText,
+        productCount: 0, // Initialize with zero products
       );
 
       final json = categoryModel.toJson(isUpdate: true);
@@ -109,14 +167,19 @@ class CategoryController extends GetxController {
         true,
       );
 
+      // Set the ID in the model and add to local list
       categoryModel.categoryId = categoryId;
       allCategories.add(categoryModel);
+
+      // Force UI update
+      update();
 
       cleanCategoryDetail();
       TLoader.successSnackBar(
         title: 'Category Added!',
-        message: '${categoryName.text} successfully added.',
+        message: '$categoryNameText successfully added.',
       );
+      Navigator.of(Get.context!).pop();
     } catch (e) {
       TLoader.errorSnackBar(title: 'Error', message: e.toString());
     } finally {
@@ -139,10 +202,32 @@ class CategoryController extends GetxController {
         return;
       }
 
+      // Check for duplicate category name (excluding the current category being edited)
+      final categoryNameText = categoryName.text.trim();
+      if (_categoryNameExists(categoryNameText,
+          excludeCategoryId: categoryId)) {
+        TLoader.errorSnackBar(
+          title: "Duplicate Category",
+          message:
+              'A category with the name "$categoryNameText" already exists.',
+        );
+        return;
+      }
+
+      // Find existing category to preserve product counts
+      final existingCategory = allCategories.firstWhere(
+        (category) => category.categoryId == categoryId,
+        orElse: () => CategoryModel.empty(),
+      );
+
+      final existingProductCount = existingCategory.productCount ?? 0;
+
       // Prepare the updated category model
       final categoryModel = CategoryModel(
         categoryId: categoryId,
-        categoryName: categoryName.text.trim(),
+        categoryName: categoryNameText,
+        productCount: existingProductCount,
+        isFeatured: existingCategory.isFeatured,
       );
 
       final json = categoryModel.toJson();
@@ -167,13 +252,17 @@ class CategoryController extends GetxController {
         allCategories.add(categoryModel); // Add new category if not found
       }
 
+      // Force UI update
+      update();
+
       cleanCategoryDetail();
 
       // Show success message
       TLoader.successSnackBar(
         title: 'Category Updated!',
-        message: '${categoryName.text} updated successfully.',
+        message: '$categoryNameText updated successfully.',
       );
+      Navigator.of(Get.context!).pop();
     } catch (e) {
       TLoader.errorSnackBar(title: 'Error', message: e.toString());
     } finally {
@@ -184,7 +273,8 @@ class CategoryController extends GetxController {
   void setCategoryDetail(CategoryModel category) {
     try {
       categoryName.text = category.categoryName;
-      //  productCount.text = category.image.toString(); //Image
+      productCount.text =
+          category.productCount?.toString() ?? '0'; // Show product count in UI
     } catch (e) {
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
@@ -203,6 +293,9 @@ class CategoryController extends GetxController {
     try {
       final categories = await categoryRepository.fetchCategories();
       allCategories.assignAll(categories);
+
+      // Force UI update
+      update();
     } catch (e) {
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
 
@@ -229,9 +322,6 @@ class CategoryController extends GetxController {
 
   Future<void> deleteCategory(int categoryId) async {
     try {
-      // Call the repository function to delete from the database
-      await categoryRepository.deleteCategoryFromTable(categoryId);
-
       // Find the category in allCategories to get the name
       final categoryToRemove = allCategories.firstWhere(
         (category) => category.categoryId == categoryId,
@@ -242,9 +332,22 @@ class CategoryController extends GetxController {
         throw Exception("Category not found in the list");
       }
 
-      // Remove category from lists
+      // Store category name for success message
+      final catName = categoryToRemove.categoryName;
+
+      // Call the repository function to delete from the database
+      await categoryRepository.deleteCategoryFromTable(categoryId);
+
+      // Remove category from local list
       allCategories
           .removeWhere((category) => category.categoryId == categoryId);
+
+      // Force UI update
+      update();
+
+      // Show success message
+      TLoader.successSnackBar(
+          title: "Success", message: "$catName deleted successfully");
     } catch (e) {
       if (kDebugMode) {
         print("Error deleting category: $e");

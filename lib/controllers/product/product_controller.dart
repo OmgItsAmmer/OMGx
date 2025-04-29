@@ -61,6 +61,10 @@ class ProductController extends GetxController {
 
   int selectedBrandId = -1;
   int selectedCategoryId = -1;
+  // Track original brand and category for updates
+  int originalBrandId = -1;
+  int originalCategoryId = -1;
+
   GlobalKey<FormState> productDetail = GlobalKey<FormState>();
   var variantForm = GlobalKey<FormState>();
 
@@ -129,6 +133,8 @@ class ProductController extends GetxController {
       brandName.clear();
       selectedBrandId = -1;
       selectedCategoryId = -1;
+      originalBrandId = -1;
+      originalCategoryId = -1;
       selectedCategoryNameController.clear();
       selectedBrandNameController.clear();
       hasSerialNumbers.value = false;
@@ -214,6 +220,18 @@ class ProductController extends GetxController {
       productId.value = newProductId;
       debugPrint('Product ID set in controller: ${productId.value}');
 
+      // Increment product count in brand and category
+      final BrandController brandController = Get.find<BrandController>();
+      final CategoryController categoryController =
+          Get.find<CategoryController>();
+
+      brandController.incrementProductCount(selectedBrandId);
+      categoryController.incrementProductCount(selectedCategoryId);
+
+      // Save the original values for potential future updates
+      originalBrandId = selectedBrandId;
+      originalCategoryId = selectedCategoryId;
+
       // Save the image (wrapped in try-catch to continue even if image upload fails)
       try {
         await mediaController.imageAssigner(newProductId,
@@ -291,6 +309,31 @@ class ProductController extends GetxController {
       await productRepository.updateProduct(json);
       debugPrint('Product update database call completed');
 
+      // Handle brand and category count updates if they changed
+      final BrandController brandController = Get.find<BrandController>();
+      final CategoryController categoryController =
+          Get.find<CategoryController>();
+
+      // Update brand count if brand changed
+      if (selectedBrandId != originalBrandId && originalBrandId > 0) {
+        // Decrement old brand count
+        brandController.decrementProductCount(originalBrandId);
+        // Increment new brand count
+        brandController.incrementProductCount(selectedBrandId);
+      }
+
+      // Update category count if category changed
+      if (selectedCategoryId != originalCategoryId && originalCategoryId > 0) {
+        // Decrement old category count
+        categoryController.decrementProductCount(originalCategoryId);
+        // Increment new category count
+        categoryController.incrementProductCount(selectedCategoryId);
+      }
+
+      // Update original values for future updates
+      originalBrandId = selectedBrandId;
+      originalCategoryId = selectedCategoryId;
+
       // Update the image
       try {
         await mediaController.imageAssigner(productId.value,
@@ -352,6 +395,11 @@ class ProductController extends GetxController {
       alertStock.text = product.alertStock.toString();
       selectedBrandId = product.brandID ?? -1;
       selectedCategoryId = product.categoryId ?? -1;
+
+      // Store original values for detecting changes on update
+      originalBrandId = product.brandID ?? -1;
+      originalCategoryId = product.categoryId ?? -1;
+
       selectedBrandNameController.text = brandController.allBrands
               .firstWhere((brand) => brand.brandID == product.brandID)
               .bname ??
@@ -455,7 +503,7 @@ class ProductController extends GetxController {
   }
 
   // Add a variant to a product
-  Future<void> addVariant  () async {
+  Future<void> addVariant() async {
     try {
       debugPrint('AddVariant called - starting process');
       // Prevent multiple simultaneous add operations

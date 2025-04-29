@@ -149,7 +149,7 @@ class BrandInfo extends StatelessWidget {
                         brandController.updateBrand(brandModel.brandID!);
                       }
 
-                      Navigator.of(context).pop();
+                      
                     },
                     child: (brandController.isUpdating.value) ? const CircularProgressIndicator(color: TColors.white,) :Text( (brandModel.brandID == null) ?
                       'Save': 'Update',

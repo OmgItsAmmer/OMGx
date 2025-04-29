@@ -148,7 +148,7 @@ class CategoryInfo extends StatelessWidget {
                         categoryController.updateCategory(categoryModel.categoryId!);
                       }
 
-                      Navigator.of(context).pop();
+                      
                     },
                     child: (categoryController.isUpdating.value)
                         ? const CircularProgressIndicator(color: TColors.white)

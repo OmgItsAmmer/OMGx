@@ -48,14 +48,14 @@ class CustomerThumbnailInfo extends StatelessWidget {
                               ),
                               builder: (context, snapshot) {
                                 if (snapshot.connectionState == ConnectionState.waiting) {
-                                  return const TShimmerEffect(width: 80, height: 80);
+                                  return const TShimmerEffect(width: 150, height: 150);
                                 } else if (snapshot.hasError || snapshot.data == null) {
                                   return const Icon(Icons.error);
                                 } else {
                                   return TRoundedImage(
                                     isNetworkImage: true,
-                                    width: 80,
-                                    height: 80,
+                                    width: 150,
+                                    height: 150,
                                     imageurl: snapshot.data!,
                                   );
                                 }
@@ -68,18 +68,18 @@ class CustomerThumbnailInfo extends StatelessWidget {
 
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const TShimmerEffect(width: 80, height: 80); // Show shimmer while loading
+                            return const TShimmerEffect(width: 150, height: 150); // Show shimmer while loading
                           } else if (snapshot.hasError) {
                             return const Text('Error loading image'); // Handle error case
                           } else if (snapshot.hasData && snapshot.data != null) {
                             return TRoundedImage(
                               isNetworkImage: true,
-                              width: 80,
-                              height: 80,
+                              width: 150,
+                              height: 150,
                               imageurl: snapshot.data!,
                             );
                           } else {
-                            return const TCircularIcon(icon: Iconsax.image,width: 80,height: 80,backgroundColor: TColors.primaryBackground,); // Handle case where no image is available
+                            return const TCircularIcon(icon: Iconsax.image,width: 150,height: 150,backgroundColor: TColors.primaryBackground,); // Handle case where no image is available
 // Handle case where no image is available
                           }
                         },

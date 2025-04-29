@@ -26,8 +26,49 @@ class _ProductBrandcCategoryState extends State<ProductBrandcCategory> {
   final FocusNode categoryFocusNode = FocusNode();
   final FocusNode brandFocusNode = FocusNode();
 
+  // Access controllers
+  final BrandController brandController = Get.find<BrandController>();
+  final ProductController productController = Get.find<ProductController>();
+  final CategoryController categoryController = Get.find<CategoryController>();
+
+  @override
+  void initState() {
+    super.initState();
+    // Refresh data when widget initializes
+    _refreshData();
+
+    // Set up focus node listeners to refresh data when dropdown is focused
+    categoryFocusNode.addListener(_onCategoryFocusChange);
+    brandFocusNode.addListener(_onBrandFocusChange);
+  }
+
+  void _refreshData() {
+    // Refresh both lists to ensure we have the latest data
+    brandController.fetchBrands();
+    categoryController.fetchCategories();
+  }
+
+  void _onCategoryFocusChange() {
+    if (categoryFocusNode.hasFocus) {
+      // Refresh categories when dropdown is focused
+      categoryController.fetchCategories();
+    }
+  }
+
+  void _onBrandFocusChange() {
+    if (brandFocusNode.hasFocus) {
+      // Refresh brands when dropdown is focused
+      brandController.fetchBrands();
+    }
+  }
+
   @override
   void dispose() {
+    // Clean up focus node listeners
+    categoryFocusNode.removeListener(_onCategoryFocusChange);
+    brandFocusNode.removeListener(_onBrandFocusChange);
+
+    // Dispose focus nodes
     categoryFocusNode.dispose();
     brandFocusNode.dispose();
     super.dispose();
@@ -35,11 +76,6 @@ class _ProductBrandcCategoryState extends State<ProductBrandcCategory> {
 
   @override
   Widget build(BuildContext context) {
-    final BrandController brandController = Get.find<BrandController>();
-    final ProductController productController = Get.find<ProductController>();
-    final CategoryController categoryController =
-        Get.find<CategoryController>();
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -59,9 +95,12 @@ class _ProductBrandcCategoryState extends State<ProductBrandcCategory> {
                     icon: Icons.add,
                     backgroundColor: TColors.primary,
                     color: TColors.white,
-                    onPressed: () {
-                      Get.toNamed(TRoutes.categoryDetails,
+                    onPressed: () async {
+                      // Navigate to category creation screen
+                      await Get.toNamed(TRoutes.categoryDetails,
                           arguments: CategoryModel.empty());
+                      // Refresh categories after returning
+                      categoryController.fetchCategories();
                     },
                   ),
                 ],
@@ -71,26 +110,29 @@ class _ProductBrandcCategoryState extends State<ProductBrandcCategory> {
               ),
               Focus(
                 focusNode: categoryFocusNode,
-                child: EnhancedAutocomplete<String>(
-                  labelText: 'Select Category',
-                  hintText: 'Choose a category',
-                  options: categoryController.allCategories
-                      .map((e) => e.categoryName)
-                      .whereType<String>()
-                      .toList(),
-                  externalController:
-                      productController.selectedCategoryNameController,
-                  displayStringForOption: (String option) => option,
-                  onSelected: (val) async {
-                    productController.selectedCategoryNameController.text = val;
-                    productController.selectedCategoryId =
-                        await categoryController.fetchCategoryId(val);
-                  },
-                  onManualTextEntry: (String text) {
-                    if (text.isEmpty) {
-                      resetCategorySelection();
-                    }
-                  },
+                child: Obx(
+                  () => EnhancedAutocomplete<String>(
+                    labelText: 'Select Category',
+                    hintText: 'Choose a category',
+                    options: categoryController.allCategories
+                        .map((e) => e.categoryName)
+                        .whereType<String>()
+                        .toList(),
+                    externalController:
+                        productController.selectedCategoryNameController,
+                    displayStringForOption: (String option) => option,
+                    onSelected: (val) async {
+                      productController.selectedCategoryNameController.text =
+                          val;
+                      productController.selectedCategoryId =
+                          await categoryController.fetchCategoryId(val);
+                    },
+                    onManualTextEntry: (String text) {
+                      if (text.isEmpty) {
+                        resetCategorySelection();
+                      }
+                    },
+                  ),
                 ),
               ),
             ],
@@ -117,9 +159,12 @@ class _ProductBrandcCategoryState extends State<ProductBrandcCategory> {
                     icon: Icons.add,
                     backgroundColor: TColors.primary,
                     color: TColors.white,
-                    onPressed: () {
-                      Get.toNamed(TRoutes.brandDetails,
+                    onPressed: () async {
+                      // Navigate to brand creation screen
+                      await Get.toNamed(TRoutes.brandDetails,
                           arguments: BrandModel.empty());
+                      // Refresh brands after returning
+                      brandController.fetchBrands();
                     },
                   ),
                 ],
@@ -129,26 +174,28 @@ class _ProductBrandcCategoryState extends State<ProductBrandcCategory> {
               ),
               Focus(
                 focusNode: brandFocusNode,
-                child: EnhancedAutocomplete<String>(
-                  labelText: 'Select Brand',
-                  hintText: 'Choose a brand',
-                  options: brandController.allBrands
-                      .map((e) => e.bname)
-                      .whereType<String>()
-                      .toList(),
-                  externalController:
-                      productController.selectedBrandNameController,
-                  displayStringForOption: (String option) => option,
-                  onSelected: (val) async {
-                    productController.selectedBrandId =
-                        await brandController.fetchBrandId(val);
-                  },
-                  onManualTextEntry: (String text) {
-                    if (text.isEmpty) {
-                      productController.selectedBrandId = -1;
-                      productController.selectedBrandNameController.clear();
-                    }
-                  },
+                child: Obx(
+                  () => EnhancedAutocomplete<String>(
+                    labelText: 'Select Brand',
+                    hintText: 'Choose a brand',
+                    options: brandController.allBrands
+                        .map((e) => e.bname)
+                        .whereType<String>()
+                        .toList(),
+                    externalController:
+                        productController.selectedBrandNameController,
+                    displayStringForOption: (String option) => option,
+                    onSelected: (val) async {
+                      productController.selectedBrandId =
+                          await brandController.fetchBrandId(val);
+                    },
+                    onManualTextEntry: (String text) {
+                      if (text.isEmpty) {
+                        productController.selectedBrandId = -1;
+                        productController.selectedBrandNameController.clear();
+                      }
+                    },
+                  ),
                 ),
               ),
             ],

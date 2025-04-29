@@ -80,6 +80,7 @@ class SalesmanController extends GetxController {
   void setSalesmanDetail(SalesmanModel salesman) {
     try {
       salesmanId.value = salesman.salesmanId!;
+      entityId.value = salesman.salesmanId!;
       firstName.text = salesman.firstName;
       lastName.text = salesman.lastName;
       email.text = salesman.email;

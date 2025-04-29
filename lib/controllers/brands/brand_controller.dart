@@ -13,8 +13,6 @@ class BrandController extends GetxController {
   final BrandRepository brandRepository = Get.put(BrandRepository());
   final MediaController mediaController = Get.find<MediaController>();
 
-
-
 // List of brands (observable)
   RxList<BrandModel> allBrands = <BrandModel>[].obs;
   // RxList<String> brandNames = <String>[].obs;
@@ -26,14 +24,10 @@ class BrandController extends GetxController {
 
   RxBool isUpdating = false.obs;
 
-
-
   //Brand Details
   final TextEditingController brandName = TextEditingController();
   final TextEditingController productCount = TextEditingController();
-  GlobalKey<FormState> brandDetail =
-  GlobalKey<FormState>();
-
+  GlobalKey<FormState> brandDetail = GlobalKey<FormState>();
 
   @override
   void onInit() {
@@ -41,48 +35,22 @@ class BrandController extends GetxController {
     super.onInit();
   }
 
-  // Future<void> saveOrUpdate(int brandId) async {
-  //   try {
-  //     final MediaController mediaController = Get.find<MediaController>();
-  //
-  //
-  //     // Validate the form
-  //     if (!brandDetail.currentState!.validate()) {
-  //       TLoader.errorSnackBar(
-  //         title: "Empty Fields",
-  //         message: 'Kindly fill all the fields before proceeding.',
-  //       );
-  //       return;
-  //     }
-  //
-  //     final brandModel = BrandModel(
-  //       brandID: brandId,
-  //       bname: brandName.text.trim(),
-  //     );
-  //
-  //     await mediaController.imageAssigner(
-  //         brandId, MediaCategory.brands.toString().split('.').last, true);
-  //
-  //     final json = brandModel.toJson();
-  //     await brandRepository.saveOrUpdateBrandRepo(json); // 🔁 Make sure this is awaited
-  //
-  //     // 👇 Update or add in the local list
-  //     final index = allBrands.indexWhere((b) => b.brandID == brandId);
-  //     if (index != -1) {
-  //      allBrands[index] = brandModel; // Update existing
-  //     } else {
-  //       allBrands.add(brandModel); // Add new
-  //     }
-  //
-  //     cleanBrandDetail();
-  //     TLoader.successSnackBar(title: 'Brand Uploaded!');
-  //   } catch (e) {
-  //     if (kDebugMode) {
-  //       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
-  //       print(e);
-  //     }
-  //   }
-  // }
+  // Method to check if a brand name already exists
+  bool _brandNameExists(String name, {int? excludeBrandId}) {
+    final trimmedName = name.trim().toLowerCase();
+
+    return allBrands.any((brand) {
+      // Skip the current brand when updating
+      if (excludeBrandId != null && brand.brandID == excludeBrandId) {
+        return false;
+      }
+
+      // Compare names case insensitive after trimming
+      final existingName = brand.bname?.trim().toLowerCase() ?? '';
+      return existingName == trimmedName;
+    });
+  }
+
   Future<void> insertBrand() async {
     try {
       isUpdating.value = true;
@@ -96,11 +64,21 @@ class BrandController extends GetxController {
         return;
       }
 
+      // Check for duplicate brand name
+      final brandNameText = brandName.text.trim();
+      if (_brandNameExists(brandNameText)) {
+        TLoader.errorSnackBar(
+          title: "Duplicate Brand",
+          message: 'A brand with the name "$brandNameText" already exists.',
+        );
+        return;
+      }
+
       // Build the brand model
       final brandModel = BrandModel(
         brandID: null,
-        bname: brandName.text,
-
+        bname: brandNameText,
+        productsCount: 0, // Initialize with zero products
         // Add other fields if your BrandModel has more
       );
 
@@ -113,12 +91,12 @@ class BrandController extends GetxController {
       await mediaController.imageAssigner(
           brandId, MediaCategory.brands.toString().split('.').last, true);
 
-      // Optionally add address logic if brands also have it (not usually needed)
-      // await AddressController.instance.saveAddress(brandId, 'Brand');
-
-      // Add to local list
+      // Add to local list with the ID assigned
       brandModel.brandID = brandId;
       allBrands.add(brandModel);
+
+      // Force UI update
+      update();
 
       // Clear input fields
       cleanBrandDetail();
@@ -127,6 +105,7 @@ class BrandController extends GetxController {
         title: 'Brand Added!',
         message: '${brandName.text} added to Database',
       );
+      Navigator.of(Get.context!).pop();
     } catch (e) {
       TLoader.errorSnackBar(
         title: "Error",
@@ -136,7 +115,6 @@ class BrandController extends GetxController {
       isUpdating.value = false;
     }
   }
-
 
   Future<void> updateBrand(int brandId) async {
     try {
@@ -151,12 +129,31 @@ class BrandController extends GetxController {
         return;
       }
 
-      // Create brand model
+      // Check for duplicate brand name (excluding the current brand being edited)
+      final brandNameText = brandName.text.trim();
+      if (_brandNameExists(brandNameText, excludeBrandId: brandId)) {
+        TLoader.errorSnackBar(
+          title: "Duplicate Brand",
+          message: 'A brand with the name "$brandNameText" already exists.',
+        );
+        return;
+      }
+
+      // Find existing brand to preserve counts
+      final existingBrand = allBrands.firstWhere(
+        (brand) => brand.brandID == brandId,
+        orElse: () => BrandModel.empty(),
+      );
+
+      final existingProductCount = existingBrand.productsCount ?? 0;
+
+      // Create brand model with preserved counts
       final brandModel = BrandModel(
         brandID: brandId,
-        bname: brandName.text,
-
-        // Add other fields if any
+        bname: brandNameText,
+        productsCount: existingProductCount,
+        isVerified: existingBrand.isVerified,
+        isFeatured: existingBrand.isFeatured,
       );
 
       final json = brandModel.toJson(isUpdate: false); // keep ID for update
@@ -171,16 +168,25 @@ class BrandController extends GetxController {
         true,
       );
 
-      // Update locally if needed
-      brandModel.brandID = brandId;
+      // Update locally
+      final index = allBrands.indexWhere((b) => b.brandID == brandId);
+      if (index != -1) {
+        allBrands[index] = brandModel;
+      } else {
+        allBrands.add(brandModel);
+      }
+
+      // Force UI update
+      update();
 
       // Clear form
       cleanBrandDetail();
 
       TLoader.successSnackBar(
         title: 'Brand Updated!',
-        message: '${brandName.text} updated in Database',
+        message: '${brandNameText} updated in Database',
       );
+      Navigator.of(Get.context!).pop();
     } catch (e) {
       TLoader.errorSnackBar(
         title: "Error",
@@ -191,15 +197,11 @@ class BrandController extends GetxController {
     }
   }
 
-
   Future<void> deleteBrand(int brandId) async {
     try {
-      // Call the repository function to delete from the database
-      await brandRepository.deleteBrandFromTable(brandId);
-
       // Find the brand in allBrands to get the name
       final brandToRemove = allBrands.firstWhere(
-            (brand) => brand.brandID == brandId,
+        (brand) => brand.brandID == brandId,
         orElse: () => BrandModel.empty(), // Default to avoid error
       );
 
@@ -207,9 +209,22 @@ class BrandController extends GetxController {
         throw Exception("Brand not found in the list");
       }
 
-      // Remove brand from lists
+      // Store name for success message
+      final brandName = brandToRemove.bname;
+
+      // Call the repository function to delete from the database
+      await brandRepository.deleteBrandFromTable(brandId);
+
+      // Remove brand from local list
       allBrands.removeWhere((brand) => brand.brandID == brandId);
 
+      // Force UI update
+      update();
+
+      // Show success message
+      TLoader.successSnackBar(
+          title: "Success",
+          message: "${brandName ?? 'Brand'} deleted successfully");
     } catch (e) {
       if (kDebugMode) {
         print("Error deleting brand: $e");
@@ -218,65 +233,15 @@ class BrandController extends GetxController {
     }
   }
 
-
-
-  // Future<void> insertBrand() async {
-  //   try {
-  //     final MediaController mediaController = Get.find<MediaController>();
-  //
-  //
-  //     // Validate the form
-  //     if (!brandDetail.currentState!.validate()) {
-  //       TLoader.errorSnackBar(
-  //         title: "Empty Fields",
-  //         message: 'Kindly fill all the fields before proceeding.',
-  //       );
-  //       return;
-  //     }
-  //
-  //     final brandModel = BrandModel(
-  //       brandID: null,
-  //       bname: brandName.text.trim(),
-  //     );
-  //
-  //     await mediaController.imageAssigner(
-  //         , MediaCategory.brands.toString().split('.').last, true);
-  //
-  //     final json = brandModel.toJson(isUpdate: true);
-  //     await brandRepository.saveOrUpdateBrandRepo(json); // 🔁 Make sure this is awaited
-  //
-  //     // 👇 Update or add in the local list
-  //     final index = allBrands.indexWhere((b) => b.brandID == brandId);
-  //     if (index != -1) {
-  //       allBrands[index] = brandModel; // Update existing
-  //     } else {
-  //       allBrands.add(brandModel); // Add new
-  //     }
-  //
-  //     cleanBrandDetail();
-  //     TLoader.successSnackBar(title: 'Brand Uploaded!');
-  //   } catch (e) {
-  //     if (kDebugMode) {
-  //       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
-  //       print(e);
-  //     }
-  //   }
-  // }
-
   void setBrandDetail(BrandModel brand) {
     try {
       selectedBrand.value = brand;
       brandName.text = brand.bname ?? ' ';
       productCount.text = brand.productsCount.toString();
-
-
-
-
     } catch (e) {
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
   }
-
 
   void cleanBrandDetail() {
     try {
@@ -288,21 +253,18 @@ class BrandController extends GetxController {
     }
   }
 
-
-
   Future<void> fetchBrands() async {
     try {
       final brands = await brandRepository.fetchBrands();
       allBrands.assignAll(brands);
 
-  //Brand names
+      // Force UI update
+      update();
+
+      //Brand names
       final names = allBrands
           .map((brand) => brand.bname ?? '') // Replace null with empty string
           .toList();
-
-
-
-
     } catch (e) {
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
 
@@ -326,12 +288,76 @@ class BrandController extends GetxController {
     }
   }
 
+  // Methods to update product count for brands
+  void incrementProductCount(int brandId) async {
+    try {
+      // Find the brand in our list
+      final index = allBrands.indexWhere((brand) => brand.brandID == brandId);
+      if (index != -1) {
+        // Update the local model
+        final brand = allBrands[index];
+        final currentCount = brand.productsCount ?? 0;
+        final newCount = currentCount + 1;
 
-// Add a new brand
-// void addBrand(String newBrand) {
-//   if (newBrand.trim().isNotEmpty && !brands.contains(newBrand.trim())) {
-//     brands.add(newBrand.trim()); // Add the new brand
-//     selectedBrand.value = newBrand.trim(); // Select the new brand
-//   }
-// }
+        // Create a new brand model with updated count
+        final updatedBrand = BrandModel(
+          brandID: brand.brandID,
+          bname: brand.bname,
+          isVerified: brand.isVerified,
+          isFeatured: brand.isFeatured,
+          productsCount: newCount,
+        );
+
+        // Update in local list
+        allBrands[index] = updatedBrand;
+
+        // Update the database
+        await brandRepository.updateBrandProductCount(brandId, newCount);
+
+        // Force UI update to reflect changes immediately
+        update();
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error incrementing brand product count: $e");
+      }
+    }
+  }
+
+  void decrementProductCount(int brandId) async {
+    try {
+      // Find the brand in our list
+      final index = allBrands.indexWhere((brand) => brand.brandID == brandId);
+      if (index != -1) {
+        // Update the local model
+        final brand = allBrands[index];
+        final currentCount = brand.productsCount ?? 0;
+        if (currentCount <= 0) return; // Prevent negative counts
+
+        final newCount = currentCount - 1;
+
+        // Create a new brand model with updated count
+        final updatedBrand = BrandModel(
+          brandID: brand.brandID,
+          bname: brand.bname,
+          isVerified: brand.isVerified,
+          isFeatured: brand.isFeatured,
+          productsCount: newCount,
+        );
+
+        // Update in local list
+        allBrands[index] = updatedBrand;
+
+        // Update the database
+        await brandRepository.updateBrandProductCount(brandId, newCount);
+
+        // Force UI update to reflect changes immediately
+        update();
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error decrementing brand product count: $e");
+      }
+    }
+  }
 }

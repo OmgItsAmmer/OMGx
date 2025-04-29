@@ -12,6 +12,7 @@ class AddCustomerScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final customerModel = Get.arguments;
     return TSiteTemplate(
+      useLayout: false,
       desktop: AddCustomerDesktop(customerModel: customerModel),
       tablet: AddCustomerTablet(customerModel: customerModel),
       mobile: AddCustomerMobile(customerModel: customerModel),
