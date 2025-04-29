@@ -22,7 +22,8 @@ class CategoryInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final CategoryController categoryController = Get.find<CategoryController>();
+    final CategoryController categoryController =
+        Get.find<CategoryController>();
     final MediaController mediaController = Get.find<MediaController>();
 
     final bool isMobile = TDeviceUtils.isMobileScreen(context);
@@ -100,8 +101,12 @@ class CategoryInfo extends StatelessWidget {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const TShimmerEffect(width: 80, height: 80);
                     } else if (snapshot.hasError || snapshot.data == null) {
-                      return const TCircularIcon(icon: Iconsax.image,width: 80,height: 80,backgroundColor: TColors.primaryBackground,); // Handle case where no image is available
-
+                      return const TCircularIcon(
+                        icon: Iconsax.image,
+                        width: 80,
+                        height: 80,
+                        backgroundColor: TColors.primaryBackground,
+                      ); // Handle case where no image is available
                     } else {
                       return TRoundedImage(
                         isNetworkImage: true,
@@ -113,7 +118,6 @@ class CategoryInfo extends StatelessWidget {
                   },
                 );
               }),
-
 
               // Camera Icon
               TRoundedContainer(
@@ -140,28 +144,50 @@ class CategoryInfo extends StatelessWidget {
             children: [
               Expanded(
                 child: Obx(
-              () => ElevatedButton(
+                  () => ElevatedButton(
                     onPressed: () {
                       if (categoryModel.categoryId == null) {
                         categoryController.insertCategory();
                       } else {
-                        categoryController.updateCategory(categoryModel.categoryId!);
+                        categoryController
+                            .updateCategory(categoryModel.categoryId!);
                       }
-
-                      
                     },
                     child: (categoryController.isUpdating.value)
                         ? const CircularProgressIndicator(color: TColors.white)
                         : Text(
-                      (categoryModel.categoryId == null) ? 'Save' : 'Update',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium!
-                          .apply(color: TColors.white),
-                    ),
+                            (categoryModel.categoryId == null)
+                                ? 'Save'
+                                : 'Update',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .apply(color: TColors.white),
+                          ),
                   ),
                 ),
+              ),
+            ],
+          ),
 
+          // Discard button
+          const SizedBox(height: TSizes.spaceBtwItems),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => categoryController.discardChanges(),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: TColors.error),
+                  ),
+                  child: Text(
+                    'Discard',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium!
+                        .apply(color: TColors.error),
+                  ),
+                ),
               ),
             ],
           ),

@@ -92,15 +92,19 @@ class BrandInfo extends StatelessWidget {
                 // Fallback to future-based image if no image is selected
                 return FutureBuilder<String?>(
                   future: mediaController.fetchMainImage(
-                    brandController.selectedBrand.value.brandID ?? -1 ,
+                    brandController.selectedBrand.value.brandID ?? -1,
                     MediaCategory.brands.toString().split('.').last,
                   ),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const TShimmerEffect(width: 80, height: 80);
                     } else if (snapshot.hasError || snapshot.data == null) {
-                      return const TCircularIcon(icon: Iconsax.image,width: 80,height: 80,backgroundColor: TColors.primaryBackground,); // Handle case where no image is available
-
+                      return const TCircularIcon(
+                        icon: Iconsax.image,
+                        width: 80,
+                        height: 80,
+                        backgroundColor: TColors.primaryBackground,
+                      ); // Handle case where no image is available
                     } else {
                       return TRoundedImage(
                         isNetworkImage: true,
@@ -112,7 +116,6 @@ class BrandInfo extends StatelessWidget {
                   },
                 );
               }),
-
 
               // Camera Icon
               TRoundedContainer(
@@ -139,25 +142,47 @@ class BrandInfo extends StatelessWidget {
             children: [
               Expanded(
                 child: Obx(
-              () => ElevatedButton(
+                  () => ElevatedButton(
                     onPressed: () {
-
-                      if(brandModel.brandID == null){
+                      if (brandModel.brandID == null) {
                         brandController.insertBrand();
-                      }
-                      else {
+                      } else {
                         brandController.updateBrand(brandModel.brandID!);
                       }
-
-                      
                     },
-                    child: (brandController.isUpdating.value) ? const CircularProgressIndicator(color: TColors.white,) :Text( (brandModel.brandID == null) ?
-                      'Save': 'Update',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium!
-                          .apply(color: TColors.white),
-                    ),
+                    child: (brandController.isUpdating.value)
+                        ? const CircularProgressIndicator(
+                            color: TColors.white,
+                          )
+                        : Text(
+                            (brandModel.brandID == null) ? 'Save' : 'Update',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .apply(color: TColors.white),
+                          ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          // Discard button
+          const SizedBox(height: TSizes.spaceBtwItems),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => brandController.discardChanges(),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: TColors.error),
+                  ),
+                  child: Text(
+                    'Discard',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium!
+                        .apply(color: TColors.error),
                   ),
                 ),
               ),

@@ -38,7 +38,8 @@ class OrderInfo extends StatelessWidget {
                   children: [
                     const Text('Date'),
                     Text(
-                      DateFormat('dd-MM-yyyy').format(DateTime.parse(orderModel.orderDate)),
+                      DateFormat('dd-MM-yyyy')
+                          .format(DateTime.parse(orderModel.orderDate)),
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                   ],
@@ -67,11 +68,12 @@ class OrderInfo extends StatelessWidget {
                         vertical: 0,
                         horizontal: TSizes.sm,
                       ),
-                      backgroundColor: THelperFunctions
-                          .getOrderStatusColor(orderController.selectedStatus.value)
-                          .withValues(alpha: 0.1), // FIXED: Used selectedStatus.value
+                      backgroundColor: THelperFunctions.getOrderStatusColor(
+                              orderController.selectedStatus.value)
+                          .withValues(
+                              alpha: 0.1), // FIXED: Used selectedStatus.value
                       child: Obx(
-                            () => DropdownButton<OrderStatus>(
+                        () => DropdownButton<OrderStatus>(
                           padding: const EdgeInsets.symmetric(vertical: 0),
                           value: orderController.selectedStatus.value,
                           items: OrderStatus.values.map((OrderStatus status) {
@@ -80,34 +82,62 @@ class OrderInfo extends StatelessWidget {
                               child: Text(
                                 status.name.capitalize.toString(),
                                 style: TextStyle(
-                                  color: THelperFunctions.getOrderStatusColor(status), // FIXED: Use correct status color
+                                  color: THelperFunctions.getOrderStatusColor(
+                                      status), // FIXED: Use correct status color
                                 ),
                               ),
                             );
                           }).toList(),
-                                onChanged: (OrderStatus? newValue) async {
-                                  if (newValue != null) {
-                                    final updatedStatus = await orderController.updateStatus(
-                                      orderModel.orderId,
-                                      newValue.toString().split('.').last,
-                                    );
+                          onChanged: (OrderStatus? newValue) async {
+                            if (newValue != null) {
+                              try {
+                                // Get the new status string (e.g., "pending", "cancelled")
+                                final newStatusString =
+                                    newValue.toString().split('.').last;
 
-                                    final orderStatusString = 'OrderStatus.$updatedStatus';
-                                    final OrderStatus? status = orderController.stringToOrderStatus(orderStatusString);
+                                // Update the status in the database and get confirmation back
+                                final updatedStatus =
+                                    await orderController.updateStatus(
+                                  orderModel.orderId,
+                                  newStatusString,
+                                );
 
-                                    if (status != null) {
-                                      orderController.selectedStatus.value = status;
+                                // If we got a valid status back, update the UI
+                                if (updatedStatus.isNotEmpty) {
+                                  // Convert string to enum and update UI dropdown
+                                  final updatedOrderStatus =
+                                      OrderStatus.values.firstWhere(
+                                    (status) =>
+                                        status.toString().split('.').last ==
+                                        updatedStatus,
+                                    orElse: () =>
+                                        orderController.selectedStatus.value,
+                                  );
 
-                                      if (orderModel.status == 'cancelled' && status != OrderStatus.cancelled) {
-                                        orderController.addBackQuantity(orderModel.orderItems);
-                                      } else if (status == OrderStatus.cancelled) {
-                                        orderController.restoreQuantity(orderModel.orderItems);
-                                      }
-                                    } else {
-                                      TLoader.errorSnackBar(title: 'Error', message: 'Invalid status: $updatedStatus');
-                                    }
-                                  }
-                                },
+                                  // Update the controller status
+                                  orderController.selectedStatus.value =
+                                      updatedOrderStatus;
+                                }
+                              } catch (e) {
+                                TLoader.errorSnackBar(
+                                    title: 'Status Update Failed',
+                                    message:
+                                        'Could not update order status: ${e.toString()}');
+
+                                // Revert dropdown to previous value if there was an error
+                                final revertStatus =
+                                    OrderStatus.values.firstWhere(
+                                  (status) =>
+                                      status.toString().split('.').last ==
+                                      orderModel.status,
+                                  orElse: () =>
+                                      orderController.selectedStatus.value,
+                                );
+                                orderController.selectedStatus.value =
+                                    revertStatus;
+                              }
+                            }
+                          },
                         ),
                       ),
                     ),

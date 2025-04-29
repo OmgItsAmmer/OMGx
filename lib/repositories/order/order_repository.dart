@@ -7,7 +7,9 @@ import '../../../main.dart';
 
 import '../../Models/orders/order_item_model.dart';
 import '../../Models/salesman/salesman_model.dart';
+import '../../Models/products/product_model.dart';
 import '../../controllers/product/product_controller.dart';
+import '../../repositories/products/product_variants_repository.dart';
 
 class OrderRepository extends GetxController {
   static OrderRepository get instance => Get.find();
@@ -137,38 +139,28 @@ class OrderRepository extends GetxController {
 
   Future<void> restoreQuantity(OrderItemModel item) async {
     try {
-      // Step 1: Fetch the current stock quantity
-      final response = await supabase
-          .from('products')
-          .select('stock_quantity')
-          .eq('product_id', item.productId)
-          .single(); // Ensures we get a single row
+      // Fetch the product to determine if it has serial numbers
+      final productController = Get.find<ProductController>();
+      final product = productController.allProducts.firstWhere(
+          (p) => p.productId == item.productId,
+          orElse: () => ProductModel.empty());
 
-      // Directly access the stock quantity from the response
-      final int currentStock = response['stock_quantity'] as int;
-      final int newStock = currentStock + item.quantity;
-
-      // Step 2: Update the stock quantity
-      final updateResponse = await supabase.from('products').update(
-          {'stock_quantity': newStock}).eq('product_id', item.productId);
-
-      if (updateResponse.error != null) {
-        TLoader.errorSnackBar(
-            title: 'Restore Quantity Error',
-            message: updateResponse.error!.message);
-      } else {
-        TLoader.successSnackBar(
-            title: 'Success', message: 'Quantity restored successfully');
+      if (product.hasSerialNumbers && item.variantId != null) {
+        // For serialized products, update the variant's sold status
+        final variantsRepository = Get.find<ProductVariantsRepository>();
+        await variantsRepository.markVariantAsAvailable(item.variantId!);
 
         // Update local product list in ProductController
         try {
-          final productController = Get.find<ProductController>();
           final productIndex = productController.allProducts
               .indexWhere((p) => p.productId == item.productId);
           if (productIndex != -1) {
-            final currentProduct = productController.allProducts[productIndex];
-            final updatedProduct = currentProduct.copyWith(
-              stockQuantity: currentProduct.stockQuantity! + item.quantity,
+            // Get updated count of available variants
+            final availableCount =
+                await variantsRepository.countAvailableVariants(item.productId);
+            final updatedProduct =
+                productController.allProducts[productIndex].copyWith(
+              stockQuantity: availableCount,
             );
             productController.allProducts[productIndex] = updatedProduct;
             productController.update();
@@ -176,6 +168,47 @@ class OrderRepository extends GetxController {
         } catch (e) {
           if (kDebugMode) {
             print('Failed to update local product list: $e');
+          }
+        }
+      } else {
+        // For regular products, update the quantity in the database
+        // Step 1: Fetch the current stock quantity
+        final response = await supabase
+            .from('products')
+            .select('stock_quantity')
+            .eq('product_id', item.productId)
+            .single(); // Ensures we get a single row
+
+        // Directly access the stock quantity from the response
+        final int currentStock = response['stock_quantity'] as int;
+        final int newStock = currentStock + item.quantity;
+
+        // Step 2: Update the stock quantity
+        final updateResponse = await supabase.from('products').update(
+            {'stock_quantity': newStock}).eq('product_id', item.productId);
+
+        if (updateResponse.error != null) {
+          TLoader.errorSnackBar(
+              title: 'Restore Quantity Error',
+              message: updateResponse.error!.message);
+        } else {
+          // Update local product list in ProductController
+          try {
+            final productIndex = productController.allProducts
+                .indexWhere((p) => p.productId == item.productId);
+            if (productIndex != -1) {
+              final currentProduct =
+                  productController.allProducts[productIndex];
+              final updatedProduct = currentProduct.copyWith(
+                stockQuantity: currentProduct.stockQuantity! + item.quantity,
+              );
+              productController.allProducts[productIndex] = updatedProduct;
+              productController.update();
+            }
+          } catch (e) {
+            if (kDebugMode) {
+              print('Failed to update local product list: $e');
+            }
           }
         }
       }
@@ -187,35 +220,28 @@ class OrderRepository extends GetxController {
 
   Future<void> subtractQuantity(OrderItemModel item) async {
     try {
-      // Step 1: Fetch the current stock quantity
-      final response = await supabase
-          .from('products')
-          .select('stock_quantity')
-          .eq('product_id', item.productId)
-          .single(); // Ensures we get a single row
+      // Fetch the product to determine if it has serial numbers
+      final productController = Get.find<ProductController>();
+      final product = productController.allProducts.firstWhere(
+          (p) => p.productId == item.productId,
+          orElse: () => ProductModel.empty());
 
-      // Directly access the stock quantity from the response
-      final int currentStock = response['stock_quantity'] as int;
-      final int newStock = currentStock - item.quantity; // Subtract quantity
+      if (product.hasSerialNumbers && item.variantId != null) {
+        // For serialized products, update the variant's sold status
+        final variantsRepository = Get.find<ProductVariantsRepository>();
+        await variantsRepository.markVariantAsSold(item.variantId!);
 
-      // Step 2: Update the stock quantity
-      final updateResponse = await supabase.from('products').update(
-          {'stock_quantity': newStock}).eq('product_id', item.productId);
-
-      if (updateResponse.error != null) {
-        TLoader.errorSnackBar(
-            title: 'Subtract Quantity Error',
-            message: updateResponse.error!.message);
-      } else {
         // Update local product list in ProductController
         try {
-          final productController = Get.find<ProductController>();
           final productIndex = productController.allProducts
               .indexWhere((p) => p.productId == item.productId);
           if (productIndex != -1) {
-            final currentProduct = productController.allProducts[productIndex];
-            final updatedProduct = currentProduct.copyWith(
-              stockQuantity: currentProduct.stockQuantity! - item.quantity,
+            // Get updated count of available variants
+            final availableCount =
+                await variantsRepository.countAvailableVariants(item.productId);
+            final updatedProduct =
+                productController.allProducts[productIndex].copyWith(
+              stockQuantity: availableCount,
             );
             productController.allProducts[productIndex] = updatedProduct;
             productController.update();
@@ -223,6 +249,47 @@ class OrderRepository extends GetxController {
         } catch (e) {
           if (kDebugMode) {
             print('Failed to update local product list: $e');
+          }
+        }
+      } else {
+        // For regular products, update the quantity in the database
+        // Step 1: Fetch the current stock quantity
+        final response = await supabase
+            .from('products')
+            .select('stock_quantity')
+            .eq('product_id', item.productId)
+            .single(); // Ensures we get a single row
+
+        // Directly access the stock quantity from the response
+        final int currentStock = response['stock_quantity'] as int;
+        final int newStock = currentStock - item.quantity; // Subtract quantity
+
+        // Step 2: Update the stock quantity
+        final updateResponse = await supabase.from('products').update(
+            {'stock_quantity': newStock}).eq('product_id', item.productId);
+
+        if (updateResponse != null && updateResponse.error != null) {
+          TLoader.errorSnackBar(
+              title: 'Subtract Quantity Error',
+              message: updateResponse.error!.message);
+        } else {
+          // Update local product list in ProductController
+          try {
+            final productIndex = productController.allProducts
+                .indexWhere((p) => p.productId == item.productId);
+            if (productIndex != -1) {
+              final currentProduct =
+                  productController.allProducts[productIndex];
+              final updatedProduct = currentProduct.copyWith(
+                stockQuantity: currentProduct.stockQuantity! - item.quantity,
+              );
+              productController.allProducts[productIndex] = updatedProduct;
+              productController.update();
+            }
+          } catch (e) {
+            if (kDebugMode) {
+              print('Failed to update local product list: $e');
+            }
           }
         }
       }

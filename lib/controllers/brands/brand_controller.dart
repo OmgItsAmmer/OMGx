@@ -35,6 +35,22 @@ class BrandController extends GetxController {
     super.onInit();
   }
 
+  // Method to discard changes and navigate back
+  void discardChanges() {
+    // Clear form fields
+    cleanBrandDetail();
+
+    // Navigate back to previous screen
+    if (Get.context != null) {
+      Navigator.of(Get.context!).pop();
+    } else {
+      Get.back(); // Fallback if context is null
+    }
+
+    // Show snackbar to confirm action
+    TLoader.customToast(message: 'Changes discarded');
+  }
+
   // Method to check if a brand name already exists
   bool _brandNameExists(String name, {int? excludeBrandId}) {
     final trimmedName = name.trim().toLowerCase();

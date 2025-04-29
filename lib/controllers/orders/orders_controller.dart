@@ -266,29 +266,51 @@ class OrderController extends GetxController {
     try {
       isStatusLoading.value = true;
 
+      // Validate order exists before updating
+      int index = allOrders.indexWhere((order) => order.orderId == orderId);
+      if (index == -1) {
+        throw Exception('Order not found with ID: $orderId');
+      }
+
+      // Get the original status for comparison
+      final originalStatus = allOrders[index].status;
+
+      // Update status in database
       await orderRepository.updateStatus(orderId, status);
 
       // Update the status in allOrders list
-      int index = allOrders.indexWhere((order) => order.orderId == orderId);
-      if (index != -1) {
-        allOrders[index] = allOrders[index].copyWith(status: status);
-        allOrders.refresh(); // Notify UI about the update
-      }
+      allOrders[index] = allOrders[index].copyWith(status: status);
+      allOrders.refresh(); // Notify UI about the update
 
       // Update dashboard if it's already initialized
       if (Get.isRegistered<DashboardController>()) {
         final dashboardController = Get.find<DashboardController>();
         dashboardController.calculateOrderStatusCounts(allOrders);
-        // dashboardController.fetchCards(
-        //     allOrders, Get.find<ExpenseController>().expenses);
+      }
+
+      // If moving to cancelled and order items exist, handle stock restoration
+      if (status == 'cancelled' && originalStatus != 'cancelled') {
+        // Make sure order items are available
+        if (allOrders[index].orderItems != null &&
+            allOrders[index].orderItems!.isNotEmpty) {
+          await restoreQuantity(allOrders[index].orderItems);
+        }
+      }
+      // If moving from cancelled to another status, handle adding back quantity
+      else if (originalStatus == 'cancelled' && status != 'cancelled') {
+        if (allOrders[index].orderItems != null &&
+            allOrders[index].orderItems!.isNotEmpty) {
+          await addBackQuantity(allOrders[index].orderItems);
+        }
       }
 
       return status;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
       if (kDebugMode) {
-        print(e);
+        print('Error updating order status: $e');
       }
+      TLoader.errorSnackBar(
+          title: 'Status Update Error', message: e.toString());
       return '';
     } finally {
       isStatusLoading.value = false;
@@ -329,31 +351,47 @@ class OrderController extends GetxController {
 
   Future<void> restoreQuantity(List<OrderItemModel>? orderItems) async {
     try {
-      if (orderItems != null) {
-        for (var item in orderItems) {
-          await orderRepository.restoreQuantity(item);
-        }
+      if (orderItems == null || orderItems.isEmpty) {
+        TLoader.errorSnackBar(
+            title: 'Oh Snap!', message: 'No order items to restore');
+        return;
+      }
 
-        // Refresh product list to ensure consistent data
+      for (var item in orderItems) {
+        // Skip null items
+        if (item == null) continue;
+
         try {
-          final productController = Get.find<ProductController>();
-          await productController.refreshProducts();
+          await orderRepository.restoreQuantity(item);
         } catch (e) {
           if (kDebugMode) {
-            print('Error refreshing products: $e');
+            print('Error restoring quantity for item: $e');
           }
+          // Continue with other items even if one fails
         }
-
-        TLoader.successSnackBar(
-            title: 'Product Quantity Restored!',
-            message:
-                'stock is placed back, this order will not considered in Profit Analysis');
-      } else {
-        TLoader.errorSnackBar(
-            title: 'Oh Snap!', message: 'Order items are null');
       }
+
+      // Refresh product list to ensure consistent data
+      try {
+        final productController = Get.find<ProductController>();
+        await productController.refreshProducts();
+      } catch (e) {
+        if (kDebugMode) {
+          print('Error refreshing products: $e');
+        }
+      }
+
+      TLoader.successSnackBar(
+          title: 'Product Quantity Restored!',
+          message:
+              'Stock has been placed back, this order will not be considered in Profit Analysis');
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      if (kDebugMode) {
+        print('Error in restoreQuantity: $e');
+      }
+      TLoader.errorSnackBar(
+          title: 'Restore Error',
+          message: 'Failed to restore product quantities');
     }
   }
   // Future<String> updateStatus(int orderId, String status) async {
@@ -394,9 +432,25 @@ class OrderController extends GetxController {
   // }
 
   Future<void> addBackQuantity(List<OrderItemModel>? orderItems) async {
-    if (orderItems != null) {
+    try {
+      if (orderItems == null || orderItems.isEmpty) {
+        TLoader.errorSnackBar(
+            title: 'Oh Snap!', message: 'No order items to process');
+        return;
+      }
+
       for (var item in orderItems) {
-        await orderRepository.subtractQuantity(item);
+        // Skip null items
+        if (item == null) continue;
+
+        try {
+          await orderRepository.subtractQuantity(item);
+        } catch (e) {
+          if (kDebugMode) {
+            print('Error subtracting quantity for item: $e');
+          }
+          // Continue with other items even if one fails
+        }
       }
 
       // Refresh product list to ensure consistent data
@@ -411,9 +465,14 @@ class OrderController extends GetxController {
 
       TLoader.successSnackBar(
           title: 'Stock Updated!',
-          message: 'Products have been removed from stock.');
-    } else {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: 'Order items are null');
+          message: 'Products have been removed from stock successfully.');
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error in addBackQuantity: $e');
+      }
+      TLoader.errorSnackBar(
+          title: 'Subtract Error',
+          message: 'Failed to subtract product quantities');
     }
   }
 

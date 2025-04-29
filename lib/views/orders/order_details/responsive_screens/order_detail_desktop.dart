@@ -35,7 +35,7 @@ class OrderDetailDesktopScreen extends StatelessWidget {
         Get.find<GuarantorController>();
 
     if (saleTypeFromOrder == SaleType.installment) {
-      guarantorController.fetchGuarantors(orderModel.orderId ?? -1);
+      guarantorController.fetchGuarantors(orderModel.orderId);
     }
 
     return SingleChildScrollView(
