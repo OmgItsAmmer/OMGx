@@ -23,10 +23,9 @@ import '../customer/customer_controller.dart';
 import '../shop/shop_controller.dart';
 import '../../Models/salesman/salesman_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 import 'package:url_launcher/url_launcher.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:admin_dashboard_v3/views/sales/sales.dart';
+
 
 class SalesController extends GetxController {
   static SalesController get instance => Get.find();

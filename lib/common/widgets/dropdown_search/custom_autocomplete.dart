@@ -53,6 +53,7 @@ class CustomAutocomplete<T extends Object> extends StatelessWidget {
       optionsViewOpenDirection: optionsViewOpenDirection,
       optionsViewBuilder: optionsViewBuilder ?? _defaultOptionsViewBuilder,
       onSelected: onSelected,
+      // autoFlipDirection: true,
     );
   }
 

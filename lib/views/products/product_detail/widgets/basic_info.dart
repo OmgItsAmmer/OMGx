@@ -64,14 +64,27 @@ class BasicInfo extends StatelessWidget {
                 ),
 
                 // Serial Numbers Toggle
-                Obx(() => SwitchListTile(
+                Obx(() {
+                  // Check if this is an existing product (productId > 0)
+                  final isExistingProduct =
+                      productController.productId.value > 0;
+
+                  return Tooltip(
+                    message: isExistingProduct
+                        ? 'Product type cannot be changed for existing products'
+                        : 'Enable for products with unique serial numbers like electronics',
+                    child: SwitchListTile(
                       title: const Text('Has Serial Numbers'),
                       subtitle: const Text(
                           'Enable for products with unique serial numbers like electronics'),
                       value: productController.hasSerialNumbers.value,
-                      onChanged: (value) =>
-                          productController.toggleHasSerialNumbers(value),
-                    )),
+                      onChanged: isExistingProduct
+                          ? null // Disabled for existing products
+                          : (value) =>
+                              productController.toggleHasSerialNumbers(value),
+                    ),
+                  );
+                }),
 
                 const SizedBox(
                   height: TSizes.spaceBtwInputFields,

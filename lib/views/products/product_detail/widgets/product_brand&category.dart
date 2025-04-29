@@ -14,8 +14,24 @@ import 'package:iconsax/iconsax.dart';
 import '../../../../common/widgets/dropdown_search/enhanced_autocomplete.dart';
 import '../../../../utils/constants/enums.dart';
 
-class ProductBrandcCategory extends StatelessWidget {
+class ProductBrandcCategory extends StatefulWidget {
   const ProductBrandcCategory({super.key});
+
+  @override
+  State<ProductBrandcCategory> createState() => _ProductBrandcCategoryState();
+}
+
+class _ProductBrandcCategoryState extends State<ProductBrandcCategory> {
+  // Focus nodes for category and brand fields
+  final FocusNode categoryFocusNode = FocusNode();
+  final FocusNode brandFocusNode = FocusNode();
+
+  @override
+  void dispose() {
+    categoryFocusNode.dispose();
+    brandFocusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,27 +69,29 @@ class ProductBrandcCategory extends StatelessWidget {
               const SizedBox(
                 height: TSizes.spaceBtwSections,
               ),
-              EnhancedAutocomplete<String>(
-                labelText: 'Select Category',
-                hintText: 'Choose a category',
-                options: categoryController.allCategories
-                    .map((e) => e.categoryName)
-                    .whereType<String>()
-                    .toList(),
-                externalController:
-                    productController.selectedCategoryNameController,
-                displayStringForOption: (String option) => option,
-                onSelected: (val) async {
-                  productController.selectedCategoryNameController.text = val;
-                  productController.selectedCategoryId =
-                      await categoryController.fetchCategoryId(val);
-                },
-                onManualTextEntry: (String text) {
-                  if (text.isEmpty) {
-                    resetCategorySelection();
-                  }
-                },
-                showOptionsOnFocus: true,
+              Focus(
+                focusNode: categoryFocusNode,
+                child: EnhancedAutocomplete<String>(
+                  labelText: 'Select Category',
+                  hintText: 'Choose a category',
+                  options: categoryController.allCategories
+                      .map((e) => e.categoryName)
+                      .whereType<String>()
+                      .toList(),
+                  externalController:
+                      productController.selectedCategoryNameController,
+                  displayStringForOption: (String option) => option,
+                  onSelected: (val) async {
+                    productController.selectedCategoryNameController.text = val;
+                    productController.selectedCategoryId =
+                        await categoryController.fetchCategoryId(val);
+                  },
+                  onManualTextEntry: (String text) {
+                    if (text.isEmpty) {
+                      resetCategorySelection();
+                    }
+                  },
+                ),
               ),
             ],
           ),
@@ -109,27 +127,29 @@ class ProductBrandcCategory extends StatelessWidget {
               const SizedBox(
                 height: TSizes.spaceBtwSections,
               ),
-              EnhancedAutocomplete<String>(
-                labelText: 'Select Brand',
-                hintText: 'Choose a brand',
-                options: brandController.allBrands
-                    .map((e) => e.bname)
-                    .whereType<String>()
-                    .toList(),
-                externalController:
-                    productController.selectedBrandNameController,
-                displayStringForOption: (String option) => option,
-                onSelected: (val) async {
-                  productController.selectedBrandId =
-                      await brandController.fetchBrandId(val);
-                },
-                onManualTextEntry: (String text) {
-                  if (text.isEmpty) {
-                    productController.selectedBrandId = -1;
-                    productController.selectedBrandNameController.clear();
-                  }
-                },
-                showOptionsOnFocus: true,
+              Focus(
+                focusNode: brandFocusNode,
+                child: EnhancedAutocomplete<String>(
+                  labelText: 'Select Brand',
+                  hintText: 'Choose a brand',
+                  options: brandController.allBrands
+                      .map((e) => e.bname)
+                      .whereType<String>()
+                      .toList(),
+                  externalController:
+                      productController.selectedBrandNameController,
+                  displayStringForOption: (String option) => option,
+                  onSelected: (val) async {
+                    productController.selectedBrandId =
+                        await brandController.fetchBrandId(val);
+                  },
+                  onManualTextEntry: (String text) {
+                    if (text.isEmpty) {
+                      productController.selectedBrandId = -1;
+                      productController.selectedBrandNameController.clear();
+                    }
+                  },
+                ),
               ),
             ],
           ),
@@ -175,7 +195,6 @@ class ProductBrandcCategory extends StatelessWidget {
 
 void resetCategorySelection() {
   final ProductController productController = Get.find<ProductController>();
-
   productController.selectedCategoryId = -1;
   productController.selectedCategoryNameController.clear();
 }

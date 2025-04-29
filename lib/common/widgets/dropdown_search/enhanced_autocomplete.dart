@@ -144,6 +144,38 @@ class _EnhancedAutocompleteState<T extends Object>
   Widget build(BuildContext context) {
     return CustomAutocomplete<T>(
       displayStringForOption: widget.displayStringForOption,
+      optionsViewBuilder: (BuildContext context, void Function(T) onSelected,
+          Iterable<T> options) {
+        final AlignmentDirectional optionsAlignment =
+            AlignmentDirectional.topStart;
+
+        return Align(
+          alignment: optionsAlignment,
+          child: Material(
+            elevation: 4.0,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: 200.0),
+              child: ListView.builder(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                itemCount: options.length,
+                itemBuilder: (BuildContext context, int index) {
+                  final T option = options.elementAt(index);
+                  return InkWell(
+                    onTap: () {
+                      onSelected(option);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(widget.displayStringForOption(option)),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      },
       fieldViewBuilder: (BuildContext context,
           TextEditingController textEditingController,
           FocusNode focusNode,

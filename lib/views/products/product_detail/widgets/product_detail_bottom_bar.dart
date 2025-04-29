@@ -50,37 +50,77 @@ class ProductDetailBottomBar extends StatelessWidget {
                       ? null
                       : () async {
                           try {
+                            // Set updating flag to prevent multiple clicks
+                            productController.isUpdating.value = true;
+
+                            // Check if adding new product or updating existing one
                             if (productController.productId.value == -1) {
+                              debugPrint('Saving new product...');
+
+                              // Insert new product
                               await productController.insertProduct();
-                              if (productController.productId.value != -1 &&
-                                  productController.hasSerialNumbers.value &&
+
+                              // Verify product was saved
+                              if (productController.productId.value <= 0) {
+                                debugPrint(
+                                    'Product was not saved correctly, productId is invalid');
+                                throw Exception(
+                                    'Failed to save product - invalid ID returned');
+                              }
+
+                              debugPrint(
+                                  '✓ New product saved with ID: ${productController.productId.value}');
+
+                              // If it's a serialized product with no variants, prompt user to add them
+                              if (productController.hasSerialNumbers.value &&
                                   productController
                                       .currentProductVariants.isEmpty) {
-                                // Product is created but needs variants
                                 TLoader.successSnackBar(
                                   title: "Product Created",
                                   message:
                                       "Now add serial number variants for this product",
                                 );
+                                productController.isUpdating.value = false;
                                 return; // Don't close the screen
                               }
                             } else {
+                              debugPrint(
+                                  'Updating existing product ${productController.productId.value}...');
+
+                              // Update existing product
                               await productController.updateProduct();
+                              debugPrint('✓ Product updated successfully');
+                            }
+
+                            // Save any unsaved variants to database
+                            if (productController.hasSerialNumbers.value &&
+                                productController
+                                    .unsavedProductVariants.isNotEmpty) {
+                              debugPrint(
+                                  'Saving ${productController.unsavedProductVariants.length} variants for product ${productController.productId.value}...');
+                              await productController.saveUnsavedVariants();
                             }
 
                             // Refresh product list to ensure all UI components have the latest data
+                            debugPrint('Refreshing products list...');
                             await productController.refreshProducts();
+                            debugPrint('✓ Products list refreshed');
 
+                            // Navigate back if everything is complete
                             if (!productController.hasSerialNumbers.value ||
                                 !productController
                                     .currentProductVariants.isEmpty) {
                               Navigator.of(context).pop();
                             }
                           } catch (e) {
+                            debugPrint('❌ ERROR in save/update: $e');
                             TLoader.errorSnackBar(
                               title: "Error",
                               message: e.toString(),
                             );
+                          } finally {
+                            // Always reset the updating flag
+                            productController.isUpdating.value = false;
                           }
                         },
                   child: productController.isUpdating.value

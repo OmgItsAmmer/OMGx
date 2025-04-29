@@ -37,20 +37,15 @@ class ProductDetailDesktop extends StatelessWidget {
                       const SizedBox(height: TSizes.spaceBtwSections),
 
                       // Serial Variants - Only show for products with serial numbers
-                      Obx(() {
-                        final showVariants = controller.hasSerialNumbers.value;
-
-                        // When switching to variants mode, try to refresh variants
-                        if (showVariants &&
-                            controller.currentProductVariants.isEmpty &&
-                            controller.productId.value > 0) {
-                          _loadVariants(controller);
-                        }
-
-                        return showVariants
-                            ? const ProductSerialVariants()
-                            : const SizedBox.shrink();
-                      }),
+                      GetBuilder<ProductController>(
+                        builder: (controller) {
+                          final showVariants =
+                              controller.hasSerialNumbers.value;
+                          return showVariants
+                              ? const ProductSerialVariants()
+                              : const SizedBox.shrink();
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -78,25 +73,16 @@ class ProductDetailDesktop extends StatelessWidget {
   }
 
   void _initializeVariantsIfNeeded(ProductController controller) {
-    // Initialize variants when needed - use GetX lifecycle callback
+    // Initialize variants only at the start - don't react to state changes
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadVariants(controller);
+      // Only fetch variants once when the view is first built
+      if (controller.productId.value > 0 &&
+          controller.hasSerialNumbers.value &&
+          !controller.isAddingVariants.value) {
+        // Check if we're not already loading
+        debugPrint('Initial fetch of variants');
+        controller.fetchProductVariants(controller.productId.value);
+      }
     });
-  }
-
-  void _loadVariants(ProductController controller) {
-    // Only load if:
-    // 1. We have a valid product ID
-    // 2. The product has serial numbers
-    // 3. We don't already have the variants loaded
-    // 4. We're not already loading variants
-    if (controller.productId.value > 0 &&
-        controller.hasSerialNumbers.value &&
-        controller.currentProductVariants.isEmpty &&
-        !controller.isAddingVariants.value) {
-      // Print debug information
-      debugPrint('Loading variants for product ${controller.productId.value}');
-      controller.fetchProductVariants(controller.productId.value);
-    }
   }
 }

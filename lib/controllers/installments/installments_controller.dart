@@ -272,6 +272,10 @@ class InstallmentController extends GetxController {
       int numberOfInstallments = int.tryParse(NoOfInstallments.text) ?? 0;
       double billAmountValue = double.tryParse(billAmount.value.text) ?? 0.0;
       double downPaymentValue = double.tryParse(DownPayment.text) ?? 0.0;
+      double documentChargesValue =
+          double.tryParse(DocumentCharges.text) ?? 0.0;
+      double otherChargesValue = double.tryParse(otherCharges.text) ?? 0.0;
+      double marginValue = double.tryParse(margin.text) ?? 0.0;
 
       // Validate inputs
       if (billAmountValue <= 0) {
@@ -303,9 +307,19 @@ class InstallmentController extends GetxController {
         return;
       }
 
-      //generate installment plan before installment payments
+      // Parse frequency as integer
+      int frequency = int.tryParse(frequencyInMonth.text) ?? 0;
+      // Use the provided frequency or set a default based on duration type
+      if (frequency <= 0) {
+        frequency = durationController.value == DurationType.Monthly
+            ? 1
+            : durationController.value == DurationType.Quarterly
+                ? 3
+                : 12;
+      }
+
+      // Generate installment plan before installment payments
       currentInstallmentPlan.value = InstallmentPlanModel(
-        // Example values; you need to populate this properly
         installmentPlanId: null, // not count
         //orderId: orderId, will be added at saving time
         totalAmount: billAmount.value.text,
@@ -317,24 +331,30 @@ class InstallmentController extends GetxController {
         downPayment: DownPayment.text,
         numberOfInstallments: NoOfInstallments.text,
         firstInstallmentDate: selectedDate,
-        frequencyInMonth: durationController == DurationType.Monthly
-            ? "1"
-            : durationController == DurationType.Quarterly
-                ? "3"
-                : "12",
-
-        // guarantor1_id: guarranteIds[0],
-        //  guarantor2_id: guarranteIds[1],
-        // Pass the generated installment plans
+        frequencyInMonth: frequency.toString(),
       );
 
-      double remainingAmount = billAmountValue - downPaymentValue;
+      // Calculate remaining amount including all charges
+      double baseRemainingAmount = billAmountValue - downPaymentValue;
+
+      // Calculate margin amount if applicable
+      double marginAmount = 0.0;
+      if (marginValue > 0) {
+        marginAmount = baseRemainingAmount * (marginValue / 100);
+      }
+
+      // Total amount to be distributed across installments
+      double totalRemainingWithCharges = baseRemainingAmount +
+          documentChargesValue +
+          otherChargesValue +
+          marginAmount;
 
       // If no remaining amount, add only advance payment
-      if (remainingAmount <= 0) {
+      if (totalRemainingWithCharges <= 0) {
         currentInstallmentPayments.add(
           InstallmentTableModel(
             sequenceNo: 0,
+            planId: 0, // Will be updated after saving
             description: "Advance Payment",
             dueDate: DateTime.now().toIso8601String(),
             paidDate: DateTime.now().toIso8601String(),
@@ -350,16 +370,18 @@ class InstallmentController extends GetxController {
       }
 
       // Calculate installments with remainder adjustment
-      double installmentAmount = remainingAmount / numberOfInstallments;
+      double installmentAmount =
+          totalRemainingWithCharges / numberOfInstallments;
       double roundedInstallment =
           double.parse(installmentAmount.toStringAsFixed(2));
       double totalRounded = roundedInstallment * (numberOfInstallments - 1);
-      double lastInstallment = remainingAmount - totalRounded;
+      double lastInstallment = totalRemainingWithCharges - totalRounded;
 
       // Add advance payment
       currentInstallmentPayments.add(
         InstallmentTableModel(
           sequenceNo: 0,
+          planId: 0, // Will be updated after saving
           description: "Advance Payment",
           dueDate: DateTime.now().toIso8601String(),
           paidDate: DateTime.now().toIso8601String(),
@@ -377,27 +399,29 @@ class InstallmentController extends GetxController {
       // Generate installments with correct dates and amounts
       for (int i = 1; i <= numberOfInstallments; i++) {
         DateTime dueDate;
-        switch (durationController.value) {
-          case DurationType.Monthly:
-            dueDate = DateTime(
-                currentDate.year, currentDate.month + i, currentDate.day);
-            break;
-          case DurationType.Quarterly:
-            dueDate = DateTime(
-                currentDate.year, currentDate.month + (i * 3), currentDate.day);
-            break;
-          case DurationType.Yearly:
-            dueDate = DateTime(
-                currentDate.year + i, currentDate.month, currentDate.day);
-            break;
-          default:
-            dueDate = currentDate.add(Duration(days: 30 * i));
-        }
 
-        // Handle end-of-month edge cases (e.g., adding months to a day that doesn't exist in the target month)
-        if (dueDate.month != currentDate.month + i &&
-            durationController.value == DurationType.Monthly) {
-          dueDate = DateTime(dueDate.year, dueDate.month + 1, 0);
+        // Calculate the due date based on the duration type and frequency
+        try {
+          switch (durationController.value) {
+            case DurationType.Monthly:
+              // Add months based on frequency and installment number
+              dueDate = _addMonths(currentDate, i * frequency);
+              break;
+            case DurationType.Quarterly:
+              // Add months based on quarterly frequency (3 months) and installment number
+              dueDate = _addMonths(currentDate, i * frequency);
+              break;
+            case DurationType.Yearly:
+              // Add years based on installment number
+              dueDate = DateTime(
+                  currentDate.year + i, currentDate.month, currentDate.day);
+              break;
+            default:
+              dueDate = _addMonths(currentDate, i);
+          }
+        } catch (e) {
+          // Fallback in case of date calculation error
+          dueDate = currentDate.add(Duration(days: 30 * i * frequency));
         }
 
         double amount =
@@ -406,6 +430,7 @@ class InstallmentController extends GetxController {
         currentInstallmentPayments.add(
           InstallmentTableModel(
             sequenceNo: i,
+            planId: 0, // Will be updated after saving
             description: "Installment $i",
             dueDate: dueDate.toIso8601String(),
             paidDate: null,
@@ -421,6 +446,22 @@ class InstallmentController extends GetxController {
     } catch (e) {
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
+  }
+
+  // Helper method to correctly add months to a date and handle month end edge cases
+  DateTime _addMonths(DateTime date, int monthsToAdd) {
+    // Calculate target month and year
+    int targetMonth = date.month + monthsToAdd;
+    int targetYear = date.year + (targetMonth - 1) ~/ 12;
+    targetMonth = ((targetMonth - 1) % 12) + 1; // Adjust month to be 1-12
+
+    // Get last day of target month
+    int lastDayOfMonth = DateTime(targetYear, targetMonth + 1, 0).day;
+
+    // Ensure day is valid for the target month
+    int targetDay = date.day <= lastDayOfMonth ? date.day : lastDayOfMonth;
+
+    return DateTime(targetYear, targetMonth, targetDay);
   }
 
   Future<void> savePlan() async {

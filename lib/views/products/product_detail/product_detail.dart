@@ -21,6 +21,7 @@ class ProductDetailScreen extends StatelessWidget {
     }
 
     return const TSiteTemplate(
+      useLayout: false,
       desktop: ProductDetailDesktop(),
       tablet: ProductDetailTablet(),
       mobile: ProductDetailMobile(),
