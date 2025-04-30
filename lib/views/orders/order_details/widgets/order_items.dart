@@ -17,6 +17,8 @@ import '../../../../controllers/media/media_controller.dart';
 import '../../../../repositories/products/product_variants_repository.dart';
 import '../../../../utils/constants/enums.dart';
 import '../../../../utils/constants/sizes.dart';
+import '../../../../repositories/installment/installment_repository.dart';
+import '../../../../Models/installments/installemt_plan_model.dart';
 
 class OrderItems extends StatelessWidget {
   const OrderItems({super.key, required this.order});
@@ -28,6 +30,8 @@ class OrderItems extends StatelessWidget {
     final MediaController mediaController = Get.find<MediaController>();
     final ProductVariantsRepository variantsRepository =
         Get.put(ProductVariantsRepository());
+    final InstallmentRepository installmentRepository =
+        Get.put(InstallmentRepository());
 
     final subTotal = order.orderItems?.fold(
           0.0,
@@ -40,175 +44,259 @@ class OrderItems extends StatelessWidget {
     final total =
         subTotal + (order.tax) + (order.shippingFee) - (order.discount);
 
-    return TRoundedContainer(
-      padding: const EdgeInsets.all(TSizes.defaultSpace),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Items',
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-          const SizedBox(height: TSizes.spaceBtwSections),
+    return FutureBuilder<InstallmentPlanModel?>(
+        future: order.saletype?.toLowerCase() == 'installment'
+            ? _getInstallmentPlan(installmentRepository, order.orderId)
+            : Future.value(null),
+        builder: (context, snapshot) {
+          final installmentPlan = snapshot.data;
 
-          // Flutter Table
-          Table(
-            border: TableBorder.all(color: Colors.grey),
-            columnWidths: const {
-              0: FixedColumnWidth(65), // Image
-              1: FlexColumnWidth(), // Name
-              2: FixedColumnWidth(80), // Price
-              3: FixedColumnWidth(80), // Quantity
-              4: FixedColumnWidth(100), // Total
-            },
-            children: [
-              // Table Header
-              TableRow(
-                decoration:
-                    const BoxDecoration(color: TColors.primaryBackground),
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text('Image',
-                        style: Theme.of(context).textTheme.titleMedium),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text('Item',
-                        style: Theme.of(context).textTheme.titleMedium),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text('Price',
-                        style: Theme.of(context).textTheme.titleMedium),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text('Qty',
-                        style: Theme.of(context).textTheme.titleMedium),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text('Total',
-                        style: Theme.of(context).textTheme.titleMedium),
-                  ),
-                ],
-              ),
+          return TRoundedContainer(
+            padding: const EdgeInsets.all(TSizes.defaultSpace),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Items',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+                const SizedBox(height: TSizes.spaceBtwSections),
 
-              // Table Data Rows
-              ...order.orderItems?.map((item) {
-                    final product = productController.allProducts.firstWhere(
-                        (product) => product.productId == item.productId,
-                        orElse: () => ProductModel(name: 'Not Found'));
-
-                    // Create a widget to display product info with or without serial number
-                    Widget productInfoWidget = FutureBuilder<String>(
-                      future: _getProductDisplayName(
-                          product, item, variantsRepository),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const TShimmerEffect(
-                              width: double.infinity, height: 20);
-                        } else {
-                          return Text(
-                            snapshot.data ?? product.name ?? 'Not Found',
-                            style: Theme.of(context).textTheme.bodyLarge,
-                          );
-                        }
-                      },
-                    );
-
-                    return TableRow(
+                // Flutter Table
+                Table(
+                  border: TableBorder.all(color: Colors.grey),
+                  columnWidths: const {
+                    0: FixedColumnWidth(65), // Image
+                    1: FlexColumnWidth(), // Name
+                    2: FixedColumnWidth(80), // Price
+                    3: FixedColumnWidth(80), // Quantity
+                    4: FixedColumnWidth(100), // Total
+                  },
+                  children: [
+                    // Table Header
+                    TableRow(
+                      decoration:
+                          const BoxDecoration(color: TColors.primaryBackground),
                       children: [
                         Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: FutureBuilder<String?>(
-                            future: mediaController.fetchMainImage(
-                              item.productId,
-                              MediaCategory.products.toString().split('.').last,
-                            ),
+                          child: Text('Image',
+                              style: Theme.of(context).textTheme.titleMedium),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text('Item',
+                              style: Theme.of(context).textTheme.titleMedium),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text('Price',
+                              style: Theme.of(context).textTheme.titleMedium),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text('Qty',
+                              style: Theme.of(context).textTheme.titleMedium),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text('Total',
+                              style: Theme.of(context).textTheme.titleMedium),
+                        ),
+                      ],
+                    ),
+
+                    // Table Data Rows
+                    ...order.orderItems?.map((item) {
+                          final product = productController.allProducts
+                              .firstWhere(
+                                  (product) =>
+                                      product.productId == item.productId,
+                                  orElse: () =>
+                                      ProductModel(name: 'Not Found'));
+
+                          // Create a widget to display product info with or without serial number
+                          Widget productInfoWidget = FutureBuilder<String>(
+                            future: _getProductDisplayName(
+                                product, item, variantsRepository),
                             builder: (context, snapshot) {
                               if (snapshot.connectionState ==
                                   ConnectionState.waiting) {
                                 return const TShimmerEffect(
-                                    width: 60,
-                                    height: 60); // Show shimmer while loading
-                              } else if (snapshot.hasError) {
-                                return const Text(
-                                    'Error loading image'); // Handle error case
-                              } else if (snapshot.hasData &&
-                                  snapshot.data != null) {
-                                return TRoundedImage(
-                                  isNetworkImage: true,
-                                  width: 60,
-                                  height: 60,
-                                  imageurl: snapshot.data!,
-                                );
+                                    width: double.infinity, height: 20);
                               } else {
-                                return const TCircularIcon(
-                                  icon: Iconsax.image,
-                                  width: 60,
-                                  height: 60,
-                                  backgroundColor: TColors.primaryBackground,
-                                ); // Handle case where no image is available
-                                // Handle case where no image is available
+                                return Text(
+                                  snapshot.data ?? product.name ?? 'Not Found',
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                );
                               }
                             },
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: productInfoWidget,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                              (item.price / item.quantity).toStringAsFixed(2),
-                              style: Theme.of(context).textTheme.bodyLarge),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(item.quantity.toString(),
-                              style: Theme.of(context).textTheme.bodyLarge),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text((item.price).toStringAsFixed(2),
-                              style: Theme.of(context).textTheme.bodyLarge),
-                        ),
+                          );
+
+                          return TableRow(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: FutureBuilder<String?>(
+                                  future: mediaController.fetchMainImage(
+                                    item.productId,
+                                    MediaCategory.products
+                                        .toString()
+                                        .split('.')
+                                        .last,
+                                  ),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return const TShimmerEffect(
+                                          width: 60,
+                                          height:
+                                              60); // Show shimmer while loading
+                                    } else if (snapshot.hasError) {
+                                      return const Text(
+                                          'Error loading image'); // Handle error case
+                                    } else if (snapshot.hasData &&
+                                        snapshot.data != null) {
+                                      return TRoundedImage(
+                                        isNetworkImage: true,
+                                        width: 60,
+                                        height: 60,
+                                        imageurl: snapshot.data!,
+                                      );
+                                    } else {
+                                      return const TCircularIcon(
+                                        icon: Iconsax.image,
+                                        width: 60,
+                                        height: 60,
+                                        backgroundColor:
+                                            TColors.primaryBackground,
+                                      ); // Handle case where no image is available
+                                      // Handle case where no image is available
+                                    }
+                                  },
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: productInfoWidget,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                    (item.price / item.quantity)
+                                        .toStringAsFixed(2),
+                                    style:
+                                        Theme.of(context).textTheme.bodyLarge),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(item.quantity.toString(),
+                                    style:
+                                        Theme.of(context).textTheme.bodyLarge),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text((item.price).toStringAsFixed(2),
+                                    style:
+                                        Theme.of(context).textTheme.bodyLarge),
+                              ),
+                            ],
+                          );
+                        }) ??
+                        [],
+                  ],
+                ),
+
+                const SizedBox(height: TSizes.spaceBtwSections),
+
+                // Summary Section
+                TRoundedContainer(
+                  padding: const EdgeInsets.all(TSizes.defaultSpace),
+                  backgroundColor: TColors.primaryBackground,
+                  child: Column(
+                    children: [
+                      _buildSummaryRow(context, 'SubTotal',
+                          Text('Rs. ${subTotalValue.toStringAsFixed(2)}')),
+                      _buildSummaryRow(context, 'Discount',
+                          Text('Rs. ${order.discount.toStringAsFixed(2)}')),
+                      _buildSummaryRow(context, 'Shipping',
+                          Text('Rs. ${order.shippingFee.toStringAsFixed(2)}')),
+                      _buildSummaryRow(context, 'Tax',
+                          Text('Rs. ${order.tax.toStringAsFixed(2)}')),
+
+                      // Installment-specific rows
+                      if (installmentPlan != null) ...[
+                        const Divider(),
+                        // Advance Payment
+                        _buildSummaryRow(
+                            context,
+                            'Advance Payment',
+                            Text(
+                                'Rs. ${double.tryParse(installmentPlan.downPayment) ?? 0.0}')),
+                        // Document Charges
+                        if (installmentPlan.documentCharges != null &&
+                            installmentPlan.documentCharges!.isNotEmpty)
+                          _buildSummaryRow(
+                              context,
+                              'Document Charges',
+                              Text(
+                                  'Rs. ${double.tryParse(installmentPlan.documentCharges!) ?? 0.0}')),
+                        // Other Charges
+                        if (installmentPlan.otherCharges != null &&
+                            installmentPlan.otherCharges!.isNotEmpty)
+                          _buildSummaryRow(
+                              context,
+                              'Other Charges',
+                              Text(
+                                  'Rs. ${double.tryParse(installmentPlan.otherCharges!) ?? 0.0}')),
+                        // Margin
+                        if (installmentPlan.margin != null &&
+                            installmentPlan.margin!.isNotEmpty)
+                          _buildSummaryRow(
+                              context,
+                              'Margin',
+                              Text(
+                                  '${double.tryParse(installmentPlan.margin!) ?? 0.0}%')),
+                        // Calculated margin amount
+                        if (installmentPlan.margin != null &&
+                            installmentPlan.margin!.isNotEmpty)
+                          _buildSummaryRow(
+                              context,
+                              'Margin Amount',
+                              Text(
+                                  'Rs. ${_calculateMarginAmount(installmentPlan)}')),
+                        // Salesman Commission
+                        if (order.salesmanComission > 0)
+                          _buildSummaryRow(context, 'Salesman Commission',
+                              Text('${order.salesmanComission}%')),
+                        if (order.salesmanComission > 0)
+                          _buildSummaryRow(
+                              context,
+                              'Commission Amount',
+                              Text(
+                                  'Rs. ${(total * order.salesmanComission / 100).toStringAsFixed(2)}')),
                       ],
-                    );
-                  }) ??
-                  [],
-            ],
-          ),
 
-          const SizedBox(height: TSizes.spaceBtwSections),
-
-          // Summary Section
-          TRoundedContainer(
-            padding: const EdgeInsets.all(TSizes.defaultSpace),
-            backgroundColor: TColors.primaryBackground,
-            child: Column(
-              children: [
-                _buildSummaryRow(context, 'SubTotal',
-                    Text(subTotalValue.toStringAsFixed(2))),
-                _buildSummaryRow(context, 'Discount',
-                    Text(order.discount.toStringAsFixed(2))),
-                _buildSummaryRow(context, 'Shipping',
-                    Text(order.shippingFee.toStringAsFixed(2))),
-                _buildSummaryRow(
-                    context, 'Tax', Text(order.tax.toStringAsFixed(2))),
-                const Divider(),
-                _buildSummaryRow(
-                    context, 'Total', Text(total.toStringAsFixed(2))),
+                      const Divider(),
+                      _buildSummaryRow(
+                          context,
+                          'Total',
+                          Text(
+                            'Rs. ${_calculateGrandTotal(total, installmentPlan).toStringAsFixed(2)}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: TColors.primary),
+                          )),
+                    ],
+                  ),
+                ),
               ],
             ),
-          ),
-        ],
-      ),
-    );
+          );
+        });
   }
 
   // Helper method to get the product display name with serial number if available
@@ -235,6 +323,63 @@ class OrderItems extends StatelessWidget {
     }
 
     return displayName;
+  }
+
+  // Helper method to fetch installment plan for an order
+  Future<InstallmentPlanModel?> _getInstallmentPlan(
+      InstallmentRepository repository, int orderId) async {
+    try {
+      final planId = await repository.fetchPlanId(orderId);
+      if (planId != null) {
+        return await repository.fetchInstallmentPlan(planId);
+      }
+      return null;
+    } catch (e) {
+      print('Error fetching installment plan: $e');
+      return null;
+    }
+  }
+
+  // Calculate margin amount based on installment plan
+  String _calculateMarginAmount(InstallmentPlanModel plan) {
+    double totalAmount = double.tryParse(plan.totalAmount) ?? 0.0;
+    double downPayment = double.tryParse(plan.downPayment) ?? 0.0;
+    double marginPercentage = double.tryParse(plan.margin ?? '0.0') ?? 0.0;
+
+    double baseAmount = totalAmount - downPayment;
+    double marginAmount = baseAmount * (marginPercentage / 100.0);
+
+    return marginAmount.toStringAsFixed(2);
+  }
+
+  // Calculate grand total including installment-specific charges
+  double _calculateGrandTotal(double baseTotal, InstallmentPlanModel? plan) {
+    if (plan == null) return baseTotal;
+
+    double grandTotal = baseTotal;
+
+    // Add document charges
+    if (plan.documentCharges != null && plan.documentCharges!.isNotEmpty) {
+      grandTotal += double.tryParse(plan.documentCharges!) ?? 0.0;
+    }
+
+    // Add other charges
+    if (plan.otherCharges != null && plan.otherCharges!.isNotEmpty) {
+      grandTotal += double.tryParse(plan.otherCharges!) ?? 0.0;
+    }
+
+    // Add margin amount
+    double totalAmount = double.tryParse(plan.totalAmount) ?? 0.0;
+    double downPayment = double.tryParse(plan.downPayment) ?? 0.0;
+    double marginPercentage = double.tryParse(plan.margin ?? '0.0') ?? 0.0;
+
+    if (marginPercentage > 0) {
+      double baseAmount = totalAmount - downPayment;
+      double marginAmount = baseAmount * (marginPercentage / 100.0);
+      grandTotal += marginAmount;
+    }
+
+    return grandTotal;
   }
 
   Widget _buildSummaryRow(BuildContext context, String label, Widget value) {

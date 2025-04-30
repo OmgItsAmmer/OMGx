@@ -18,8 +18,8 @@ import '../../../../controllers/salesman/salesman_controller.dart';
 import '../../../../utils/constants/enums.dart';
 import '../widgets/guarrantor_card.dart';
 
-class OrderDetailDesktopScreen extends StatelessWidget {
-  const OrderDetailDesktopScreen({super.key, required this.orderModel});
+class OrderDetailTabletScreen extends StatelessWidget {
+  const OrderDetailTabletScreen({super.key, required this.orderModel});
 
   final OrderModel orderModel;
 
@@ -60,24 +60,25 @@ class OrderDetailDesktopScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Information Section
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Left column - Order info and items
                 Expanded(
-                  flex: 2,
+                  flex: 3,
                   child: Column(
                     children: [
                       OrderInfo(orderModel: orderModel),
                       const SizedBox(height: TSizes.spaceBtwSections),
                       OrderItems(order: orderModel),
-                      const SizedBox(height: TSizes.spaceBtwSections),
-                      OrderTransaction(orderModel: orderModel),
-                      const SizedBox(height: TSizes.spaceBtwSections),
                     ],
                   ),
                 ),
-                const SizedBox(width: TSizes.spaceBtwSections),
+                const SizedBox(width: TSizes.spaceBtwItems),
+                // Right column - Customer and Salesman info
                 Expanded(
+                  flex: 2,
                   child: Column(
                     children: [
                       UserInfo(
@@ -91,7 +92,7 @@ class OrderDetailDesktopScreen extends StatelessWidget {
                             .selectedCustomer.value.phoneNumber,
                         isLoading: customerController.isLoading.value,
                       ),
-                      const SizedBox(height: TSizes.spaceBtwSections),
+                      const SizedBox(height: TSizes.spaceBtwItems),
                       UserInfo(
                         mediaCategory: MediaCategory.salesman,
                         title: 'Salesman',
@@ -107,19 +108,42 @@ class OrderDetailDesktopScreen extends StatelessWidget {
                             'Not Found',
                         isLoading: salesmanController.isLoading.value,
                       ),
-                      const SizedBox(height: TSizes.spaceBtwSections),
-                      if (saleTypeFromOrder == SaleType.installment) ...[
-                        const GuarantorCard(
-                            title: 'Guarantor 1', guarantorIndex: 0),
-                        const SizedBox(height: TSizes.spaceBtwSections),
-                        const GuarantorCard(
-                            title: 'Guarantor 2', guarantorIndex: 1),
-                      ],
                     ],
                   ),
                 ),
               ],
             ),
+
+            const SizedBox(height: TSizes.spaceBtwSections),
+
+            // Transaction Section
+            OrderTransaction(orderModel: orderModel),
+
+            // Guarantor Section (if installment)
+            if (saleTypeFromOrder == SaleType.installment) ...[
+              const SizedBox(height: TSizes.spaceBtwSections),
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      children: const [
+                        GuarantorCard(title: 'Guarantor 1', guarantorIndex: 0),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: TSizes.spaceBtwItems),
+                  Expanded(
+                    child: Column(
+                      children: const [
+                        GuarantorCard(title: 'Guarantor 2', guarantorIndex: 1),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+
+            // Installment Section (if installment)
             if (saleTypeFromOrder == SaleType.installment) ...[
               const SizedBox(height: TSizes.spaceBtwSections),
               TRoundedContainer(

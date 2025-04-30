@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../Models/installments/installemt_plan_model.dart';
 import '../../main.dart';
+import 'package:admin_dashboard_v3/Models/installments/installment_payment_model.dart';
 
 class InstallmentRepository extends GetxController {
   static InstallmentRepository get instance => Get.find();
@@ -77,9 +78,7 @@ class InstallmentRepository extends GetxController {
       }).toList();
 
       // Insert all payments in a single batch
-      await supabase
-          .from('installment_payments')
-          .insert(paymentJsons);
+      await supabase.from('installment_payments').insert(paymentJsons);
     } catch (e) {
       TLoader.errorSnackBar(
           title: 'Plan didn\'t upload', message: e.toString());
@@ -91,10 +90,8 @@ class InstallmentRepository extends GetxController {
       Map<String, dynamic> paymentJson) async {
     try {
       // Insert the payment data into the 'installment_payments' table
-     
-      await supabase
-          .from('installment_payments')
-          .insert(paymentJson);
+
+      await supabase.from('installment_payments').insert(paymentJson);
 
       TLoader.successSnackBar(
           title: 'Success', message: 'Payment successfully uploaded.');
@@ -149,6 +146,119 @@ class InstallmentRepository extends GetxController {
         print(e);
       }
       return null; // Return null in case of an error
+    }
+  }
+
+  Future<void> updateInstallmentPlanStatus(int planId, String status) async {
+    try {
+      await supabase
+          .from('installment_plans')
+          .update({'status': status}).eq('installment_plans_id', planId);
+    } catch (e) {
+      print('Error updating installment plan status: $e');
+      throw Exception('Failed to update installment plan status: $e');
+    }
+  }
+
+  Future<int?> getOrderIdForPlan(int planId) async {
+    try {
+      final result = await supabase
+          .from('installment_plans')
+          .select('order_id')
+          .eq('installment_plans_id', planId)
+          .limit(1)
+          .single();
+
+      if (result != null && result['order_id'] != null) {
+        return result['order_id'] as int;
+      }
+      return null;
+    } catch (e) {
+      print('Error getting order ID for plan: $e');
+      return null;
+    }
+  }
+
+  Future<void> updateOrderStatus(int orderId, String status) async {
+    try {
+      await supabase
+          .from('orders')
+          .update({'status': status}).eq('order_id', orderId);
+    } catch (e) {
+      print('Error updating order status: $e');
+      throw Exception('Failed to update order status: $e');
+    }
+  }
+
+  Future<void> recordRefund(
+    int orderId,
+    double amountPaid,
+    double refundAmount,
+    bool includesShipping,
+    bool includesTax,
+    bool includesDocumentCharges,
+    bool includesOtherCharges,
+    bool includesAdvancePayment,
+    bool includesSalesmanCommission,
+    bool includesMargin,
+    double advancePayment,
+    double installmentsPaid,
+    double documentCharges,
+    double otherCharges,
+    double salesmanCommission,
+    double margin,
+  ) async {
+    try {
+      // Create a record in the refunds table with detailed information
+      await supabase.from('refunds').insert({
+        'order_id': orderId,
+        'amount_paid': amountPaid,
+        'refund_amount': refundAmount,
+        'includes_shipping': includesShipping,
+        'includes_tax': includesTax,
+        'includes_document_charges': includesDocumentCharges,
+        'includes_other_charges': includesOtherCharges,
+        'includes_advance_payment': includesAdvancePayment,
+        'includes_salesman_commission': includesSalesmanCommission,
+        'includes_margin': includesMargin,
+        'advance_payment': advancePayment,
+        'installments_paid': installmentsPaid,
+        'document_charges': documentCharges,
+        'other_charges': otherCharges,
+        'salesman_commission': salesmanCommission,
+        'margin': margin,
+        'refund_date': DateTime.now().toIso8601String(),
+        'status': 'processed',
+      });
+
+      // Update the order record to mark it as refunded
+      await supabase.from('orders').update({
+        'refund_status': 'refunded',
+        'refund_amount': refundAmount,
+        'refund_date': DateTime.now().toIso8601String(),
+      }).eq('order_id', orderId);
+    } catch (e) {
+      print('Error recording refund: $e');
+      throw Exception('Failed to record refund: $e');
+    }
+  }
+
+  Future<InstallmentPlanModel?> fetchInstallmentPlan(int planId) async {
+    try {
+      final data = await supabase
+          .from('installment_plans')
+          .select()
+          .eq('installment_plans_id', planId)
+          .limit(1)
+          .single();
+
+      if (data != null) {
+        return InstallmentPlanModel.fromJson(data);
+      }
+      return null;
+    } catch (e) {
+      print('Error fetching installment plan: $e');
+      return null;
     }
   }
 }

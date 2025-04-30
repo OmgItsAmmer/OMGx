@@ -68,7 +68,12 @@ enum UnitType {
   custom // Custom unit (will be handled separately)
 }
 
-enum InstallmentStatus { duration, paid, pending, overdue }
+enum InstallmentStatus {
+  pending,
+  paid,
+  overdue,
+  completed,
+}
 
 enum NotificationType {
   installment,

@@ -29,9 +29,7 @@ class InstallmentRow extends DataTableSource {
     final installmentItem =
         installmentController.currentInstallmentPayments[index];
     return DataRow2(
-        onTap: () {
-          
-        },
+        onTap: () {},
         selected: false,
         onSelectChanged: (value) {},
         cells: [
@@ -59,7 +57,8 @@ class InstallmentRow extends DataTableSource {
                 .apply(color: TColors.primary),
           )),
           DataCell(Text(
-            installmentItem.paidDate == 'null' || installmentItem.paidDate == null
+            installmentItem.paidDate == 'null' ||
+                    installmentItem.paidDate == null
                 ? 'not yet'
                 : installmentItem.paidDate.toString(),
             style: Theme.of(Get.context!)
@@ -95,16 +94,24 @@ class InstallmentRow extends DataTableSource {
                 .bodyLarge!
                 .apply(color: TColors.primary),
           )),
-          DataCell(Text(
-            installmentItem.status.toString(),
+          DataCell(Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: installmentController
+                  .getStatusColor(installmentItem.status ?? ''),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              installmentItem.status?.toString() ?? 'unknown',
             style: Theme.of(Get.context!)
                 .textTheme
-                .bodyLarge!
-                .apply(color: TColors.primary),
+                  .bodyMedium!
+                  .apply(color: Colors.white),
+            ),
           )),
           DataCell(TTableActionButtons(
             view: false,
-            edit: true,
+            edit: installmentItem.status?.toLowerCase() != 'completed',
             delete: false,
             onViewPressed: () {},
             onDeletePressed: () {},
@@ -151,23 +158,27 @@ class InstallmentRow extends DataTableSource {
                             TextFormField(
                               onChanged: (value) {
                                 try {
-                                  double paidAmount = double.tryParse(value) ?? 0.0;
+                                  double paidAmount =
+                                      double.tryParse(value) ?? 0.0;
                                   double amountDue = double.tryParse(
                                           installmentItem.amountDue) ??
                                       0.0;
 
                                   if (paidAmount > amountDue) {
-                                    installmentController.paidAmount.text = "0.0";
-                                    installmentController.remainingAmount.value.text = 
-                                        amountDue.toStringAsFixed(2);
+                                    installmentController.paidAmount.text =
+                                        "0.0";
+                                    installmentController.remainingAmount.value
+                                        .text = amountDue.toStringAsFixed(2);
                                     TLoader.errorSnackBar(
                                       title: "Invalid Payment",
                                       message:
                                           "Paid amount cannot exceed the total amount.",
                                     );
                                   } else {
-                                    installmentController.remainingAmount.value.text =
-                                        (amountDue - paidAmount).toStringAsFixed(2);
+                                    installmentController
+                                            .remainingAmount.value.text =
+                                        (amountDue - paidAmount)
+                                            .toStringAsFixed(2);
                                   }
                                 } catch (e) {
                                   if (kDebugMode) {
@@ -234,23 +245,29 @@ class InstallmentRow extends DataTableSource {
                                 Expanded(
                                   child: Obx(
                                     () => ElevatedButton(
-                                      onPressed: installmentController.isUpdating.value
+                                      onPressed: installmentController
+                                              .isUpdating.value
                                           ? null
                                           : () async {
                                               await installmentController
                                                   .updateInstallmentPayments(
-                                                      installmentItem.sequenceNo,
+                                                      installmentItem
+                                                          .sequenceNo,
                                                       installmentItem.planId);
-                                              installmentController.resetFormFields();
+                                              installmentController
+                                                  .resetFormFields();
                                               Navigator.of(Get.context!).pop();
                                             },
-                                      child: installmentController.isUpdating.value
+                                      child: installmentController
+                                              .isUpdating.value
                                           ? const SizedBox(
                                               height: 20,
                                               width: 20,
                                               child: CircularProgressIndicator(
                                                 strokeWidth: 2,
-                                                valueColor: AlwaysStoppedAnimation<Color>(TColors.white),
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<
+                                                        Color>(TColors.white),
                                               ),
                                             )
                                           : Text(
