@@ -1,7 +1,10 @@
-import 'dart:typed_data';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
+import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/common/widgets/shimmers/shimmer.dart';
+import 'package:admin_dashboard_v3/controllers/shop/shop_controller.dart';
+import 'package:admin_dashboard_v3/controllers/user/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
@@ -15,23 +18,70 @@ import '../../../../controllers/sales/sales_controller.dart';
 
 import '../../../../Models/installments/installment_table_model/installment_table_model.dart';
 
-class InstallmentReportPage extends StatelessWidget {
+class InstallmentReportPage extends StatefulWidget {
   final List<InstallmentTableModel> installmentPlans;
-  final String companyName;
-  final String branchName;
-  final String cashierName;
-  final String softwareCompanyName;
 
   InstallmentReportPage({
     required this.installmentPlans,
-    required this.companyName,
-    required this.branchName,
-    required this.cashierName,
-    this.softwareCompanyName = 'OMGz',
   });
 
   @override
+  _InstallmentReportPageState createState() => _InstallmentReportPageState();
+}
+
+class _InstallmentReportPageState extends State<InstallmentReportPage> {
+  final RxBool _isLoading = true.obs;
+  final RxBool _hasError = false.obs;
+  final RxString _errorMessage = ''.obs;
+  Uint8List? _pdfBytes;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _generatePdfReport();
+    });
+  }
+
+  Future<void> _generatePdfReport() async {
+    try {
+      _isLoading.value = true;
+      _hasError.value = false;
+      _errorMessage.value = '';
+
+      final shopController = Get.find<ShopController>();
+      final userController = Get.find<UserController>();
+
+      _pdfBytes = await compute(generatePdfInBackground, {
+        'installmentPlans': widget.installmentPlans,
+        'companyName': shopController.selectedShop?.value.shopname ?? 'Company',
+        'branchName': 'MAIN',
+        'cashierName': userController.currentUser.value.fullName,
+        'softwareCompanyName':
+            shopController.selectedShop?.value.softwareCompanyName ?? 'OMGz',
+        'softwareWebsiteLink':
+            shopController.selectedShop?.value.softwareWebsiteLink ??
+                'https://www.omgz.com',
+        'softwareContactNo':
+            shopController.selectedShop?.value.softwareContactNo ?? '',
+        'format': PdfPageFormat.a4,
+      }).timeout(const Duration(seconds: 10), onTimeout: () {
+        _hasError.value = true;
+        _errorMessage.value = 'PDF generation timed out. Please try again.';
+        return _createEmptyPdf(PdfPageFormat.a4);
+      });
+    } catch (e) {
+      _hasError.value = true;
+      _errorMessage.value = 'Error generating PDF: ${e.toString()}';
+      _pdfBytes = await _createErrorPdf(PdfPageFormat.a4, e.toString());
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Get required controllers
     final installmentController = Get.find<InstallmentController>();
     final salesController = Get.find<SalesController>();
 
@@ -45,6 +95,10 @@ class InstallmentReportPage extends StatelessWidget {
               await savePdf(context);
             },
           ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _generatePdfReport,
+          ),
         ],
       ),
       body: Column(
@@ -53,32 +107,91 @@ class InstallmentReportPage extends StatelessWidget {
             child: Center(
               child: TRoundedContainer(
                 width: 1000,
-                child: PdfPreview(
-                  build: (format) => generatePdfInBackground({
-                    'installmentPlans': installmentPlans,
-                    'companyName': companyName,
-                    'branchName': branchName,
-                    'cashierName': cashierName,
-                    'softwareCompanyName': softwareCompanyName,
-                    'format': PdfPageFormat.a4,
-                  }),
-                  loadingWidget: const TShimmerEffect(width: 80, height: 80),
-                  canChangeOrientation: false,
-                  canChangePageFormat: false,
-                  allowPrinting: true,
-                  allowSharing: true,
-               //   showPrintedNotification: false,
-                  pdfPreviewPageDecoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.2),
-                        blurRadius: 5,
-                        spreadRadius: 1,
-                      ),
-                    ],
-                  ),
-                ),
+                child: widget.installmentPlans.isEmpty && !_isLoading.value
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.info_outline,
+                                size: 48, color: Colors.grey),
+                            SizedBox(height: 16),
+                            Text(
+                              'No installment data available',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            SizedBox(height: 8),
+                            ElevatedButton(
+                              onPressed: _generatePdfReport,
+                              child: Text('Refresh'),
+                            ),
+                          ],
+                        ),
+                      )
+                    : Obx(() {
+                        if (_isLoading.value) {
+                          return const Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                TShimmerEffect(width: 120, height: 120),
+                                SizedBox(height: 16),
+                                Text('Generating Installment Report...'),
+                              ],
+                            ),
+                          );
+                        } else if (_hasError.value) {
+                          return Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.error_outline,
+                                    color: Colors.red, size: 48),
+                                SizedBox(height: 16),
+                                Text(_errorMessage.value),
+                                SizedBox(height: 16),
+                                ElevatedButton(
+                                  onPressed: _generatePdfReport,
+                                  child: Text('Retry'),
+                                ),
+                              ],
+                            ),
+                          );
+                        } else {
+                          return PdfPreview(
+                            maxPageWidth: 800,
+                            build: (format) {
+                              return Future.value(_pdfBytes!);
+                            },
+                            loadingWidget: const Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  TShimmerEffect(width: 120, height: 120),
+                                  SizedBox(height: 16),
+                                  Text('Loading PDF preview...'),
+                                ],
+                              ),
+                            ),
+                            canChangeOrientation: false,
+                            canChangePageFormat: false,
+                            canDebug: false,
+                            allowPrinting: true,
+                            allowSharing: true,
+                            enableScrollToPage: true,
+                            initialPageFormat: PdfPageFormat.a4,
+                            pdfPreviewPageDecoration: BoxDecoration(
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.2),
+                                  blurRadius: 5,
+                                  spreadRadius: 1,
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                      }),
               ),
             ),
           ),
@@ -100,6 +213,42 @@ class InstallmentReportPage extends StatelessWidget {
     );
   }
 
+  Future<Uint8List> _createEmptyPdf(PdfPageFormat format) async {
+    final pdf = pw.Document();
+    pdf.addPage(
+      pw.Page(
+        pageFormat: format,
+        build: (context) => pw.Center(
+          child: pw.Text('PDF generation timed out. Please try again.',
+              style: pw.TextStyle(fontSize: 18)),
+        ),
+      ),
+    );
+    return pdf.save();
+  }
+
+  Future<Uint8List> _createErrorPdf(PdfPageFormat format, String error) async {
+    final pdf = pw.Document();
+    pdf.addPage(
+      pw.Page(
+        pageFormat: format,
+        build: (context) => pw.Center(
+          child: pw.Column(
+            mainAxisAlignment: pw.MainAxisAlignment.center,
+            children: [
+              pw.Text('Error generating PDF',
+                  style: pw.TextStyle(fontSize: 18, color: PdfColors.red)),
+              pw.SizedBox(height: 20),
+              pw.Text('Please try again later.',
+                  style: pw.TextStyle(fontSize: 14)),
+            ],
+          ),
+        ),
+      ),
+    );
+    return pdf.save();
+  }
+
   static Future<Uint8List> generatePdfInBackground(
       Map<String, dynamic> params) async {
     final List<InstallmentTableModel> installmentPlans =
@@ -108,108 +257,149 @@ class InstallmentReportPage extends StatelessWidget {
     final String branchName = params['branchName'];
     final String cashierName = params['cashierName'];
     final String softwareCompanyName = params['softwareCompanyName'];
+    final String softwareWebsiteLink = params['softwareWebsiteLink'];
+    final String softwareContactNo = params['softwareContactNo'];
     final PdfPageFormat format = params['format'];
 
-    final pdf = pw.Document();
+    try {
+      final pdf = pw.Document();
 
-    const rowsPerPage = 15;
-    final installmentChunks = _chunkList(installmentPlans, rowsPerPage);
+      const rowsPerPage = 15;
+      final installmentChunks = _chunkList(installmentPlans, rowsPerPage);
 
-    for (var chunk in installmentChunks) {
-      pdf.addPage(
-        pw.MultiPage(
-          pageFormat: format,
-          build: (context) => [
-            pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-              children: [
-                pw.Text(companyName,
-                    style: pw.TextStyle(
-                        fontSize: 16, fontWeight: pw.FontWeight.bold)),
-              ],
-            ),
-            pw.SizedBox(height: 8),
-            pw.Text('Branch: $branchName',
-                style: const pw.TextStyle(fontSize: 12)),
-            pw.Text('Cashier: $cashierName',
-                style: const pw.TextStyle(fontSize: 12)),
-            pw.Divider(),
-            pw.SizedBox(height: 8),
-            pw.Table(
-              border: pw.TableBorder.all(width: 1),
-              columnWidths: {
-                0: const pw.FlexColumnWidth(1.5),
-                1: const pw.FlexColumnWidth(2.5),
-                2: const pw.FlexColumnWidth(2.5),
-                3: const pw.FlexColumnWidth(2.5),
-                4: const pw.FlexColumnWidth(1.5),
-                5: const pw.FlexColumnWidth(1.5),
-                6: const pw.FlexColumnWidth(2.5),
-                7: const pw.FlexColumnWidth(1.5),
-                8: const pw.FlexColumnWidth(1.5),
-              },
-              children: [
-                pw.TableRow(
-                  decoration: const pw.BoxDecoration(color: PdfColors.grey300),
-                  children: [
-                    _tableHeader('Seq No'),
-                    _tableHeader('Description'),
-                    _tableHeader('Due Date'),
-                    _tableHeader('Paid Date'),
-                    _tableHeader('Amount Due'),
-                    _tableHeader('Paid Amount'),
-                    _tableHeader('Remarks'),
-                    _tableHeader('Balance'),
-                    _tableHeader('Status'),
-                  ],
-                ),
-                for (var installment in chunk)
-                  pw.TableRow(
-                    children: [
-                      _tableCell(installment.sequenceNo.toString()),
-                      _tableCell(installment.description),
-                      _tableCell(installment.dueDate),
-                      _tableCell(installment.paidDate ?? 'N/A'),
-                      _tableCell(installment.amountDue.toString()),
-                      _tableCell(installment.paidAmount.toString()),
-                      _tableCell(installment.remarks ?? ''),
-                      _tableCell(installment.remaining.toString()),
-                      _tableCell(installment.status ?? 'NA'),
-                    ],
-                  ),
-              ],
-            ),
-            pw.SizedBox(height: 16),
-            pw.Align(
-              alignment: pw.Alignment.bottomCenter,
-              child: pw.Column(
+      for (var chunk in installmentChunks) {
+        pdf.addPage(
+          pw.MultiPage(
+            pageFormat: format,
+            build: (context) => [
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
-                  pw.Text(softwareCompanyName,
+                  pw.Text(companyName,
                       style: pw.TextStyle(
-                          fontSize: 10, fontWeight: pw.FontWeight.bold)),
-                  pw.SizedBox(height: 8),
-                  pw.Row(
-                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                    children: [
-                      pw.Text("Generated by: $softwareCompanyName",
-                          style: const pw.TextStyle(fontSize: 8)),
-                      pw.BarcodeWidget(
-                        data: 'https://www.omgzz.com',
-                        barcode: pw.Barcode.qrCode(),
-                        width: 40,
-                        height: 40,
-                      ),
-                    ],
-                  ),
+                          fontSize: 16, fontWeight: pw.FontWeight.bold)),
+                  pw.Text('Installment Report',
+                      style: pw.TextStyle(
+                          fontSize: 14, fontWeight: pw.FontWeight.bold)),
                 ],
               ),
+              pw.SizedBox(height: 8),
+              pw.Text('Branch: $branchName',
+                  style: const pw.TextStyle(fontSize: 10)),
+              pw.Text('Prepared By: $cashierName',
+                  style: const pw.TextStyle(fontSize: 10)),
+              pw.Text('Date: ${DateTime.now().toString().split(' ')[0]}',
+                  style: const pw.TextStyle(fontSize: 10)),
+              pw.Divider(),
+              pw.SizedBox(height: 8),
+              pw.Table(
+                border: pw.TableBorder.all(width: 0.5),
+                columnWidths: {
+                  0: const pw.FlexColumnWidth(1.5),
+                  1: const pw.FlexColumnWidth(2.5),
+                  2: const pw.FlexColumnWidth(2.5),
+                  3: const pw.FlexColumnWidth(2.5),
+                  4: const pw.FlexColumnWidth(1.5),
+                  5: const pw.FlexColumnWidth(1.5),
+                  6: const pw.FlexColumnWidth(2.5),
+                  7: const pw.FlexColumnWidth(1.5),
+                  8: const pw.FlexColumnWidth(1.5),
+                },
+                children: [
+                  pw.TableRow(
+                    decoration:
+                        const pw.BoxDecoration(color: PdfColors.grey300),
+                    children: [
+                      _tableHeader('Seq No'),
+                      _tableHeader('Description'),
+                      _tableHeader('Due Date'),
+                      _tableHeader('Paid Date'),
+                      _tableHeader('Amount Due'),
+                      _tableHeader('Paid Amount'),
+                      _tableHeader('Remarks'),
+                      _tableHeader('Balance'),
+                      _tableHeader('Status'),
+                    ],
+                  ),
+                  for (var installment in chunk)
+                    pw.TableRow(
+                      children: [
+                        _tableCell(installment.sequenceNo.toString()),
+                        _tableCell(installment.description),
+                        _tableCell(installment.dueDate),
+                        _tableCell(installment.paidDate ?? 'N/A'),
+                        _tableCell(installment.amountDue.toString()),
+                        _tableCell(installment.paidAmount.toString()),
+                        _tableCell(installment.remarks ?? ''),
+                        _tableCell(installment.remaining.toString()),
+                        _tableCell(installment.status ?? 'NA'),
+                      ],
+                    ),
+                ],
+              ),
+              pw.SizedBox(height: 16),
+              pw.Align(
+                alignment: pw.Alignment.bottomCenter,
+                child: pw.Column(
+                  children: [
+                    pw.Text(softwareCompanyName,
+                        style: pw.TextStyle(
+                            fontSize: 10, fontWeight: pw.FontWeight.bold)),
+                    pw.SizedBox(height: 8),
+                    pw.Row(
+                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                      children: [
+                        pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            pw.Text("Generated by: $softwareCompanyName",
+                                style: const pw.TextStyle(fontSize: 8)),
+                            if (softwareWebsiteLink.isNotEmpty)
+                              pw.Text("Website: $softwareWebsiteLink",
+                                  style: const pw.TextStyle(fontSize: 8)),
+                            if (softwareContactNo.isNotEmpty)
+                              pw.Text("Contact: $softwareContactNo",
+                                  style: const pw.TextStyle(fontSize: 8)),
+                          ],
+                        ),
+                        pw.BarcodeWidget(
+                          data: softwareWebsiteLink,
+                          barcode: pw.Barcode.qrCode(),
+                          width: 40,
+                          height: 40,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+
+      return pdf.save();
+    } catch (e) {
+      // Create a simple error PDF if something goes wrong
+      final pdf = pw.Document();
+      pdf.addPage(
+        pw.Page(
+          pageFormat: format,
+          build: (context) => pw.Center(
+            child: pw.Column(
+              mainAxisAlignment: pw.MainAxisAlignment.center,
+              children: [
+                pw.Text('Error generating PDF',
+                    style: pw.TextStyle(fontSize: 18, color: PdfColors.red)),
+                pw.SizedBox(height: 20),
+                pw.Text(e.toString(), style: const pw.TextStyle(fontSize: 12)),
+              ],
             ),
-          ],
+          ),
         ),
       );
+      return pdf.save();
     }
-
-    return pdf.save();
   }
 
   static List<List<T>> _chunkList<T>(List<T> list, int chunkSize) {
@@ -223,33 +413,34 @@ class InstallmentReportPage extends StatelessWidget {
 
   Future<void> savePdf(BuildContext context) async {
     try {
-      final pdfBytes = await compute(
-        generatePdfInBackground,
-        {
-          'installmentPlans': installmentPlans,
-          'companyName': companyName,
-          'branchName': branchName,
-          'cashierName': cashierName,
-          'softwareCompanyName': softwareCompanyName,
-          'format': PdfPageFormat.a4,
-        },
-      );
+      if (_pdfBytes == null) {
+        TLoader.errorSnackBar(
+          title: "Error",
+          message: "PDF not generated yet. Please wait or try again.",
+        );
+        return;
+      }
 
-      Directory? downloadsDir = await getDownloadsDirectory();
-      if (downloadsDir == null) {
+      final directory = Platform.isIOS || Platform.isAndroid
+          ? await getApplicationDocumentsDirectory()
+          : await getDownloadsDirectory();
+
+      if (directory == null) {
         throw Exception("Could not find downloads directory");
       }
 
-      final filePath = '${downloadsDir.path}/Installment_Report.pdf';
+      final filePath = '${directory.path}/Installment_Report.pdf';
       final file = File(filePath);
-      await file.writeAsBytes(pdfBytes);
+      await file.writeAsBytes(_pdfBytes!);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("PDF saved in Downloads folder!")),
+      TLoader.successSnackBar(
+        title: 'PDF Saved',
+        message: 'File saved to: ${file.path}',
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to save PDF: $e")),
+      TLoader.errorSnackBar(
+        title: "Error saving PDF",
+        message: e.toString(),
       );
     }
   }

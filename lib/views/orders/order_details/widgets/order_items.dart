@@ -40,8 +40,7 @@ class OrderItems extends StatelessWidget {
         ) ??
         0.0; // Ensure it's never null
 
-    final subTotalValue = subTotal + (order.discount);
-    final total =
+    final totalBeforeInstallmentCharges =
         subTotal + (order.tax) + (order.shippingFee) - (order.discount);
 
     return FutureBuilder<InstallmentPlanModel?>(
@@ -50,6 +49,23 @@ class OrderItems extends StatelessWidget {
             : Future.value(null),
         builder: (context, snapshot) {
           final installmentPlan = snapshot.data;
+
+          // Calculate commission amount - Based on subtotal after discount
+          double commissionAmount = 0.0;
+          if (order.salesmanComission > 0) {
+            // Base for commission is usually the net item value
+            final commissionBase = subTotal - order.discount;
+            commissionAmount = commissionBase * order.salesmanComission / 100;
+          }
+
+          // Calculate the actual grand total including all components
+          double grandTotal = _calculateGrandTotal(
+              subTotal: subTotal,
+              discount: order.discount,
+              tax: order.tax,
+              shippingFee: order.shippingFee,
+              commissionAmount: commissionAmount, // Pass calculated commission
+              installmentPlan: installmentPlan);
 
           return TRoundedContainer(
             padding: const EdgeInsets.all(TSizes.defaultSpace),
@@ -216,7 +232,7 @@ class OrderItems extends StatelessWidget {
                   child: Column(
                     children: [
                       _buildSummaryRow(context, 'SubTotal',
-                          Text('Rs. ${subTotalValue.toStringAsFixed(2)}')),
+                          Text('Rs. ${subTotal.toStringAsFixed(2)}')),
                       _buildSummaryRow(context, 'Discount',
                           Text('Rs. ${order.discount.toStringAsFixed(2)}')),
                       _buildSummaryRow(context, 'Shipping',
@@ -264,7 +280,7 @@ class OrderItems extends StatelessWidget {
                               context,
                               'Margin Amount',
                               Text(
-                                  'Rs. ${_calculateMarginAmount(installmentPlan)}')),
+                                  'Rs. ${_calculateMarginAmount(subTotal - order.discount, installmentPlan)}')),
                         // Salesman Commission
                         if (order.salesmanComission > 0)
                           _buildSummaryRow(context, 'Salesman Commission',
@@ -274,7 +290,7 @@ class OrderItems extends StatelessWidget {
                               context,
                               'Commission Amount',
                               Text(
-                                  'Rs. ${(total * order.salesmanComission / 100).toStringAsFixed(2)}')),
+                                  'Rs. ${(commissionAmount).toStringAsFixed(2)}')),
                       ],
 
                       const Divider(),
@@ -282,7 +298,7 @@ class OrderItems extends StatelessWidget {
                           context,
                           'Total',
                           Text(
-                            'Rs. ${_calculateGrandTotal(total, installmentPlan).toStringAsFixed(2)}',
+                            'Rs. ${grandTotal.toStringAsFixed(2)}',
                             style: Theme.of(context)
                                 .textTheme
                                 .titleLarge
@@ -340,44 +356,61 @@ class OrderItems extends StatelessWidget {
     }
   }
 
-  // Calculate margin amount based on installment plan
-  String _calculateMarginAmount(InstallmentPlanModel plan) {
-    double totalAmount = double.tryParse(plan.totalAmount) ?? 0.0;
+  // Calculate margin amount based on installment plan and base amount
+  String _calculateMarginAmount(
+      double baseAmountForMargin, InstallmentPlanModel plan) {
     double downPayment = double.tryParse(plan.downPayment) ?? 0.0;
     double marginPercentage = double.tryParse(plan.margin ?? '0.0') ?? 0.0;
 
-    double baseAmount = totalAmount - downPayment;
-    double marginAmount = baseAmount * (marginPercentage / 100.0);
+    // Margin is usually calculated on the amount financed after downpayment
+    double financedBase = baseAmountForMargin - downPayment;
+    if (financedBase < 0) financedBase = 0; // Ensure not negative
+    double marginAmount = financedBase * (marginPercentage / 100.0);
 
     return marginAmount.toStringAsFixed(2);
   }
 
   // Calculate grand total including installment-specific charges
-  double _calculateGrandTotal(double baseTotal, InstallmentPlanModel? plan) {
-    if (plan == null) return baseTotal;
+  double _calculateGrandTotal(
+      {required double subTotal,
+      required double discount,
+      required double tax,
+      required double shippingFee,
+      required double commissionAmount,
+      required InstallmentPlanModel? installmentPlan}) {
+    // Start with the base order total
+    double grandTotal = subTotal - discount + tax + shippingFee;
 
-    double grandTotal = baseTotal;
+    // Add installment specific charges if applicable
+    if (installmentPlan != null) {
+      // Add document charges
+      if (installmentPlan.documentCharges != null &&
+          installmentPlan.documentCharges!.isNotEmpty) {
+        grandTotal += double.tryParse(installmentPlan.documentCharges!) ?? 0.0;
+      }
 
-    // Add document charges
-    if (plan.documentCharges != null && plan.documentCharges!.isNotEmpty) {
-      grandTotal += double.tryParse(plan.documentCharges!) ?? 0.0;
+      // Add other charges
+      if (installmentPlan.otherCharges != null &&
+          installmentPlan.otherCharges!.isNotEmpty) {
+        grandTotal += double.tryParse(installmentPlan.otherCharges!) ?? 0.0;
+      }
+
+      // Add margin amount
+      double baseAmountForMargin = subTotal - discount;
+      double downPayment = double.tryParse(installmentPlan.downPayment) ?? 0.0;
+      double marginPercentage =
+          double.tryParse(installmentPlan.margin ?? '0.0') ?? 0.0;
+
+      if (marginPercentage > 0) {
+        double financedBase = baseAmountForMargin - downPayment;
+        if (financedBase < 0) financedBase = 0; // Ensure not negative
+        double marginAmount = financedBase * (marginPercentage / 100.0);
+        grandTotal += marginAmount;
+      }
     }
 
-    // Add other charges
-    if (plan.otherCharges != null && plan.otherCharges!.isNotEmpty) {
-      grandTotal += double.tryParse(plan.otherCharges!) ?? 0.0;
-    }
-
-    // Add margin amount
-    double totalAmount = double.tryParse(plan.totalAmount) ?? 0.0;
-    double downPayment = double.tryParse(plan.downPayment) ?? 0.0;
-    double marginPercentage = double.tryParse(plan.margin ?? '0.0') ?? 0.0;
-
-    if (marginPercentage > 0) {
-      double baseAmount = totalAmount - downPayment;
-      double marginAmount = baseAmount * (marginPercentage / 100.0);
-      grandTotal += marginAmount;
-    }
+    // Add commission amount
+    grandTotal += commissionAmount;
 
     return grandTotal;
   }

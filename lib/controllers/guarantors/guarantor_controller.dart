@@ -13,8 +13,8 @@ class GuarantorController extends GetxController {
   static GuarantorController get instance => Get.find();
   final GuarantorRepository guarantorRepository =
       Get.put(GuarantorRepository());
-  final InstallmentRepository installmentRepository = Get.find<InstallmentRepository>(); //TODO rule destroyed
-
+  final InstallmentRepository installmentRepository =
+      Get.find<InstallmentRepository>(); //TODO rule destroyed
 
   //Guarantor 1 Info
   final guraante1Name = TextEditingController();
@@ -32,29 +32,25 @@ class GuarantorController extends GetxController {
   GlobalKey<FormState> guraante2FormKey =
       GlobalKey<FormState>(); // Form key for form validation
 
-
-
   //OrderDetails
-  final RxList<GuarantorsModel> selectedGuarantors = <GuarantorsModel>[
-
-  ].obs;
+  final RxList<GuarantorsModel> selectedGuarantors = <GuarantorsModel>[].obs;
   Rx<ImageModel?> guarrantor1Image = Rx<ImageModel?>(null);
   Rx<ImageModel?> guarrantor2Image = Rx<ImageModel?>(null);
-
-
 
   Future<void> fetchGuarantors(int orderId) async {
     try {
       final planId = await installmentRepository.fetchPlanId(orderId);
 
-      final list = await guarantorRepository.fetchSpecificOrderGuarantors(planId ?? -1);
+      final list =
+          await guarantorRepository.fetchSpecificOrderGuarantors(planId ?? -1);
 
       if (list.isNotEmpty) {
         // If the fetched list has data, assign it to selectedGuarantors
         selectedGuarantors.assignAll(list);
       } else {
         // If the fetched list is empty, reset selectedGuarantors to two empty models
-        selectedGuarantors.assignAll([GuarantorsModel.empty(), GuarantorsModel.empty()]);
+        selectedGuarantors
+            .assignAll([GuarantorsModel.empty(), GuarantorsModel.empty()]);
       }
       if (kDebugMode) {
         print('Selected Guarantors Length: ${selectedGuarantors.length}');
@@ -89,14 +85,14 @@ class GuarantorController extends GetxController {
 
       String firstName1 = nameParts1.isNotEmpty ? nameParts1.first : "";
       String lastName1 =
-      nameParts1.length > 1 ? nameParts1.sublist(1).join(' ') : "";
+          nameParts1.length > 1 ? nameParts1.sublist(1).join(' ') : "";
 
       String fullName2 = guraante2Name.text.trim();
       List<String> nameParts2 = fullName2.split(' ');
 
       String firstName2 = nameParts2.isNotEmpty ? nameParts2.first : "";
       String lastName2 =
-      nameParts2.length > 1 ? nameParts2.sublist(1).join(' ') : "";
+          nameParts2.length > 1 ? nameParts2.sublist(1).join(' ') : "";
 
       // Create GuarantorsModel objects
       GuarantorsModel guarantor1 = GuarantorsModel(
@@ -120,8 +116,10 @@ class GuarantorController extends GetxController {
       );
 
       // Upload guarantors
-      final ids = await guarantorRepository
-          .uploadGuarantors([guarantor1.toJson(isUpdate: true ), guarantor2.toJson(isUpdate: true)]);
+      final ids = await guarantorRepository.uploadGuarantors([
+        guarantor1.toJson(isUpdate: true),
+        guarantor2.toJson(isUpdate: true)
+      ]);
 
       // Success Message
       return ids;
@@ -130,5 +128,20 @@ class GuarantorController extends GetxController {
           title: 'Oh Snap! Guarantors!!', message: e.toString());
       return [];
     }
+  }
+
+  // Clear all guarantor text fields
+  void clearGuarantorFields() {
+    // Clear Guarantor 1 fields
+    guraante1Name.clear();
+    guraante1PhoneNo.clear();
+    guraante1Address.clear();
+    guraante1CNIC.clear();
+
+    // Clear Guarantor 2 fields
+    guraante2Name.clear();
+    guraante2PhoneNo.clear();
+    guraante2Address.clear();
+    guraante2CNIC.clear();
   }
 }

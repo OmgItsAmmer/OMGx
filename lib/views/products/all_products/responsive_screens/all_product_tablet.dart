@@ -1,26 +1,25 @@
-import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/controllers/table/table_search_controller.dart';
-import 'package:admin_dashboard_v3/routes/routes.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
+import '../../../../controllers/product/product_controller.dart';
+import '../../../../routes/routes.dart';
+import '../table/product_table.dart';
 
-import '../table/customer_table.dart';
-
-class CustomerTablet extends StatelessWidget {
-  const CustomerTablet({super.key});
+class AllProductTabletScreen extends GetView<ProductController> {
+  const AllProductTabletScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Use a unique instance of TableSearchController for customers
-    if (!Get.isRegistered<TableSearchController>(tag: 'customers')) {
-      Get.put(TableSearchController(), tag: 'customers');
+    // Initialize the table search controller if not already initialized
+    if (!Get.isRegistered<TableSearchController>(tag: 'products')) {
+      Get.put(TableSearchController(), tag: 'products');
     }
     final tableSearchController =
-        Get.find<TableSearchController>(tag: 'customers');
+        Get.find<TableSearchController>(tag: 'products');
 
     return SingleChildScrollView(
       child: Padding(
@@ -28,33 +27,28 @@ class CustomerTablet extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Title
-            Text(
-              'Customers',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
+            Text('Products', style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: TSizes.spaceBtwItems),
 
-            // Table container
+            // Table Body
             TRoundedContainer(
               padding: const EdgeInsets.all(TSizes.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Add & Search - Stacked for tablet
+                  // Add & Search Row - Stacked on tablet for better space utilization
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Add button
                       SizedBox(
                         width: 200,
                         child: ElevatedButton(
                           onPressed: () {
-                            Get.toNamed(TRoutes.addCustomer,
-                                arguments: CustomerModel.empty());
+                            controller.cleanProductDetail();
+                            Get.toNamed(TRoutes.productsDetail);
                           },
                           child: Text(
-                            'Add New Customer',
+                            'Add Products',
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium!
@@ -63,12 +57,11 @@ class CustomerTablet extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: TSizes.spaceBtwItems),
-                      // Search field
                       TextFormField(
                         controller: tableSearchController.searchController,
                         decoration: const InputDecoration(
                           prefixIcon: Icon(Iconsax.search_normal),
-                          hintText: 'Search by name, email, or phone',
+                          hintText: 'Search Anything',
                         ),
                         onChanged: (value) {
                           tableSearchController.searchTerm.value = value;
@@ -78,12 +71,12 @@ class CustomerTablet extends StatelessWidget {
                   ),
                   const SizedBox(height: TSizes.spaceBtwItems),
 
-                  // Customer table with horizontal scroll for tablet
+                  // Table body
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: SizedBox(
                       width: MediaQuery.of(context).size.width - 2 * TSizes.md,
-                      child: const CustomerTable(),
+                      child: const ProductTable(),
                     ),
                   ),
                 ],

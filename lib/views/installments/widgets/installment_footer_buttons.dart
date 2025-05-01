@@ -21,72 +21,98 @@ class InstallmentFooterButtons extends StatelessWidget {
     final GuarantorImageController guarantorImageController =
         Get.find<GuarantorImageController>();
 
+    // Function to show confirmation dialog
+    void showDiscardConfirmation() {
+      showDialog(
+        context: context,
+        builder: (BuildContext dialogContext) {
+          return AlertDialog(
+            title: const Text('Confirm Discard'),
+            content: const Text(
+                'Are you sure you want to discard the installment plan? All data will be lost.'),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(dialogContext).pop(); // Close the dialog
+                },
+              ),
+              TextButton(
+                child: const Text('Discard'),
+                onPressed: () {
+                  Navigator.of(dialogContext).pop(); // Close the dialog
+                  installmentController.clearAllFields();
+                  guarantorImageController.clearGuarantorImages();
+                  Navigator.of(context).pop(); // Go back to previous screen
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+
     return TRoundedContainer(
       padding: const EdgeInsets.all(TSizes.defaultSpace),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
+          // Empty space on the left side
           Expanded(
-              flex: TDeviceUtils.isDesktopScreen(context) ? 6 : 0,
-              child: const SizedBox()),
+            flex: TDeviceUtils.isDesktopScreen(context) ? 6 : 0,
+            child: const SizedBox(),
+          ),
 
-          //Buttons confirm print cancel
+          // Discard button
           Expanded(
-              child: SizedBox(
-            width: 150,
-            child: OutlinedButton(
-                onPressed: () {
-                  Get.back();
-                },
-                child: const Text('Discard')),
-          )),
-          const SizedBox(
-            width: TSizes.spaceBtwSections,
-          ),
-          Expanded(
-              child: SizedBox(
-            width: 150,
-            child: ElevatedButton(
-                onPressed: () {}, child: const Text('Print only')),
-          )),
-          const SizedBox(
-            width: TSizes.spaceBtwSections,
-          ),
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () async {
-                // Get the input values
-                try {
-                  // Save the installment plan and guarantor images
-                  // (now correctly handled in savePlan method)
-                  installmentController.savePlan();
-                } catch (e) {
-                  TLoader.errorSnackBar(title: 'Error', message: e.toString());
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: TColors.primary,
-                foregroundColor: Colors.white,
-                minimumSize: const Size(200, 50),
+            child: SizedBox(
+              width: 150,
+              child: OutlinedButton(
+                onPressed: showDiscardConfirmation,
+                child: const Text('Discard'),
               ),
-              child: const Text('Create Installment Plan'),
             ),
           ),
-          const SizedBox(
-            width: TSizes.spaceBtwSections,
-          ),
+
+          const SizedBox(width: TSizes.spaceBtwSections),
+
+          // Print only button
           Expanded(
-              child: SizedBox(
-            width: 150,
-            child: TextButton(
-                onPressed: () {
-                  installmentController.clearAllFields();
-                  guarantorImageController.clearGuarantorImages();
-                  Get.back();
+            child: SizedBox(
+              width: 150,
+              child: ElevatedButton(
+                onPressed: () {},
+                child: const Text('Print only'),
+              ),
+            ),
+          ),
+
+          const SizedBox(width: TSizes.spaceBtwSections),
+
+          // Create Installment Plan button
+          Expanded(
+            flex: 2,
+            child: SizedBox(
+              width: 200,
+              child: ElevatedButton(
+                onPressed: () async {
+                  try {
+                    // Save the installment plan and guarantor images
+                    installmentController.savePlan();
+                  } catch (e) {
+                    TLoader.errorSnackBar(
+                        title: 'Error', message: e.toString());
+                  }
                 },
-                child: const Text('Cancel')),
-          )),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: TColors.primary,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Create Plan'),
+              ),
+            ),
+          ),
         ],
       ),
     );

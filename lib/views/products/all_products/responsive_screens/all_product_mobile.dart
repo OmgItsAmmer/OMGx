@@ -1,30 +1,29 @@
-import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
+import 'package:admin_dashboard_v3/Models/products/product_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
-import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
 import 'package:admin_dashboard_v3/controllers/media/media_controller.dart';
 import 'package:admin_dashboard_v3/controllers/table/table_search_controller.dart';
-import 'package:admin_dashboard_v3/routes/routes.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
+import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
+import '../../../../controllers/product/product_controller.dart';
+import '../../../../routes/routes.dart';
 
-class CustomerMobile extends StatelessWidget {
-  const CustomerMobile({super.key});
+class AllProductMobileScreen extends GetView<ProductController> {
+  const AllProductMobileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Use a unique instance of TableSearchController for customers
-    if (!Get.isRegistered<TableSearchController>(tag: 'customers')) {
-      Get.put(TableSearchController(), tag: 'customers');
+    // Initialize the table search controller if not already initialized
+    if (!Get.isRegistered<TableSearchController>(tag: 'products')) {
+      Get.put(TableSearchController(), tag: 'products');
     }
-
     final tableSearchController =
-        Get.find<TableSearchController>(tag: 'customers');
-    final customerController = Get.find<CustomerController>();
+        Get.find<TableSearchController>(tag: 'products');
     final mediaController = Get.find<MediaController>();
 
     return SingleChildScrollView(
@@ -33,11 +32,7 @@ class CustomerMobile extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Title
-            Text(
-              'Customers',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
+            Text('Products', style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: TSizes.spaceBtwItems),
 
             // Controls
@@ -46,16 +41,16 @@ class CustomerMobile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Add button
+                  // Add Button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        Get.toNamed(TRoutes.addCustomer,
-                            arguments: CustomerModel.empty());
+                        controller.cleanProductDetail();
+                        Get.toNamed(TRoutes.productsDetail);
                       },
                       child: Text(
-                        'Add New Customer',
+                        'Add Products',
                         style: Theme.of(context)
                             .textTheme
                             .bodyMedium!
@@ -65,12 +60,12 @@ class CustomerMobile extends StatelessWidget {
                   ),
                   const SizedBox(height: TSizes.spaceBtwItems),
 
-                  // Search field
+                  // Search Field
                   TextFormField(
                     controller: tableSearchController.searchController,
                     decoration: const InputDecoration(
                       prefixIcon: Icon(Iconsax.search_normal),
-                      hintText: 'Search by name, email, or phone',
+                      hintText: 'Search Anything',
                     ),
                     onChanged: (value) {
                       tableSearchController.searchTerm.value = value;
@@ -81,31 +76,34 @@ class CustomerMobile extends StatelessWidget {
             ),
             const SizedBox(height: TSizes.spaceBtwItems),
 
-            // Customer Cards List
+            // Products Grid
             Obx(() {
               // Get the search term from the controller
               String searchTerm =
                   tableSearchController.searchTerm.value.toLowerCase();
 
-              // Create a filtered customers list based on search term
-              var filteredCustomers = [
-                ...customerController.allCustomers
+              // Create a filtered product list based on search term
+              var filteredProducts = [
+                ...controller.allProducts
               ]; // Create a copy
               if (searchTerm.isNotEmpty) {
-                filteredCustomers =
-                    customerController.allCustomers.where((customer) {
-                  return customer.fullName.toLowerCase().contains(searchTerm) ||
-                      customer.email.toLowerCase().contains(searchTerm) ||
-                      customer.phoneNumber.toLowerCase().contains(searchTerm);
-                }).toList();
+                filteredProducts = controller.allProducts
+                    .where((product) =>
+                        (product.name?.toString().toLowerCase() ?? '')
+                            .contains(searchTerm) ||
+                        (product.salePrice?.toString().toLowerCase() ?? '')
+                            .contains(searchTerm) ||
+                        (product.stockQuantity?.toString().toLowerCase() ?? '')
+                            .contains(searchTerm))
+                    .toList();
               }
 
-              if (filteredCustomers.isEmpty) {
+              if (filteredProducts.isEmpty) {
                 return Center(
                   child: Padding(
                     padding: const EdgeInsets.all(TSizes.defaultSpace),
                     child: Text(
-                      'No customers found',
+                      'No products found',
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                   ),
@@ -115,15 +113,24 @@ class CustomerMobile extends StatelessWidget {
               return ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: filteredCustomers.length,
+                itemCount: filteredProducts.length,
                 itemBuilder: (context, index) {
-                  final customer = filteredCustomers[index];
-                  return CustomerCard(
-                    customer: customer,
+                  final product = filteredProducts[index];
+                  return ProductCard(
+                    product: product,
                     mediaController: mediaController,
-                    onView: () {
-                      customerController.selectedCustomer.value = customer;
-                      Get.toNamed(TRoutes.customerDetails);
+                    onEdit: () {
+                      // Ensure we have a valid product ID as an int
+                      final productIdStr =
+                          product.productId?.toString() ?? '-1';
+                      controller.productId.value =
+                          int.tryParse(productIdStr) ?? -1;
+
+                      // Set the selectedProduct string value
+                      controller.selectedProduct.value = productIdStr;
+
+                      // Navigate to product details
+                      Get.toNamed(TRoutes.productsDetail);
                     },
                   );
                 },
@@ -136,24 +143,33 @@ class CustomerMobile extends StatelessWidget {
   }
 }
 
-class CustomerCard extends StatelessWidget {
-  final CustomerModel customer;
+class ProductCard extends StatelessWidget {
+  final ProductModel product;
   final MediaController mediaController;
-  final VoidCallback onView;
+  final VoidCallback onEdit;
 
-  const CustomerCard({
+  const ProductCard({
     Key? key,
-    required this.customer,
+    required this.product,
     required this.mediaController,
-    required this.onView,
+    required this.onEdit,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Safely get customer ID for image retrieval
-    final int customerId = customer.customerId is int
-        ? customer.customerId as int
-        : int.tryParse(customer.customerId?.toString() ?? '-1') ?? -1;
+    // Handle numeric values for display
+    final double? basePriceNum = double.tryParse(product.basePrice ?? '');
+    final double? salePriceNum = double.tryParse(product.salePrice ?? '');
+
+    // Safely convert stock quantity to int
+    final int stockQuantity = product.stockQuantity is int
+        ? product.stockQuantity as int
+        : int.tryParse(product.stockQuantity?.toString() ?? '0') ?? 0;
+
+    // Parse productId to int for the image fetch
+    final int productIdInt = product.productId is int
+        ? product.productId as int
+        : int.tryParse(product.productId?.toString() ?? '-1') ?? -1;
 
     return TRoundedContainer(
       margin: const EdgeInsets.only(bottom: TSizes.spaceBtwItems),
@@ -161,15 +177,15 @@ class CustomerCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Customer info row
+          // Product image and name row
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Customer image
+              // Product Image
               FutureBuilder<String?>(
                 future: mediaController.fetchMainImage(
-                  customerId,
-                  MediaCategory.customers.toString().split('.').last,
+                  productIdInt,
+                  MediaCategory.products.toString().split('.').last,
                 ),
                 builder: (context, snapshot) {
                   return Container(
@@ -185,40 +201,26 @@ class CustomerCard extends StatelessWidget {
                             isNetworkImage: true,
                             imageurl: snapshot.data!,
                           )
-                        : const CircleAvatar(
-                            radius: 30,
-                            child: Icon(Iconsax.user, size: 30),
-                          ),
+                        : const Icon(Iconsax.image, size: 30),
                   );
                 },
               ),
               const SizedBox(width: TSizes.sm),
 
-              // Customer name and details
+              // Product name
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      customer.fullName,
+                      product.name ?? 'Unknown Product',
                       style: Theme.of(context).textTheme.titleMedium,
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: TSizes.xs),
-                    Row(
-                      children: [
-                        const Icon(Iconsax.sms, size: 14),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            customer.email,
-                            style: Theme.of(context).textTheme.bodySmall,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      'Brand: ${product.brandID ?? 'N/A'}',
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
                 ),
@@ -229,16 +231,20 @@ class CustomerCard extends StatelessWidget {
           const SizedBox(height: TSizes.sm),
           const Divider(),
 
-          // Contact details
+          // Product details
           Padding(
             padding: const EdgeInsets.symmetric(vertical: TSizes.xs),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Icon(Iconsax.call, size: 16),
-                const SizedBox(width: 8),
+                const Text('Buy Price:'),
                 Text(
-                  customer.phoneNumber,
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  basePriceNum != null
+                      ? 'Rs. ${basePriceNum.toStringAsFixed(2)}'
+                      : 'Rs. N/A',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ],
             ),
@@ -247,12 +253,35 @@ class CustomerCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: TSizes.xs),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Icon(Iconsax.card, size: 16),
-                const SizedBox(width: 8),
+                const Text('Sale Price:'),
                 Text(
-                  customer.cnic.isNotEmpty ? customer.cnic : 'No CNIC provided',
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  salePriceNum != null
+                      ? 'Rs. ${salePriceNum.toStringAsFixed(2)}'
+                      : 'Rs. N/A',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: TColors.primary,
+                      ),
+                ),
+              ],
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: TSizes.xs),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Stock:'),
+                Text(
+                  '$stockQuantity units',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color:
+                            stockQuantity > 0 ? TColors.success : TColors.error,
+                      ),
                 ),
               ],
             ),
@@ -260,13 +289,13 @@ class CustomerCard extends StatelessWidget {
 
           const SizedBox(height: TSizes.sm),
 
-          // View details button
+          // Edit button
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: onView,
-              icon: const Icon(Iconsax.eye),
-              label: const Text('View Details'),
+              onPressed: onEdit,
+              icon: const Icon(Iconsax.edit),
+              label: const Text('Edit Product'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: TColors.primary,
                 foregroundColor: TColors.white,
