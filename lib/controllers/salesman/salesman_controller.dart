@@ -5,8 +5,10 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../Models/salesman/salesman_model.dart';
 import '../../common/widgets/loaders/tloaders.dart';
+import '../../routes/routes.dart';
 import '../address/address_controller.dart';
 import '../media/media_controller.dart';
+import '../orders/orders_controller.dart';
 
 class SalesmanController extends GetxController {
   static SalesmanController get instance => Get.find();
@@ -180,6 +182,45 @@ class SalesmanController extends GetxController {
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     } finally {
       // Set loading state to false
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> prepareSalesmanDetails(dynamic salesmanId) async {
+    try {
+      // Set loading state to true
+      isLoading.value = true;
+
+      // Find salesman by ID
+      final salesmanData = allSalesman.firstWhere(
+        (salesman) => salesman.salesmanId == salesmanId,
+        orElse: () => SalesmanModel.empty(),
+      );
+
+      // Set selected salesman
+      if (salesmanData != SalesmanModel.empty()) {
+        selectedSalesman?.value = salesmanData;
+      } else {
+        TLoader.errorSnackBar(title: 'Error', message: 'Salesman not found');
+        return;
+      }
+
+      // Fetch related data
+      await Get.find<AddressController>()
+          .fetchEntityAddresses(salesmanId, 'Salesman');
+      await Get.find<OrderController>()
+          .fetchEntityOrders(salesmanId, 'Salesman');
+
+      // Process order data
+      final orderController = Get.find<OrderController>();
+      orderController.setRecentOrderDay();
+      // orderController.setAverageTotalAmount(); // Uncomment if needed for salesmen
+
+      // Navigate to details screen with salesman model as argument
+      Get.toNamed(TRoutes.salesmanDetails, arguments: salesmanData);
+    } catch (e) {
+      TLoader.errorSnackBar(title: 'Error', message: e.toString());
+    } finally {
       isLoading.value = false;
     }
   }

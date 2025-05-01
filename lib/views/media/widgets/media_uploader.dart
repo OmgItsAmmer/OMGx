@@ -50,42 +50,43 @@ class MediaUploader extends StatelessWidget {
                             child: Container(
                               color: Colors.transparent,
                               child: Center(
-                                child: Obx(
-                                  () {
-                                    if(mediaController.isInserting.value) {
-                                      return TAnimationLoaderWidget(
-                                        animation: TImages.docerAnimation,
-                                        height: 80,
-                                        width: 80,
-                                        text: 'Uploading...',
-                                      );
-                                    }
-
-                                   return Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        TAnimationLoaderWidget(
-                                          animation: TImages.animatedFile,
-                                          height: 80,
-                                          width: 80,
-                                          text: 'Drag and Drop Images here',
-                                        ),
-                                        // const SizedBox(
-                                        //     height: TSizes.spaceBtwItems),
-                                        // const Text('Drag and Drop Images here'),
-                                        const SizedBox(
-                                            height: TSizes.spaceBtwItems),
-                                        OutlinedButton(
-                                          onPressed: () async {
-                                            mediaController
-                                                .pickImageFromExplorer();
-                                          },
-                                          child: const Text('Select Images'),
-                                        ),
-                                      ],
+                                child: Obx(() {
+                                  if (mediaController.isInserting.value) {
+                                    return TAnimationLoaderWidget(
+                                      animation: TImages.docerAnimation,
+                                      height: 80,
+                                      width: 80,
+                                      text: 'Uploading...',
                                     );
                                   }
-                                ),
+
+                                  return Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      TAnimationLoaderWidget(
+                                        animation: TImages.animatedFile,
+                                        height: 80,
+                                        width: 80,
+                                        text: (TDeviceUtils.isMobileScreen(
+                                                context))
+                                            ? ''
+                                            : 'Drag and Drop Images here',
+                                      ),
+                                      // const SizedBox(
+                                      //     height: TSizes.spaceBtwItems),
+                                      // const Text('Drag and Drop Images here'),
+                                      const SizedBox(
+                                          height: TSizes.spaceBtwItems),
+                                      OutlinedButton(
+                                        onPressed: () async {
+                                          mediaController
+                                              .pickImageFromExplorer();
+                                        },
+                                        child: const Text('Select Images'),
+                                      ),
+                                    ],
+                                  );
+                                }),
                               ),
                             ),
                           ),
@@ -139,7 +140,22 @@ class MediaUploader extends StatelessWidget {
                                 children: [
                                   TextButton(
                                       onPressed: () {
-                                        mediaController.droppedFiles.clear();
+                                        // Add confirmation dialog before removing all
+                                        Get.defaultDialog(
+                                          title: 'Confirm Removal',
+                                          middleText:
+                                              'Are you sure you want to remove all images?',
+                                          textConfirm: 'Yes',
+                                          textCancel: 'No',
+                                          onConfirm: () {
+                                            mediaController.droppedFiles
+                                                .clear();
+                                            Navigator.of(context).pop();
+                                          },
+                                          onCancel: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                        );
                                       },
                                       child: const Text('Remove  All')),
                                   const SizedBox(
@@ -175,7 +191,6 @@ class MediaUploader extends StatelessWidget {
                                                   },
                                                   onCancel: () {
                                                     Navigator.of(context).pop();
-
                                                   },
                                                 );
                                               } else {
@@ -200,67 +215,129 @@ class MediaUploader extends StatelessWidget {
                             spacing: TSizes.spaceBtwItems / 2,
                             runSpacing: TSizes.spaceBtwItems / 2,
                             children: mediaController.droppedFiles
-                                .map((file) => GestureDetector(
-                                      onTap: () {},
-                                      child: SizedBox(
-                                        width: 140,
-                                        height: 180,
-                                        child: Column(
-                                          children: [
-                                            Expanded(
-                                                child: TRoundedImage(
-                                              //   backgroundColor: TColors.primaryBackground,
-                                              width: 150,
-                                              height: 100,
-                                              imageurl: file.path,
-                                              isNetworkImage: false,
-                                              isFileImage: true,
-                                            )),
-                                          ],
+                                .asMap()
+                                .entries
+                                .map((entry) {
+                              final index = entry.key;
+                              final file = entry.value;
+                              return Stack(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {},
+                                    child: SizedBox(
+                                      width: 140,
+                                      height: 180,
+                                      child: Column(
+                                        children: [
+                                          Expanded(
+                                              child: TRoundedImage(
+                                            width: 150,
+                                            height: 100,
+                                            imageurl: file.path,
+                                            isNetworkImage: false,
+                                            isFileImage: true,
+                                          )),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  // Cross icon to remove individual images
+                                  Positioned(
+                                    top: 0,
+                                    right: 0,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        mediaController.droppedFiles
+                                            .removeAt(index);
+                                      },
+                                      child: Container(
+                                        decoration: const BoxDecoration(
+                                          color: Colors.red,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        padding: const EdgeInsets.all(4),
+                                        child: const Icon(
+                                          Icons.close,
+                                          size: 16,
+                                          color: Colors.white,
                                         ),
                                       ),
-                                    ))
-                                .toList(),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }).toList(),
                           ),
                           const SizedBox(
                             height: TSizes.spaceBtwSections,
                           ),
                           TDeviceUtils.isMobileScreen(context)
-                              ? SizedBox(
-                                  width: double.infinity,
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      if (mediaController.selectedPath !=
-                                          MediaCategory.folders) {
-                                        // Step 1: Confirmation dialog
+                              ? Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        if (mediaController.selectedPath !=
+                                            MediaCategory.folders) {
+                                          // Step 1: Confirmation dialog
+                                          Get.defaultDialog(
+                                            title: 'Confirm Upload',
+                                            middleText:
+                                                'Are you sure you want to upload?',
+                                            textConfirm: 'Yes',
+                                            textCancel: 'No',
+                                            onConfirm: () {
+                                              Navigator.of(context).pop();
+                                              mediaController
+                                                  .insertImagesInTableAndBucket(
+                                                mediaController
+                                                    .selectedPath.value
+                                                    .toString()
+                                                    .split('.')
+                                                    .last,
+                                              );
+                                            },
+                                            onCancel: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          );
+                                        } else {
+                                          TLoader.errorSnackBar(
+                                            title: 'Select Category',
+                                            message:
+                                                'Kindly select the category first',
+                                          );
+                                        }
+                                      },
+                                      child: const Text('Upload'),
+                                    ),
+                                    const SizedBox(
+                                      height: TSizes.spaceBtwItems,
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        // Add confirmation dialog before removing all
                                         Get.defaultDialog(
-                                          title: 'Confirm Upload',
+                                          title: 'Confirm Removal',
                                           middleText:
-                                              'Are you sure you want to upload?',
+                                              'Are you sure you want to remove all images?',
                                           textConfirm: 'Yes',
                                           textCancel: 'No',
                                           onConfirm: () {
+                                            mediaController.droppedFiles
+                                                .clear();
                                             Navigator.of(context).pop();
-                                            mediaController
-                                                .insertImagesInTableAndBucket(
-                                              mediaController.selectedPath.value
-                                                  .toString()
-                                                  .split('.')
-                                                  .last,
-                                            );
                                           },
-                                          onCancel: () {},
+                                          onCancel: () {
+                                            Navigator.of(context).pop();
+                                          },
                                         );
-                                      } else {
-                                        TLoader.errorSnackBar(
-                                          title: 'Select Category',
-                                          message:
-                                              'Kindly select the category first',
-                                        );
-                                      }
-                                    },
-                                    child: const Text('Upload'),
-                                  ))
+                                      },
+                                      child: const Text('Remove All'),
+                                    ),
+                                  ],
+                                )
                               : const SizedBox.shrink()
                         ],
                       ),
@@ -271,5 +348,3 @@ class MediaUploader extends StatelessWidget {
         : const SizedBox.shrink());
   }
 }
-
-

@@ -33,7 +33,7 @@ class InstallmentTable extends StatelessWidget {
         sortAscending: tableSearchController.sortAscending.value,
         sortColumnIndex: tableSearchController.sortColumnIndex.value,
         minWidth: 700,
-        rowsperPage: 10, // Fixed value that exists in availableRowsPerPage
+        rowsperPage: 5, // Fixed value that exists in availableRowsPerPage
         availableRowsPerPage: tableSearchController.availableRowsPerPage,
         onSortChanged: (columnIndex, ascending) {
           tableSearchController.sort(columnIndex, ascending);

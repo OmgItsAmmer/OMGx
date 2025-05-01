@@ -435,6 +435,9 @@ class MediaController extends GetxController {
       TLoader.successSnackBar(
           title: 'Success', message: 'All files uploaded successfully!');
       droppedFiles.clear();
+
+      // Reset selectedPath back to default after successful upload
+      selectedPath.value = MediaCategory.folders;
     } catch (e) {
       TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     } finally {

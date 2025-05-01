@@ -294,7 +294,10 @@ class ProductCard extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: onEdit,
-              icon: const Icon(Iconsax.edit),
+              icon: const Icon(
+                Iconsax.edit,
+                color: TColors.white,
+              ),
               label: const Text('Edit Product'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: TColors.primary,

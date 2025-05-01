@@ -121,9 +121,9 @@ class CustomerMobile extends StatelessWidget {
                   return CustomerCard(
                     customer: customer,
                     mediaController: mediaController,
-                    onView: () {
-                      customerController.selectedCustomer.value = customer;
-                      Get.toNamed(TRoutes.customerDetails);
+                    onView: () async {
+                      await customerController
+                          .prepareCustomerDetails(customer.customerId);
                     },
                   );
                 },
@@ -187,7 +187,7 @@ class CustomerCard extends StatelessWidget {
                           )
                         : const CircleAvatar(
                             radius: 30,
-                            child: Icon(Iconsax.user, size: 30),
+                            child: Icon(Iconsax.user, size: 30,color: TColors.white,),
                           ),
                   );
                 },
@@ -208,7 +208,7 @@ class CustomerCard extends StatelessWidget {
                     const SizedBox(height: TSizes.xs),
                     Row(
                       children: [
-                        const Icon(Iconsax.sms, size: 14),
+                        const Icon(Iconsax.sms, size: 14,color: TColors.white,),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
@@ -234,7 +234,7 @@ class CustomerCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: TSizes.xs),
             child: Row(
               children: [
-                const Icon(Iconsax.call, size: 16),
+                const Icon(Iconsax.call, size: 16,color: TColors.white,),
                 const SizedBox(width: 8),
                 Text(
                   customer.phoneNumber,
@@ -248,7 +248,7 @@ class CustomerCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: TSizes.xs),
             child: Row(
               children: [
-                const Icon(Iconsax.card, size: 16),
+                const Icon(Iconsax.card, size: 16,color: TColors.white,),
                 const SizedBox(width: 8),
                 Text(
                   customer.cnic.isNotEmpty ? customer.cnic : 'No CNIC provided',
