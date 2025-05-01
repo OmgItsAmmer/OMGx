@@ -27,6 +27,7 @@ class CategoryController extends GetxController {
   GlobalKey<FormState> categoryDetail = GlobalKey<FormState>();
 
   RxBool isUpdating = false.obs;
+  RxBool isLoading = false.obs;
 
   // Method to discard changes and navigate back
   void discardChanges() {
@@ -309,15 +310,14 @@ class CategoryController extends GetxController {
     try {
       final categories = await categoryRepository.fetchCategories();
       allCategories.assignAll(categories);
-
-      // Force UI update
-      update();
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
-
       if (kDebugMode) {
-        print(e);
+        print('Error fetching categories: $e');
       }
+      TLoader.errorSnackBar(
+        title: "Error",
+        message: 'Failed to load categories: ${e.toString()}',
+      );
     }
   }
 
@@ -369,6 +369,28 @@ class CategoryController extends GetxController {
         print("Error deleting category: $e");
         TLoader.errorSnackBar(title: 'Error', message: e.toString());
       }
+    }
+  }
+
+  // Method to refresh categories data from database
+  Future<void> refreshCategories() async {
+    try {
+      isLoading.value = true;
+      await fetchCategories();
+      TLoader.successSnackBar(
+        title: 'Refreshed!',
+        message: 'Category list has been updated.',
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error refreshing categories: $e');
+      }
+      TLoader.errorSnackBar(
+        title: 'Error',
+        message: 'Failed to refresh categories: ${e.toString()}',
+      );
+    } finally {
+      isLoading.value = false;
     }
   }
 }

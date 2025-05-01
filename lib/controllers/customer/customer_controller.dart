@@ -62,6 +62,28 @@ class CustomerController extends GetxController {
     }
   }
 
+  // Method to refresh customers data from database
+  Future<void> refreshCustomers() async {
+    try {
+      isLoading.value = true;
+      await fetchAllCustomers();
+      TLoader.successSnackBar(
+        title: 'Refreshed!',
+        message: 'Customer list has been updated.',
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error refreshing customers: $e');
+      }
+      TLoader.errorSnackBar(
+        title: 'Error',
+        message: 'Failed to refresh customers: ${e.toString()}',
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<void> updateCustomer(int customerId) async {
     try {
       // Validate the form

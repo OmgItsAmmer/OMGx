@@ -138,33 +138,35 @@ class MediaContent extends StatelessWidget {
                                         backgroundColor: TColors.primaryBackground,
                                         isNetworkImage: true,
                                       ),
-                                      Positioned(
-                                        top: TSizes.md,
-                                        right: TSizes.md,
-                                        child: Obx(() => Checkbox(
-                                          value: image.isSelected.value,
-                                          onChanged: (selected) {
-                                            if (selected != null) {
-                                              image.isSelected.value = selected;
-                                              if (selected) {
-                                                if (!allowMultipleSelection) {
-                                                  for (var otherImage in selectedImages) {
-                                                    if (otherImage != image) {
-                                                      otherImage.isSelected.value = false;
+                                      // Only show checkbox when allowSelection is true
+                                      if (allowSelection)
+                                        Positioned(
+                                          top: TSizes.md,
+                                          right: TSizes.md,
+                                          child: Obx(() => Checkbox(
+                                            value: image.isSelected.value,
+                                            onChanged: (selected) {
+                                              if (selected != null) {
+                                                image.isSelected.value = selected;
+                                                if (selected) {
+                                                  if (!allowMultipleSelection) {
+                                                    for (var otherImage in selectedImages) {
+                                                      if (otherImage != image) {
+                                                        otherImage.isSelected.value = false;
+                                                      }
                                                     }
+                                                    selectedImages.clear();
                                                   }
-                                                  selectedImages.clear();
+                                                  if (!selectedImages.contains(image)) {
+                                                    selectedImages.add(image);
+                                                  }
+                                                } else {
+                                                  selectedImages.remove(image);
                                                 }
-                                                if (!selectedImages.contains(image)) {
-                                                  selectedImages.add(image);
-                                                }
-                                              } else {
-                                                selectedImages.remove(image);
                                               }
-                                            }
-                                          },
-                                        )),
-                                      ),
+                                            },
+                                          )),
+                                        ),
                                     ],
                                   );
                                 }
@@ -187,7 +189,6 @@ class MediaContent extends StatelessWidget {
                     );
                   }).toList(),
                 )
-
               ],
             );
           }),
@@ -292,7 +293,6 @@ class MediaContent extends StatelessWidget {
               }
             },
           ),
-
         );
       },
     );
@@ -313,39 +313,41 @@ class MediaContent extends StatelessWidget {
           backgroundColor: TColors.primaryBackground,
           isNetworkImage: true,
         ),
-        Positioned(
-          top: TSizes.md,
-          right: TSizes.md,
-          child: Obx(
-            () => Checkbox(
-              value: image.isSelected.value,
-              onChanged: (selected) {
-                if (selected != null) {
-                  image.isSelected.value = selected;
-                  if (selected) {
-                    if (!allowMultipleSelection) {
-                      // If multiple selection is not allowed, uncheck others
-                      for (var otherImage in selectedImages) {
-                        if (otherImage != image) {
-                          otherImage.isSelected.value = false;
+        // Only show checkbox when allowSelection is true
+        if (allowSelection)
+          Positioned(
+            top: TSizes.md,
+            right: TSizes.md,
+            child: Obx(
+              () => Checkbox(
+                value: image.isSelected.value,
+                onChanged: (selected) {
+                  if (selected != null) {
+                    image.isSelected.value = selected;
+                    if (selected) {
+                      if (!allowMultipleSelection) {
+                        // If multiple selection is not allowed, uncheck others
+                        for (var otherImage in selectedImages) {
+                          if (otherImage != image) {
+                            otherImage.isSelected.value = false;
+                          }
                         }
+                        selectedImages.clear();
                       }
-                      selectedImages.clear();
+                      selectedImages.add(image);
+                    } else {
+                      selectedImages.remove(image);
                     }
-                    selectedImages.add(image);
-                  } else {
-                    selectedImages.remove(image);
                   }
-                }
-              },
+                },
+              ),
             ),
           ),
-        ),
       ],
     );
   }
 
-  Widget buildAddSelectedImageButton(BuildContext  context) {
+  Widget buildAddSelectedImageButton(BuildContext context) {
     return Row(
       children: [
         // Close Button
@@ -375,11 +377,3 @@ class MediaContent extends StatelessWidget {
     );
   }
 }
-
-// TRoundedImage(
-// imageurl: TImages.productImage1,
-// width: 90,
-// height: 90,
-// padding: EdgeInsets.all(TSizes.sm),
-// backgroundColor: TColors.primaryBackground,
-// ),

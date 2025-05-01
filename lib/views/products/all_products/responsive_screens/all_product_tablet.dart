@@ -1,4 +1,5 @@
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
+import 'package:admin_dashboard_v3/common/widgets/icons/t_circular_icon.dart';
 import 'package:admin_dashboard_v3/controllers/table/table_search_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
@@ -57,15 +58,31 @@ class AllProductTabletScreen extends GetView<ProductController> {
                         ),
                       ),
                       const SizedBox(height: TSizes.spaceBtwItems),
-                      TextFormField(
-                        controller: tableSearchController.searchController,
-                        decoration: const InputDecoration(
-                          prefixIcon: Icon(Iconsax.search_normal),
-                          hintText: 'Search Anything',
-                        ),
-                        onChanged: (value) {
-                          tableSearchController.searchTerm.value = value;
-                        },
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller:
+                                  tableSearchController.searchController,
+                              decoration: const InputDecoration(
+                                prefixIcon: Icon(Iconsax.search_normal),
+                                hintText: 'Search Anything',
+                              ),
+                              onChanged: (value) {
+                                tableSearchController.searchTerm.value = value;
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: TSizes.sm),
+                          TCircularIcon(
+                            icon: Iconsax.refresh,
+                            backgroundColor: TColors.primary,
+                            color: TColors.white,
+                            onPressed: () {
+                              controller.refreshProducts();
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),

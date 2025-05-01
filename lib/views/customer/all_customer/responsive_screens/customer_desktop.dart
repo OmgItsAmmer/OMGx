@@ -1,5 +1,7 @@
 import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
+import 'package:admin_dashboard_v3/common/widgets/icons/t_circular_icon.dart';
+import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
 import 'package:admin_dashboard_v3/controllers/table/table_search_controller.dart';
 import 'package:admin_dashboard_v3/routes/routes.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
@@ -21,6 +23,7 @@ class CustomerDesktop extends StatelessWidget {
     }
     final tableSearchController =
         Get.find<TableSearchController>(tag: 'customers');
+    final customerController = Get.find<CustomerController>();
 
     return Expanded(
       child: SizedBox(
@@ -67,20 +70,35 @@ class CustomerDesktop extends StatelessWidget {
                                       .apply(color: TColors.white),
                                 )),
                           ),
-                          SizedBox(
-                            width: 500,
-                            child: TextFormField(
-                              controller:
-                                  tableSearchController.searchController,
-                              decoration: const InputDecoration(
-                                  prefixIcon: Icon(Iconsax.search_normal),
-                                  hintText: 'Search by name, email, or phone'),
-                              onChanged: (value) {
-                                // Update the search term
-                                tableSearchController.searchTerm.value = value;
-                              },
-                            ),
-                          )
+                          Row(
+                            children: [
+                              SizedBox(
+                                width: 500,
+                                child: TextFormField(
+                                  controller:
+                                      tableSearchController.searchController,
+                                  decoration: const InputDecoration(
+                                      prefixIcon: Icon(Iconsax.search_normal),
+                                      hintText:
+                                          'Search by name, email, or phone'),
+                                  onChanged: (value) {
+                                    // Update the search term
+                                    tableSearchController.searchTerm.value =
+                                        value;
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: TSizes.sm),
+                              TCircularIcon(
+                                icon: Iconsax.refresh,
+                                backgroundColor: TColors.primary,
+                                color: TColors.white,
+                                onPressed: () {
+                                  customerController.refreshCustomers();
+                                },
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                       const SizedBox(

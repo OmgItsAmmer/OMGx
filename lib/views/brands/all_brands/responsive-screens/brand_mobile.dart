@@ -67,15 +67,30 @@ class AllBrandsMobileScreen extends StatelessWidget {
 
                   const SizedBox(height: TSizes.spaceBtwItems),
 
-                  // Search field - full width for mobile
-                  TextFormField(
-                    controller: tableSearchController.searchController,
-                    decoration: const InputDecoration(
-                        prefixIcon: Icon(Iconsax.search_normal),
-                        hintText: 'Search by brand name'),
-                    onChanged: (value) {
-                      tableSearchController.searchTerm.value = value;
-                    },
+                  // Search field with refresh icon
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: tableSearchController.searchController,
+                          decoration: const InputDecoration(
+                              prefixIcon: Icon(Iconsax.search_normal),
+                              hintText: 'Search by brand name'),
+                          onChanged: (value) {
+                            tableSearchController.searchTerm.value = value;
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: TSizes.sm),
+                      TCircularIcon(
+                        icon: Iconsax.refresh,
+                        backgroundColor: TColors.primary,
+                        color: TColors.white,
+                        onPressed: () {
+                          brandController.refreshBrands();
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -327,7 +342,6 @@ class BrandCard extends StatelessWidget {
                   size: 16,
                 ),
               ),
-              
             ],
           ),
         ],

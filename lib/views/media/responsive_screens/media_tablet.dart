@@ -56,7 +56,7 @@ class MediaTabletScreen extends StatelessWidget {
               allowMultipleSelection: false,
               allowSelection: false,
               onSelectedImage: (val) {
-                mediaController.selectedImages.value = val;
+              //  mediaController.selectedImages.value = val;
               },
             ),
           ],

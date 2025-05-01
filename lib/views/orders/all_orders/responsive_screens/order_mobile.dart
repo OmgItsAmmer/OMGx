@@ -1,5 +1,6 @@
 import 'package:admin_dashboard_v3/Models/orders/order_item_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
+import 'package:admin_dashboard_v3/common/widgets/icons/t_circular_icon.dart';
 import 'package:admin_dashboard_v3/controllers/orders/orders_controller.dart';
 import 'package:admin_dashboard_v3/controllers/table/table_search_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
@@ -45,17 +46,32 @@ class OrdersMobileScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Add search bar with full width for mobile
-                  TextFormField(
-                    controller: tableSearchController.searchController,
-                    decoration: const InputDecoration(
-                      prefixIcon:
-                          Icon(Iconsax.search_normal, color: TColors.white),
-                      hintText: 'Search by order ID, date, or status',
-                    ),
-                    onChanged: (value) {
-                      // Update the search term
-                      tableSearchController.searchTerm.value = value;
-                    },
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: tableSearchController.searchController,
+                          decoration: const InputDecoration(
+                            prefixIcon: Icon(Iconsax.search_normal,
+                                color: TColors.white),
+                            hintText: 'Search by order ID, date, or status',
+                          ),
+                          onChanged: (value) {
+                            // Update the search term
+                            tableSearchController.searchTerm.value = value;
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: TSizes.sm),
+                      TCircularIcon(
+                        icon: Iconsax.refresh,
+                        backgroundColor: TColors.primary,
+                        color: TColors.white,
+                        onPressed: () {
+                          orderController.fetchOrders();
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),

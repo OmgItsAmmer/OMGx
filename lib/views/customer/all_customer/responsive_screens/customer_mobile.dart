@@ -1,5 +1,6 @@
 import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
+import 'package:admin_dashboard_v3/common/widgets/icons/t_circular_icon.dart';
 import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
 import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
 import 'package:admin_dashboard_v3/controllers/media/media_controller.dart';
@@ -65,16 +66,31 @@ class CustomerMobile extends StatelessWidget {
                   ),
                   const SizedBox(height: TSizes.spaceBtwItems),
 
-                  // Search field
-                  TextFormField(
-                    controller: tableSearchController.searchController,
-                    decoration: const InputDecoration(
-                      prefixIcon: Icon(Iconsax.search_normal),
-                      hintText: 'Search by name, email, or phone',
-                    ),
-                    onChanged: (value) {
-                      tableSearchController.searchTerm.value = value;
-                    },
+                  // Search field with refresh icon
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: tableSearchController.searchController,
+                          decoration: const InputDecoration(
+                            prefixIcon: Icon(Iconsax.search_normal),
+                            hintText: 'Search by name, email, or phone',
+                          ),
+                          onChanged: (value) {
+                            tableSearchController.searchTerm.value = value;
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: TSizes.sm),
+                      TCircularIcon(
+                        icon: Iconsax.refresh,
+                        backgroundColor: TColors.primary,
+                        color: TColors.white,
+                        onPressed: () {
+                          customerController.refreshCustomers();
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -187,7 +203,11 @@ class CustomerCard extends StatelessWidget {
                           )
                         : const CircleAvatar(
                             radius: 30,
-                            child: Icon(Iconsax.user, size: 30,color: TColors.white,),
+                            child: Icon(
+                              Iconsax.user,
+                              size: 30,
+                              color: TColors.white,
+                            ),
                           ),
                   );
                 },
@@ -208,7 +228,11 @@ class CustomerCard extends StatelessWidget {
                     const SizedBox(height: TSizes.xs),
                     Row(
                       children: [
-                        const Icon(Iconsax.sms, size: 14,color: TColors.white,),
+                        const Icon(
+                          Iconsax.sms,
+                          size: 14,
+                          color: TColors.white,
+                        ),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
@@ -234,7 +258,11 @@ class CustomerCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: TSizes.xs),
             child: Row(
               children: [
-                const Icon(Iconsax.call, size: 16,color: TColors.white,),
+                const Icon(
+                  Iconsax.call,
+                  size: 16,
+                  color: TColors.white,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   customer.phoneNumber,
@@ -248,7 +276,11 @@ class CustomerCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: TSizes.xs),
             child: Row(
               children: [
-                const Icon(Iconsax.card, size: 16,color: TColors.white,),
+                const Icon(
+                  Iconsax.card,
+                  size: 16,
+                  color: TColors.white,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   customer.cnic.isNotEmpty ? customer.cnic : 'No CNIC provided',

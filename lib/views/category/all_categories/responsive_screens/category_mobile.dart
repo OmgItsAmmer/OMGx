@@ -68,15 +68,32 @@ class CategoryMobile extends StatelessWidget {
                   ),
                   const SizedBox(height: TSizes.spaceBtwItems),
 
-                  // Search Field
-                  TextFormField(
-                    controller: tableSearchController.searchController,
-                    decoration: const InputDecoration(
-                        prefixIcon: Icon(Iconsax.search_normal,),
-                        hintText: 'Search by category name'),
-                    onChanged: (value) {
-                      tableSearchController.searchTerm.value = value;
-                    },
+                  // Search Field with Refresh Icon
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: tableSearchController.searchController,
+                          decoration: const InputDecoration(
+                              prefixIcon: Icon(
+                                Iconsax.search_normal,
+                              ),
+                              hintText: 'Search by category name'),
+                          onChanged: (value) {
+                            tableSearchController.searchTerm.value = value;
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: TSizes.sm),
+                      TCircularIcon(
+                        icon: Iconsax.refresh,
+                        backgroundColor: TColors.primary,
+                        color: TColors.white,
+                        onPressed: () {
+                          categoryController.refreshCategories();
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -270,7 +287,10 @@ class CategoryCard extends StatelessWidget {
                 flex: 2,
                 child: ElevatedButton.icon(
                   onPressed: onEdit,
-                  icon: const Icon(Iconsax.edit,color: TColors.white,),
+                  icon: const Icon(
+                    Iconsax.edit,
+                    color: TColors.white,
+                  ),
                   label: const Text('Edit'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: TColors.primary,
@@ -283,7 +303,6 @@ class CategoryCard extends StatelessWidget {
               // Delete button
               Expanded(
                 child: TCircularIcon(
-                
                   onPressed: onDelete,
                   icon: Iconsax.trash,
                   color: TColors.white,
@@ -291,7 +310,6 @@ class CategoryCard extends StatelessWidget {
                   size: 16,
                 ),
               ),
-              
             ],
           ),
         ],

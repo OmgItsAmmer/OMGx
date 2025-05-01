@@ -1,5 +1,7 @@
 import 'package:admin_dashboard_v3/Models/salesman/salesman_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
+import 'package:admin_dashboard_v3/common/widgets/icons/t_circular_icon.dart';
+import 'package:admin_dashboard_v3/controllers/salesman/salesman_controller.dart';
 import 'package:admin_dashboard_v3/controllers/table/table_search_controller.dart';
 import 'package:admin_dashboard_v3/routes/routes.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
@@ -20,6 +22,7 @@ class SalesmanTablet extends StatelessWidget {
     }
     final tableSearchController =
         Get.find<TableSearchController>(tag: 'salesmen');
+    final salesmanController = Get.find<SalesmanController>();
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -62,21 +65,39 @@ class SalesmanTablet extends StatelessWidget {
                               )),
                         ),
                         Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: TSizes.md),
-                            child: TextFormField(
-                              controller:
-                                  tableSearchController.searchController,
-                              decoration: const InputDecoration(
-                                  prefixIcon: Icon(Iconsax.search_normal),
-                                  hintText: 'Search by name, email, or phone'),
-                              onChanged: (value) {
-                                // Update the search term
-                                tableSearchController.searchTerm.value = value;
-                              },
-                            ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.only(left: TSizes.md),
+                                  child: TextFormField(
+                                    controller:
+                                        tableSearchController.searchController,
+                                    decoration: const InputDecoration(
+                                        prefixIcon: Icon(Iconsax.search_normal),
+                                        hintText:
+                                            'Search by name, email, or phone'),
+                                    onChanged: (value) {
+                                      // Update the search term
+                                      tableSearchController.searchTerm.value =
+                                          value;
+                                    },
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: TSizes.sm),
+                              TCircularIcon(
+                                icon: Iconsax.refresh,
+                                backgroundColor: TColors.primary,
+                                color: TColors.white,
+                                onPressed: () {
+                                  salesmanController.refreshSalesman();
+                                },
+                              ),
+                            ],
                           ),
-                        )
+                        ),
                       ],
                     ),
                     const SizedBox(

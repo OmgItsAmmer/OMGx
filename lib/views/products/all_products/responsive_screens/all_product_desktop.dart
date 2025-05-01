@@ -1,4 +1,5 @@
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
+import 'package:admin_dashboard_v3/common/widgets/icons/t_circular_icon.dart';
 import 'package:admin_dashboard_v3/controllers/table/table_search_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
@@ -59,20 +60,35 @@ class AllProductDesktopScreen extends GetView<ProductController> {
                           ),
                         ),
                       ),
-                      SizedBox(
-                        width: 500,
-                        child: TextFormField(
-                          controller: tableSearchController.searchController,
-                          decoration: const InputDecoration(
-                            prefixIcon: Icon(Iconsax.search_normal),
-                            hintText: 'Search Anything',
+                      Row(
+                        children: [
+                          SizedBox(
+                            width: 500,
+                            child: TextFormField(
+                              controller:
+                                  tableSearchController.searchController,
+                              decoration: const InputDecoration(
+                                prefixIcon: Icon(Iconsax.search_normal),
+                                hintText: 'Search Anything',
+                              ),
+                              onChanged: (value) {
+                                // This will trigger the Rx variable update through the listener
+                                tableSearchController.searchTerm.value = value;
+                              },
+                            ),
                           ),
-                          onChanged: (value) {
-                            // This will trigger the Rx variable update through the listener
-                            tableSearchController.searchTerm.value = value;
-                          },
-                        ),
-                      )
+                          const SizedBox(width: TSizes.sm),
+                          TCircularIcon(
+                            icon: Iconsax.refresh,
+                            backgroundColor:
+                                TColors.primary,
+                            color: TColors.white,
+                            onPressed: () {
+                              controller.refreshProducts();
+                            },
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                   const SizedBox(height: TSizes.spaceBtwSections),

@@ -1,4 +1,5 @@
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
+import 'package:admin_dashboard_v3/common/widgets/icons/t_circular_icon.dart';
 import 'package:admin_dashboard_v3/controllers/brands/brand_controller.dart';
 import 'package:admin_dashboard_v3/controllers/table/table_search_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
@@ -68,19 +69,33 @@ class AllBrandsDesktopScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-                      SizedBox(
-                        width: 500,
-                        child: TextFormField(
-                          controller: tableSearchController.searchController,
-                          decoration: const InputDecoration(
-                              prefixIcon: Icon(Iconsax.search_normal),
-                              hintText: 'Search by brand name'),
-                          onChanged: (value) {
-                            // Update the search term in the controller
-                            tableSearchController.searchTerm.value = value;
-                          },
-                        ),
-                      )
+                      Row(
+                        children: [
+                          SizedBox(
+                            width: 500,
+                            child: TextFormField(
+                              controller:
+                                  tableSearchController.searchController,
+                              decoration: const InputDecoration(
+                                  prefixIcon: Icon(Iconsax.search_normal),
+                                  hintText: 'Search by brand name'),
+                              onChanged: (value) {
+                                // Update the search term in the controller
+                                tableSearchController.searchTerm.value = value;
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: TSizes.sm),
+                          TCircularIcon(
+                            icon: Iconsax.refresh,
+                            backgroundColor: TColors.primary,
+                            color: TColors.white,
+                            onPressed: () {
+                              brandController.refreshBrands();
+                            },
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                   const SizedBox(

@@ -23,6 +23,9 @@ class TRouteMiddleware extends GetMiddleware {
       image.isSelected.value = false; // ✅ Reset checkbox state
     }
     mediaController.selectedImages.clear();
+    mediaController.allImages.clear();
+  
+  
     mediaController.selectedPath.value = MediaCategory.folders;
 
     // Run function when navigating to ProfileScreen

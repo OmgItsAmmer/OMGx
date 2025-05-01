@@ -395,4 +395,26 @@ class SalesmanController extends GetxController {
       );
     }
   }
+
+  // Method to refresh salesman data from database
+  Future<void> refreshSalesman() async {
+    try {
+      isLoading.value = true;
+      await fetchAllSalesman();
+      TLoader.successSnackBar(
+        title: 'Refreshed!',
+        message: 'Salesman list has been updated.',
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error refreshing salesman list: $e');
+      }
+      TLoader.errorSnackBar(
+        title: 'Error',
+        message: 'Failed to refresh salesman list: ${e.toString()}',
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }

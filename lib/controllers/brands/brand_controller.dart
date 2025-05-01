@@ -23,6 +23,7 @@ class BrandController extends GetxController {
   // Controller for the text field to add a new brand
 
   RxBool isUpdating = false.obs;
+  RxBool isLoading = false.obs;
 
   //Brand Details
   final TextEditingController brandName = TextEditingController();
@@ -374,6 +375,28 @@ class BrandController extends GetxController {
       if (kDebugMode) {
         print("Error decrementing brand product count: $e");
       }
+    }
+  }
+
+  // Method to refresh brands data from database
+  Future<void> refreshBrands() async {
+    try {
+      isLoading.value = true;
+      await fetchBrands();
+      TLoader.successSnackBar(
+        title: 'Refreshed!',
+        message: 'Brand list has been updated.',
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error refreshing brands: $e');
+      }
+      TLoader.errorSnackBar(
+        title: 'Error',
+        message: 'Failed to refresh brands: ${e.toString()}',
+      );
+    } finally {
+      isLoading.value = false;
     }
   }
 }

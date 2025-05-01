@@ -59,7 +59,7 @@ class MediaDesktopScreen extends StatelessWidget {
                   allowSelection: false,
                   onSelectedImage: (val){
 
-                    mediaController.selectedImages.value = val; //do it but its useless
+                 //   mediaController.selectedImages.value = val; //do it but its useless
 
                   },
 

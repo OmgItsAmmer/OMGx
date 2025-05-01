@@ -1,5 +1,6 @@
 import 'package:admin_dashboard_v3/Models/salesman/salesman_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
+import 'package:admin_dashboard_v3/common/widgets/icons/t_circular_icon.dart';
 import 'package:admin_dashboard_v3/controllers/table/table_search_controller.dart';
 import 'package:admin_dashboard_v3/routes/routes.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
@@ -64,15 +65,31 @@ class SalesmanMobile extends StatelessWidget {
 
                     const SizedBox(height: TSizes.spaceBtwItems),
 
-                    // Search field
-                    TextFormField(
-                      controller: tableSearchController.searchController,
-                      decoration: const InputDecoration(
-                          prefixIcon: Icon(Iconsax.search_normal),
-                          hintText: 'Search by name, email, or phone'),
-                      onChanged: (value) {
-                        tableSearchController.searchTerm.value = value;
-                      },
+                    // Search field with refresh icon
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: tableSearchController.searchController,
+                            decoration: const InputDecoration(
+                              prefixIcon: Icon(Iconsax.search_normal),
+                              hintText: 'Search by name, email, or phone',
+                            ),
+                            onChanged: (value) {
+                              tableSearchController.searchTerm.value = value;
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: TSizes.sm),
+                        TCircularIcon(
+                          icon: Iconsax.refresh,
+                          backgroundColor: TColors.primary,
+                          color: TColors.white,
+                          onPressed: () {
+                            salesmanController.refreshSalesman();
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -162,7 +179,11 @@ class SalesmanCard extends StatelessWidget {
               // Salesman avatar
               const CircleAvatar(
                 radius: 30,
-                child: Icon(Iconsax.user, size: 30,color: TColors.white,),
+                child: Icon(
+                  Iconsax.user,
+                  size: 30,
+                  color: TColors.white,
+                ),
               ),
               const SizedBox(width: TSizes.sm),
 
@@ -180,7 +201,11 @@ class SalesmanCard extends StatelessWidget {
                     const SizedBox(height: TSizes.xs),
                     Row(
                       children: [
-                        const Icon(Iconsax.sms, size: 14,color: TColors.white,),
+                        const Icon(
+                          Iconsax.sms,
+                          size: 14,
+                          color: TColors.white,
+                        ),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
@@ -206,7 +231,11 @@ class SalesmanCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: TSizes.xs),
             child: Row(
               children: [
-                const Icon(Iconsax.call, size: 16,color: TColors.white,),
+                const Icon(
+                  Iconsax.call,
+                  size: 16,
+                  color: TColors.white,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   salesman.phoneNumber,
@@ -220,7 +249,11 @@ class SalesmanCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: TSizes.xs),
             child: Row(
               children: [
-                const Icon(Iconsax.location, size: 16,color: TColors.white,),
+                const Icon(
+                  Iconsax.location,
+                  size: 16,
+                  color: TColors.white,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -238,7 +271,11 @@ class SalesmanCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: TSizes.xs),
             child: Row(
               children: [
-                const Icon(Iconsax.card, size: 16,color: TColors.white,),
+                const Icon(
+                  Iconsax.card,
+                  size: 16,
+                  color: TColors.white,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   salesman.cnic,
@@ -253,7 +290,11 @@ class SalesmanCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: TSizes.xs),
               child: Row(
                 children: [
-                  const Icon(Iconsax.percentage_circle, size: 16,color: TColors.white,),
+                  const Icon(
+                    Iconsax.percentage_circle,
+                    size: 16,
+                    color: TColors.white,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'Commission: ${salesman.comission}%',
@@ -270,7 +311,10 @@ class SalesmanCard extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: onView,
-              icon: const Icon(Iconsax.eye,color: TColors.white,),
+              icon: const Icon(
+                Iconsax.eye,
+                color: TColors.white,
+              ),
               label: const Text('View Details'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: TColors.primary,

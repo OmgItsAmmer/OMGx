@@ -1,4 +1,5 @@
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
+import 'package:admin_dashboard_v3/common/widgets/icons/t_circular_icon.dart';
 import 'package:admin_dashboard_v3/controllers/table/table_search_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
@@ -27,54 +28,53 @@ class AllCategoryDesktopScreen extends StatelessWidget {
     final tableSearchController =
         Get.find<TableSearchController>(tag: 'categories');
 
-    return Expanded(
-      child: SizedBox(
-        // height: 900,
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(TSizes.defaultSpace),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Categories',
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-                const SizedBox(
-                  height: TSizes.spaceBtwSections,
-                ),
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(TSizes.defaultSpace),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Categories',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(
+              height: TSizes.spaceBtwSections,
+            ),
 
-                //Bread Crumbs
+            //Bread Crumbs
 
-                //Table Body
-                TRoundedContainer(
-                  padding: const EdgeInsets.all(TSizes.defaultSpace),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            //Table Body
+            TRoundedContainer(
+              padding: const EdgeInsets.all(TSizes.defaultSpace),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          SizedBox(
-                            width: 200,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                categoryController.cleanCategoryDetail();
-                                Get.toNamed(
-                                  TRoutes.categoryDetails,
-                                  arguments: CategoryModel.empty(),
-                                );
-                              },
-                              child: Text(
-                                'Add New Category',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium!
-                                    .apply(color: TColors.white),
-                              ),
-                            ),
+                      SizedBox(
+                        width: 200,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            categoryController.cleanCategoryDetail();
+                            Get.toNamed(
+                              TRoutes.categoryDetails,
+                              arguments: CategoryModel.empty(),
+                            );
+                          },
+                          child: Text(
+                            'Add New Category',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .apply(color: TColors.white),
                           ),
+                        ),
+                      ),
+                      Row(
+                        children: [
                           SizedBox(
                             width: 500,
                             child: TextFormField(
@@ -88,21 +88,30 @@ class AllCategoryDesktopScreen extends StatelessWidget {
                                 tableSearchController.searchTerm.value = value;
                               },
                             ),
-                          )
+                          ),
+                          const SizedBox(width: TSizes.sm),
+                          TCircularIcon(
+                            icon: Iconsax.refresh,
+                            backgroundColor: TColors.primary,
+                            color: TColors.white,
+                            onPressed: () {
+                              categoryController.refreshCategories();
+                            },
+                          ),
                         ],
                       ),
-                      const SizedBox(
-                        height: TSizes.spaceBtwSections,
-                      ),
-
-                      //Table body
-                      const CategoryTable()
                     ],
                   ),
-                ),
-              ],
+                  const SizedBox(
+                    height: TSizes.spaceBtwSections,
+                  ),
+
+                  //Table body
+                  const CategoryTable()
+                ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
