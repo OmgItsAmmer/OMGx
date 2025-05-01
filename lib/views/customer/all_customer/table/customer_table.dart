@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 
 import '../../../../controllers/customer/customer_controller.dart';
 import '../../../../utils/device/device_utility.dart';
-import '../../../data_table.dart';
+import '../../../paginated_data_table.dart';
 import 'customer_table_soruce.dart';
 
 class CustomerTable extends StatelessWidget {

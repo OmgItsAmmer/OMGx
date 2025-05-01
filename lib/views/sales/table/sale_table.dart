@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../controllers/sales/sales_controller.dart';
-import '../../data_table.dart';
+import '../../paginated_data_table.dart';
 
 class SaleTable extends StatelessWidget {
   const SaleTable({super.key});
@@ -41,8 +41,9 @@ class SaleTable extends StatelessWidget {
         sortAscending: tableSearchController.sortAscending.value,
         sortColumnIndex: tableSearchController.sortColumnIndex.value,
         minWidth: 700,
-        rowsperPage: tableSearchController.rowsPerPage.value,
-        availableRowsPerPage: tableSearchController.availableRowsPerPage,
+        rowsperPage: 5,
+        availableRowsPerPage: const [5, 10],
+        controllerTag: 'sales',
         onSortChanged: (columnIndex, ascending) {
           tableSearchController.sort(columnIndex, ascending);
           // Add sorting logic here if needed

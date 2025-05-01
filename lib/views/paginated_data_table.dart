@@ -1,4 +1,5 @@
 import 'package:admin_dashboard_v3/common/widgets/loaders/animation_loader.dart';
+import 'package:admin_dashboard_v3/controllers/table/table_search_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:data_table_2/data_table_2.dart';
@@ -25,6 +26,7 @@ class TPaginatedDataTable extends StatefulWidget {
     this.availableRowsPerPage = const [10, 20, 50, 100],
     this.onSortChanged,
     this.searchQuery = '',
+    this.controllerTag,
   });
 
   // Dynamic column names
@@ -41,6 +43,7 @@ class TPaginatedDataTable extends StatefulWidget {
   final List<int> availableRowsPerPage;
   final Function(int, bool)? onSortChanged;
   final String searchQuery;
+  final String? controllerTag;
 
   @override
   State<TPaginatedDataTable> createState() => _TPaginatedDataTableState();
@@ -111,16 +114,7 @@ class _TPaginatedDataTableState extends State<TPaginatedDataTable> {
             dividerThickness: 0,
             horizontalMargin: 12,
             rowsPerPage: _rowsPerPage,
-            onRowsPerPageChanged: (value) {
-              if (value != null) {
-                setState(() {
-                  _rowsPerPage = value;
-                });
-                if (widget.onPageChanged != null) {
-                  widget.onPageChanged!(0); // Reset to first page
-                }
-              }
-            },
+            onRowsPerPageChanged: null,
             availableRowsPerPage: widget.availableRowsPerPage,
             dataRowHeight: widget.dataRowHeight,
             onPageChanged: widget.onPageChanged,

@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 
 import '../../common/widgets/appbar/appbar.dart';
-import '../data_table.dart';
+import '../paginated_data_table.dart';
 
 class ProductScreen extends StatelessWidget {
   const ProductScreen({super.key});

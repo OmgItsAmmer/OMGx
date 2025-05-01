@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../controllers/salesman/salesman_controller.dart';
-import '../../../data_table.dart';
+import '../../../paginated_data_table.dart';
 
 class SalesmanTable extends StatelessWidget {
   const SalesmanTable({super.key});

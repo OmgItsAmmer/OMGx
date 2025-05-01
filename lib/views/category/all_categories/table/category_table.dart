@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../controllers/brands/brand_controller.dart';
-import '../../../data_table.dart';
+import '../../../paginated_data_table.dart';
 import 'category_table_source.dart';
 
 class CategoryTable extends StatelessWidget {

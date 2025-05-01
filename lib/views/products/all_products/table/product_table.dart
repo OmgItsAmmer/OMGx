@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../utils/device/device_utility.dart';
-import '../../../data_table.dart';
+import '../../../paginated_data_table.dart';
 
 class ProductTable extends StatelessWidget {
   const ProductTable({super.key});

@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
-import '../../../data_table.dart';
+import '../../../paginated_data_table.dart';
 
 class OrderTable extends StatelessWidget {
   const OrderTable({super.key});
@@ -56,13 +56,16 @@ class OrderTable extends StatelessWidget {
       }
 
       return TPaginatedDataTable(
+        // isScrollable: false,
         sortAscending: tableSearchController.sortAscending.value,
         sortColumnIndex: tableSearchController.sortColumnIndex.value,
         minWidth: 700,
         showCheckBox: false,
         dataRowHeight: 60,
-        rowsperPage: tableSearchController.rowsPerPage.value,
-        availableRowsPerPage: tableSearchController.availableRowsPerPage,
+        tableHeight: 840,
+        rowsperPage: 10,
+        availableRowsPerPage: const [5, 10],
+        controllerTag: 'orders',
         onSortChanged: (columnIndex, ascending) {
           // Only sort by Order ID (column 0)
           if (columnIndex == 0) {

@@ -15,7 +15,7 @@ class TableSearchController extends GetxController {
   final Rx<bool> sortAscending = true.obs;
 
   // Available rows per page options
-  final availableRowsPerPage = [10, 25, 50];
+  final availableRowsPerPage = [5, 10, 25, 50];
   final Rx<int> rowsPerPage = 10.obs;
 
   // Initialize controller

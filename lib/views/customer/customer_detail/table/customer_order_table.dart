@@ -3,7 +3,7 @@ import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../data_table.dart';
+import '../../../paginated_data_table.dart';
 import 'customer_order_table_source.dart';
 
 class CustomerOrderTable extends StatelessWidget {

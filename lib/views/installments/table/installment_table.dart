@@ -9,7 +9,7 @@ import 'package:get/get.dart';
 import '../../../../utils/device/device_utility.dart';
 import '../../../controllers/installments/installments_controller.dart';
 import '../../../controllers/sales/sales_controller.dart';
-import '../../data_table.dart';
+import '../../paginated_data_table.dart';
 import 'installment_table_source.dart';
 
 class InstallmentTable extends StatelessWidget {

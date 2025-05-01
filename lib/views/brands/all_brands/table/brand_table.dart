@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 
 import '../../../../controllers/brands/brand_controller.dart';
 import '../../../../utils/device/device_utility.dart';
-import '../../../data_table.dart';
+import '../../../paginated_data_table.dart';
 import 'brand_table_source.dart';
 
 class BrandTable extends StatelessWidget {
