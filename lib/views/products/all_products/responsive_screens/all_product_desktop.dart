@@ -36,6 +36,7 @@ class AllProductDesktopScreen extends GetView<ProductController> {
 
             //Table Body
             TRoundedContainer(
+           
               padding: const EdgeInsets.all(TSizes.defaultSpace),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

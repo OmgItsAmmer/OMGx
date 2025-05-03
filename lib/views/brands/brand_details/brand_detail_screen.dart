@@ -12,6 +12,7 @@ class BrandDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final brand = Get.arguments;
     return TSiteTemplate(
+      useLayout: false,
       desktop: BrandDetailDesktop(brandModel: brand),
       tablet: BrandDetailTablet(brandModel: brand),
       mobile: BrandDetailMobile(brandModel: brand),

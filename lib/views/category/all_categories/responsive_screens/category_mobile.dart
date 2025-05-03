@@ -141,6 +141,7 @@ class CategoryMobile extends StatelessWidget {
                     category: category,
                     mediaController: mediaController,
                     onEdit: () {
+                      categoryController.setCategoryDetail(category);
                       categoryController.selectedCategory.value =
                           category.categoryId.toString();
                       Get.toNamed(TRoutes.categoryDetails, arguments: category);

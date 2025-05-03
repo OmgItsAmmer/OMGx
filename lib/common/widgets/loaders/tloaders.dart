@@ -157,18 +157,46 @@ class TLoader {
     }
   }
 
+  /// Shows an info snackbar using Get.rawSnackbar
+  static infoSnackBar(
+      {required String title, String message = '', int duration = 3}) {
+    try {
+      Get.rawSnackbar(
+        titleText: Text(title,
+            style: const TextStyle(
+                color: TColors.white, fontWeight: FontWeight.bold)),
+        messageText:
+            Text(message, style: const TextStyle(color: TColors.white)),
+        icon: const Icon(Iconsax.information, color: TColors.white, size: 20),
+        isDismissible: true,
+        shouldIconPulse: true,
+        backgroundColor: TColors.info,
+        snackPosition: SnackPosition.BOTTOM,
+        duration: Duration(seconds: duration),
+        margin: const EdgeInsets.all(20),
+        borderRadius: 10,
+        maxWidth: 600,
+      );
+    } catch (e) {
+      debugPrint('Error showing info snackbar (raw): $e');
+      _fallbackGetSnackbar(title: title, message: message, isInfo: true);
+    }
+  }
+
   /// Fallback method that tries to show a simpler snackbar when the main one fails
   static void _fallbackGetSnackbar(
       {String title = '',
       String message = '',
       bool isSuccess = false,
       bool isWarning = false,
-      bool isError = false}) {
+      bool isError = false,
+      bool isInfo = false}) {
     try {
       Color bgColor = Colors.grey;
       if (isSuccess) bgColor = TColors.primary;
       if (isWarning) bgColor = Colors.orange;
       if (isError) bgColor = Colors.red.shade600;
+      if (isInfo) bgColor = TColors.info;
 
       Get.rawSnackbar(
         title: title,

@@ -14,6 +14,7 @@ class CategoryDetailScreen extends StatelessWidget {
     final CategoryModel category = Get.arguments;
 
     return TSiteTemplate(
+      useLayout: false,
       desktop: CategoryDetailDesktop(
         categoryModel: category,
       ),

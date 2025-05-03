@@ -52,230 +52,324 @@ class SalesMobile extends GetView<SalesController> {
                   ),
                   const SizedBox(height: TSizes.spaceBtwItems),
 
-                  // Sales Details - Remove ExpansionTile, keep content
-                  // ExpansionTile(
-                  //   title: const Text(
-                  //     "Sales Details",
-                  //     style: TextStyle(
-                  //       fontSize: 14,
-                  //       fontWeight: FontWeight.bold,
-                  //     ),
-                  //   ),
-                  //   initiallyExpanded: controller.isExpanded.value,
-                  //   onExpansionChanged: (value) {
-                  //     controller.toggleExpanded();
-                  //   },
-                  //   children: [
-                  Padding(
-                    padding: const EdgeInsets.all(TSizes.sm),
-                    child: TRoundedContainer(
-                      padding: const EdgeInsets.all(TSizes.sm),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Cashier Info
-                          const SalesCashierInfo(),
-
-                          const SizedBox(
-                            height: TSizes.spaceBtwItems,
-                          ),
-
-                          // Customer Info
-                          SaleCustomerInfo(
-                            namesList: customerController.allCustomers
-                                .map((e) => e.fullName)
-                                .toList(),
-                            hintText: 'Customer Name',
-                            userNameTextController:
-                                controller.customerNameController,
-                            onSelectedName: (val) async {
-                              if (val.isEmpty) {
-                                customerController.selectedCustomer.value =
-                                    CustomerModel.empty();
-                                controller.customerPhoneNoController.value
-                                    .clear();
-                                controller.customerCNICController.value.clear();
-                                addressController.selectedCustomerAddress
-                                    .value = AddressModel.empty();
-                                controller.customerAddressController.value
-                                    .clear();
-                                controller.selectedAddressId = null;
-                                mediaController.displayImage.value = null;
-                                return;
-                              }
-
-                              // Continue normal logic
-                              customerController.selectedCustomer.value =
-                                  customerController.allCustomers.firstWhere(
-                                      (user) => user.fullName == val);
-                              addressController.fetchEntityAddresses(
-                                  customerController
-                                      .selectedCustomer.value.customerId!,
-                                  'Customer');
-                              controller.entityId.value = customerController
-                                  .selectedCustomer.value.customerId!;
-                              controller.customerPhoneNoController.value.text =
-                                  customerController
-                                      .selectedCustomer.value.phoneNumber;
-                              controller.customerCNICController.value.text =
-                                  customerController
-                                      .selectedCustomer.value.cnic;
-                            },
-                            addressList:
-                                addressController.allCustomerAddressesLocation,
-                            addressTextController:
-                                controller.customerAddressController.value,
-                            onSelectedAddress: (val) {
-                              addressController.selectedCustomerAddress.value =
-                                  addressController.allCustomerAddresses
-                                      .firstWhere(
-                                          (address) => address.location == val);
-
-                              controller.selectedAddressId = addressController
-                                  .selectedCustomerAddress.value.addressId;
-                            },
-                          ),
-
-                          const SizedBox(
-                            height: TSizes.spaceBtwItems,
-                          ),
-
-                          // Salesman Info
-                          const SalesSalemanInfo(),
-                        ],
-                      ),
-                    ),
-                  ),
-                  //   ],
-                  // ),
-
-                  const SizedBox(
-                    height: TSizes.spaceBtwItems,
-                  ),
-
-                  // Product Search Section
-                  TRoundedContainer(
-                    padding: const EdgeInsets.all(TSizes.sm),
-                    child: FocusTraversalGroup(
-                      policy: OrderedTraversalPolicy(),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Product Bar
-                          FocusTraversalOrder(
-                            order: const NumericFocusOrder(1.0),
-                            child: ProductSearchBar(
-                                productNameFocus: controller.productNameFocus),
-                          ),
-                          const SizedBox(
-                            height: TSizes.spaceBtwItems,
-                          ),
-
-                          // Unit Price Quantity
-                          FocusTraversalOrder(
-                            order: const NumericFocusOrder(2.0),
-                            child: UnitPriceQuantity(
-                              unitPriceFocus: controller.unitPriceFocus,
-                              quantityFocus: controller.quantityFocus,
-                            ),
-                          ),
-                          const SizedBox(
-                            height: TSizes.spaceBtwItems,
-                          ),
-
-                          // Unit(Kg/etc) Total Price
-                          FocusTraversalOrder(
-                            order: const NumericFocusOrder(4.0),
-                            child: UnitTotalPrice(
-                                totalPriceFocus: controller.totalPriceFocus),
-                          ),
-                          const SizedBox(
-                            height: TSizes.spaceBtwItems,
-                          ),
-
-                          // Add Button
-                          SizedBox(
-                            width: double.infinity,
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: FocusTraversalOrder(
-                                    // Wrap button
-                                    order: const NumericFocusOrder(5.0),
-                                    child: Obx(() => ElevatedButton(
-                                          focusNode: controller
-                                              .addButtonFocus, // Assign focus node
-                                          onPressed: controller.isLoading.value
-                                              ? null
-                                              : () {
-                                                  controller.addProduct();
-                                                  // Request focus after adding
-                                                  controller.productNameFocus
-                                                      .requestFocus();
-                                                },
-                                          child: controller.isLoading.value
-                                              ? const SizedBox(
-                                                  height: 20,
-                                                  width: 20,
-                                                  child:
-                                                      CircularProgressIndicator(),
-                                                )
-                                              : const Text('Add'),
-                                        )),
+                  // Sales Details section - collapsible
+                  Obx(() => ExpansionTile(
+                        childrenPadding: EdgeInsets.zero,
+                        tilePadding:
+                            const EdgeInsets.symmetric(horizontal: TSizes.sm),
+                        title: Text(
+                          "Sales Details",
+                          style:
+                              Theme.of(context).textTheme.titleMedium!.copyWith(
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                ),
-                                const SizedBox(width: 8),
-                                TCircularIcon(
-                                  icon: Iconsax.refresh,
-                                  backgroundColor:
-                                      TColors.primary.withOpacity(0.1),
-                                  color: TColors.primary,
-                                  onPressed: () {
-                                    // Reset product form fields
-                                    controller.resetFields();
-                                    // Request focus after resetting
-                                    controller.productNameFocus.requestFocus();
+                        ),
+                        initiallyExpanded: controller.isExpanded.value,
+                        onExpansionChanged: (value) {
+                          controller.toggleExpanded();
+                        },
+                        children: [
+                          TRoundedContainer(
+                            padding: const EdgeInsets.all(TSizes.sm),
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: TSizes.sm),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Cashier Info
+                                const SalesCashierInfo(),
+                                const SizedBox(height: TSizes.sm),
+
+                                // Customer Info
+                                SaleCustomerInfo(
+                                  namesList: customerController.allCustomers
+                                      .map((e) => e.fullName)
+                                      .toList(),
+                                  hintText: 'Customer Name',
+                                  userNameTextController:
+                                      controller.customerNameController,
+                                  onSelectedName: (val) async {
+                                    if (val.isEmpty) {
+                                      customerController.selectedCustomer
+                                          .value = CustomerModel.empty();
+                                      controller.customerPhoneNoController.value
+                                          .clear();
+                                      controller.customerCNICController.value
+                                          .clear();
+                                      addressController.selectedCustomerAddress
+                                          .value = AddressModel.empty();
+                                      controller.customerAddressController.value
+                                          .clear();
+                                      controller.selectedAddressId = null;
+                                      mediaController.displayImage.value = null;
+                                      return;
+                                    }
+
+                                    // Continue normal logic
+                                    customerController.selectedCustomer.value =
+                                        customerController.allCustomers
+                                            .firstWhere(
+                                                (user) => user.fullName == val);
+                                    addressController.fetchEntityAddresses(
+                                        customerController
+                                            .selectedCustomer.value.customerId!,
+                                        'Customer');
+                                    controller.entityId.value =
+                                        customerController
+                                            .selectedCustomer.value.customerId!;
+                                    controller.customerPhoneNoController.value
+                                            .text =
+                                        customerController
+                                            .selectedCustomer.value.phoneNumber;
+                                    controller
+                                            .customerCNICController.value.text =
+                                        customerController
+                                            .selectedCustomer.value.cnic;
+                                  },
+                                  addressList: addressController
+                                      .allCustomerAddressesLocation,
+                                  addressTextController: controller
+                                      .customerAddressController.value,
+                                  onSelectedAddress: (val) {
+                                    addressController
+                                            .selectedCustomerAddress.value =
+                                        addressController.allCustomerAddresses
+                                            .firstWhere((address) =>
+                                                address.location == val);
+
+                                    controller.selectedAddressId =
+                                        addressController
+                                            .selectedCustomerAddress
+                                            .value
+                                            .addressId;
                                   },
                                 ),
+                                const SizedBox(height: TSizes.sm),
+
+                                // Salesman Info
+                                const SalesSalemanInfo(),
                               ],
                             ),
                           ),
                         ],
-                      ),
+                      )),
+
+                  const SizedBox(height: TSizes.spaceBtwItems),
+
+                  // Product Search Section - collapsible
+                  Obx(() => ExpansionTile(
+                        childrenPadding: EdgeInsets.zero,
+                        tilePadding:
+                            const EdgeInsets.symmetric(horizontal: TSizes.sm),
+                        title: Text(
+                          "Add Products",
+                          style:
+                              Theme.of(context).textTheme.titleMedium!.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                        ),
+                        initiallyExpanded:
+                            controller.isProductEntryExpanded.value,
+                        onExpansionChanged: (value) {
+                          controller.isProductEntryExpanded.value = value;
+                        },
+                        children: [
+                          TRoundedContainer(
+                            padding: const EdgeInsets.all(TSizes.sm),
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: TSizes.sm),
+                            child: FocusTraversalGroup(
+                              policy: OrderedTraversalPolicy(),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Product Bar
+                                  FocusTraversalOrder(
+                                    order: const NumericFocusOrder(1.0),
+                                    child: ProductSearchBar(
+                                        productNameFocus:
+                                            controller.productNameFocus),
+                                  ),
+                                  const SizedBox(height: TSizes.sm),
+
+                                  // Unit Price Quantity
+                                  FocusTraversalOrder(
+                                    order: const NumericFocusOrder(2.0),
+                                    child: UnitPriceQuantity(
+                                      unitPriceFocus: controller.unitPriceFocus,
+                                      quantityFocus: controller.quantityFocus,
+                                    ),
+                                  ),
+                                  const SizedBox(height: TSizes.sm),
+
+                                  // Unit(Kg/etc) Total Price
+                                  FocusTraversalOrder(
+                                    order: const NumericFocusOrder(4.0),
+                                    child: UnitTotalPrice(
+                                        totalPriceFocus:
+                                            controller.totalPriceFocus),
+                                  ),
+                                  const SizedBox(height: TSizes.md),
+
+                                  // Add Button - full width for mobile
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: FocusTraversalOrder(
+                                            order: const NumericFocusOrder(5.0),
+                                            child: Obx(() => ElevatedButton(
+                                                  focusNode:
+                                                      controller.addButtonFocus,
+                                                  onPressed:
+                                                      controller.isLoading.value
+                                                          ? null
+                                                          : () {
+                                                              controller
+                                                                  .addProduct();
+                                                              controller
+                                                                  .productNameFocus
+                                                                  .requestFocus();
+                                                            },
+                                                  child:
+                                                      controller.isLoading.value
+                                                          ? const SizedBox(
+                                                              height: 20,
+                                                              width: 20,
+                                                              child:
+                                                                  CircularProgressIndicator(),
+                                                            )
+                                                          : const Text('Add'),
+                                                )),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        TCircularIcon(
+                                          icon: Iconsax.refresh,
+                                          backgroundColor:
+                                              TColors.primary.withOpacity(0.1),
+                                          color: TColors.primary,
+                                          onPressed: () {
+                                            controller.resetFields();
+                                            controller.productNameFocus
+                                                .requestFocus();
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      )),
+
+                  const SizedBox(height: TSizes.spaceBtwItems),
+
+                  // Serial Numbers Selector - collapsible if any exist
+                  Obx(() => controller.hasSerialNumbers.value
+                      ? ExpansionTile(
+                          childrenPadding: EdgeInsets.zero,
+                          tilePadding:
+                              const EdgeInsets.symmetric(horizontal: TSizes.sm),
+                          title: Text(
+                            "Serial Numbers",
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium!
+                                .copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          initiallyExpanded: controller.isSerialExpanded.value,
+                          onExpansionChanged: (value) {
+                            controller.isSerialExpanded.value = value;
+                          },
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: TSizes.sm),
+                              child: SerialVariantSelector(),
+                            ),
+                          ],
+                        )
+                      : const SizedBox()),
+
+                  const SizedBox(height: TSizes.spaceBtwItems),
+
+                  // Current Cart Items
+                  TRoundedContainer(
+                    padding: const EdgeInsets.all(TSizes.sm),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Cart table header
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: TSizes.sm),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Cart Items',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium!
+                                    .copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                              Obx(() => Text(
+                                    '${controller.saleCartItem.length} item(s)',
+                                    style:
+                                        Theme.of(context).textTheme.bodySmall,
+                                  )),
+                            ],
+                          ),
+                        ),
+
+                        // Responsive table with constrained height
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(
+                            maxHeight: 300, // Maximum height
+                            minHeight: 100, // Minimum height
+                          ),
+                          child: Obx(() => controller.saleCartItem.isEmpty
+                              ? Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(TSizes.lg),
+                                    child: Text(
+                                      'No items added yet',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium!
+                                          .copyWith(
+                                            color: Colors.grey,
+                                          ),
+                                    ),
+                                  ),
+                                )
+                              : const SaleTable()),
+                        ),
+                      ],
                     ),
                   ),
 
-                  const SizedBox(
-                    height: TSizes.spaceBtwItems,
-                  ),
+                  const SizedBox(height: TSizes.spaceBtwItems),
 
-                  // Serial Numbers Selector (for products with serial numbers)
-                  const SerialVariantSelector(),
-
-                  const SizedBox(
-                    height: TSizes.spaceBtwItems,
-                  ),
-
-                  // Sale Table - smaller height for mobile
-                  const TRoundedContainer(height: 350, child: SaleTable()),
-
-                  const SizedBox(
-                    height: TSizes.spaceBtwItems,
-                  ),
-
-                  // Action buttons and summary in separate containers
-                  const TRoundedContainer(
-                    padding: EdgeInsets.all(TSizes.sm),
-                    child: SaleActionButtons(),
-                  ),
-
-                  const SizedBox(
-                    height: TSizes.spaceBtwItems,
-                  ),
-
+                  // Sale Summary - optimized for mobile
                   const TRoundedContainer(
                     padding: EdgeInsets.all(TSizes.sm),
                     child: SalesSummary(),
+                  ),
+
+                  const SizedBox(height: TSizes.md),
+
+                  // Action buttons - full width for mobile
+                  const TRoundedContainer(
+                    padding: EdgeInsets.all(TSizes.sm),
+                    child: SaleActionButtons(),
                   ),
                 ],
               ),

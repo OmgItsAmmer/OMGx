@@ -437,6 +437,10 @@ class ProductController extends GetxController {
       if (kDebugMode) {
         print('Product list refreshed from database');
       }
+      TLoader.successSnackBar(
+        title: 'Refreshed!',
+        message: 'Product list has been updated.',
+      );
     } catch (e) {
       if (kDebugMode) {
         print('Error refreshing products: $e');

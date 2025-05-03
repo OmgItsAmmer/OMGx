@@ -144,7 +144,7 @@ class AllProductMobileScreen extends GetView<ProductController> {
 
                       // Set the selectedProduct string value
                       controller.selectedProduct.value = productIdStr;
-
+                      controller.onProductTap(product);
                       // Navigate to product details
                       Get.toNamed(TRoutes.productsDetail);
                     },

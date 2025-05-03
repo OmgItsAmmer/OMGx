@@ -11,12 +11,12 @@ class AllBrands extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TSiteTemplate(
+    return const TSiteTemplate(
     //  title: 'Brands',
      
-        desktop: const AllBrandsDesktopScreen(),
-        tablet:  const AllBrandsTabletScreen(),
-        mobile:  const AllBrandsMobileScreen(),
+        desktop: AllBrandsDesktopScreen(),
+        tablet:  AllBrandsTabletScreen(),
+        mobile:  AllBrandsMobileScreen(),
       
     );
   }

@@ -457,6 +457,10 @@ class OrderController extends GetxController {
       try {
         final productController = Get.find<ProductController>();
         await productController.refreshProducts();
+        TLoader.successSnackBar(
+          title: 'Refreshed!',
+          message: 'Order list has been updated.',
+        );
       } catch (e) {
         if (kDebugMode) {
           print('Error refreshing products: $e');

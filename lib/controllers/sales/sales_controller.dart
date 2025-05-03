@@ -26,7 +26,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:iconsax/iconsax.dart';
 
-
 class SalesController extends GetxController {
   static SalesController get instance => Get.find();
 
@@ -45,6 +44,15 @@ class SalesController extends GetxController {
 
 //making order
   RxList<SaleModel> allSales = <SaleModel>[].obs;
+  // Alias for allSales for better mobile UI naming consistency
+  RxList<SaleModel> get saleCartItem => allSales;
+
+  // UI expansion states
+  var isProductEntryExpanded = true.obs;
+  var isSerialExpanded = true.obs;
+
+  // Indicator for whether there are serial numbers to display
+  RxBool hasSerialNumbers = false.obs;
 
   // Loading state for fetching products
   final isLoading = false.obs;

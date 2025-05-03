@@ -20,7 +20,7 @@ class TPaginatedDataTable extends StatefulWidget {
     required this.columns,
     this.onPageChanged,
     this.dataRowHeight = TSizes.xl * 2,
-    this.tableHeight = 760,
+    this.tableHeight = 840,
     this.minWidth = 1000,
     this.showCheckBox = true,
     this.availableRowsPerPage = const [10, 20, 50, 100],

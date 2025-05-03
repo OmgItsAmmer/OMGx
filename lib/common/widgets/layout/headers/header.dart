@@ -78,23 +78,72 @@ class THeader extends StatelessWidget implements PreferredSizeWidget {
                       });
                     },
                     icon: const Icon(Iconsax.search_normal)),
-             (TDeviceUtils.isDesktopScreen(context)) ? Obx(() => IconButton(
-                    icon: Icon(
-                      fullscreenController.isFullscreen.value
-                          ? Icons.fullscreen_exit
-                          : Icons.fullscreen,
-                    ),
-                    onPressed: fullscreenController.toggleFullscreen,
-                  )) : const SizedBox.shrink(),
+              (TDeviceUtils.isDesktopScreen(context))
+                  ? Obx(() => IconButton(
+                        icon: Icon(
+                          fullscreenController.isFullscreen.value
+                              ? Icons.fullscreen_exit
+                              : Icons.fullscreen,
+                        ),
+                        onPressed: fullscreenController.toggleFullscreen,
+                      ))
+                  : const SizedBox.shrink(),
 
               const SizedBox(
                 width: TSizes.spaceBtwItems / 2,
               ),
-              IconButton(
-                  onPressed: () {
-                    notificationController.showNotificationsBottomSheet();
-                  },
-                  icon: const Icon(Iconsax.notification)),
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  IconButton(
+                      onPressed: () {
+                        notificationController.showNotifications();
+                      },
+                      icon: const Icon(Iconsax.notification)),
+                  Obx(() {
+                    final unreadCount = notificationController.unreadCount;
+                    if (unreadCount > 0) {
+                      return Positioned(
+                        top: 0,
+                        right: 0,
+                        child: TweenAnimationBuilder<double>(
+                          tween: Tween<double>(begin: 0.0, end: 1.0),
+                          duration: const Duration(milliseconds: 400),
+                          builder: (context, value, child) {
+                            return Transform.scale(
+                              scale: value,
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: TColors.error,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                      color: TColors.white, width: 1.5),
+                                ),
+                                constraints: const BoxConstraints(
+                                  minWidth: 16,
+                                  minHeight: 16,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    unreadCount > 9 ? '9+' : '$unreadCount',
+                                    style: const TextStyle(
+                                      color: TColors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  }),
+                ],
+              ),
               const SizedBox(
                 width: TSizes.spaceBtwItems / 2,
               ),
@@ -168,20 +217,22 @@ class THeader extends StatelessWidget implements PreferredSizeWidget {
                   if (userController.profileLoading.value) {
                     return const TShimmerEffect(width: 20, height: 20);
                   }
-                  return (TDeviceUtils.isMobileScreen(context)) ? const SizedBox.shrink() : Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        userController.currentUser.value.fullName,
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      Text(
-                        userController.currentUser.value.email,
-                        style: Theme.of(context).textTheme.labelMedium,
-                      ),
-                    ],
-                  );
+                  return (TDeviceUtils.isMobileScreen(context))
+                      ? const SizedBox.shrink()
+                      : Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              userController.currentUser.value.fullName,
+                              style: Theme.of(context).textTheme.titleLarge,
+                            ),
+                            Text(
+                              userController.currentUser.value.email,
+                              style: Theme.of(context).textTheme.labelMedium,
+                            ),
+                          ],
+                        );
                 })
               ])
             ],

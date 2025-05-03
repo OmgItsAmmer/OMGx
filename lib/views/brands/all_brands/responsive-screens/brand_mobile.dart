@@ -137,6 +137,7 @@ class AllBrandsMobileScreen extends StatelessWidget {
                     brand: brand,
                     mediaController: mediaController,
                     onEdit: () {
+                      brandController.setBrandDetail(brand);
                       brandController.selectedBrand.value = brand;
                       Get.toNamed(TRoutes.brandDetails, arguments: brand);
                     },

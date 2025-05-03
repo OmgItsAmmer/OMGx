@@ -3,6 +3,9 @@ import 'package:admin_dashboard_v3/Models/orders/order_item_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/controllers/orders/orders_controller.dart';
 import 'package:admin_dashboard_v3/routes/routes.dart';
+import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
+import 'package:admin_dashboard_v3/views/notifications/notification_mobile.dart';
+import 'package:admin_dashboard_v3/views/notifications/notification_tablet.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -20,11 +23,13 @@ class NotificationController extends GetxController {
   final ProductController productController = Get.find<ProductController>();
   final OrderController orderController = Get.find<OrderController>();
 
-
   //
   RxBool isMarkAsRead = false.obs;
 
   RxList<NotificationModel> allNotifications = <NotificationModel>[].obs;
+
+  // Computed property for unread count
+  int get unreadCount => allNotifications.where((n) => !n.isRead.value).length;
 
   @override
   void onInit() {
@@ -36,14 +41,28 @@ class NotificationController extends GetxController {
     try {
       final notifications = await notificationRepository.fetchNotifications();
       allNotifications.assignAll(notifications);
-
-
     } catch (e) {
       if (kDebugMode) {
         TLoader.errorSnackBar(
             title: 'Notification Controller', message: e.toString());
         print(e);
       }
+    }
+  }
+
+  Future<void> showNotifications() async {
+    // Determine which screen to show based on device size
+    final context = Get.context!;
+
+    if (TDeviceUtils.isDesktopScreen(context)) {
+      // Show desktop notifications as bottom sheet
+      await showNotificationsBottomSheet();
+    } else if (TDeviceUtils.isTabletScreen(context)) {
+      // Show tablet view as a new screen
+      await Get.to(() => const NotificationTablet());
+    } else {
+      // Show mobile view as a new screen
+      await Get.to(() => const NotificationMobile());
     }
   }
 
@@ -81,77 +100,103 @@ class NotificationController extends GetxController {
     );
   }
 
-
   void openProduct(int productId) {
-   try{
-     // Find the product with the matching productId from the allProducts array
-     ProductModel? productModel = productController.allProducts.firstWhere(
-           (product) => product.productId == productId,
-       orElse: () => ProductModel.empty(), // If no product is found, return null
-     );
+    try {
+      // Find the product with the matching productId from the allProducts array
+      ProductModel? productModel = productController.allProducts.firstWhere(
+        (product) => product.productId == productId,
+        orElse: () =>
+            ProductModel.empty(), // If no product is found, return null
+      );
 
-     // Navigate to the product details page and pass the productModel
-     productController.onProductTap(productModel);
-     Get.toNamed(TRoutes.productsDetail);
-
-   }
-   catch(e)
-    {
+      // Navigate to the product details page and pass the productModel
+      productController.onProductTap(productModel);
+      Get.toNamed(TRoutes.productsDetail);
+    } catch (e) {
       if (kDebugMode) {
         print(e);
-        TLoader.errorSnackBar(title: 'Error opening product screen',message: e.toString());
+        TLoader.errorSnackBar(
+            title: 'Error opening product screen', message: e.toString());
       }
-
     }
-    }
+  }
 
   void openOrder(int orderId) {
-    try{
+    try {
       // Find the product with the matching productId from the allProducts array
       OrderModel? orderModel = orderController.allOrders.firstWhere(
-            (order) => order.orderId == orderId,
+        (order) => order.orderId == orderId,
         orElse: () => OrderModel.empty(), // If no product is found, return null
       );
 
       // Navigate to the product details page and pass the productModel
       Get.toNamed(TRoutes.orderDetails, arguments: orderModel);
-
-    }
-    catch(e)
-    {
+    } catch (e) {
       if (kDebugMode) {
         print(e);
-        TLoader.errorSnackBar(title: 'Error opening product screen',message: e.toString());
+        TLoader.errorSnackBar(
+            title: 'Error opening product screen', message: e.toString());
       }
-
     }
   }
 
- Future<void> toggleRead(NotificationModel model,int index) async {
-   try{
+  Future<void> toggleRead(NotificationModel model, int index) async {
+    try {
+      final newCondition = !model.isRead.value;
 
-     final newCondition = !model.isRead.value;
+      await notificationRepository.changeRead(
+          newCondition, model.notificationId);
 
+      allNotifications[index].isRead.value = newCondition;
 
-     await notificationRepository.changeRead(newCondition,model.notificationId);
+      allNotifications.refresh();
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+        TLoader.errorSnackBar(
+            title: 'Error opening product screen', message: e.toString());
+      }
+    }
+  }
 
-     allNotifications[index].isRead.value = newCondition;
+  // Method to mark all notifications as read
+  Future<void> markAllAsRead() async {
+    try {
+      // Get all unread notifications
+      final unreadNotifications =
+          allNotifications.where((n) => !n.isRead.value).toList();
 
-     allNotifications.refresh();
+      if (unreadNotifications.isEmpty) return;
 
+      // Update each notification
+      for (final notification in unreadNotifications) {
+        final index = allNotifications
+            .indexWhere((n) => n.notificationId == notification.notificationId);
+        if (index != -1) {
+          await notificationRepository.changeRead(
+              true, notification.notificationId);
+          allNotifications[index].isRead.value = true;
+        }
+      }
 
-   }
-   catch(e)
-   {
-     if (kDebugMode) {
-       print(e);
-       TLoader.errorSnackBar(title: 'Error opening product screen',message: e.toString());
-     }
+      allNotifications.refresh();
+      TLoader.infoSnackBar(
+        title: 'Notifications',
+        message: 'All notifications marked as read',
+        duration: 2,
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+        TLoader.errorSnackBar(
+            title: 'Error marking notifications as read',
+            message: e.toString());
+      }
+    }
+  }
 
-   }
- }
-
-  Future<void> deleteNotification(BuildContext context, int notificationId) async {
+  Future<void> deleteNotification(
+      BuildContext context, int notificationId) async {
     try {
       // Show confirmation dialog
       bool? confirmDelete = await showDialog<bool>(
@@ -159,10 +204,12 @@ class NotificationController extends GetxController {
         builder: (BuildContext context) {
           return AlertDialog(
             title: const Text('Delete Notification'),
-            content: const Text('Are you sure you want to delete this notification?'),
+            content: const Text(
+                'Are you sure you want to delete this notification?'),
             actions: [
               OutlinedButton(
-                onPressed: () => Navigator.pop(context, false), // Dismiss dialog
+                onPressed: () =>
+                    Navigator.pop(context, false), // Dismiss dialog
                 child: const Text('Cancel'),
               ),
               ElevatedButton(
@@ -176,8 +223,18 @@ class NotificationController extends GetxController {
 
       // If user confirms deletion
       if (confirmDelete == true) {
-        await notificationRepository.deleteNotificationFromTable(notificationId);
-        Get.snackbar('Success', 'Notification deleted successfully.');
+        await notificationRepository
+            .deleteNotificationFromTable(notificationId);
+
+        // Remove the notification from the local list
+        allNotifications.removeWhere(
+            (notification) => notification.notificationId == notificationId);
+
+        TLoader.successSnackBar(
+          title: 'Success',
+          message: 'Notification deleted successfully',
+          duration: 2,
+        );
       }
     } catch (e) {
       if (kDebugMode) {
@@ -186,17 +243,14 @@ class NotificationController extends GetxController {
       }
     }
   }
+
   final _hoverStates = <String, bool>{};
 
-  bool isHovered(String notificationId) => _hoverStates[notificationId] ?? false;
+  bool isHovered(String notificationId) =>
+      _hoverStates[notificationId] ?? false;
 
   void setHover(String notificationId, bool value) {
     _hoverStates[notificationId] = value;
     update([notificationId]);
   }
-
-
-
-
-
 }

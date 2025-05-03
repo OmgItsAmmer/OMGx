@@ -322,7 +322,7 @@ class InstallmentController extends GetxController {
     try {
       // Convert strings to double and then perform the addition
       double billAmountDouble = double.tryParse(billAmount.value.text) ?? 0.0;
-      double downPaymentDouble = double.tryParse(DownPayment.text) ?? 0.0;
+     // double downPaymentDouble = double.tryParse(DownPayment.text) ?? 0.0;
       double documentChargesDouble =
           double.tryParse(DocumentCharges.text) ?? 0.0;
       double otherChargesDouble = double.tryParse(otherCharges.text) ?? 0.0;
@@ -333,7 +333,6 @@ class InstallmentController extends GetxController {
 
       // Perform the addition
       double _payableExMargin = billAmountDouble +
-          downPaymentDouble +
           documentChargesDouble +
           otherChargesDouble;
       double _payableINCLMargin =

@@ -19,56 +19,53 @@ class ProductDetailDesktop extends StatelessWidget {
     // Use a separate method to initialize variants to make it cleaner
     _initializeVariantsIfNeeded(controller);
 
-    return Expanded(
-      child: Scaffold(
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(TSizes.defaultSpace),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Basic Info
-                      const BasicInfo(),
-                      const SizedBox(height: TSizes.spaceBtwSections),
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(TSizes.defaultSpace),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 2,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Basic Info
+                    const BasicInfo(),
+                    const SizedBox(height: TSizes.spaceBtwSections),
 
-                      // Serial Variants - Only show for products with serial numbers
-                      GetBuilder<ProductController>(
-                        builder: (controller) {
-                          final showVariants =
-                              controller.hasSerialNumbers.value;
-                          return showVariants
-                              ? const ProductSerialVariants()
-                              : const SizedBox.shrink();
-                        },
-                      ),
-                    ],
-                  ),
+                    // Serial Variants - Only show for products with serial numbers
+                    GetBuilder<ProductController>(
+                      builder: (controller) {
+                        final showVariants = controller.hasSerialNumbers.value;
+                        return showVariants
+                            ? const ProductSerialVariants()
+                            : const SizedBox.shrink();
+                      },
+                    ),
+                  ],
                 ),
-                const SizedBox(width: TSizes.spaceBtwSections),
-                const Expanded(
-                  flex: 1,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Thumbnail Upload
-                      ThumbnailInfo(),
-                      SizedBox(height: TSizes.spaceBtwSections),
-                      // Brand & Category & visibility
-                      ProductBrandcCategory(),
-                    ],
-                  ),
+              ),
+              const SizedBox(width: TSizes.spaceBtwSections),
+              const Expanded(
+                flex: 1,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Thumbnail Upload
+                    ThumbnailInfo(),
+                    SizedBox(height: TSizes.spaceBtwSections),
+                    // Brand & Category & visibility
+                    ProductBrandcCategory(),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
-        bottomNavigationBar: const ProductDetailBottomBar(),
       ),
+      bottomNavigationBar: const ProductDetailBottomBar(),
     );
   }
 

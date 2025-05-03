@@ -37,9 +37,11 @@ class NotificationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final formattedDate = DateFormat('HH:mm  dd/MM/yyyy').format(date);
     final notificationTypeEnum = NotificationType.values.firstWhere(
-          (e) => e.name == notificationType,
+      (e) => e.name == notificationType,
       orElse: () => NotificationType.company,
     );
+    final notificationColor =
+        THelperFunctions.getNotificationColor(notificationTypeEnum);
 
     return GetBuilder<NotificationController>(
       id: notificationId, // Unique ID for this notification
@@ -47,94 +49,206 @@ class NotificationCard extends StatelessWidget {
         return MouseRegion(
           onEnter: (_) => controller.setHover(notificationId, true),
           onExit: (_) => controller.setHover(notificationId, false),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            decoration: BoxDecoration(
-              color: controller.isHovered(notificationId)
-                  ? TColors.primary.withValues(alpha: 0.15)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                width: 0.5,
-                color: controller.isHovered(notificationId)
-                    ? TColors.primary
-                    : Colors.transparent,
-              ),
-              boxShadow: controller.isHovered(notificationId)
-                  ? [
-                BoxShadow(
-                  color: TColors.primary.withValues(alpha: 0.3),
-                  blurRadius: 8,
-                  spreadRadius: 1,
-                  offset: const Offset(0, 3),
-                )
-              ]
-                  : [],
-            ),
-            child: TRoundedContainer(
-              backgroundColor: TColors.primaryBackground,
-              width: double.infinity,
-              padding: const EdgeInsets.all(TSizes.defaultSpace),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Stack(
+            children: [
+              // Unread indicator
+              if (!markAsRead)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  bottom: 0,
+                  child: Container(
+                    width: 4,
+                    decoration: BoxDecoration(
+                      color: notificationColor,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(12),
+                        bottomLeft: Radius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                decoration: BoxDecoration(
+                  color: markAsRead ? TColors.primaryBackground : TColors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    width: 0.5,
+                    color: controller.isHovered(notificationId)
+                        ? TColors.primary
+                        : markAsRead
+                            ? Colors.transparent
+                            : notificationColor.withOpacity(0.3),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: controller.isHovered(notificationId)
+                          ? TColors.primary.withOpacity(0.2)
+                          : markAsRead
+                              ? Colors.transparent
+                              : notificationColor.withOpacity(0.1),
+                      blurRadius: controller.isHovered(notificationId) ? 8 : 4,
+                      spreadRadius:
+                          controller.isHovered(notificationId) ? 1 : 0,
+                      offset: const Offset(0, 2),
+                    )
+                  ],
+                ),
+                child: TRoundedContainer(
+                  backgroundColor: Colors.transparent,
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(TSizes.defaultSpace),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Row(
-                          children: [
-                            TRoundedContainer(
-                              backgroundColor:
-                              THelperFunctions.getNotificationColor(
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Notification icon with styled container
+                          TRoundedContainer(
+                            backgroundColor: notificationColor
+                                .withOpacity(markAsRead ? 0.7 : 1.0),
+                            radius: 12,
+                            padding: const EdgeInsets.all(12),
+                            child: Icon(
+                              THelperFunctions.getNotificationIcon(
                                   notificationTypeEnum),
-                              child: Icon(
-                                THelperFunctions.getNotificationIcon(
-                                    notificationTypeEnum),
-                                color: Colors.white,
-                                size: 18,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: TSizes.spaceBtwItems),
+
+                          // Notification content
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        description,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium
+                                            ?.copyWith(
+                                              fontWeight: markAsRead
+                                                  ? FontWeight.normal
+                                                  : FontWeight.bold,
+                                              color: markAsRead
+                                                  ? TColors.textSecondary
+                                                  : TColors.textPrimary,
+                                            ),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 2,
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                        width: TSizes.spaceBtwItems / 2),
+                                    // Push date to right side
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: markAsRead
+                                            ? TColors.lightGrey
+                                            : notificationColor
+                                                .withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        formattedDate,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                                color: markAsRead
+                                                    ? TColors.darkGrey
+                                                    : notificationColor),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: TSizes.spaceBtwItems),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      // Actions row
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          // Mark as read toggle button
+                          InkWell(
+                            onTap: () {
+                              toggleRead();
+                              controller.update([notificationId]);
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: markAsRead
+                                    ? TColors.primary.withOpacity(0.1)
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: markAsRead
+                                      ? TColors.primary
+                                      : TColors.grey,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    markAsRead
+                                        ? Iconsax.tick_circle
+                                        : Iconsax.tick_circle5,
+                                    color: markAsRead
+                                        ? TColors.primary
+                                        : TColors.darkGrey,
+                                    size: 16,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    markAsRead ? 'Read' : 'Mark as read',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: markAsRead
+                                          ? TColors.primary
+                                          : TColors.darkGrey,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            const SizedBox(width: TSizes.spaceBtwItems),
-                            Text(
-                              description,
-                              style: Theme.of(context).textTheme.headlineSmall,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                      Text(formattedDate,
-                          style: Theme.of(context).textTheme.bodySmall),
-                    ],
-                  ),
-                  const SizedBox(height: TSizes.spaceBtwItems),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      InkWell(
-                        onTap: () {
-                          toggleRead();
-                          controller.update([notificationId]);
-                        },
-                        child: Icon(
-                          Iconsax.tick_circle,
-                          color: markAsRead ? TColors.primary : Colors.black,
-                        ),
-                      ),
-                      const SizedBox(width: TSizes.spaceBtwItems / 2),
-                      TTableActionButtons(
-                        view: true,
-                        delete: true,
-                        edit: false,
-                        onViewPressed: onTapView,
-                        onDeletePressed: onTapDelete,
+                          ),
+                          const SizedBox(width: TSizes.spaceBtwItems),
+
+                          // View and delete actions
+                          TTableActionButtons(
+                            view: true,
+                            delete: true,
+                            edit: false,
+                            onViewPressed: onTapView,
+                            onDeletePressed: onTapDelete,
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         );
       },

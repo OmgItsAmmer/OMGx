@@ -54,6 +54,7 @@ class ProductTable extends StatelessWidget {
       }
 
       return TPaginatedDataTable(
+        tableHeight: 840,
         sortAscending: tableSearchController.sortAscending.value,
         sortColumnIndex: tableSearchController.sortColumnIndex.value,
         rowsperPage: tableSearchController.rowsPerPage.value,

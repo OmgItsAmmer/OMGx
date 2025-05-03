@@ -48,6 +48,7 @@ class CustomerDesktop extends StatelessWidget {
 
                 //Table
                 TRoundedContainer(
+              
                   padding: const EdgeInsets.all(TSizes.defaultSpace),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
