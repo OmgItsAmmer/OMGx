@@ -37,7 +37,7 @@ class DashboardMobile extends StatelessWidget {
 
               //Cards in a column for mobile
               TDashBoardCard(
-                isLoading: dashboardController.isLoading,
+                isLoading: dashboardController.isLoading.value,
                 iconWidget: const TCircularIcon(
                   width: 40,
                   height: 40,
@@ -62,7 +62,7 @@ class DashboardMobile extends StatelessWidget {
               const SizedBox(height: TSizes.spaceBtwItems),
 
               TDashBoardCard(
-                isLoading: dashboardController.isLoading,
+                isLoading: dashboardController.isLoading.value,
                 iconWidget: const TCircularIcon(
                   width: 40,
                   height: 40,
@@ -87,7 +87,7 @@ class DashboardMobile extends StatelessWidget {
               const SizedBox(height: TSizes.spaceBtwItems),
 
               TDashBoardCard(
-                isLoading: dashboardController.isLoading,
+                isLoading: dashboardController.isLoading.value,
                 iconWidget: const TCircularIcon(
                   width: 40,
                   height: 40,
@@ -112,7 +112,7 @@ class DashboardMobile extends StatelessWidget {
               const SizedBox(height: TSizes.spaceBtwItems),
 
               TDashBoardCard(
-                isLoading: dashboardController.isLoading,
+                isLoading: dashboardController.isLoading.value,
                 iconWidget: const TCircularIcon(
                   width: 40,
                   height: 40,

@@ -34,7 +34,7 @@ class AddCustomerBottomBar extends StatelessWidget {
               child: OutlinedButton(
                 onPressed: () {
                   customerController.cleanCustomerDetails();
-                  Get.back();
+                  Navigator.of(context).pop();
                 },
                 child: const Text('Discard'),
               ),

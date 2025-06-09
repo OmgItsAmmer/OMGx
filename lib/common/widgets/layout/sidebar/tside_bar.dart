@@ -194,7 +194,7 @@ class TSideBar extends StatelessWidget {
                     const TMenuItem(
                       icon: Iconsax.image,
                       itemName: 'Media',
-                      route: TRoutes.mediaScreen,
+                      route: TRoutes.installment
                     ),
                     const TMenuItem(
                       icon: Iconsax.note,
@@ -202,7 +202,7 @@ class TSideBar extends StatelessWidget {
                       route: TRoutes.reportScreen,
                     ),
                     const TMenuItem(
-                      icon: Iconsax.note,
+                      icon: Iconsax.ticket,
                       itemName: 'Expenses',
                       route: TRoutes.expenseScreen,
                     ),

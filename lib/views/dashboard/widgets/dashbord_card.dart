@@ -30,20 +30,24 @@ class TDashBoardCard extends StatelessWidget {
   final int stats;
   final void Function()? onTap;
   final TCircularIcon iconWidget;
-  final RxBool isLoading;
+  final bool isLoading;
   final Rx<DataFetchState> cardState;
 
   @override
   Widget build(BuildContext context) {
-    // Determine icon and color based on stats
-    IconData statusIcon = icon;
+    // Determine icon and color based on stats (logic stays here, just not rendered)
+    IconData? statusIcon = icon;
     Color statusColor = color;
 
-    // For zero values, use a neutral icon/color instead of down arrow
-    if (stats == 0) {
-      statusIcon = Iconsax.status; // Neutral icon
-      statusColor = Colors.amber; // Yellow/amber color
+    if (stats == 0 && cardState.value == DataFetchState.success) {
+      statusIcon = null;
+      statusColor = Colors.amber;
     }
+
+    // Handle NaN display for value and stats
+    double? numericValue = double.tryParse(value);
+    String displayValue = (numericValue != null && numericValue == 0) ? 'NaN' : value;
+    String displayStats = (stats == 0) ? 'NaN' : '$stats%';
 
     return TRoundedContainer(
       onTap: onTap,
@@ -56,12 +60,12 @@ class TDashBoardCard extends StatelessWidget {
             children: [
               iconWidget,
               const SizedBox(width: TSizes.spaceBtwItems),
-              Obx(() => cardState.value == DataFetchState.loading
-                  ? const TStripLoader(width: 100, height: 25) // Larger loader
+              cardState.value == DataFetchState.loading
+                  ? const TStripLoader(width: 100, height: 25)
                   : TSectionHeading(
                       title: title,
                       textColor: TColors.textSecondary,
-                    )),
+                    ),
             ],
           ),
 
@@ -72,48 +76,38 @@ class TDashBoardCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Value display with loading state
-              Obx(() => cardState.value == DataFetchState.loading
-                  ? const TStripLoader(width: 150, height: 30) // Larger loader
+              cardState.value == DataFetchState.loading
+                  ? const TStripLoader(width: 150, height: 30)
                   : Text(
-                      value,
+                      displayValue,
                       style: Theme.of(context).textTheme.headlineMedium,
-                    )),
+                    ),
 
-              // Stats with loading state
+              // Stats with loading state (icon removed)
               Column(
                 children: [
                   Row(
                     children: [
-                      Obx(() => Icon(
-                          cardState.value == DataFetchState.loading
-                              ? Iconsax.timer_1
-                              : statusIcon,
-                          color: cardState.value == DataFetchState.loading
-                              ? Colors.grey
-                              : statusColor,
-                          size: TSizes.iconSm)),
-                      Obx(() => cardState.value == DataFetchState.loading
-                          ? const TStripLoader(
-                              width: 50, height: 25) // Larger loader
+                      cardState.value == DataFetchState.loading
+                          ? const TStripLoader(width: 50, height: 25)
                           : Text(
-                              '$stats%',
+                              displayStats,
                               style: Theme.of(context)
                                   .textTheme
                                   .titleLarge!
                                   .apply(color: statusColor),
-                            )),
+                            ),
                     ],
                   ),
                   SizedBox(
                     width: 135,
-                    child: Obx(() => cardState.value == DataFetchState.loading
-                        ? const TStripLoader(
-                            width: 130, height: 20) // Larger loader
+                    child: cardState.value == DataFetchState.loading
+                        ? const TStripLoader(width: 130, height: 20)
                         : Text(
                             subTitle,
                             style: Theme.of(context).textTheme.labelMedium,
                             overflow: TextOverflow.ellipsis,
-                          )),
+                          ),
                   ),
                 ],
               )

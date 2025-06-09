@@ -61,7 +61,7 @@ class TRoutes {
   static const expenseScreen = '/ExpenseScreen';
 
   //Unknown ROutes
-  static const UnkownRoute = '/ReportScreen';
+  static const UnkownRoute = '/UnkowntScreen';
 
   static const splashScreen = '/splashScreen';
 }

@@ -1,5 +1,8 @@
 import 'package:admin_dashboard_v3/Models/reports/simple_pnl_report_model.dart';
+import 'package:admin_dashboard_v3/Models/reports/upcoming_installments_report_model.dart';
+import 'package:admin_dashboard_v3/Models/reports/overdue_installments_report_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -173,4 +176,86 @@ class ReportsRepository extends GetxController {
       return [];
     }
   }
+
+  Future<List<OverdueInstallmentsReportModel>>
+      fetchOverdueInstallmentsReport() async {
+    try {
+      final response = await supabase.rpc('get_overdue_installments_report');
+
+      return (response as List)
+          .map((item) => OverdueInstallmentsReportModel.fromJson(
+              item as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      if (kDebugMode) {
+        TLoader.errorSnackBar(title: e.toString());
+        print(e);
+      }
+      return [];
+    }
+  }
+
+  Future<List<UpcomingInstallmentsReportModel>> fetchUpcomingInstallmentsReport(
+      int daysAhead) async {
+    try {
+      final response =
+          await supabase.rpc('get_upcoming_installments_report', params: {
+        'days_ahead': daysAhead,
+      });
+
+      return (response as List)
+          .map((item) => UpcomingInstallmentsReportModel.fromJson(
+              item as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      if (kDebugMode) {
+        TLoader.errorSnackBar(title: e.toString());
+        print(e);
+      }
+      return [];
+    }
+  }
+
+  // Debug methods to troubleshoot installment issues
+  // Future<void> debugInstallmentPayments() async {
+  //   try {
+  //     final response = await supabase.rpc('debug_installment_payments');
+  //     if (kDebugMode) {
+  //       print('Debug Installment Payments:');
+  //       print(response);
+  //     }
+  //   } catch (e) {
+  //     if (kDebugMode) {
+  //       print('Debug installment payments error: $e');
+  //     }
+  //   }
+  // }
+
+  // Future<void> debugInstallmentPlans() async {
+  //   try {
+  //     final response = await supabase.rpc('debug_installment_plans');
+  //     if (kDebugMode) {
+  //       print('Debug Installment Plans:');
+  //       print(response);
+  //     }
+  //   } catch (e) {
+  //     if (kDebugMode) {
+  //       print('Debug installment plans error: $e');
+  //     }
+  //   }
+  // }
+
+  // Future<void> debugSimpleUpcomingInstallments() async {
+  //   try {
+  //     final response = await supabase.rpc('simple_upcoming_installments');
+  //     if (kDebugMode) {
+  //       print('Simple Upcoming Installments:');
+  //       print(response);
+  //     }
+  //   } catch (e) {
+  //     if (kDebugMode) {
+  //       print('Simple upcoming installments error: $e');
+  //     }
+  //   }
+  // }
 }

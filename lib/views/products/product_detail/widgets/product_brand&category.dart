@@ -112,6 +112,7 @@ class _ProductBrandcCategoryState extends State<ProductBrandcCategory> {
                 focusNode: categoryFocusNode,
                 child: Obx(
                   () => EnhancedAutocomplete<String>(
+                    showOptionsOnFocus: true,
                     labelText: 'Select Category',
                     hintText: 'Choose a category',
                     options: categoryController.allCategories
@@ -176,6 +177,7 @@ class _ProductBrandcCategoryState extends State<ProductBrandcCategory> {
                 focusNode: brandFocusNode,
                 child: Obx(
                   () => EnhancedAutocomplete<String>(
+                    showOptionsOnFocus: true,
                     labelText: 'Select Brand',
                     hintText: 'Choose a brand',
                     options: brandController.allBrands

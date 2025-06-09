@@ -2,6 +2,7 @@ import 'package:admin_dashboard_v3/controllers/dashboard/dashboard_controoler.da
 import 'package:admin_dashboard_v3/controllers/orders/orders_controller.dart';
 import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
 import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
+import 'package:admin_dashboard_v3/network_manager.dart';
 import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -48,8 +49,8 @@ class _SplashScreenState extends State<SplashScreen>
     // Navigate to the next screen after the animation completes
     _controller.addStatusListener((status) async {
       if (status == AnimationStatus.completed && _isDataLoaded) {
-        // Always redirect to login screen, regardless of session status
-        // This ensures users must log in every time they start the app
+        Get.put(NetworkManager());
+
         Get.offAllNamed(TRoutes.login);
       }
     });
@@ -67,7 +68,7 @@ class _SplashScreenState extends State<SplashScreen>
       // Start fetching data in parallel
       // This will continue in the background even after navigation
       Future.wait([
-       // dashboardController.initializeDashboard(),
+        // dashboardController.initializeDashboard(),
         orderController.fetchOrders(),
         productController.fetchProducts(),
         customerController.fetchAllCustomers(),
@@ -76,6 +77,7 @@ class _SplashScreenState extends State<SplashScreen>
           _isDataLoaded = true;
           // If animation has completed already, navigate now
           if (_controller.status == AnimationStatus.completed) {
+            
             Get.offAllNamed(TRoutes.login);
           }
         });

@@ -82,7 +82,10 @@ class InstallmentFooterButtons extends StatelessWidget {
             child: SizedBox(
               width: 150,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  // Navigate to the report page without saving the plan
+                  installmentController.navigateToReportWithoutSaving();
+                },
                 child: const Text('Print only'),
               ),
             ),
@@ -95,22 +98,34 @@ class InstallmentFooterButtons extends StatelessWidget {
             flex: 2,
             child: SizedBox(
               width: 200,
-              child: ElevatedButton(
-                onPressed: () async {
-                  try {
-                    // Save the installment plan and guarantor images
-                    installmentController.savePlan();
-                  } catch (e) {
-                    TLoader.errorSnackBar(
-                        title: 'Error', message: e.toString());
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: TColors.primary,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Create Plan'),
-              ),
+              child: Obx(() {
+                final isSaving = installmentController.isSavingPlan.value;
+                return ElevatedButton(
+                  onPressed: isSaving
+                      ? null // Disable the button when saving
+                      : () async {
+                          try {
+                            // Save the installment plan and guarantor images
+                            await installmentController.savePlan();
+                          } catch (e) {
+                            TLoader.errorSnackBar(
+                                title: 'Error', message: e.toString());
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isSaving
+                        ? Colors.grey // Grey out the button when saving
+                        : TColors.primary,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: isSaving
+                      ? const CircularProgressIndicator(
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        )
+                      : const Text('Create Plan'),
+                );
+              }),
             ),
           ),
         ],

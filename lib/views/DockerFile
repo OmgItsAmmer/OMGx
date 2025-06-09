@@ -1,0 +1,26 @@
+# Step 1: Use the official Dart image as the base image
+FROM dart:stable AS build
+
+# Step 2: Set the working directory inside the container
+WORKDIR /app
+
+# Step 3: Copy the Flutter project files into the container
+COPY . .
+
+# Step 4: Install the Flutter dependencies
+RUN dart pub get
+
+# Step 5: Build the Flutter Web application
+RUN flutter build web
+
+# Step 6: Use Nginx to serve the built Flutter app
+FROM nginx:alpine
+
+# Step 7: Copy the build output to Nginx's default directory
+COPY --from=build /app/build/web /usr/share/nginx/html
+
+# Step 8: Expose port 80 for the web server
+EXPOSE 80
+
+# Step 9: Run the Nginx server to serve the Flutter app
+CMD ["nginx", "-g", "daemon off;"]

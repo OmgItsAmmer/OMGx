@@ -49,7 +49,7 @@ class BrandController extends GetxController {
     }
 
     // Show snackbar to confirm action
-    TLoader.customToast(message: 'Changes discarded');
+ 
   }
 
   // Method to check if a brand name already exists

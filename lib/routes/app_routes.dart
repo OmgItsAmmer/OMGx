@@ -5,6 +5,7 @@ import 'package:admin_dashboard_v3/views/category/all_categories/category.dart';
 import 'package:admin_dashboard_v3/views/expenses/expenses.dart';
 import 'package:admin_dashboard_v3/views/login/login.dart';
 import 'package:admin_dashboard_v3/views/orders/all_orders/orders.dart';
+import 'package:admin_dashboard_v3/views/unkown_route.dart';
 import 'package:get/get.dart';
 
 import '../views/brands/brand_details/brand_detail_screen.dart';
@@ -150,7 +151,10 @@ class TAppRoutes {
         page: () => const ExpenseScreen(),
         middlewares: [TRouteMiddleware()]),
 
-    // Admin Key Test Screen
+      GetPage(
+        name: TRoutes.UnkownRoute,
+        page: () => const UnkownRoute(),
+        middlewares: [TRouteMiddleware()]),
         
    
 

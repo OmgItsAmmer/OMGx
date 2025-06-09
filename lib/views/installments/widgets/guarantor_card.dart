@@ -1,20 +1,13 @@
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
-import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
 import 'package:admin_dashboard_v3/controllers/guarantors/guarantor_controller.dart';
 import 'package:admin_dashboard_v3/controllers/guarantors/guarantor_image_controller.dart';
-import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:iconsax/iconsax.dart';
 
-import '../../../common/widgets/dropdown_search/searchable_text_field.dart';
-import '../../../common/widgets/icons/t_circular_icon.dart';
-import '../../../common/widgets/shimmers/shimmer.dart';
 import '../../../controllers/media/media_controller.dart';
-import '../../../utils/constants/colors.dart';
 import '../../../utils/constants/enums.dart';
 import '../../../utils/validators/validation.dart';
 
@@ -115,6 +108,9 @@ class GuarrantorCard extends StatelessWidget {
                   //     height: 80,
                   child: TextFormField(
                     controller: cnicTextController,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly
+                    ],
                     validator: (value) =>
                         TValidator.validateEmptyText('CNIC', value),
                     style: Theme.of(context).textTheme.bodyMedium,
@@ -144,6 +140,9 @@ class GuarrantorCard extends StatelessWidget {
                   //    height: 80,
                   child: TextFormField(
                     controller: phoneNoTextController,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly
+                    ],
                     validator: (value) =>
                         TValidator.validateEmptyText('Phone Number', value),
                     style: Theme.of(context).textTheme.bodyMedium,

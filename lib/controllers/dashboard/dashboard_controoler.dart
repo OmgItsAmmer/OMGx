@@ -38,7 +38,7 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
   final RxBool customerDataInitialized = false.obs;
 
   // Legacy loading state (keep for backward compatibility)
-  RxBool isLoading = true.obs;
+  RxBool isLoading = false.obs;
 
   final OrderController orderController = Get.find<OrderController>();
   final ExpenseController expenseController = Get.find<ExpenseController>();
@@ -81,57 +81,147 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
   void onInit() {
     super.onInit();
 
-    // Set all cards to loading state
-    salesCardState.value = DataFetchState.loading;
-    avgOrderState.value = DataFetchState.loading;
-    profitCardState.value = DataFetchState.loading;
-    customerCardState.value = DataFetchState.loading;
-    chartState.value = DataFetchState.loading;
-    pieChartState.value = DataFetchState.loading;
+    // Initialize default values
+    currentMonthSales.value = 0.0;
+    averageOrderValue.value = 0.0;
+    currentMonthProfit.value = 0.0;
+    customerCount.value = 0;
+    card1Percentage.value = 0;
+    card2Percentage.value = 0;
+    card4Percentage.value = 0;
+    averageOrderPercentage.value = 0;
 
     // Start loading data
     loadDashboardData();
-  }
-
-  @override
-  void onReady() {
-    super.onReady();
-    // Double-check data load on ready
-    if (!orderDataInitialized.value ||
-        !expenseDataInitialized.value ||
-        !customerDataInitialized.value) {
-      // If any data is not loaded, try again with a slight delay
-      Future.delayed(const Duration(milliseconds: 500), () {
-        loadDashboardData();
-      });
-    }
   }
 
   Future<void> loadDashboardData() async {
     try {
       isLoading.value = true;
 
-      // Load order data if needed
-      if (!orderDataInitialized.value) {
-        await loadOrderData();
-      }
+      // Load all necessary data first
+      await _loadAllData();
 
-      // Load expense data if needed
-      if (!expenseDataInitialized.value) {
-        await loadExpenseData();
-      }
-
-      // Load customer data if needed
-      if (!customerDataInitialized.value) {
-        await loadCustomerData();
-      }
-
-      // Calculate dashboard metrics
-      await calculateDashboardMetrics();
+      // Then calculate metrics for each card separately
+      await _calculateAllMetrics();
     } catch (e) {
-      handleError(e);
+      _handleGlobalError(e);
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> _loadAllData() async {
+    // Load order data if needed
+    if (!orderDataInitialized.value || orderController.allOrders.isEmpty) {
+      await loadOrderData();
+    }
+
+    // Load expense data if needed
+    if (!expenseDataInitialized.value || expenseController.expenses.isEmpty) {
+      await loadExpenseData();
+    }
+
+    // Load customer data if needed
+    if (!customerDataInitialized.value ||
+        customerController.allCustomers.isEmpty) {
+      await loadCustomerData();
+    }
+  }
+
+  Future<void> _calculateAllMetrics() async {
+    // Calculate each metric independently with proper state management
+    await _calculateSalesCard();
+    await _calculateAvgOrderCard();
+    await _calculateProfitCard();
+    await _calculateCustomerCard();
+    await _calculateChartData();
+    await _calculatePieChartData();
+  }
+
+  Future<void> _calculateSalesCard() async {
+    salesCardState.value = DataFetchState.loading;
+    try {
+      var result = salesService.calculateSalesTotal(orderController.allOrders);
+      currentMonthSales.value = result.currentMonthSales;
+      card1Percentage.value = result.percentageChange;
+      isCard1Profit.value = result.isProfit;
+      lastMonth.value = result.monthYear;
+      salesCardState.value = DataFetchState.success;
+    } catch (e) {
+      salesCardState.value = DataFetchState.error;
+      if (kDebugMode) {
+        print('Error calculating sales total: $e');
+      }
+    }
+  }
+
+  Future<void> _calculateAvgOrderCard() async {
+    avgOrderState.value = DataFetchState.loading;
+    try {
+      calculateAverageOrderValue(orderController.allOrders);
+      avgOrderState.value = DataFetchState.success;
+    } catch (e) {
+      avgOrderState.value = DataFetchState.error;
+      if (kDebugMode) {
+        print('Error calculating average order value: $e');
+      }
+    }
+  }
+
+  Future<void> _calculateProfitCard() async {
+    profitCardState.value = DataFetchState.loading;
+    try {
+      var result = salesService.calculateProfit(
+          orderController.allOrders, expenseController.expenses);
+      currentMonthProfit.value = result.currentMonthSales;
+      card2Percentage.value = result.percentageChange;
+      isCard2Profit.value = result.isProfit;
+      profitCardState.value = DataFetchState.success;
+    } catch (e) {
+      profitCardState.value = DataFetchState.error;
+      if (kDebugMode) {
+        print('Error calculating profit: $e');
+      }
+    }
+  }
+
+  Future<void> _calculateCustomerCard() async {
+    customerCardState.value = DataFetchState.loading;
+    try {
+      fetchCustomerCard(customerController.allCustomers);
+      customerCardState.value = DataFetchState.success;
+    } catch (e) {
+      customerCardState.value = DataFetchState.error;
+      if (kDebugMode) {
+        print('Error calculating customer metrics: $e');
+      }
+    }
+  }
+
+  Future<void> _calculateChartData() async {
+    chartState.value = DataFetchState.loading;
+    try {
+      calculateWeeklySales1(orderController.allOrders);
+      chartState.value = DataFetchState.success;
+    } catch (e) {
+      chartState.value = DataFetchState.error;
+      if (kDebugMode) {
+        print('Error calculating weekly sales: $e');
+      }
+    }
+  }
+
+  Future<void> _calculatePieChartData() async {
+    pieChartState.value = DataFetchState.loading;
+    try {
+      calculateOrderStatusCounts(orderController.allOrders);
+      pieChartState.value = DataFetchState.success;
+    } catch (e) {
+      pieChartState.value = DataFetchState.error;
+      if (kDebugMode) {
+        print('Error calculating order status counts: $e');
+      }
     }
   }
 
@@ -174,94 +264,8 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
     }
   }
 
-  Future<void> calculateDashboardMetrics() async {
-    try {
-      // Calculate weekly sales (for chart)
-      chartState.value = DataFetchState.loading;
-      try {
-        calculateWeeklySales1(orderController.allOrders);
-        chartState.value = DataFetchState.success;
-      } catch (e) {
-        chartState.value = DataFetchState.error;
-        if (kDebugMode) {
-          print('Error calculating weekly sales: $e');
-        }
-      }
-
-      // Calculate sales total
-      salesCardState.value = DataFetchState.loading;
-      try {
-        var result =
-            salesService.calculateSalesTotal(orderController.allOrders);
-        currentMonthSales.value = result.currentMonthSales;
-        card1Percentage.value = result.percentageChange;
-        isCard1Profit.value = result.isProfit;
-        lastMonth.value = result.monthYear;
-        salesCardState.value = DataFetchState.success;
-      } catch (e) {
-        salesCardState.value = DataFetchState.error;
-        if (kDebugMode) {
-          print('Error calculating sales total: $e');
-        }
-      }
-
-      // Calculate profit
-      profitCardState.value = DataFetchState.loading;
-      try {
-        var result = salesService.calculateProfit(
-            orderController.allOrders, expenseController.expenses);
-        currentMonthProfit.value = result.currentMonthSales;
-        card2Percentage.value = result.percentageChange;
-        isCard2Profit.value = result.isProfit;
-        profitCardState.value = DataFetchState.success;
-      } catch (e) {
-        profitCardState.value = DataFetchState.error;
-        if (kDebugMode) {
-          print('Error calculating profit: $e');
-        }
-      }
-
-      // Calculate customer metrics
-      customerCardState.value = DataFetchState.loading;
-      try {
-        fetchCustomerCard(customerController.allCustomers);
-        customerCardState.value = DataFetchState.success;
-      } catch (e) {
-        customerCardState.value = DataFetchState.error;
-        if (kDebugMode) {
-          print('Error calculating customer metrics: $e');
-        }
-      }
-
-      // Calculate average order value
-      avgOrderState.value = DataFetchState.loading;
-      try {
-        calculateAverageOrderValue(orderController.allOrders);
-        avgOrderState.value = DataFetchState.success;
-      } catch (e) {
-        avgOrderState.value = DataFetchState.error;
-        if (kDebugMode) {
-          print('Error calculating average order value: $e');
-        }
-      }
-
-      // Calculate order status counts
-      pieChartState.value = DataFetchState.loading;
-      try {
-        calculateOrderStatusCounts(orderController.allOrders);
-        pieChartState.value = DataFetchState.success;
-      } catch (e) {
-        pieChartState.value = DataFetchState.error;
-        if (kDebugMode) {
-          print('Error calculating order status counts: $e');
-        }
-      }
-    } catch (e) {
-      handleError(e);
-    }
-  }
-
-  void handleError(dynamic error) {
+  // Simplified error handling
+  void _handleGlobalError(dynamic error) {
     if (kDebugMode) {
       print('Dashboard error: $error');
     }
@@ -313,7 +317,7 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
         final percentageChange =
             ((currentAvg - lastAvg) / lastAvg * 100).round();
         averageOrderPercentage.value =
-            percentageChange.abs(); // Store absolute value
+            percentageChange; // Store the actual value (can be negative)
         isAverageOrderIncrease.value = currentAvg >= lastAvg; // Store direction
       }
 
@@ -331,7 +335,7 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
       if (kDebugMode) {
         print('Error calculating average order value: $e');
       }
-      throw Exception('Error calculating average order value: $e');
+      rethrow;
     }
   }
 
@@ -361,7 +365,7 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
         }
       }
     } catch (e) {
-      throw Exception('Error calculating order status counts: $e');
+      rethrow;
     }
   }
 
@@ -437,7 +441,7 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
       card4Percentage.value = percentageChange;
       isCustomerIncrease.value = isIncrease;
     } catch (e) {
-      throw Exception('Error calculating customer stats: $e');
+      rethrow;
     }
   }
 }

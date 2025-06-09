@@ -37,117 +37,120 @@ class DashboardDesktop extends StatelessWidget {
               ),
 
               //Cards
-              Row(
-                children: [
-                  Expanded(
-                      child: TDashBoardCard(
-                    isLoading: dashboardController.isLoading,
-                    iconWidget: const TCircularIcon(
-                      width: 40,
-                      height: 40,
-                      backgroundColor: TColors.primary,
-                      icon: Iconsax.box,
-                      color: TColors.white,
-                    ),
-                    value:
-                        'Rs ${dashboardController.currentMonthSales.value.toStringAsFixed(2)}',
-                    stats: dashboardController.card1Percentage.value,
-                    title: 'Sales Total',
-                    subTitle:
-                        'Compared to ${dashboardController.lastMonth.value}',
-                    icon: (dashboardController.isCard1Profit.value)
-                        ? Iconsax.arrow_up_3
-                        : Iconsax.arrow_down,
-                    color: (dashboardController.isCard1Profit.value)
-                        ? Colors.green
-                        : Colors.red,
-                    cardState: dashboardController.salesCardState,
-                  )),
-                  const SizedBox(
-                    width: TSizes.spaceBtwItems,
-                  ),
-                  Expanded(
-                      child: TDashBoardCard(
-                    isLoading: dashboardController.isLoading,
-                    iconWidget: const TCircularIcon(
-                      width: 40,
-                      height: 40,
-                      backgroundColor: Colors.purple,
-                      icon: Iconsax.receipt_item,
-                      color: TColors.white,
-                    ),
-                    value:
-                        'Rs ${dashboardController.averageOrderValue.value.toStringAsFixed(2)}',
-                    stats: dashboardController.averageOrderPercentage.value,
-                    title: 'Average Order Value',
-                    subTitle:
-                        'Compared to ${dashboardController.lastMonth.value}',
-                    color: (dashboardController.isAverageOrderIncrease.value)
-                        ? Colors.green
-                        : Colors.red,
-                    icon: (dashboardController.isAverageOrderIncrease.value)
-                        ? Iconsax.arrow_up_3
-                        : Iconsax.arrow_down,
-                    cardState: dashboardController.avgOrderState,
-                  )),
-                  const SizedBox(
-                    width: TSizes.spaceBtwItems,
-                  ),
-                  Expanded(
-                    child: TDashBoardCard(
-                      isLoading: dashboardController.isLoading,
+              Obx(() {
+                return Row(
+                  children: [
+                    Expanded(
+                        child: TDashBoardCard(
+                      isLoading: dashboardController.isLoading.value,
                       iconWidget: const TCircularIcon(
                         width: 40,
                         height: 40,
-                        backgroundColor: CupertinoColors.systemYellow,
-                        icon: Iconsax.money,
+                        backgroundColor: TColors.primary,
+                        icon: Iconsax.box,
                         color: TColors.white,
                       ),
                       value:
-                          'Rs ${dashboardController.currentMonthProfit.value.toStringAsFixed(2)}',
-                      stats: dashboardController.card2Percentage.value,
-                      title: 'Profit',
+                          'Rs ${dashboardController.currentMonthSales.value.toStringAsFixed(2)}',
+                      stats: dashboardController.card1Percentage.value,
+                      title: 'Sales Total',
                       subTitle:
                           'Compared to ${dashboardController.lastMonth.value}',
-                      icon: (dashboardController.isCard2Profit.value)
+                      icon: (dashboardController.isCard1Profit.value)
                           ? Iconsax.arrow_up_3
                           : Iconsax.arrow_down,
-                      color: (dashboardController.isCard2Profit.value)
+                      color: (dashboardController.isCard1Profit.value)
                           ? Colors.green
                           : Colors.red,
-                      cardState: dashboardController.profitCardState,
+                      cardState: dashboardController.salesCardState,
+                    )),
+                    const SizedBox(
+                      width: TSizes.spaceBtwItems,
                     ),
-                  ),
-                  const SizedBox(
-                    width: TSizes.spaceBtwItems,
-                  ),
-                  Expanded(
+                    Expanded(
+                        child: TDashBoardCard(
+                      isLoading: dashboardController.isLoading.value,
+                      iconWidget: const TCircularIcon(
+                        width: 40,
+                        height: 40,
+                        backgroundColor: Colors.purple,
+                        icon: Iconsax.receipt_item,
+                        color: TColors.white,
+                      ),
+                      value:
+                          'Rs ${dashboardController.averageOrderValue.value.toStringAsFixed(2)}',
+                      stats: dashboardController.averageOrderPercentage.value,
+                      title: 'Average Order Value',
+                      subTitle:
+                          'Compared to ${dashboardController.lastMonth.value}',
+                      color: (dashboardController.isAverageOrderIncrease.value)
+                          ? Colors.green
+                          : Colors.red,
+                      icon: (dashboardController.isAverageOrderIncrease.value)
+                          ? Iconsax.arrow_up_3
+                          : Iconsax.arrow_down,
+                      cardState: dashboardController.avgOrderState,
+                    )),
+                    const SizedBox(
+                      width: TSizes.spaceBtwItems,
+                    ),
+                    Expanded(
                       child: TDashBoardCard(
-                    isLoading: dashboardController.isLoading,
-                    iconWidget: const TCircularIcon(
-                      width: 40,
-                      height: 40,
-                      backgroundColor: Colors.green,
-                      icon: Iconsax.people,
-                      color: TColors.white,
+                        isLoading: dashboardController.isLoading.value,
+                        iconWidget: const TCircularIcon(
+                          width: 40,
+                          height: 40,
+                          backgroundColor: CupertinoColors.systemYellow,
+                          icon: Iconsax.money,
+                          color: TColors.white,
+                        ),
+                        value:
+                            'Rs ${dashboardController.currentMonthProfit.value.toStringAsFixed(2)}',
+                        stats: dashboardController.card2Percentage.value,
+                        title: 'Profit',
+                        subTitle:
+                            'Compared to ${dashboardController.lastMonth.value}',
+                        icon: (dashboardController.isCard2Profit.value)
+                            ? Iconsax.arrow_up_3
+                            : Iconsax.arrow_down,
+                        color: (dashboardController.isCard2Profit.value)
+                            ? Colors.green
+                            : Colors.red,
+                        cardState: dashboardController.profitCardState,
+                      ),
                     ),
-                    value: dashboardController.customerCount.value.toString(),
-                    stats: dashboardController.card4Percentage.value,
-                    title: 'Customers',
-                    subTitle:
-                        'Compared to ${dashboardController.lastMonth.value}',
-                    icon: (dashboardController.isCustomerIncrease.value)
-                        ? Iconsax.arrow_up_3
-                        : Iconsax.arrow_down,
-                    color: (dashboardController.isCustomerIncrease.value)
-                        ? Colors.green
-                        : Colors.red,
-                    cardState: dashboardController.customerCardState,
-                  )),
-                  const SizedBox(
-                    width: TSizes.spaceBtwItems,
-                  ),
-                ],
+                    const SizedBox(
+                      width: TSizes.spaceBtwItems,
+                    ),
+                    Expanded(
+                        child: TDashBoardCard(
+                      isLoading: dashboardController.isLoading.value,
+                      iconWidget: const TCircularIcon(
+                        width: 40,
+                        height: 40,
+                        backgroundColor: Colors.green,
+                        icon: Iconsax.people,
+                        color: TColors.white,
+                      ),
+                      value: dashboardController.customerCount.value.toString(),
+                      stats: dashboardController.card4Percentage.value,
+                      title: 'Customers',
+                      subTitle:
+                          'Compared to ${dashboardController.lastMonth.value}',
+                      icon: (dashboardController.isCustomerIncrease.value)
+                          ? Iconsax.arrow_up_3
+                          : Iconsax.arrow_down,
+                      color: (dashboardController.isCustomerIncrease.value)
+                          ? Colors.green
+                          : Colors.red,
+                      cardState: dashboardController.customerCardState,
+                    )),
+                    const SizedBox(
+                      width: TSizes.spaceBtwItems,
+                    ),
+                  ],
+                );
+              }
               ),
               const SizedBox(
                 height: TSizes.spaceBtwSections,

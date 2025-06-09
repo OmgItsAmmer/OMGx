@@ -2,6 +2,7 @@ import 'package:admin_dashboard_v3/common/widgets/loaders/animation_loader.dart'
 import 'package:admin_dashboard_v3/controllers/table/table_search_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -132,8 +133,10 @@ class _TPaginatedDataTableState extends State<TPaginatedDataTable> {
               topRight: Radius.circular(TSizes.borderRadiusMd),
             )),
 
-            empty: const TAnimationLoaderWidget(
-              text: 'Nothing Found',
+            empty:  TAnimationLoaderWidget(
+              text: (TDeviceUtils.isMobileScreen(context))
+                  ? ''
+                  : 'Nothing Found',
               animation: TImages.noDataFound,
               showAction: false,
               width: 200,

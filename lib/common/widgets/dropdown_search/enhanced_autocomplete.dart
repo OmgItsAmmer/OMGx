@@ -233,13 +233,14 @@ class _EnhancedAutocompleteState<T extends Object>
             _validateManualEntry(textEditingController.text);
           }
 
-          if (focusNode.hasFocus && widget.showOptionsOnFocus) {
-            // Add a slight delay to ensure the focus is complete
-            Future.microtask(() {
-              if (_isMounted && widget.showOptionsOnFocus) {
-                onFieldSubmitted();
-              }
-            });
+          // Show options on focus for fields that need it, but avoid auto-selection
+          if (focusNode.hasFocus &&
+              widget.showOptionsOnFocus &&
+              textEditingController.text.isEmpty &&
+              widget.options.isNotEmpty) {
+            // Instead of calling onFieldSubmitted immediately, we'll let the optionsBuilder
+            // handle showing options naturally when the field is focused and empty
+            // This avoids the auto-selection issue
           }
         });
 
@@ -250,12 +251,8 @@ class _EnhancedAutocompleteState<T extends Object>
             controller: textEditingController,
             validator: widget.validator,
             onTap: () {
-              if (_isMounted &&
-                  widget.showOptionsOnFocus &&
-                  widget.options.isNotEmpty) {
-                // When tapped, show all options even if the field is empty
-                onFieldSubmitted();
-              }
+              // Simplified onTap - let the optionsBuilder handle showing options
+              // This prevents the auto-selection issue that was happening with onFieldSubmitted
             },
             onFieldSubmitted: (String value) {
               if (!_isMounted) return;

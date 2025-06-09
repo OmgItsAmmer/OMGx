@@ -35,13 +35,16 @@ class OrderItems extends StatelessWidget {
 
     final subTotal = order.orderItems?.fold(
           0.0,
-          (previousValue, element) =>
-              previousValue + (element.price * element.quantity),
+          (previousValue, element) => previousValue + element.price,
         ) ??
         0.0; // Ensure it's never null
 
+    // Calculate the discount amount based on the percentage
+    final discountAmount = subTotal * (order.discount / 100);
+
+    // Calculate the total before installment charges
     final totalBeforeInstallmentCharges =
-        subTotal + (order.tax) + (order.shippingFee) - (order.discount);
+        subTotal + (order.tax) + (order.shippingFee) - discountAmount;
 
     return FutureBuilder<InstallmentPlanModel?>(
         future: order.saletype?.toLowerCase() == 'installment'
@@ -54,14 +57,14 @@ class OrderItems extends StatelessWidget {
           double commissionAmount = 0.0;
           if (order.salesmanComission > 0) {
             // Base for commission is usually the net item value
-            final commissionBase = subTotal - order.discount;
+            final commissionBase = subTotal - discountAmount;
             commissionAmount = commissionBase * order.salesmanComission / 100;
           }
 
           // Calculate the actual grand total including all components
           double grandTotal = _calculateGrandTotal(
               subTotal: subTotal,
-              discount: order.discount,
+              discount: discountAmount, // Pass the calculated discount amount
               tax: order.tax,
               shippingFee: order.shippingFee,
               commissionAmount: commissionAmount, // Pass calculated commission
@@ -233,20 +236,32 @@ class OrderItems extends StatelessWidget {
                     children: [
                       _buildSummaryRow(context, 'SubTotal',
                           Text('Rs. ${subTotal.toStringAsFixed(2)}')),
-                      _buildSummaryRow(context, 'Discount',
-                          Text('Rs. ${order.discount.toStringAsFixed(2)}')),
+                      _buildSummaryRow(
+                          context,
+                          'Discount',
+                          Text(
+                              '${order.discount}% (Rs. ${discountAmount.toStringAsFixed(2)})')),
                       _buildSummaryRow(context, 'Shipping',
                           Text('Rs. ${order.shippingFee.toStringAsFixed(2)}')),
                       _buildSummaryRow(context, 'Tax',
                           Text('Rs. ${order.tax.toStringAsFixed(2)}')),
 
-                      // Installment-specific rows
-                      if (installmentPlan != null) ...[
+                      // Salesman Commission (always shown)
+                      if (order.salesmanComission > 0)
+                        _buildSummaryRow(
+                            context,
+                            'Salesman Commission',
+                            Text(
+                                '${order.salesmanComission}% (Rs. ${commissionAmount.toStringAsFixed(2)})')),
+
+                      // Installment-specific rows (only shown for installment sales)
+                      if (order.saletype?.toLowerCase() == 'installment' &&
+                          installmentPlan != null) ...[
                         const Divider(),
                         // Advance Payment
                         _buildSummaryRow(
                             context,
-                            'Advance Payment',
+                            'Advance Payment (Already Added)',
                             Text(
                                 'Rs. ${double.tryParse(installmentPlan.downPayment) ?? 0.0}')),
                         // Document Charges
@@ -272,25 +287,7 @@ class OrderItems extends StatelessWidget {
                               context,
                               'Margin',
                               Text(
-                                  '${double.tryParse(installmentPlan.margin!) ?? 0.0}%')),
-                        // Calculated margin amount
-                        if (installmentPlan.margin != null &&
-                            installmentPlan.margin!.isNotEmpty)
-                          _buildSummaryRow(
-                              context,
-                              'Margin Amount',
-                              Text(
-                                  'Rs. ${_calculateMarginAmount(subTotal - order.discount, installmentPlan)}')),
-                        // Salesman Commission
-                        if (order.salesmanComission > 0)
-                          _buildSummaryRow(context, 'Salesman Commission',
-                              Text('${order.salesmanComission}%')),
-                        if (order.salesmanComission > 0)
-                          _buildSummaryRow(
-                              context,
-                              'Commission Amount',
-                              Text(
-                                  'Rs. ${(commissionAmount).toStringAsFixed(2)}')),
+                                  '${double.tryParse(installmentPlan.margin!) ?? 0.0}% (Rs. ${_calculateMarginAmount(subTotal - discountAmount, installmentPlan)})')),
                       ],
 
                       const Divider(),
@@ -379,7 +376,8 @@ class OrderItems extends StatelessWidget {
       required double commissionAmount,
       required InstallmentPlanModel? installmentPlan}) {
     // Start with the base order total
-    double grandTotal = subTotal - discount + tax + shippingFee;
+    double grandTotal =
+        subTotal - discount + tax + shippingFee; // Apply discount first
 
     // Add installment specific charges if applicable
     if (installmentPlan != null) {

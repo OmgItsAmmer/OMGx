@@ -101,7 +101,7 @@ class GuarantorCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildInfoText(
-                            context, guarantor.fullName, "No Guarantor Found"),
+                            context, guarantor.fullName, "No Guarantor Found",isBold: true),
                         _buildInfoText(
                             context, guarantor.cnic, "No CNIC Found"),
                         _buildInfoText(context, guarantor.phoneNumber,
@@ -122,16 +122,18 @@ class GuarantorCard extends StatelessWidget {
       ),
     );
   }
+Widget _buildInfoText(BuildContext context, String? value, String fallback, {bool isBold = false}) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: TSizes.spaceBtwSections / 2),
+    child: Text(
+      value?.isNotEmpty == true ? value! : fallback,
+      style: Theme.of(context).textTheme.titleSmall!.copyWith(
+            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+          ),
+      overflow: TextOverflow.ellipsis,
+      maxLines: 1,
+    ),
+  );
+}
 
-  Widget _buildInfoText(BuildContext context, String? value, String fallback) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: TSizes.spaceBtwSections / 2),
-      child: Text(
-        value?.isNotEmpty == true ? value! : fallback,
-        style: Theme.of(context).textTheme.titleSmall,
-        overflow: TextOverflow.ellipsis,
-        maxLines: 1,
-      ),
-    );
-  }
 }

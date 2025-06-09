@@ -15,6 +15,7 @@ A comprehensive admin dashboard for business management built with Flutter and S
 - **Salesman Management**: Manage sales team and track performance
 - **Brand & Category Management**: Organize products by brands and categories
 - **Installment Tracking**: Manage installment-based sales
+- **Installment Reports**: Generate upcoming and overdue installments reports for better payment tracking
 - **Expense Management**: Track business expenses
 - **Report Generation**: Generate PDF reports using the pdf package
 - **Media Management**: Upload and manage product images
@@ -214,6 +215,58 @@ If you encounter socket connection issues with Supabase in release mode:
 - Admin operations are disabled in production (use a secure backend service instead)
 - All sensitive operations require appropriate authentication
 - ProGuard obfuscation is enabled for Android release builds
+
+## Installment Reports
+
+The application now includes comprehensive installment tracking with two specialized reports:
+
+### 1. Upcoming Installments Report
+- **Purpose**: Track installments due within a specified number of days (7, 15, 30, 60, or 90 days)
+- **Features**: 
+  - Customer contact information for follow-up
+  - Salesman details for accountability
+  - Days until due for prioritization
+  - Total amount calculations
+  - PDF export functionality
+
+### 2. Overdue Installments Report
+- **Purpose**: Monitor unpaid installments that have passed their due date
+- **Features**:
+  - Days overdue calculation for urgency assessment
+  - Customer and salesman information
+  - Status tracking
+  - Total overdue amount calculations
+  - PDF export functionality
+
+### Database Schema
+
+#### Installment Reports Functions
+
+1. **get_upcoming_installments_report(days_ahead INTEGER)**
+   - Returns installments due within the specified number of days
+   - Includes customer, salesman, and installment details
+   - Filters unpaid installments only
+
+2. **get_overdue_installments_report()**
+   - Returns all overdue unpaid installments
+   - Calculates days overdue automatically
+   - Ordered by due date and customer name
+
+#### Related Tables
+- `installment_payments`: Main installment payment records
+- `installment_plans`: Installment plan details linked to orders
+- `orders`: Order information linking customers and salesman
+- `customers`: Customer contact and personal information
+- `salesman`: Salesman details for follow-up accountability
+
+### Report Components
+
+Both reports feature:
+- Professional PDF generation with company branding
+- Comprehensive data tables with customer contact information
+- Summary statistics (total amounts, averages)
+- Responsive UI with preview functionality
+- Downloadable PDF reports for offline use
 
 ## Contributing
 

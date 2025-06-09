@@ -180,7 +180,7 @@ class NotificationController extends GetxController {
       }
 
       allNotifications.refresh();
-      TLoader.infoSnackBar(
+      TLoader.successSnackBar(
         title: 'Notifications',
         message: 'All notifications marked as read',
         duration: 2,

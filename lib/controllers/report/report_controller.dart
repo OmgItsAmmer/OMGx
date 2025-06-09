@@ -1,11 +1,15 @@
 import 'package:admin_dashboard_v3/Models/reports/sale_report_model.dart';
 import 'package:admin_dashboard_v3/Models/reports/simple_pnl_report_model.dart';
+import 'package:admin_dashboard_v3/Models/reports/upcoming_installments_report_model.dart';
+import 'package:admin_dashboard_v3/Models/reports/overdue_installments_report_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
 import 'package:admin_dashboard_v3/controllers/salesman/salesman_controller.dart';
 import 'package:admin_dashboard_v3/views/reports/specific_reports/pnl_report/pnLReportPage.dart';
 import 'package:admin_dashboard_v3/views/reports/specific_reports/recovery_report_salesman/recovery_report_salesman.dart';
 import 'package:admin_dashboard_v3/views/reports/specific_reports/simplePnLReport.dart';
+import 'package:admin_dashboard_v3/views/reports/specific_reports/upcoming_installments_report/upcoming_installments_report.dart';
+import 'package:admin_dashboard_v3/views/reports/specific_reports/overdue_installments_report/overdue_installments_report.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -46,6 +50,14 @@ class ReportController extends GetxController {
 
 //Simple PnL Report
   RxList<SimplePnLReportModel> simplePnLReports = <SimplePnLReportModel>[].obs;
+
+//Upcoming Installments Report
+  RxList<UpcomingInstallmentsReportModel> upcomingInstallmentsReports =
+      <UpcomingInstallmentsReportModel>[].obs;
+
+//Overdue Installments Report
+  RxList<OverdueInstallmentsReportModel> overdueInstallmentsReports =
+      <OverdueInstallmentsReportModel>[].obs;
 
   //Monthly Sales Report
   void openMonthYearPicker(BuildContext context) {
@@ -552,5 +564,133 @@ class ReportController extends GetxController {
         );
       },
     );
+  }
+
+  void showUpcomingInstallmentsDialog(BuildContext context) {
+    int selectedDays = 7; // Default to 7 days
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Upcoming Installments Report'),
+          content: StatefulBuilder(
+            builder: (context, setState) {
+              return SizedBox(
+                height: 120,
+                width: 300,
+                child: Column(
+                  children: [
+                    const Text('Select number of days to look ahead:'),
+                    const SizedBox(height: 16),
+                    DropdownButton<int>(
+                      isExpanded: true,
+                      value: selectedDays,
+                      items: [7, 15, 30, 60, 90].map((days) {
+                        return DropdownMenuItem(
+                          value: days,
+                          child: Text('$days days'),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          selectedDays = value!;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                showUpcomingInstallmentsReport(selectedDays);
+                Get.back();
+              },
+              child: const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text('Generate Report'),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> showUpcomingInstallmentsReport(int daysAhead) async {
+    try {
+      await fetchUpcomingInstallmentsReport(daysAhead);
+      Get.to(() => UpcomingInstallmentsReportPage(
+            reports: upcomingInstallmentsReports,
+            daysAhead: daysAhead,
+          ));
+    } catch (e) {
+      TLoader.errorSnackBar(title: e.toString());
+    }
+  }
+
+  Future<void> fetchUpcomingInstallmentsReport(int daysAhead) async {
+    try {
+      // Debug calls to check data
+      // if (kDebugMode) {
+      //   print('Debugging installment data before fetching report...');
+      //   await reportsRepository.debugInstallmentPayments();
+      //   await reportsRepository.debugInstallmentPlans();
+      //   await reportsRepository.debugSimpleUpcomingInstallments();
+      // }
+
+      upcomingInstallmentsReports.assignAll(
+          await reportsRepository.fetchUpcomingInstallmentsReport(daysAhead));
+
+      if (kDebugMode) {
+        print(
+            'Fetched ${upcomingInstallmentsReports.length} upcoming installments');
+      }
+    } catch (e) {
+      TLoader.errorSnackBar(title: e.toString());
+      if (kDebugMode) {
+        print('Error fetching upcoming installments: $e');
+      }
+    }
+  }
+
+  Future<void> showOverdueInstallmentsReport() async {
+    try {
+      await fetchOverdueInstallmentsReport();
+      Get.to(() =>
+          OverdueInstallmentsReportPage(reports: overdueInstallmentsReports));
+    } catch (e) {
+      TLoader.errorSnackBar(title: e.toString());
+    }
+  }
+
+  Future<void> fetchOverdueInstallmentsReport() async {
+    try {
+      // Debug calls to check data
+      if (kDebugMode) {
+        print('Debugging installment data before fetching overdue report...');
+        // await reportsRepository.debugInstallmentPayments();
+      }
+
+      overdueInstallmentsReports
+          .assignAll(await reportsRepository.fetchOverdueInstallmentsReport());
+
+      if (kDebugMode) {
+        print(
+            'Fetched ${overdueInstallmentsReports.length} overdue installments');
+      }
+    } catch (e) {
+      TLoader.errorSnackBar(title: e.toString());
+      if (kDebugMode) {
+        print('Error fetching overdue installments: $e');
+      }
+    }
   }
 }

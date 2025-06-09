@@ -21,11 +21,10 @@ class SaleCustomerInfo extends StatelessWidget {
   final String hintText;
 
   final namesList;
-  final addressList;
+
   final onSelectedName;
-  final onSelectedAddress;
+
   final userNameTextController;
-  final addressTextController;
 
   const SaleCustomerInfo({
     super.key,
@@ -33,9 +32,6 @@ class SaleCustomerInfo extends StatelessWidget {
     required this.namesList,
     required this.onSelectedName,
     required this.userNameTextController,
-    required this.onSelectedAddress,
-    required this.addressList,
-    required this.addressTextController,
   });
 
   @override
@@ -67,35 +63,8 @@ class SaleCustomerInfo extends StatelessWidget {
                   backgroundColor: TColors.primary.withOpacity(0.1),
                   color: TColors.primary,
                   onPressed: () {
-                    // Reset all customer fields - more robust approach
-                    // Clear external controllers first
-                    userNameTextController.text = '';
-                    addressTextController.text = '';
-                    salesController.customerPhoneNoController.value.clear();
-                    salesController.customerCNICController.value.clear();
-                    salesController.selectedAddressId = null;
-                    salesController.entityId.value = -1;
-                    mediaController.displayImage.value = null;
-
-                    // Force update text selection which triggers the controller listener
-                    userNameTextController.selection =
-                        TextSelection.fromPosition(
-                            const TextPosition(offset: 0));
-                    addressTextController.selection =
-                        TextSelection.fromPosition(
-                            const TextPosition(offset: 0));
-
-                    // Trigger callbacks
-                    if (onSelectedName != null) onSelectedName('');
-                    if (onSelectedAddress != null) onSelectedAddress('');
-
-                    // Set a very short delay to ensure UI updates
-                    Future.microtask(() {
-                      if (salesController.customerFormKey.currentState !=
-                          null) {
-                        salesController.update();
-                      }
-                    });
+                    // Use the centralized function from SalesController
+                    salesController.handleCustomerSelection('');
                   },
                 ),
               ],
@@ -182,6 +151,7 @@ class SaleCustomerInfo extends StatelessWidget {
                       SizedBox(
                         width: 300,
                         child: EnhancedAutocomplete<String>(
+                          showOptionsOnFocus: true,
                           labelText: hintText,
                           hintText: 'Select a customer',
                           options: namesList,
@@ -219,6 +189,7 @@ class SaleCustomerInfo extends StatelessWidget {
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly
                             ], // Allow only digits
+                            readOnly: true,
                             style: Theme.of(context).textTheme.bodyMedium,
                             decoration: const InputDecoration(
                                 labelText: 'Phone Number'),
@@ -229,16 +200,15 @@ class SaleCustomerInfo extends StatelessWidget {
                         ),
                         SizedBox(
                           width: double.infinity,
-                          // height: 80,
-
-                          child: EnhancedAutocomplete<String>(
-                            labelText: 'Address',
-                            hintText: 'Enter address',
-                            options: addressList,
-                            externalController: addressTextController,
-                            displayStringForOption: (String option) => option,
-                            onSelected: onSelectedAddress,
-                            showOptionsOnFocus: true,
+                          child: TextFormField(
+                            controller:
+                                salesController.customerAddressController.value,
+                            validator: (value) =>
+                                TValidator.validateEmptyText('Address', value),
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            decoration:
+                                const InputDecoration(labelText: 'Address'),
+                            readOnly: true,
                           ),
                         ),
                         const SizedBox(
@@ -246,7 +216,6 @@ class SaleCustomerInfo extends StatelessWidget {
                         ),
                         SizedBox(
                           width: double.infinity,
-                          //     height: 80,
                           child: TextFormField(
                             controller:
                                 salesController.customerCNICController.value,
@@ -260,6 +229,7 @@ class SaleCustomerInfo extends StatelessWidget {
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly
                             ],
+                            readOnly: true,
                           ),
                         ),
                       ],

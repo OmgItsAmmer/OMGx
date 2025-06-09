@@ -41,8 +41,7 @@ class CategoryController extends GetxController {
       Get.back(); // Fallback if context is null
     }
 
-    // Show snackbar to confirm action
-    TLoader.customToast(message: 'Changes discarded');
+ 
   }
 
   // Method to check if a category name already exists

@@ -91,59 +91,11 @@ class SalesDesktop extends GetView<SalesController> {
                                     controller.customerNameController,
 
                                 onSelectedName: (val) async {
-                                  if (val.isEmpty) {
-                                    customerController.selectedCustomer.value =
-                                        CustomerModel.empty();
-                                    controller.customerPhoneNoController.value
-                                        .clear();
-                                    controller.customerCNICController.value
-                                        .clear();
-                                    addressController.selectedCustomerAddress
-                                        .value = AddressModel.empty();
-                                    controller.customerAddressController.value
-                                        .clear();
-                                    controller.selectedAddressId = null;
-                                    mediaController.displayImage.value = null;
-                                    return;
-                                  }
-
-                                  // Continue normal logic
-                                  customerController.selectedCustomer.value =
-                                      customerController.allCustomers
-                                          .firstWhere(
-                                              (user) => user.fullName == val);
-                                  addressController.fetchEntityAddresses(
-                                      customerController
-                                          .selectedCustomer.value.customerId!,
-                                      'Customer');
-                                  controller.entityId.value = customerController
-                                      .selectedCustomer.value.customerId!;
-                                  controller.customerPhoneNoController.value
-                                          .text =
-                                      customerController
-                                          .selectedCustomer.value.phoneNumber;
-                                  controller.customerCNICController.value.text =
-                                      customerController
-                                          .selectedCustomer.value.cnic;
+                                  await controller.handleCustomerSelection(val);
                                 },
 
-                                ///ADDRESS RELATED
-                                addressList: addressController
-                                    .allCustomerAddressesLocation,
-                                addressTextController:
-                                    controller.customerAddressController.value,
-                                onSelectedAddress: (val) {
-                                  addressController
-                                          .selectedCustomerAddress.value =
-                                      addressController.allCustomerAddresses
-                                          .firstWhere((address) =>
-                                              address.location == val);
-
-                                  controller.selectedAddressId =
-                                      addressController.selectedCustomerAddress
-                                          .value.addressId;
-                                },
-                              )),
+                               
+                            )),
 
                           const SizedBox(
                             width: TSizes.spaceBtwSections,

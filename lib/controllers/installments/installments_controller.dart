@@ -91,6 +91,16 @@ class InstallmentController extends GetxController {
   //OrderDetails
   // Rx<CustomerModel> selectedCustomer = CustomerModel.empty().obs;
 
+  // Store order details for grand total calculation
+  double _currentOrderSubTotal = 0.0;
+  double _currentOrderDiscount = 0.0;
+  double _currentOrderTax = 0.0;
+  double _currentOrderShippingFee = 0.0;
+  double _currentOrderCommissionAmount = 0.0;
+
+  // Add a loading state
+  final isSavingPlan = false.obs;
+
   void resetFormFields() {
     try {
       paidAmount.clear();
@@ -298,6 +308,7 @@ class InstallmentController extends GetxController {
       isLoading.value = true;
       currentInstallmentPayments.clear();
       final planId = await installmentRepository.fetchPlanId(orderId);
+
       if (planId == null) {
         TLoader.errorSnackBar(title: 'Fetch Plan Issue!');
       } else {
@@ -322,7 +333,7 @@ class InstallmentController extends GetxController {
     try {
       // Convert strings to double and then perform the addition
       double billAmountDouble = double.tryParse(billAmount.value.text) ?? 0.0;
-     // double downPaymentDouble = double.tryParse(DownPayment.text) ?? 0.0;
+      // double downPaymentDouble = double.tryParse(DownPayment.text) ?? 0.0;
       double documentChargesDouble =
           double.tryParse(DocumentCharges.text) ?? 0.0;
       double otherChargesDouble = double.tryParse(otherCharges.text) ?? 0.0;
@@ -332,9 +343,8 @@ class InstallmentController extends GetxController {
       double marginAsDecimal = marginDouble / 100;
 
       // Perform the addition
-      double _payableExMargin = billAmountDouble +
-          documentChargesDouble +
-          otherChargesDouble;
+      double _payableExMargin =
+          billAmountDouble + documentChargesDouble + otherChargesDouble;
       double _payableINCLMargin =
           _payableExMargin + (_payableExMargin * marginAsDecimal);
 
@@ -350,6 +360,63 @@ class InstallmentController extends GetxController {
     try {
       // Clear existing plans
       currentInstallmentPayments.clear();
+
+      // Validate text controllers
+      if (billAmount.value.text.isEmpty ||
+          double.tryParse(billAmount.value.text) == null) {
+        TLoader.errorSnackBar(
+          title: 'Invalid Data',
+          message: 'Bill Amount must be a valid number.',
+        );
+        return;
+      }
+      if (NoOfInstallments.text.isEmpty ||
+          int.tryParse(NoOfInstallments.text) == null) {
+        TLoader.errorSnackBar(
+          title: 'Invalid Data',
+          message: 'Number of Installments must be a valid integer.',
+        );
+        return;
+      }
+      if (DownPayment.text.isEmpty ||
+          double.tryParse(DownPayment.text) == null) {
+        TLoader.errorSnackBar(
+          title: 'Invalid Data',
+          message: 'Down Payment must be a valid number.',
+        );
+        return;
+      }
+      if (DocumentCharges.text.isEmpty ||
+          double.tryParse(DocumentCharges.text) == null) {
+        TLoader.errorSnackBar(
+          title: 'Invalid Data',
+          message: 'Document Charges must be a valid number.',
+        );
+        return;
+      }
+      if (otherCharges.text.isEmpty ||
+          double.tryParse(otherCharges.text) == null) {
+        TLoader.errorSnackBar(
+          title: 'Invalid Data',
+          message: 'Other Charges must be a valid number.',
+        );
+        return;
+      }
+      if (margin.text.isEmpty || double.tryParse(margin.text) == null) {
+        TLoader.errorSnackBar(
+          title: 'Invalid Data',
+          message: 'Margin must be a valid number.',
+        );
+        return;
+      }
+      if (frequencyInMonth.text.isEmpty ||
+          int.tryParse(frequencyInMonth.text) == null) {
+        TLoader.errorSnackBar(
+          title: 'Invalid Data',
+          message: 'Frequency must be a valid integer.',
+        );
+        return;
+      }
 
       // Parse inputs with validation
       int numberOfInstallments = int.tryParse(NoOfInstallments.text) ?? 0;
@@ -549,6 +616,16 @@ class InstallmentController extends GetxController {
 
   Future<void> savePlan() async {
     try {
+      isSavingPlan.value = true; // Set loading state to true
+
+      // Make sure we have data to display in the report
+      if (currentInstallmentPayments.isEmpty) {
+        TLoader.errorSnackBar(
+          title: 'Data Error',
+          message: 'No installment data to display in the report.',
+        );
+        return;
+      }
       final guarantorImageController = Get.find<GuarantorImageController>();
       final mediaController = Get.find<MediaController>();
       int orderId = await salesController.checkOut();
@@ -578,15 +655,6 @@ class InstallmentController extends GetxController {
       // Clear the images after successful upload and save guarantor images with correct IDs
       await guarantorImageController.saveGuarantorImages(guarranteIds);
 
-      // Make sure we have data to display in the report
-      if (currentInstallmentPayments.isEmpty) {
-        TLoader.errorSnackBar(
-          title: 'Data Error',
-          message: 'No installment data to display in the report.',
-        );
-        return;
-      }
-
       // Navigate to the report page with the current installment payments
       final installmentPaymentsToDisplay =
           List<InstallmentTableModel>.from(currentInstallmentPayments);
@@ -594,21 +662,20 @@ class InstallmentController extends GetxController {
             installmentPlans: installmentPaymentsToDisplay,
           ));
 
-      // Only clear the fields after successful navigation
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        clearAllFields();
-        guarantorImageController.clearGuarantorImages();
-        mediaController.displayImage.value = null;
-        salesController.clearSaleDetails();
-      });
+      clearAllFields();
+      guarantorImageController.clearGuarantorImages();
+      mediaController.displayImage.value = null;
+      salesController.clearSaleDetails();
     } catch (e) {
       if (kDebugMode) {
         print(e);
         TLoader.errorSnackBar(
-          title: 'Oh Snap! ya hoo',
+          title: 'Oh Snap! , savePlan!',
           message: e.toString(),
         );
       }
+    } finally {
+      isSavingPlan.value = false; // Set loading state to false
     }
   }
 
@@ -664,6 +731,52 @@ class InstallmentController extends GetxController {
         componentType == 'margin');
   }
 
+  // Calculate grand total using the same logic as in order_items.dart
+  double calculateGrandTotal({
+    required double subTotal,
+    required double discount,
+    required double tax,
+    required double shippingFee,
+    required double commissionAmount,
+    required InstallmentPlanModel? installmentPlan,
+  }) {
+    // Start with the base order total
+    double grandTotal = subTotal - discount + tax + shippingFee;
+
+    // Add installment specific charges if applicable
+    if (installmentPlan != null) {
+      // Add document charges
+      if (installmentPlan.documentCharges != null &&
+          installmentPlan.documentCharges!.isNotEmpty) {
+        grandTotal += double.tryParse(installmentPlan.documentCharges!) ?? 0.0;
+      }
+
+      // Add other charges
+      if (installmentPlan.otherCharges != null &&
+          installmentPlan.otherCharges!.isNotEmpty) {
+        grandTotal += double.tryParse(installmentPlan.otherCharges!) ?? 0.0;
+      }
+
+      // Add margin amount
+      double baseAmountForMargin = subTotal - discount;
+      double downPayment = double.tryParse(installmentPlan.downPayment) ?? 0.0;
+      double marginPercentage =
+          double.tryParse(installmentPlan.margin ?? '0.0') ?? 0.0;
+
+      if (marginPercentage > 0) {
+        double financedBase = baseAmountForMargin - downPayment;
+        if (financedBase < 0) financedBase = 0; // Ensure not negative
+        double marginAmount = financedBase * (marginPercentage / 100.0);
+        grandTotal += marginAmount;
+      }
+    }
+
+    // Add commission amount
+    grandTotal += commissionAmount;
+
+    return grandTotal;
+  }
+
   // Initializes refund data when an order status changes to cancelled
   void initializeRefundData(OrderModel order) {
     try {
@@ -677,11 +790,10 @@ class InstallmentController extends GetxController {
       includeMarginInRefund.value = true;
       isProcessingRefund.value = false;
 
-      // Set the initial base order amount (product subtotal without any charges)
-      double baseOrderAmount = order.orderItems?.fold<double>(
+      // Calculate subtotal using the same logic as order_items.dart
+      double subTotal = order.orderItems?.fold<double>(
             0.0,
-            (previousValue, element) =>
-                (previousValue ?? 0.0) + (element.price * element.quantity),
+            (previousValue, element) => previousValue + element.price,
           ) ??
           0.0;
 
@@ -691,18 +803,20 @@ class InstallmentController extends GetxController {
       // Set tax amount from order
       taxAmount.value = order.tax;
 
-      // Calculate salesman commission amount (convert from percentage to amount)
-      // We need to match the exact amount shown in order details
-      // This may vary depending on how the commission is calculated in the app
-      if (order.salesmanComission == 2 && baseOrderAmount == 300) {
-        // For this particular case, we know the commission is 10.54
-        salesmanCommissionAmount.value = 10.54;
-      } else {
-        // Default calculation for other cases
-        salesmanCommissionAmount.value =
-            (baseOrderAmount * (order.salesmanComission / 100.0))
-                .roundToDouble();
+      // Calculate salesman commission amount - Based on subtotal after discount
+      double commissionAmount = 0.0;
+      if (order.salesmanComission > 0) {
+        final commissionBase = subTotal - order.discount;
+        commissionAmount = commissionBase * order.salesmanComission / 100;
       }
+      salesmanCommissionAmount.value = commissionAmount;
+
+      // Store order details for grand total calculation
+      _currentOrderSubTotal = subTotal;
+      _currentOrderDiscount = order.discount;
+      _currentOrderTax = order.tax;
+      _currentOrderShippingFee = order.shippingFee;
+      _currentOrderCommissionAmount = commissionAmount;
 
       // Load installment plan details for this order if needed
       if (currentInstallmentPlan.value.installmentPlanId == null ||
@@ -726,124 +840,6 @@ class InstallmentController extends GetxController {
     }
   }
 
-  // Calculate refund amount based on current settings
-  void calculateRefundAmount() {
-    // Start with installment payments which are always included
-    double calculatedRefund = installmentsPaidAmount.value;
-
-    if (kDebugMode) {
-      print('-------- Refund Calculation (DETAILED) --------');
-      print('Starting with installment payments: $calculatedRefund');
-    }
-
-    // Conditionally include advance payment
-    if (includeAdvancePaymentInRefund.value) {
-      calculatedRefund += advancePaymentAmount.value;
-      if (kDebugMode) {
-        print(
-            'Added advance payment: +${advancePaymentAmount.value} = $calculatedRefund');
-      }
-    }
-
-    // Conditionally include shipping
-    if (includeShippingInRefund.value &&
-        !isComponentIncludedInInstallments('shipping')) {
-      calculatedRefund += shippingAmount.value;
-      if (kDebugMode) {
-        print('Added shipping: +${shippingAmount.value} = $calculatedRefund');
-      }
-    }
-
-    // Conditionally include tax
-    if (includeTaxInRefund.value && !isComponentIncludedInInstallments('tax')) {
-      calculatedRefund += taxAmount.value;
-      if (kDebugMode) {
-        print('Added tax: +${taxAmount.value} = $calculatedRefund');
-      }
-    }
-
-    // Conditionally include document charges - only if not already part of installment
-    if (includeDocumentChargesInRefund.value &&
-        !isComponentIncludedInInstallments('document')) {
-      calculatedRefund += documentChargesAmount.value;
-      if (kDebugMode) {
-        print(
-            'Added document charges: +${documentChargesAmount.value} = $calculatedRefund');
-      }
-    }
-
-    // Conditionally include other charges - only if not already part of installment
-    if (includeOtherChargesInRefund.value &&
-        !isComponentIncludedInInstallments('other')) {
-      calculatedRefund += otherChargesAmount.value;
-      if (kDebugMode) {
-        print(
-            'Added other charges: +${otherChargesAmount.value} = $calculatedRefund');
-      }
-    }
-
-    // Conditionally include margin - only if not already part of installment
-    if (includeMarginInRefund.value &&
-        !isComponentIncludedInInstallments('margin')) {
-      calculatedRefund += marginAmount.value;
-      if (kDebugMode) {
-        print('Added margin: +${marginAmount.value} = $calculatedRefund');
-      }
-    }
-
-    // Conditionally include salesman commission - never included in installments
-    if (includeSalesmanCommissionInRefund.value) {
-      calculatedRefund += salesmanCommissionAmount.value;
-      if (kDebugMode) {
-        print(
-            'Added commission: +${salesmanCommissionAmount.value} = $calculatedRefund');
-      }
-    }
-
-    // Update the refund amount
-    refundAmount.value = calculatedRefund;
-
-    // Debug information
-    if (kDebugMode) {
-      print('-------- Refund Calculation Summary --------');
-      print('Installment Payments: ${installmentsPaidAmount.value}');
-      print(
-          'Advance Payment: ${includeAdvancePaymentInRefund.value ? advancePaymentAmount.value : 0}');
-      print(
-          'Shipping: ${includeShippingInRefund.value && !isComponentIncludedInInstallments("shipping") ? shippingAmount.value : 0}');
-      print(
-          'Tax: ${includeTaxInRefund.value && !isComponentIncludedInInstallments("tax") ? taxAmount.value : 0}');
-      print(
-          'Document Charges: ${includeDocumentChargesInRefund.value && !isComponentIncludedInInstallments("document") ? documentChargesAmount.value : 0}');
-      print(
-          'Other Charges: ${includeOtherChargesInRefund.value && !isComponentIncludedInInstallments("other") ? otherChargesAmount.value : 0}');
-      print(
-          'Margin: ${includeMarginInRefund.value && !isComponentIncludedInInstallments("margin") ? marginAmount.value : 0}');
-      print(
-          'Salesman Commission: ${includeSalesmanCommissionInRefund.value ? salesmanCommissionAmount.value : 0}');
-      print('Final Refund Amount: ${refundAmount.value}');
-      print('-----------------------------------');
-    }
-
-    // Force UI update
-    update();
-  }
-
-  // Calculates the amount paid through installments
-  void calculateInstallmentsPaid() {
-    double paidInstallments = 0.0;
-    for (var payment in currentInstallmentPayments) {
-      final paymentStatus = payment.status?.toLowerCase() ?? '';
-      // Only count actual installments (not the advance payment which is sequence 0)
-      if (paymentStatus ==
-              InstallmentStatus.paid.toString().split('.').last.toLowerCase() &&
-          payment.sequenceNo > 0) {
-        paidInstallments += double.tryParse(payment.paidAmount ?? '0.0') ?? 0.0;
-      }
-    }
-    installmentsPaidAmount.value = paidInstallments;
-  }
-
   // Updates refund values from the current installment plan
   void updateRefundValuesFromPlan() {
     try {
@@ -856,44 +852,42 @@ class InstallmentController extends GetxController {
           currentInstallmentPlan.value.otherCharges?.trim() ?? '0.0';
       final String marginStr =
           currentInstallmentPlan.value.margin?.trim() ?? '0.0';
-      final String totalAmountStr =
-          currentInstallmentPlan.value.totalAmount.trim();
 
       // Parse values safely
       final double downPayment = double.tryParse(downPaymentStr) ?? 0.0;
       final double documentCharges = double.tryParse(documentChargesStr) ?? 0.0;
       final double otherCharges = double.tryParse(otherChargesStr) ?? 0.0;
       final double marginPercentage = double.tryParse(marginStr) ?? 0.0;
-      final double totalAmount = double.tryParse(totalAmountStr) ?? 0.0;
 
-      // Calculate margin amount
-      final double baseAmount = totalAmount - downPayment;
-      final double margin = baseAmount * (marginPercentage / 100.0);
+      // Calculate margin amount using the same logic as order_items.dart
+      double baseAmountForMargin =
+          _currentOrderSubTotal - _currentOrderDiscount;
+      double financedBase = baseAmountForMargin - downPayment;
+      if (financedBase < 0) financedBase = 0; // Ensure not negative
+      double margin = financedBase * (marginPercentage / 100.0);
 
-      // The base product amount without any extras
-      double productSubtotal = totalAmount;
-
-      // Calculate total order amount including all charges (as it would appear on the invoice)
-      double orderTotal = productSubtotal; // Start with product subtotal
-      orderTotal += documentCharges; // Add document charges
-      orderTotal += otherCharges; // Add other charges
-      orderTotal += margin; // Add margin
-      orderTotal += taxAmount.value; // Add tax
-      orderTotal += shippingAmount.value; // Add shipping
-
-      // Add salesman commission to total order amount calculation
-      orderTotal += salesmanCommissionAmount.value;
+      // Calculate total order amount using the same grand total logic as order_items.dart
+      double grandTotal = calculateGrandTotal(
+        subTotal: _currentOrderSubTotal,
+        discount: _currentOrderDiscount,
+        tax: _currentOrderTax,
+        shippingFee: _currentOrderShippingFee,
+        commissionAmount: _currentOrderCommissionAmount,
+        installmentPlan: currentInstallmentPlan.value,
+      );
 
       if (kDebugMode) {
-        print('-------- Total Order Amount Calculation --------');
-        print('Product Subtotal: $productSubtotal');
+        print(
+            '-------- Total Order Amount Calculation (Grand Total Logic) --------');
+        print('SubTotal: $_currentOrderSubTotal');
+        print('Discount: $_currentOrderDiscount');
+        print('Tax: $_currentOrderTax');
+        print('Shipping: $_currentOrderShippingFee');
+        print('Commission Amount: $_currentOrderCommissionAmount');
         print('Document Charges: $documentCharges');
         print('Other Charges: $otherCharges');
         print('Margin: $margin');
-        print('Tax: ${taxAmount.value}');
-        print('Shipping: ${shippingAmount.value}');
-        print('Salesman Commission: ${salesmanCommissionAmount.value}');
-        print('Total Order Amount: $orderTotal');
+        print('Grand Total: $grandTotal');
         print('-----------------------------------');
       }
 
@@ -902,7 +896,7 @@ class InstallmentController extends GetxController {
       documentChargesAmount.value = documentCharges;
       otherChargesAmount.value = otherCharges;
       marginAmount.value = margin;
-      totalOrderAmount.value = orderTotal;
+      totalOrderAmount.value = grandTotal; // Use grand total calculation
 
       // Calculate installments paid
       calculateInstallmentsPaid();
@@ -1059,6 +1053,154 @@ class InstallmentController extends GetxController {
     } finally {
       isProcessingRefund.value = false;
       update(); // Ensure UI updates
+    }
+  }
+
+  // Calculates the amount paid through installments
+  void calculateInstallmentsPaid() {
+    double paidInstallments = 0.0;
+    for (var payment in currentInstallmentPayments) {
+      final paymentStatus = payment.status?.toLowerCase() ?? '';
+      // Only count actual installments (not the advance payment which is sequence 0)
+      if (paymentStatus ==
+              InstallmentStatus.paid.toString().split('.').last.toLowerCase() &&
+          payment.sequenceNo > 0) {
+        paidInstallments += double.tryParse(payment.paidAmount ?? '0.0') ?? 0.0;
+      }
+    }
+    installmentsPaidAmount.value = paidInstallments;
+  }
+
+  // Calculates the refund amount based on current settings
+  void calculateRefundAmount() {
+    // Start with installment payments which are always included
+    double calculatedRefund = installmentsPaidAmount.value;
+
+    if (kDebugMode) {
+      print('-------- Refund Calculation (DETAILED) --------');
+      print('Starting with installment payments: $calculatedRefund');
+    }
+
+    // Conditionally include advance payment
+    if (includeAdvancePaymentInRefund.value) {
+      calculatedRefund += advancePaymentAmount.value;
+      if (kDebugMode) {
+        print(
+            'Added advance payment: +${advancePaymentAmount.value} = $calculatedRefund');
+      }
+    }
+
+    // Conditionally include shipping
+    if (includeShippingInRefund.value &&
+        !isComponentIncludedInInstallments('shipping')) {
+      calculatedRefund += shippingAmount.value;
+      if (kDebugMode) {
+        print('Added shipping: +${shippingAmount.value} = $calculatedRefund');
+      }
+    }
+
+    // Conditionally include tax
+    if (includeTaxInRefund.value && !isComponentIncludedInInstallments('tax')) {
+      calculatedRefund += taxAmount.value;
+      if (kDebugMode) {
+        print('Added tax: +${taxAmount.value} = $calculatedRefund');
+      }
+    }
+
+    // Conditionally include document charges - only if not already part of installment
+    if (includeDocumentChargesInRefund.value &&
+        !isComponentIncludedInInstallments('document')) {
+      calculatedRefund += documentChargesAmount.value;
+      if (kDebugMode) {
+        print(
+            'Added document charges: +${documentChargesAmount.value} = $calculatedRefund');
+      }
+    }
+
+    // Conditionally include other charges - only if not already part of installment
+    if (includeOtherChargesInRefund.value &&
+        !isComponentIncludedInInstallments('other')) {
+      calculatedRefund += otherChargesAmount.value;
+      if (kDebugMode) {
+        print(
+            'Added other charges: +${otherChargesAmount.value} = $calculatedRefund');
+      }
+    }
+
+    // Conditionally include margin - only if not already part of installment
+    if (includeMarginInRefund.value &&
+        !isComponentIncludedInInstallments('margin')) {
+      calculatedRefund += marginAmount.value;
+      if (kDebugMode) {
+        print('Added margin: +${marginAmount.value} = $calculatedRefund');
+      }
+    }
+
+    // Conditionally include salesman commission - never included in installments
+    if (includeSalesmanCommissionInRefund.value) {
+      calculatedRefund += salesmanCommissionAmount.value;
+      if (kDebugMode) {
+        print(
+            'Added commission: +${salesmanCommissionAmount.value} = $calculatedRefund');
+      }
+    }
+
+    // Update the refund amount
+    refundAmount.value = calculatedRefund;
+
+    // Debug information
+    if (kDebugMode) {
+      print('-------- Refund Calculation Summary --------');
+      print('Installment Payments: ${installmentsPaidAmount.value}');
+      print(
+          'Advance Payment: ${includeAdvancePaymentInRefund.value ? advancePaymentAmount.value : 0}');
+      print(
+          'Shipping: ${includeShippingInRefund.value && !isComponentIncludedInInstallments("shipping") ? shippingAmount.value : 0}');
+      print(
+          'Tax: ${includeTaxInRefund.value && !isComponentIncludedInInstallments("tax") ? taxAmount.value : 0}');
+      print(
+          'Document Charges: ${includeDocumentChargesInRefund.value && !isComponentIncludedInInstallments("document") ? documentChargesAmount.value : 0}');
+      print(
+          'Other Charges: ${includeOtherChargesInRefund.value && !isComponentIncludedInInstallments("other") ? otherChargesAmount.value : 0}');
+      print(
+          'Margin: ${includeMarginInRefund.value && !isComponentIncludedInInstallments("margin") ? marginAmount.value : 0}');
+      print(
+          'Salesman Commission: ${includeSalesmanCommissionInRefund.value ? salesmanCommissionAmount.value : 0}');
+      print('Final Refund Amount: ${refundAmount.value}');
+      print('-----------------------------------');
+    }
+
+    // Force UI update
+    update();
+  }
+
+  // Add a new function for "Print Only" button
+  void navigateToReportWithoutSaving() {
+    try {
+      // Make sure we have data to display in the report
+      if (currentInstallmentPayments.isEmpty) {
+        TLoader.errorSnackBar(
+          title: 'Data Error',
+          message: 'No installment data to display in the report.',
+        );
+        return;
+      }
+
+      // Navigate to the report page with the current installment payments
+      final installmentPaymentsToDisplay =
+          List<InstallmentTableModel>.from(currentInstallmentPayments);
+      Get.to(() => InstallmentReportPage(
+            installmentPlans: installmentPaymentsToDisplay,
+            isPrintOnly: true, // Add a flag to indicate "Print Only" mode
+          ));
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+        TLoader.errorSnackBar(
+          title: 'Oh Snap!',
+          message: e.toString(),
+        );
+      }
     }
   }
 }

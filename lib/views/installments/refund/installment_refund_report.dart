@@ -341,34 +341,36 @@ class InstallmentRefundReport extends StatelessWidget {
                   ],
                 ),
               )),
-          const SizedBox(height: TSizes.spaceBtwSections),
-          Obx(() => ElevatedButton.icon(
-                onPressed: installmentController.isProcessingRefund.value
-                    ? null
-                    : () => installmentController.processRefund(),
-                icon: installmentController.isProcessingRefund.value
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.white),
-                        ),
-                      )
-                    : const Icon(Icons.payments_outlined),
-                label: Text(installmentController.isProcessingRefund.value
-                    ? 'Processing...'
-                    : 'Process Refund'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: TColors.primary,
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(200, 50),
-                ),
-              )),
+          // const SizedBox(height: TSizes.spaceBtwSections),
+          // Obx(() => ElevatedButton.icon(
+          //       onPressed: installmentController.isProcessingRefund.value
+          //           ? null
+          //           : () => installmentController.processRefund(),
+          //       icon: installmentController.isProcessingRefund.value
+          //           ? const SizedBox(
+          //               width: 20,
+          //               height: 20,
+          //               child: CircularProgressIndicator(
+          //                 strokeWidth: 2,
+          //                 valueColor:
+          //                     AlwaysStoppedAnimation<Color>(Colors.white),
+          //               ),
+          //             )
+          //           : const Icon(Icons.payments_outlined),
+          //       label: Text(installmentController.isProcessingRefund.value
+          //           ? 'Processing...'
+          //           : 'Process Refund'),
+          //       style: ElevatedButton.styleFrom(
+          //         backgroundColor: TColors.primary,
+          //         foregroundColor: Colors.white,
+          //         minimumSize: const Size(200, 50),
+          //       ),
+          //     )),
         ],
       );
-    });
+    }
+
+    );
   }
 
   Widget _buildToggleOption(

@@ -4,13 +4,10 @@ import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-
-import '../../../common/widgets/dropdown_search/dropdown_search.dart';
 import '../../../common/widgets/dropdown_search/enhanced_autocomplete.dart';
 import '../../../common/widgets/icons/t_circular_icon.dart';
 import '../../../controllers/sales/sales_controller.dart';
 import '../../../utils/constants/colors.dart';
-import '../../../utils/constants/enums.dart';
 import '../../../utils/validators/validation.dart';
 
 class SalesSalemanInfo extends StatelessWidget {
@@ -55,6 +52,7 @@ class SalesSalemanInfo extends StatelessWidget {
             SizedBox(
               width: 300,
               child: EnhancedAutocomplete<String>(
+                showOptionsOnFocus: true,
                 labelText: 'Salesman',
                 hintText: 'Select a salesman',
                 options: salesmanController.allSalesmanNames,

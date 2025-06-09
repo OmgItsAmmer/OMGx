@@ -247,7 +247,7 @@ class SaleActionButtons extends StatelessWidget {
                                     child: ElevatedButton(
                                         onPressed: () {
                                           salesController.checkOut();
-                                          Navigator.of(context).pop();
+                                          Get.offAllNamed(TRoutes.sales);
                                         },
                                         child: (salesController
                                                 .isCheckingOut.value)

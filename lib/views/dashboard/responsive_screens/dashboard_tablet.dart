@@ -46,7 +46,7 @@ class DashboardTablet extends StatelessWidget {
                 childAspectRatio: 2.2,
                 children: [
                   TDashBoardCard(
-                    isLoading: dashboardController.isLoading,
+                    isLoading: dashboardController.isLoading.value,
                     iconWidget: const TCircularIcon(
                       width: 40,
                       height: 40,
@@ -69,7 +69,7 @@ class DashboardTablet extends StatelessWidget {
                     cardState: dashboardController.salesCardState,
                   ),
                   TDashBoardCard(
-                    isLoading: dashboardController.isLoading,
+                    isLoading: dashboardController.isLoading.value,
                     iconWidget: const TCircularIcon(
                       width: 40,
                       height: 40,
@@ -92,7 +92,7 @@ class DashboardTablet extends StatelessWidget {
                     cardState: dashboardController.avgOrderState,
                   ),
                   TDashBoardCard(
-                    isLoading: dashboardController.isLoading,
+                    isLoading: dashboardController.isLoading.value,
                     iconWidget: const TCircularIcon(
                       width: 40,
                       height: 40,
@@ -115,7 +115,7 @@ class DashboardTablet extends StatelessWidget {
                     cardState: dashboardController.profitCardState,
                   ),
                   TDashBoardCard(
-                    isLoading: dashboardController.isLoading,
+                    isLoading: dashboardController.isLoading.value,
                     iconWidget: const TCircularIcon(
                       width: 40,
                       height: 40,

@@ -103,6 +103,7 @@ class LoginController extends GetxController {
         print("Login successful - redirecting to dashboard");
       }
     } catch (e) {
+      print(e);
       TFullScreenLoader.stopLoading();
       TLoader.errorSnackBar(
           title: 'Login Failed',

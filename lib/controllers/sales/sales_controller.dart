@@ -1,5 +1,8 @@
+import 'package:admin_dashboard_v3/Models/address/address_model.dart';
+import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
 import 'package:admin_dashboard_v3/Models/products/product_variant_model.dart';
 import 'package:admin_dashboard_v3/Models/sales/sale_model.dart';
+import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
 import 'package:admin_dashboard_v3/utils/popups/loaders.dart';
 import 'package:admin_dashboard_v3/controllers/media/media_controller.dart';
 import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
@@ -165,14 +168,14 @@ class SalesController extends GetxController {
     super.onInit();
 
     // Refresh product data to ensure accurate stock information
-    try {
-      final productController = Get.find<ProductController>();
-      productController.refreshProducts();
-    } catch (e) {
-      if (kDebugMode) {
-        print('Failed to refresh products: $e');
-      }
-    }
+    // try {
+    //   final productController = Get.find<ProductController>();
+    //   productController.refreshProducts();
+    // } catch (e) {
+    //   if (kDebugMode) {
+    //     print('Failed to refresh products: $e');
+    //   }
+    // }
 
     // Initialize values
     remainingAmount.value.text = netTotal.value.toString();
@@ -1407,6 +1410,55 @@ class SalesController extends GetxController {
       if (kDebugMode) {
         print('Error resetting salesman fields: $e');
       }
+    }
+  }
+
+  // Add this method to handle customer selection and field population
+  Future<void> handleCustomerSelection(String val) async {
+    final addressController = Get.find<AddressController>();
+    final mediaController = Get.find<MediaController>();
+    if (val.isEmpty) {
+      // Clear the customer name controller
+      customerNameController.clear();
+
+      customerController.selectedCustomer.value = CustomerModel.empty();
+      customerPhoneNoController.value.clear();
+      customerCNICController.value.clear();
+      addressController.selectedCustomerAddress.value = AddressModel.empty();
+      customerAddressController.value.clear();
+      selectedAddressId = null;
+      entityId.value = -1;
+      mediaController.displayImage.value = null;
+      return;
+    }
+
+    // Continue normal logic
+    customerController.selectedCustomer.value = customerController.allCustomers
+        .firstWhere((user) => user.fullName == val);
+
+    await addressController.fetchEntityAddresses(
+        customerController.selectedCustomer.value.customerId!, 'Customer');
+
+    entityId.value = customerController.selectedCustomer.value.customerId!;
+
+    customerPhoneNoController.value.text =
+        customerController.selectedCustomer.value.phoneNumber;
+
+    customerCNICController.value.text =
+        customerController.selectedCustomer.value.cnic;
+
+    // Populate the address field with the first address of the selected customer
+    if (addressController.allCustomerAddressesLocation.isNotEmpty) {
+      final firstAddress = addressController.allCustomerAddressesLocation.first;
+
+      customerAddressController.value.text = firstAddress;
+
+      // Select the first address in the address controller
+      addressController.selectedCustomerAddress.value = addressController
+          .allCustomerAddresses
+          .firstWhere((address) => address.location == firstAddress);
+      selectedAddressId =
+          addressController.selectedCustomerAddress.value.addressId;
     }
   }
 }

@@ -19,43 +19,55 @@ class OrderReportSection extends StatelessWidget {
     return TRoundedContainer(
       padding: const EdgeInsets.all(TSizes.defaultSpace),
       child: Column(
-
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Orders/Sales',style: Theme.of(context).textTheme.headlineMedium ,),
-          const SizedBox(height: TSizes.spaceBtwSections,),
+          Text(
+            'Orders/Sales',
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+          const SizedBox(
+            height: TSizes.spaceBtwSections,
+          ),
           Wrap(
-             clipBehavior: Clip.none,
+            clipBehavior: Clip.none,
             spacing: TSizes.spaceBtwItems, // Horizontal space between items
             runSpacing: TSizes.spaceBtwItems, // Vertical space between rows
             children: [
               HoverableCard(
                 text: 'Monthly Item Sale Report',
                 animation: TImages.docerAnimation,
-                onPressed: (){
-                   reportController.openMonthYearPicker(context);
-
-
+                onPressed: () {
+                  reportController.openMonthYearPicker(context);
                 },
-
               ),
-               HoverableCard(
+              HoverableCard(
                 text: 'Simple P&L Report',
                 animation: TImages.docerAnimation,
                 onPressed: () {
                   reportController.showDateRangePickerDialogSimplePnL(context);
                 },
               ),
-                HoverableCard(
+              HoverableCard(
                 text: 'Advance Profit/Loss Report',
                 animation: TImages.docerAnimation,
                 onPressed: () {
                   reportController.showDateRangePickerDialogPnL(context);
-
                 },
               ),
-
-            
+              HoverableCard(
+                text: 'Upcoming Installments Report',
+                animation: TImages.docerAnimation,
+                onPressed: () {
+                  reportController.showUpcomingInstallmentsDialog(context);
+                },
+              ),
+              HoverableCard(
+                text: 'Overdue Installments Report',
+                animation: TImages.docerAnimation,
+                onPressed: () {
+                  reportController.showOverdueInstallmentsReport();
+                },
+              ),
             ],
           ),
         ],

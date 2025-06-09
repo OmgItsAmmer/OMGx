@@ -17,12 +17,15 @@ import '../../../../controllers/installments/installments_controller.dart';
 import '../../../../controllers/sales/sales_controller.dart';
 
 import '../../../../Models/installments/installment_table_model/installment_table_model.dart';
+import '../../../../views/reports/common/report_footer.dart';
 
 class InstallmentReportPage extends StatefulWidget {
   final List<InstallmentTableModel> installmentPlans;
+  final bool isPrintOnly;
 
-  InstallmentReportPage({
+  const InstallmentReportPage({super.key, 
     required this.installmentPlans,
+    this.isPrintOnly = false,
   });
 
   @override
@@ -112,17 +115,17 @@ class _InstallmentReportPageState extends State<InstallmentReportPage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.info_outline,
+                            const Icon(Icons.info_outline,
                                 size: 48, color: Colors.grey),
-                            SizedBox(height: 16),
-                            Text(
+                            const SizedBox(height: 16),
+                            const Text(
                               'No installment data available',
                               style: TextStyle(fontSize: 16),
                             ),
-                            SizedBox(height: 8),
+                            const SizedBox(height: 8),
                             ElevatedButton(
                               onPressed: _generatePdfReport,
-                              child: Text('Refresh'),
+                              child: const Text('Refresh'),
                             ),
                           ],
                         ),
@@ -144,14 +147,14 @@ class _InstallmentReportPageState extends State<InstallmentReportPage> {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.error_outline,
+                                const Icon(Icons.error_outline,
                                     color: Colors.red, size: 48),
-                                SizedBox(height: 16),
+                                const SizedBox(height: 16),
                                 Text(_errorMessage.value),
-                                SizedBox(height: 16),
+                                const SizedBox(height: 16),
                                 ElevatedButton(
                                   onPressed: _generatePdfReport,
-                                  child: Text('Retry'),
+                                  child: const Text('Retry'),
                                 ),
                               ],
                             ),
@@ -189,23 +192,24 @@ class _InstallmentReportPageState extends State<InstallmentReportPage> {
                                 ),
                               ],
                             ),
+                            actions: [
+                              IconButton(
+                                icon: const Icon(Icons.done),
+                                onPressed: () {
+                                  if (widget.isPrintOnly) {
+                                    Get.offAllNamed(TRoutes.installment);
+                                  } else {
+                                    installmentController.clearAllFields();
+                                    salesController.resetFields();
+                                    Get.offAllNamed(TRoutes.sales);
+                                  }
+                                },
+                              ),
+                            ],
                           );
                         }
                       }),
               ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton(
-              onPressed: () {
-                // Clear both installment and sales fields
-                installmentController.clearAllFields();
-                salesController.resetFields();
-                // Navigate back to sales screen
-                Get.offAllNamed(TRoutes.sales);
-              },
-              child: const Text('Done'),
             ),
           ),
         ],
@@ -220,7 +224,7 @@ class _InstallmentReportPageState extends State<InstallmentReportPage> {
         pageFormat: format,
         build: (context) => pw.Center(
           child: pw.Text('PDF generation timed out. Please try again.',
-              style: pw.TextStyle(fontSize: 18)),
+              style: const pw.TextStyle(fontSize: 18)),
         ),
       ),
     );
@@ -237,10 +241,10 @@ class _InstallmentReportPageState extends State<InstallmentReportPage> {
             mainAxisAlignment: pw.MainAxisAlignment.center,
             children: [
               pw.Text('Error generating PDF',
-                  style: pw.TextStyle(fontSize: 18, color: PdfColors.red)),
+                  style: const pw.TextStyle(fontSize: 18, color: PdfColors.red)),
               pw.SizedBox(height: 20),
               pw.Text('Please try again later.',
-                  style: pw.TextStyle(fontSize: 14)),
+                  style: const pw.TextStyle(fontSize: 14)),
             ],
           ),
         ),
@@ -338,40 +342,11 @@ class _InstallmentReportPageState extends State<InstallmentReportPage> {
                 ],
               ),
               pw.SizedBox(height: 16),
-              pw.Align(
-                alignment: pw.Alignment.bottomCenter,
-                child: pw.Column(
-                  children: [
-                    pw.Text(softwareCompanyName,
-                        style: pw.TextStyle(
-                            fontSize: 10, fontWeight: pw.FontWeight.bold)),
-                    pw.SizedBox(height: 8),
-                    pw.Row(
-                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                      children: [
-                        pw.Column(
-                          crossAxisAlignment: pw.CrossAxisAlignment.start,
-                          children: [
-                            pw.Text("Generated by: $softwareCompanyName",
-                                style: const pw.TextStyle(fontSize: 8)),
-                            if (softwareWebsiteLink.isNotEmpty)
-                              pw.Text("Website: $softwareWebsiteLink",
-                                  style: const pw.TextStyle(fontSize: 8)),
-                            if (softwareContactNo.isNotEmpty)
-                              pw.Text("Contact: $softwareContactNo",
-                                  style: const pw.TextStyle(fontSize: 8)),
-                          ],
-                        ),
-                        pw.BarcodeWidget(
-                          data: softwareWebsiteLink,
-                          barcode: pw.Barcode.qrCode(),
-                          width: 40,
-                          height: 40,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+              ReportFooter.buildReportFooter(
+                signatureTitle: 'Signature by Manager',
+                softwareCompanyName: softwareCompanyName,
+                softwareWebsiteLink: softwareWebsiteLink,
+                softwareContactNo: softwareContactNo,
               ),
             ],
           ),
@@ -390,7 +365,7 @@ class _InstallmentReportPageState extends State<InstallmentReportPage> {
               mainAxisAlignment: pw.MainAxisAlignment.center,
               children: [
                 pw.Text('Error generating PDF',
-                    style: pw.TextStyle(fontSize: 18, color: PdfColors.red)),
+                    style: const pw.TextStyle(fontSize: 18, color: PdfColors.red)),
                 pw.SizedBox(height: 20),
                 pw.Text(e.toString(), style: const pw.TextStyle(fontSize: 12)),
               ],

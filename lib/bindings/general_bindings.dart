@@ -1,5 +1,6 @@
 import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
 import 'package:admin_dashboard_v3/controllers/brands/brand_controller.dart';
+import 'package:admin_dashboard_v3/controllers/dashboard/dashboard_controoler.dart';
 import 'package:admin_dashboard_v3/controllers/expenses/expense_controller.dart';
 import 'package:admin_dashboard_v3/controllers/installments/installments_controller.dart';
 import 'package:admin_dashboard_v3/controllers/notification/notification_controller.dart';
@@ -28,17 +29,19 @@ class GeneralBindings extends Bindings {
     // Register controllers
     Get.put(UserController());
     Get.put(ProductController());
+    Get.put(OrderController());
     Get.put(CustomerController());
     Get.put(SalesController());
-    Get.put(AddressController());
     Get.put(InstallmentController());
+    Get.put(ExpenseController());
+    Get.put(DashboardController());
+
+    Get.put(AddressController());
     Get.put(SalesmanController());
-    Get.put(OrderController());
     Get.put(BrandController());
     Get.put(CategoryController());
     // Get.put(ProductImagesController());
     Get.put(MediaController());
-    Get.put(ExpenseController());
     Get.put(NotificationController());
     Get.put(ShopController());
     Get.put(GuarantorImageController());
