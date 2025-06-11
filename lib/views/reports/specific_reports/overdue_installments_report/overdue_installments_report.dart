@@ -269,12 +269,12 @@ class OverdueInstallmentsReportPage extends StatelessWidget {
       final file = File('${directory!.path}/overdue_installments_report.pdf');
       await file.writeAsBytes(pdfBytes);
 
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
         title: 'PDF Saved',
         message: 'File saved to: ${file.path}',
       );
     } catch (e) {
-      TLoader.errorSnackBar(title: "Error saving PDF", message: e.toString());
+      TLoaders.errorSnackBar(title: "Error saving PDF", message: e.toString());
     }
   }
 }

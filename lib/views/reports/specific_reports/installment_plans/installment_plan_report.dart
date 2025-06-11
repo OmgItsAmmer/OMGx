@@ -23,7 +23,8 @@ class InstallmentReportPage extends StatefulWidget {
   final List<InstallmentTableModel> installmentPlans;
   final bool isPrintOnly;
 
-  const InstallmentReportPage({super.key, 
+  const InstallmentReportPage({
+    super.key,
     required this.installmentPlans,
     this.isPrintOnly = false,
   });
@@ -241,7 +242,8 @@ class _InstallmentReportPageState extends State<InstallmentReportPage> {
             mainAxisAlignment: pw.MainAxisAlignment.center,
             children: [
               pw.Text('Error generating PDF',
-                  style: const pw.TextStyle(fontSize: 18, color: PdfColors.red)),
+                  style:
+                      const pw.TextStyle(fontSize: 18, color: PdfColors.red)),
               pw.SizedBox(height: 20),
               pw.Text('Please try again later.',
                   style: const pw.TextStyle(fontSize: 14)),
@@ -365,7 +367,8 @@ class _InstallmentReportPageState extends State<InstallmentReportPage> {
               mainAxisAlignment: pw.MainAxisAlignment.center,
               children: [
                 pw.Text('Error generating PDF',
-                    style: const pw.TextStyle(fontSize: 18, color: PdfColors.red)),
+                    style:
+                        const pw.TextStyle(fontSize: 18, color: PdfColors.red)),
                 pw.SizedBox(height: 20),
                 pw.Text(e.toString(), style: const pw.TextStyle(fontSize: 12)),
               ],
@@ -389,7 +392,7 @@ class _InstallmentReportPageState extends State<InstallmentReportPage> {
   Future<void> savePdf(BuildContext context) async {
     try {
       if (_pdfBytes == null) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: "Error",
           message: "PDF not generated yet. Please wait or try again.",
         );
@@ -408,12 +411,12 @@ class _InstallmentReportPageState extends State<InstallmentReportPage> {
       final file = File(filePath);
       await file.writeAsBytes(_pdfBytes!);
 
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
         title: 'PDF Saved',
         message: 'File saved to: ${file.path}',
       );
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: "Error saving PDF",
         message: e.toString(),
       );

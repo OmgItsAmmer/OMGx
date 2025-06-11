@@ -63,8 +63,35 @@ class SaleCustomerInfo extends StatelessWidget {
                   backgroundColor: TColors.primary.withOpacity(0.1),
                   color: TColors.primary,
                   onPressed: () {
-                    // Use the centralized function from SalesController
-                    salesController.handleCustomerSelection('');
+                    // Reset all customer fields - more robust approach
+                    // Clear external controllers first
+                    userNameTextController.text = '';
+                    //    addressTextController.text = '';
+                    salesController.customerPhoneNoController.value.clear();
+                    salesController.customerCNICController.value.clear();
+                    salesController.customerAddressController.value.clear();
+                    salesController.selectedAddressId = null;
+                    salesController.entityId.value = -1;
+                    mediaController.displayImage.value = null;
+
+                    // Force update text selection which triggers the controller listener
+                    userNameTextController.selection =
+                        TextSelection.fromPosition(
+                            const TextPosition(offset: 0));
+                    //     addressTextController.selection =
+                    TextSelection.fromPosition(const TextPosition(offset: 0));
+
+                    // Trigger callbacks
+                    if (onSelectedName != null) onSelectedName('');
+                    // if (onSelectedAddress != null) onSelectedAddress('');
+
+                    // Set a very short delay to ensure UI updates
+                    Future.microtask(() {
+                      if (salesController.customerFormKey.currentState !=
+                          null) {
+                        salesController.update();
+                      }
+                    });
                   },
                 ),
               ],

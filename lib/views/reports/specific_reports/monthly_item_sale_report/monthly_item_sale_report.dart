@@ -71,16 +71,13 @@ class MonthlySalesReportPage extends StatelessWidget {
                     'format': PdfPageFormat.a4,
                   }),
                   loadingWidget: const TShimmerEffect(width: 80, height: 80),
-                  canChangeOrientation: false,
-                  canChangePageFormat: true,
                   initialPageFormat: PdfPageFormat.a4,
+                  canChangeOrientation: false,
+                  canChangePageFormat: false,
+                  canDebug: false,
                   allowPrinting: true,
                   allowSharing: true,
-                  pageFormats: const {
-                    'A3': PdfPageFormat.a3,
-                    'A4': PdfPageFormat.a4,
-                    'A5': PdfPageFormat.a5,
-                  },
+                  
                 ),
         ),
       ),
@@ -223,12 +220,13 @@ class MonthlySalesReportPage extends StatelessWidget {
           '${directory!.path}/Monthly_Sales_Report_${month}_$year.pdf'); // 🔹 Updated file name
       await file.writeAsBytes(pdfBytes);
 
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
         title: 'PDF Saved',
         message: 'File saved to: ${file.path}',
       );
     } catch (e) {
-      TLoader.errorSnackBar(title: "Failed to save PDF", message: e.toString());
+      TLoaders.errorSnackBar(
+          title: "Failed to save PDF", message: e.toString());
     }
   }
 

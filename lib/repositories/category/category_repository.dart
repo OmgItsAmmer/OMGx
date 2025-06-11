@@ -16,33 +16,37 @@ class CategoryRepository {
       final categoryId = response['category_id'] as int;
       return categoryId;
     } on PostgrestException catch (e) {
-      TLoader.errorSnackBar(title: 'Categories Repo', message: e.message);
+      TLoaders.errorSnackBar(title: 'Categories Repo', message: e.message);
       rethrow;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Categories Repo', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Categories Repo', message: e.toString());
       rethrow;
     }
   }
 
-  Future<void> updateCategory(Map<String, dynamic> json) async {
+  Future<void> updateCategory(CategoryModel plan) async {
     try {
-      int? categoryId = json['category_id'];
-      if (categoryId == null)
+      int? categoryId = plan.categoryId;
+      if (categoryId == null) {
         throw Exception('Category ID is required for update.');
+      }
 
-      final updateData = Map<String, dynamic>.from(json)..remove('category_id');
+      final json = plan.toJson();
+      final updateData = Map<String, dynamic>.from(json)
+        ..remove('category_id')
+        ..remove('product_count');
 
       await supabase
           .from('categories')
           .update(updateData)
           .eq('category_id', categoryId);
 
-      TLoader.successSnackBar(title: 'Category Updated');
+      TLoaders.successSnackBar(title: 'Category Updated');
     } on PostgrestException catch (e) {
-      TLoader.errorSnackBar(title: 'Categories Repo', message: e.message);
+      TLoaders.errorSnackBar(title: 'Categories Repo', message: e.message);
       rethrow;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Categories Repo', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Categories Repo', message: e.toString());
       rethrow;
     }
   }
@@ -77,7 +81,7 @@ class CategoryRepository {
 
       return categoryList;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'fetchCategories', message: e.toString());
+      TLoaders.errorSnackBar(title: 'fetchCategories', message: e.toString());
       return [];
     }
   }
@@ -99,12 +103,12 @@ class CategoryRepository {
       }
     } on PostgrestException catch (e) {
       // Handle Supabase-specific errors
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'Can\'t get Category Id!', message: e.message);
       rethrow;
     } catch (e) {
       // Handle other errors
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'Can\'t get Category Id!', message: e.toString());
       rethrow;
     }
@@ -117,11 +121,11 @@ class CategoryRepository {
           .delete()
           .match({'category_id': categoryId});
 
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
           title: "Success", message: "Category deleted successfully");
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(title: 'Category Repo', message: e.toString());
+        TLoaders.errorSnackBar(title: 'Category Repo', message: e.toString());
         print("Error deleting category: $e");
       }
     }

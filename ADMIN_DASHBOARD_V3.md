@@ -216,6 +216,34 @@ If you encounter socket connection issues with Supabase in release mode:
 - All sensitive operations require appropriate authentication
 - ProGuard obfuscation is enabled for Android release builds
 
+## Recent Bug Fixes
+
+### Sales Controller - Buying Price Calculation (Latest Fix)
+
+**Issue Fixed**: The `buyingPriceTotal` calculation in the sales controller was incorrectly handling deletion of cart items and merging of products, especially for serialized products.
+
+**Problems Resolved**:
+1. **Cart Item Deletion**: When removing items from the cart, the `buyingPriceTotal` was not being updated, causing inflated buying price totals in the database
+2. **Product Merging**: When merging identical products, inconsistent buying price calculations were used
+3. **Order Item Total Buying Price**: The `totalBuyPrice` field in `OrderItemModel` was not correctly calculated for regular products (needed quantity multiplication)
+
+**Fixes Implemented**:
+- Updated `deleteItem()` method to properly subtract buying prices when removing items
+- Fixed `_mergeWithExistingProduct()` to use consistent buying price from existing sale
+- Corrected `OrderItemModel` creation to properly calculate `totalBuyPrice` for both serialized and regular products
+- Added proper handling for both serialized products (quantity always 1) and regular products (quantity variable)
+
+**Technical Details**:
+```dart
+// Before: buyingPriceTotal was not updated on item deletion
+// After: Proper calculation based on product type
+if (saleItem.variantId != null) {
+  buyingPriceToSubtract = saleItem.buyPrice; // Serialized product
+} else {
+  buyingPriceToSubtract = saleItem.buyPrice * quantity; // Regular product
+}
+```
+
 ## Installment Reports
 
 The application now includes comprehensive installment tracking with two specialized reports:

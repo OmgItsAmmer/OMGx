@@ -105,7 +105,7 @@ class LoginController extends GetxController {
     } catch (e) {
       print(e);
       TFullScreenLoader.stopLoading();
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'Login Failed',
           message: 'Please check your credentials and try again.');
     }
@@ -142,7 +142,7 @@ class LoginController extends GetxController {
       //Save user Record
       //  await userController.saveUserRecord(userCredentional);
       TFullScreenLoader.stopLoading();
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: "Google Sign-In",
           message:
               "Google sign-in is currently unavailable. Please try another method.");
@@ -150,7 +150,7 @@ class LoginController extends GetxController {
       //  Get.to(()=> NavigationMenu());
     } catch (e) {
       TFullScreenLoader.stopLoading();
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'Login Failed',
           message:
               'An error occurred during Google sign-in. Please try again.');

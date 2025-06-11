@@ -9,7 +9,6 @@ import 'package:get/get.dart';
 import '../../Models/image/image_model.dart';
 import '../../main.dart';
 
-
 class MediaRepository extends GetxController {
   static MediaRepository get instance => Get.find();
 
@@ -35,24 +34,16 @@ class MediaRepository extends GetxController {
       // if (imageIds.isEmpty) return [];
 
       // Step 3: Fetch corresponding images using image IDs
-      final List<Map<String, dynamic>> imageJsonList = await supabase
-          .from('images')
-          .select()
-          .eq('folderType', folderType);
+      final List<Map<String, dynamic>> imageJsonList =
+          await supabase.from('images').select().eq('folderType', folderType);
 
-      final List<ImageModel> imageModels = imageJsonList
-          .map((json) => ImageModel.fromJson(json))
-          .toList();
-
-
-
+      final List<ImageModel> imageModels =
+          imageJsonList.map((json) => ImageModel.fromJson(json)).toList();
 
       // // Step 4: Build a map for faster lookup
       // final Map<int, Map<String, dynamic>> imageJsonMap = {
       //   for (var img in imageJsonList) img['image_id'] as int: img
       // };
-
-
 
       // Step 5: Combine using factory method
       // final List<CombinedImageEntityModel> combinedList = entityJsonList.map((entityJson) {
@@ -71,14 +62,13 @@ class MediaRepository extends GetxController {
 
       return imageModels;
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: 'fetchFolderImagesFromImagesTable',
         message: e.toString(),
       );
       return [];
     }
   }
-
 
   Future<ImageModel> fetchSpecificImageRow({
     required String folder,
@@ -98,13 +88,13 @@ class MediaRepository extends GetxController {
 
       return imageList[0];
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Media Repo', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Media Repo', message: e.toString());
       return ImageModel.empty();
     }
   }
 
-  Future<String?>   fetchImageFromBucket(String filePath,
-      String bucketName) async {
+  Future<String?> fetchImageFromBucket(
+      String filePath, String bucketName) async {
     try {
       // return await supabase.storage.from(bucketName).download(filePath);
       return supabase.storage.from(bucketName).getPublicUrl(filePath);
@@ -144,7 +134,6 @@ class MediaRepository extends GetxController {
         // ✅ Step 1: Insert metadata into DB
         await supabase.from('images').insert(jsonData);
 
-
         // final user = supabase.auth.currentUser;
         // if (user == null) {
         //   throw Exception("User not authenticated.");
@@ -154,7 +143,7 @@ class MediaRepository extends GetxController {
             bucketName: bucketName, file: file, filename: filename);
       } catch (e) {
         if (kDebugMode) print("❌ Upload error: $e");
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Image Table Upload Failed', message: e.toString());
       }
     }
@@ -169,7 +158,7 @@ class MediaRepository extends GetxController {
       await supabase.storage.from(bucketName).upload(filename, file);
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Bucket Upload Failed', message: e.toString());
 
         print("❌ Bucket upload failed: $e");
@@ -178,9 +167,8 @@ class MediaRepository extends GetxController {
     }
   }
 
-
-  Future<void> updateEntityIdRepo(int entityId, int imageId,
-      String mediaCategory) async {
+  Future<void> updateEntityIdRepo(
+      int entityId, int imageId, String mediaCategory) async {
     try {
       // Step 1: Find the previous image associated with the same entityId
       final previousImageResponse = await supabase
@@ -192,24 +180,21 @@ class MediaRepository extends GetxController {
 
       if (previousImageResponse != null) {
         // Step 2: Set the previous image's entity_id to null
-        await supabase
-            .from('images')
-            .update({'entity_id': null})
-            .eq('image_id', previousImageResponse['image_id']);
+        await supabase.from('images').update({'entity_id': null}).eq(
+            'image_id', previousImageResponse['image_id']);
       }
 
       // Step 3: Update the new image with the entityId
       await supabase
           .from('images')
-          .update({'entity_id': entityId})
-          .eq('image_id', imageId);
+          .update({'entity_id': entityId}).eq('image_id', imageId);
 
       if (kDebugMode) {
         print('Entity ID updated successfully for image ID: $imageId');
       }
     } catch (e) {
       // Handle errors
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'Error updating entity ID', message: e.toString());
       if (kDebugMode) {
         print('Error updating entity ID: $e');
@@ -231,7 +216,7 @@ class MediaRepository extends GetxController {
       return response != null;
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Check Assigned Error', message: e.toString());
         print("❌ checkAssigned failed: $e");
       }
@@ -239,8 +224,8 @@ class MediaRepository extends GetxController {
     }
   }
 
-  Future<void> reAssignNewImage(int entityId, String entityType,
-      int imageId) async {
+  Future<void> reAssignNewImage(
+      int entityId, String entityType, int imageId) async {
     try {
       try {
         final existingRow = await supabase
@@ -253,10 +238,8 @@ class MediaRepository extends GetxController {
         if (existingRow != null && existingRow['image_entity_id'] != null) {
           final imageEntityId = existingRow['image_entity_id'];
 
-          await supabase
-              .from('image_entity')
-              .update({'image_id': imageId})
-              .eq('image_entity_id', imageEntityId);
+          await supabase.from('image_entity').update({'image_id': imageId}).eq(
+              'image_entity_id', imageEntityId);
 
           if (kDebugMode) {
             print("✅ Image updated for entity: $entityId");
@@ -268,13 +251,13 @@ class MediaRepository extends GetxController {
         }
       } catch (e) {
         if (kDebugMode) {
-          TLoader.errorSnackBar(title: 'Update Error', message: e.toString());
+          TLoaders.errorSnackBar(title: 'Update Error', message: e.toString());
           print("❌ updateImageAssignment failed: $e");
         }
       }
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'reAssignNewImage Error', message: e.toString());
         print("❌ reAssignNewImage failed: $e");
       }
@@ -286,7 +269,7 @@ class MediaRepository extends GetxController {
       await supabase.from('image_entity').insert(json);
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(title: 'Insert Error', message: e.toString());
+        TLoaders.errorSnackBar(title: 'Insert Error', message: e.toString());
         print("❌ assignNewImage failed: $e");
       }
     }
@@ -296,9 +279,9 @@ class MediaRepository extends GetxController {
     try {
       final imageId = await fetchMainImageFromTable(entityId, entityType);
 
-     final model =  await fetchImageFromImageTable(imageId);
+      final model = await fetchImageFromImageTable(imageId);
 
-    return model;
+      return model;
     } catch (e) {
       if (kDebugMode) {
         print("❌ fetchMainImageFromTable failed: $e");
@@ -319,10 +302,7 @@ class MediaRepository extends GetxController {
           .eq('isFeatured', true)
           .single();
 
-      final imageId = ImageEntityModel
-          .fromJson(response)
-          .imageId;
-
+      final imageId = ImageEntityModel.fromJson(response).imageId;
 
       return imageId ?? -1;
     } catch (e) {
@@ -341,7 +321,6 @@ class MediaRepository extends GetxController {
           .select('*')
           .eq('image_id', imageId) // Filter by image_id
           .single(); // We are expecting a single record.
-
 
       final image = ImageModel.fromJson(response);
 

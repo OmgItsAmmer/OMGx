@@ -154,7 +154,7 @@ class ProductController extends GetxController {
       variantSellingPrice.clear();
       update(); // Force UI update
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
   }
 
@@ -167,7 +167,7 @@ class ProductController extends GetxController {
       // First validate the basic product form
       if (!productDetail.currentState!.validate()) {
         debugPrint('Product form validation failed');
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: "Invalid Form",
           message: 'Please fill all required fields correctly.',
         );
@@ -177,7 +177,7 @@ class ProductController extends GetxController {
       // Then validate the brand and category selection
       if (selectedBrandId == -1 || selectedCategoryId == -1) {
         debugPrint('Brand or category not selected');
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: "Missing Selection",
           message: 'Please select both brand and category.',
         );
@@ -252,7 +252,7 @@ class ProductController extends GetxController {
       }
 
       // Show success message
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
         title: "Success",
         message: 'Product added successfully!',
       );
@@ -261,7 +261,7 @@ class ProductController extends GetxController {
       return newProductId;
     } catch (e) {
       debugPrint('Error inserting product: $e');
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: "Error",
         message: e.toString(),
       );
@@ -282,7 +282,7 @@ class ProductController extends GetxController {
           selectedBrandId == -1 ||
           selectedCategoryId == -1) {
         debugPrint('Product form validation failed or missing brand/category');
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: "Empty Fields",
           message: 'Kindly fill all the fields before proceeding.',
         );
@@ -361,7 +361,7 @@ class ProductController extends GetxController {
       }
 
       // Show success message
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
         title: "Success",
         message: 'Product updated successfully!',
       );
@@ -369,7 +369,7 @@ class ProductController extends GetxController {
       return true;
     } catch (e) {
       debugPrint('Error updating product: $e');
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: "Error",
         message: e.toString(),
       );
@@ -416,7 +416,7 @@ class ProductController extends GetxController {
         fetchProductVariants(product.productId!);
       }
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
   }
 
@@ -425,7 +425,7 @@ class ProductController extends GetxController {
       final product = await productRepository.fetchProducts();
       allProducts.assignAll(product);
     } catch (e) {
-      TLoader.errorSnackBar(title: 'ProductController', message: e.toString());
+      TLoaders.errorSnackBar(title: 'ProductController', message: e.toString());
     }
   }
 
@@ -437,10 +437,10 @@ class ProductController extends GetxController {
       if (kDebugMode) {
         print('Product list refreshed from database');
       }
-      TLoader.successSnackBar(
-        title: 'Refreshed!',
-        message: 'Product list has been updated.',
-      );
+      // TLoaders.successSnackBar(
+      //   title: 'Refreshed!',
+      //   message: 'Product list has been updated.',
+      // );
     } catch (e) {
       if (kDebugMode) {
         print('Error refreshing products: $e');
@@ -525,7 +525,7 @@ class ProductController extends GetxController {
 
       if (serialNum.isEmpty || buyPrice.isEmpty || sellPrice.isEmpty) {
         debugPrint('Fields empty - returning early');
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: "Empty Fields",
           message: 'Please fill all variant details',
         );
@@ -533,7 +533,7 @@ class ProductController extends GetxController {
       }
 
       if (double.tryParse(buyPrice) == null) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: "Invalid Price",
           message: 'Buy price must be a valid number',
         );
@@ -541,7 +541,7 @@ class ProductController extends GetxController {
       }
 
       if (double.tryParse(sellPrice) == null) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: "Invalid Price",
           message: 'Sell price must be a valid number',
         );
@@ -550,7 +550,7 @@ class ProductController extends GetxController {
 
       // Check if serial number already exists in current list
       if (currentProductVariants.any((v) => v.serialNumber == serialNum)) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: "Duplicate Serial",
           message: 'This serial number already exists in the list',
         );
@@ -576,12 +576,12 @@ class ProductController extends GetxController {
       addVariantToUnsaved(variant);
 
       // Show success message
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
         title: "Variant Added",
         message: 'Remember to save changes to store in database',
       );
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: "Error Adding Variant",
         message: e.toString(),
       );
@@ -645,13 +645,13 @@ class ProductController extends GetxController {
       await fetchProductVariants(productId.value);
 
       // Show a more accurate success message
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
         title: "Variants Saved",
         message: "$variantCount variants saved to database",
       );
     } catch (e) {
       debugPrint('Error saving variants: $e');
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: "Error Saving Variants",
         message: e.toString(),
       );
@@ -667,7 +667,7 @@ class ProductController extends GetxController {
       bulkImportVariants.clear();
 
       if (productId.value == -1) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: "Error",
           message: 'Please save the product first before adding variants',
         );
@@ -677,7 +677,7 @@ class ProductController extends GetxController {
       final lines = csvData.text.trim().split('\n');
 
       if (lines.isEmpty) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: "Empty CSV",
           message: 'No data found in the CSV input',
         );
@@ -691,7 +691,7 @@ class ProductController extends GetxController {
 
         final parts = line.split(',');
         if (parts.length < 3) {
-          TLoader.errorSnackBar(
+          TLoaders.errorSnackBar(
             title: "Invalid CSV Format",
             message:
                 'Line ${i + 1} has invalid format. Expected: SerialNumber,PurchasePrice,SellingPrice',
@@ -717,19 +717,19 @@ class ProductController extends GetxController {
       }
 
       if (bulkImportVariants.isEmpty) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: "No Valid Data",
           message: 'No valid variant data found in the CSV input',
         );
         return;
       }
 
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
         title: "CSV Parsed",
         message: '${bulkImportVariants.length} variants ready for import',
       );
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: "CSV Parse Error",
         message: e.toString(),
       );
@@ -744,7 +744,7 @@ class ProductController extends GetxController {
       update(['variants_list']);
 
       if (bulkImportVariants.isEmpty) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: "No Variants",
           message: 'No variants to import. Parse CSV data first.',
         );
@@ -758,7 +758,7 @@ class ProductController extends GetxController {
       for (final importVariant in bulkImportVariants) {
         if (currentProductVariants
             .any((v) => v.serialNumber == importVariant.serialNumber)) {
-          TLoader.errorSnackBar(
+          TLoaders.errorSnackBar(
             title: "Duplicate Serial Number",
             message:
                 'Serial number "${importVariant.serialNumber}" already exists in the list',
@@ -780,13 +780,13 @@ class ProductController extends GetxController {
       csvData.clear();
       bulkImportVariants.clear();
 
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
         title: "Success",
         message:
             '$importCount variants added to list. Remember to save changes.',
       );
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: "Import Error",
         message: e.toString(),
       );
@@ -807,12 +807,12 @@ class ProductController extends GetxController {
       // Update the in-memory product stock count for UI display
       updateProductStockFromVariants();
 
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
         title: "Success",
         message: 'Variant deleted successfully',
       );
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: "Delete Error",
         message: e.toString(),
       );
@@ -931,6 +931,8 @@ class ProductController extends GetxController {
     if (value) {
       // Clear the stock field since it will be auto-calculated
       stock.text = '0';
+      basePrice.text = '0';
+      salePrice.text = '0';
 
       // Force immediate UI update
       update();
@@ -953,7 +955,7 @@ class ProductController extends GetxController {
     try {
       return await productVariantsRepository.fetchAvailableVariants(productId);
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'Fetch Variants Error', message: e.toString());
       return [];
     }

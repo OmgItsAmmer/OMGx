@@ -269,7 +269,7 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
     if (kDebugMode) {
       print('Dashboard error: $error');
     }
-    TLoader.errorSnackBar(title: 'Dashboard Error', message: error.toString());
+    TLoaders.errorSnackBar(title: 'Dashboard Error', message: error.toString());
     change(null, status: RxStatus.error(error.toString()));
   }
 

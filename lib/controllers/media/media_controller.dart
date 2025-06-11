@@ -88,7 +88,7 @@ class MediaController extends GetxController {
         print('No file selected.');
       }
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'Oh Snap!', message: 'Didn\'t get the image from explorer');
     }
   }
@@ -235,7 +235,7 @@ class MediaController extends GetxController {
       if (isFeatured) {
         // Make sure only one image is selected
         if (selectedImages.length > 1) {
-          TLoader.warningSnackBar(
+          TLoaders.warningSnackBar(
               title: 'Warning',
               message: 'Please select exactly one image for Main Image.');
           return;
@@ -278,7 +278,7 @@ class MediaController extends GetxController {
         }
       }
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'Image Assigner Issue', message: e.toString());
     } finally {
       for (var image in allImages) {
@@ -325,7 +325,7 @@ class MediaController extends GetxController {
         }
       }
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'Image Assigner Issue', message: e.toString());
     }
   }
@@ -432,14 +432,14 @@ class MediaController extends GetxController {
         files: droppedFiles,
       );
 
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
           title: 'Success', message: 'All files uploaded successfully!');
       droppedFiles.clear();
 
       // Reset selectedPath back to default after successful upload
       selectedPath.value = MediaCategory.folders;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     } finally {
       isInserting.value = false;
     }
@@ -456,7 +456,7 @@ class MediaController extends GetxController {
           mediaRepository.fetchImageFromBucket(fileName, bucketName);
       return response;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
     return null;
   }
@@ -496,7 +496,7 @@ class MediaController extends GetxController {
     } catch (e) {
       // Handle errors
       if (kDebugMode) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Error updating entity ID', message: e.toString());
         print('Error updating entity ID: $e');
       }
@@ -559,7 +559,7 @@ class MediaController extends GetxController {
       if (kDebugMode) {
         print('Error fetching Main Picture: $e');
         print('Stack trace: $stackTrace'); // <-- this is key
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: ' Controller Error fetching Main Picture',
             message: e.toString());
       }

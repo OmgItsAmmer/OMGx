@@ -27,7 +27,7 @@ class OrderRepository extends GetxController {
 
       return addressList;
     } catch (e) {
-      TLoader.warningSnackBar(
+      TLoaders.warningSnackBar(
           title: "Fetch Customer Orders", message: e.toString());
       return [];
     }
@@ -39,11 +39,12 @@ class OrderRepository extends GetxController {
           .from('orders')
           .update({'status': newStatus}).eq('order_id', orderId);
 
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
           title: 'Status Updated', message: 'Status is Updated to$newStatus');
     } catch (e) {
       // Show error if any
-      TLoader.errorSnackBar(title: 'Update Order Error', message: e.toString());
+      TLoaders.errorSnackBar(
+          title: 'Update Order Error', message: e.toString());
       if (kDebugMode) {
         print(e);
       }
@@ -71,13 +72,13 @@ class OrderRepository extends GetxController {
             );
       }
 
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
           title: 'Success', message: 'Order successfully checked out.');
       return orderId;
     } catch (e) {
       // ❌ Handle errors
       if (kDebugMode) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Update Order Error', message: e.toString());
         print(e);
       }
@@ -97,7 +98,7 @@ class OrderRepository extends GetxController {
       return orderList;
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(title: 'Order Fetch', message: e.toString());
+        TLoaders.errorSnackBar(title: 'Order Fetch', message: e.toString());
         print(e.toString());
       }
       return [];
@@ -122,7 +123,7 @@ class OrderRepository extends GetxController {
 
       return orderItemList;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Order Item Fetch', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Order Item Fetch', message: e.toString());
       print(e.toString());
       return [];
     }
@@ -188,7 +189,7 @@ class OrderRepository extends GetxController {
             {'stock_quantity': newStock}).eq('product_id', item.productId);
 
         if (updateResponse.error != null) {
-          TLoader.errorSnackBar(
+          TLoaders.errorSnackBar(
               title: 'Restore Quantity Error',
               message: updateResponse.error!.message);
         } else {
@@ -213,7 +214,7 @@ class OrderRepository extends GetxController {
         }
       }
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'Restore Quantity Error', message: e.toString());
     }
   }
@@ -269,7 +270,7 @@ class OrderRepository extends GetxController {
             {'stock_quantity': newStock}).eq('product_id', item.productId);
 
         if (updateResponse != null && updateResponse.error != null) {
-          TLoader.errorSnackBar(
+          TLoaders.errorSnackBar(
               title: 'Subtract Quantity Error',
               message: updateResponse.error!.message);
         } else {
@@ -294,7 +295,7 @@ class OrderRepository extends GetxController {
         }
       }
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'Subtract Quantity Error', message: e.toString());
     }
   }
@@ -321,7 +322,7 @@ class OrderRepository extends GetxController {
     } catch (e) {
       if (kDebugMode) {
         print('Error updating paid amount: $e');
-        TLoader.errorSnackBar(title: 'Order Repo', message: e.toString());
+        TLoaders.errorSnackBar(title: 'Order Repo', message: e.toString());
       }
       return false;
     }

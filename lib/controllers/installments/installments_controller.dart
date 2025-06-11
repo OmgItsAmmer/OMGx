@@ -107,7 +107,7 @@ class InstallmentController extends GetxController {
       remainingAmount.value.clear();
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+        TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
         print(e);
       }
     }
@@ -126,7 +126,7 @@ class InstallmentController extends GetxController {
       print(planId);
       // Validate planId
       if (planId <= 0) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Invalid Plan ID',
             message: 'Please ensure the installment plan is properly saved.');
         return;
@@ -198,7 +198,7 @@ class InstallmentController extends GetxController {
           "0.0", // Ensure zero remaining amount is saved
         );
 
-        TLoader.successSnackBar(
+        TLoaders.successSnackBar(
           title: 'Plan Completed',
           message: 'All installments have been paid successfully!',
         );
@@ -224,7 +224,7 @@ class InstallmentController extends GetxController {
       } else {
         // If no next installment exists
         if (planId == 0) {
-          TLoader.errorSnackBar(
+          TLoaders.errorSnackBar(
               title: 'Plan Error',
               message: 'Reset and generate the plan again.');
           return; // Stop execution here
@@ -263,7 +263,7 @@ class InstallmentController extends GetxController {
 
         final paymentJson = newInstallment.toJson(isUpdate: true);
         await installmentRepository.insertInstallmentPayment(paymentJson);
-        TLoader.successSnackBar(
+        TLoaders.successSnackBar(
             title: 'Success', message: 'New Installment Data Added!');
 
         final newInstallmentPayment = InstallmentTableModel(
@@ -295,7 +295,7 @@ class InstallmentController extends GetxController {
       );
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+        TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
         print(e);
       }
     } finally {
@@ -310,14 +310,14 @@ class InstallmentController extends GetxController {
       final planId = await installmentRepository.fetchPlanId(orderId);
 
       if (planId == null) {
-        TLoader.errorSnackBar(title: 'Fetch Plan Issue!');
+        TLoaders.errorSnackBar(title: 'Fetch Plan Issue!');
       } else {
         final payments = await installmentRepository
             .fetchSpecifcInstallmentPlanItems(planId);
         currentInstallmentPayments.assignAll(payments);
       }
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     } finally {
       isLoading.value = false;
     }
@@ -325,7 +325,7 @@ class InstallmentController extends GetxController {
 
   void addProduct() {
     try {} catch (e) {
-      TLoader.errorSnackBar(title: 'Adding Data', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Adding Data', message: e.toString());
     }
   }
 
@@ -352,7 +352,7 @@ class InstallmentController extends GetxController {
       payableExMargin.value.text = _payableExMargin.toString();
       payableINCLMargin.value.text = _payableINCLMargin.toString();
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
   }
 
@@ -364,7 +364,7 @@ class InstallmentController extends GetxController {
       // Validate text controllers
       if (billAmount.value.text.isEmpty ||
           double.tryParse(billAmount.value.text) == null) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: 'Invalid Data',
           message: 'Bill Amount must be a valid number.',
         );
@@ -372,7 +372,7 @@ class InstallmentController extends GetxController {
       }
       if (NoOfInstallments.text.isEmpty ||
           int.tryParse(NoOfInstallments.text) == null) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: 'Invalid Data',
           message: 'Number of Installments must be a valid integer.',
         );
@@ -380,7 +380,7 @@ class InstallmentController extends GetxController {
       }
       if (DownPayment.text.isEmpty ||
           double.tryParse(DownPayment.text) == null) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: 'Invalid Data',
           message: 'Down Payment must be a valid number.',
         );
@@ -388,7 +388,7 @@ class InstallmentController extends GetxController {
       }
       if (DocumentCharges.text.isEmpty ||
           double.tryParse(DocumentCharges.text) == null) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: 'Invalid Data',
           message: 'Document Charges must be a valid number.',
         );
@@ -396,14 +396,14 @@ class InstallmentController extends GetxController {
       }
       if (otherCharges.text.isEmpty ||
           double.tryParse(otherCharges.text) == null) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: 'Invalid Data',
           message: 'Other Charges must be a valid number.',
         );
         return;
       }
       if (margin.text.isEmpty || double.tryParse(margin.text) == null) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: 'Invalid Data',
           message: 'Margin must be a valid number.',
         );
@@ -411,7 +411,7 @@ class InstallmentController extends GetxController {
       }
       if (frequencyInMonth.text.isEmpty ||
           int.tryParse(frequencyInMonth.text) == null) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: 'Invalid Data',
           message: 'Frequency must be a valid integer.',
         );
@@ -429,28 +429,28 @@ class InstallmentController extends GetxController {
 
       // Validate inputs
       if (billAmountValue <= 0) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: 'Invalid Data',
           message: 'Bill Amount must be greater than zero.',
         );
         return;
       }
       if (downPaymentValue < 0) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: 'Invalid Data',
           message: 'Down Payment cannot be negative.',
         );
         return;
       }
       if (downPaymentValue > billAmountValue) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: 'Invalid Data',
           message: 'Down Payment cannot exceed Bill Amount.',
         );
         return;
       }
       if (numberOfInstallments <= 0) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: 'Invalid Data',
           message: 'Number of Installments must be at least 1.',
         );
@@ -594,7 +594,7 @@ class InstallmentController extends GetxController {
         );
       }
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
   }
 
@@ -620,7 +620,7 @@ class InstallmentController extends GetxController {
 
       // Make sure we have data to display in the report
       if (currentInstallmentPayments.isEmpty) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: 'Data Error',
           message: 'No installment data to display in the report.',
         );
@@ -669,7 +669,7 @@ class InstallmentController extends GetxController {
     } catch (e) {
       if (kDebugMode) {
         print(e);
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: 'Oh Snap! , savePlan!',
           message: e.toString(),
         );
@@ -833,7 +833,7 @@ class InstallmentController extends GetxController {
       if (kDebugMode) {
         print('Error initializing refund data: $e');
       }
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: 'Error',
         message: 'Could not calculate refund: ${e.toString()}',
       );
@@ -1035,7 +1035,7 @@ class InstallmentController extends GetxController {
       );
 
       // Update the UI state
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
         title: 'Refund Processed',
         message:
             'Refund of Rs. ${refundAmount.value.toStringAsFixed(2)} has been processed.',
@@ -1046,7 +1046,7 @@ class InstallmentController extends GetxController {
       if (kDebugMode) {
         print('Error processing refund: $e');
       }
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: 'Refund Failed',
         message: e.toString(),
       );
@@ -1179,7 +1179,7 @@ class InstallmentController extends GetxController {
     try {
       // Make sure we have data to display in the report
       if (currentInstallmentPayments.isEmpty) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: 'Data Error',
           message: 'No installment data to display in the report.',
         );
@@ -1196,7 +1196,7 @@ class InstallmentController extends GetxController {
     } catch (e) {
       if (kDebugMode) {
         print(e);
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: 'Oh Snap!',
           message: e.toString(),
         );

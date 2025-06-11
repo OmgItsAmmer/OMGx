@@ -80,7 +80,7 @@ class InstallmentRepository extends GetxController {
       // Insert all payments in a single batch
       await supabase.from('installment_payments').insert(paymentJsons);
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'Plan didn\'t upload', message: e.toString());
       if (kDebugMode) print(e);
     }
@@ -93,10 +93,10 @@ class InstallmentRepository extends GetxController {
 
       await supabase.from('installment_payments').insert(paymentJson);
 
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
           title: 'Success', message: 'Payment successfully uploaded.');
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'Payment Upload Failed', message: e.toString());
       if (kDebugMode) {
         print(e);
@@ -120,7 +120,8 @@ class InstallmentRepository extends GetxController {
       }
       return installmentPaymentList;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Plan didn\'t fetch', message: e.toString());
+      TLoaders.errorSnackBar(
+          title: 'Plan didn\'t fetch', message: e.toString());
       print(e);
       return [];
     }
@@ -140,7 +141,7 @@ class InstallmentRepository extends GetxController {
         return null; // Return null if no matching record
       }
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'Plan ID didn\'t fetch', message: e.toString());
       if (kDebugMode) {
         print(e);

@@ -36,9 +36,6 @@ class UnkownRoute extends GetView<NetworkManager> {
                   showAction: false,
                   width: isMobile ? null : 500,
                   height: isMobile ? null : 500,
-                 
-
-           
                 ),
                 const SizedBox(
                   height: TSizes.spaceBtwSections,
@@ -51,7 +48,7 @@ class UnkownRoute extends GetView<NetworkManager> {
                         if (isConnected) {
                           Get.offAllNamed(TRoutes.login);
                         } else {
-                          TLoader.warningSnackBar(
+                          TLoaders.warningSnackBar(
                               title: 'No Internet Connection!',
                               message:
                                   'Kindly check your internet connection if issue presist restart the app or internet');

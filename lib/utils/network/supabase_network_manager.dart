@@ -85,7 +85,7 @@ class SupabaseNetworkManager {
 
       // Only show error in UI if it's not a connection timeout
       if (e is! SocketException && e is! TimeoutException) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Connection Issue',
             message:
                 'Having trouble connecting to the server. Please check your connection.');
@@ -107,7 +107,7 @@ class SupabaseNetworkManager {
         if (!await isNetworkConnected()) {
           if (attempts == 0) {
             // Only show once
-            TLoader.warningSnackBar(
+            TLoaders.warningSnackBar(
                 title: 'No Connection',
                 message: 'Please check your internet connection');
           }

@@ -69,7 +69,7 @@ class ReportsRepository extends GetxController {
 
       return reportList;
     } catch (e) {
-      TLoader.errorSnackBar(title: e.toString());
+      TLoaders.errorSnackBar(title: e.toString());
       print(e);
       return [];
     }
@@ -146,7 +146,7 @@ class ReportsRepository extends GetxController {
               SimplePnLReportModel.fromJson(item as Map<String, dynamic>))
           .toList();
     } catch (e) {
-      TLoader.errorSnackBar(title: e.toString());
+      TLoaders.errorSnackBar(title: e.toString());
       return [];
     }
   }
@@ -171,7 +171,7 @@ class ReportsRepository extends GetxController {
 
       return reportList;
     } catch (e) {
-      TLoader.errorSnackBar(title: e.toString());
+      TLoaders.errorSnackBar(title: e.toString());
       print(e);
       return [];
     }
@@ -188,7 +188,7 @@ class ReportsRepository extends GetxController {
           .toList();
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(title: e.toString());
+        TLoaders.errorSnackBar(title: e.toString());
         print(e);
       }
       return [];
@@ -209,7 +209,7 @@ class ReportsRepository extends GetxController {
           .toList();
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(title: e.toString());
+        TLoaders.errorSnackBar(title: e.toString());
         print(e);
       }
       return [];

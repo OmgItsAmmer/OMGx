@@ -6,15 +6,12 @@ import 'package:get/get.dart';
 import '../../../main.dart';
 import '../../utils/exceptions/platform_exceptions.dart';
 
-
 class ShopRepository extends GetxController {
   static ShopRepository get instance => Get.find();
 
-
-
   Future<ShopModel> fetchShopDetails() async {
     try {
-      final data =  await supabase.from('shop').select();
+      final data = await supabase.from('shop').select();
       if (kDebugMode) {
         print(data);
       }
@@ -28,18 +25,17 @@ class ShopRepository extends GetxController {
       return shopList.first;
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(title: 'Oh Snap', message: e.toString());
+        TLoaders.errorSnackBar(title: 'Oh Snap', message: e.toString());
         print(e);
       }
       return ShopModel.empty();
     }
-
   }
 
   Future<void> updateShopData(Map<String, dynamic> json, int shopId) async {
     try {
       await supabase.from('shop').update(json).eq('shop_id', shopId);
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
         title: 'Shop Updated',
         message: 'Your shop details have been updated successfully',
       );
@@ -49,10 +45,4 @@ class ShopRepository extends GetxController {
       throw 'Something went wrong. Please try again';
     }
   }
-
-
-
-
-
-
 }

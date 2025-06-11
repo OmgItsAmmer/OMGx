@@ -20,7 +20,7 @@ class SignUpRepository extends GetxController {
     } on PlatformException catch (e) {
       throw TPlatformException(e.code).message;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
   }
 
@@ -62,12 +62,12 @@ class SignUpRepository extends GetxController {
       if (count == 0) {
         await supabase.from('extras').insert({'AdminKey': adminKey});
 
-        TLoader.successSnackBar(
+        TLoaders.successSnackBar(
             title: 'Admin Key Created',
             message: 'Default admin key has been set up');
       }
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'Admin Key Setup Failed', message: e.toString());
     }
   }

@@ -41,7 +41,7 @@ class AddressController extends GetxController {
       if (entityName == 'Customer') {
         // Fetch addresses for Customer
         final customerAddress = await addressRepository
-            .fetchAddressTableForSpecificEntity(entityId,entityName);
+            .fetchAddressTableForSpecificEntity(entityId, entityName);
         allCustomerAddresses.assignAll(customerAddress);
 
         // Extract locations and filter out null values
@@ -61,14 +61,14 @@ class AddressController extends GetxController {
         // allCustomerAddressesLocation.assignAll(locations);
       } else if (entityName == 'Salesman') {
         final salesmanAddress = await addressRepository
-            .fetchAddressTableForSpecificEntity(entityId,entityName);
+            .fetchAddressTableForSpecificEntity(entityId, entityName);
         allSalesmanAddresses.assignAll(salesmanAddress);
       } else {
         throw Exception('Invalid entity name: $entityName');
       }
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(title: e.toString()); // TODO: Remove it
+        TLoaders.errorSnackBar(title: e.toString()); // TODO: Remove it
         print(e);
       }
     } finally {
@@ -76,57 +76,50 @@ class AddressController extends GetxController {
     }
   }
 
-  Future<void> saveAddress(int entityId,String entityName) async {
+  Future<void> saveAddress(int entityId, String entityName) async {
     try {
       AddressModel addressModel = AddressModel.empty();
-     if(entityName == 'Customer'){
+      if (entityName == 'Customer') {
         addressModel = AddressModel(
-          // addressId: 0,
-           location: address.text,
-           customerId: entityId,
-           phoneNumber: '',
-           street: '',
-           postalCode: '',
-           city: '',
-           state: '',
-           country: '');
-     }
-     else if(entityName == 'User')
-       {
-         addressModel = AddressModel(
-           //  addressId: 0,
-             location: address.text,
-             userId: entityId,
-             phoneNumber: '',
-             street: '',
-             postalCode: '',
-             city: '',
-             state: '',
-             country: '');
-       }
-     else if(entityName == 'Salesman'){
-       addressModel = AddressModel(
-         //  addressId: 0,
-           location: address.text,
-           salesmanId: entityId,
-           phoneNumber: '',
-           street: '',
-           postalCode: '',
-           city: '',
-           state: '',
-           country: '');
-
-     }
+            // addressId: 0,
+            location: address.text,
+            customerId: entityId,
+            phoneNumber: '',
+            street: '',
+            postalCode: '',
+            city: '',
+            state: '',
+            country: '');
+      } else if (entityName == 'User') {
+        addressModel = AddressModel(
+            //  addressId: 0,
+            location: address.text,
+            userId: entityId,
+            phoneNumber: '',
+            street: '',
+            postalCode: '',
+            city: '',
+            state: '',
+            country: '');
+      } else if (entityName == 'Salesman') {
+        addressModel = AddressModel(
+            //  addressId: 0,
+            location: address.text,
+            salesmanId: entityId,
+            phoneNumber: '',
+            street: '',
+            postalCode: '',
+            city: '',
+            state: '',
+            country: '');
+      }
 
       final json = addressModel.toJson(isUpdate: true);
 
-
       await addressRepository.updateAddressTable(json);
-
-
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(title: e.toString());
+        TLoaders.errorSnackBar(title: e.toString());
         print(e);
       }
     }

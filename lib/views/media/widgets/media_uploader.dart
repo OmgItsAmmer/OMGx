@@ -194,7 +194,7 @@ class MediaUploader extends StatelessWidget {
                                                   },
                                                 );
                                               } else {
-                                                TLoader.errorSnackBar(
+                                                TLoaders.errorSnackBar(
                                                   title: 'Select Category',
                                                   message:
                                                       'Kindly select the category first',
@@ -303,7 +303,7 @@ class MediaUploader extends StatelessWidget {
                                             },
                                           );
                                         } else {
-                                          TLoader.errorSnackBar(
+                                          TLoaders.errorSnackBar(
                                             title: 'Select Category',
                                             message:
                                                 'Kindly select the category first',

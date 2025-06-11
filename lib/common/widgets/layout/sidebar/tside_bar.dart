@@ -194,7 +194,7 @@ class TSideBar extends StatelessWidget {
                     const TMenuItem(
                       icon: Iconsax.image,
                       itemName: 'Media',
-                      route: TRoutes.installment
+                      route: TRoutes.mediaScreen
                     ),
                     const TMenuItem(
                       icon: Iconsax.note,

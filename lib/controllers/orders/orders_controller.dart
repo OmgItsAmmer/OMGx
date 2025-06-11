@@ -48,8 +48,13 @@ class OrderController extends GetxController {
     try {
       isOrdersFetching.value = true;
       final orders = await orderRepository.fetchOrders();
-      allOrders.assignAll(orders);
-      currentOrders.assignAll(orders);
+
+      // Reverse the order of the list
+      final reversedOrders = orders.reversed.toList();
+
+      // Assign the reversed list to allOrders and currentOrders
+      allOrders.assignAll(reversedOrders);
+      currentOrders.assignAll(reversedOrders);
 
       // Update dashboard if it's already initialized
       if (Get.isRegistered<DashboardController>()) {
@@ -60,7 +65,7 @@ class OrderController extends GetxController {
       }
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+        TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
         print(e);
       }
     } finally {
@@ -120,7 +125,7 @@ class OrderController extends GetxController {
     try {
       currentOrders.assignAll(allOrders);
     } catch (e) {
-      TLoader.errorSnackBar(title: e.toString()); //TODO remove it
+      TLoaders.errorSnackBar(title: e.toString()); //TODO remove it
       if (kDebugMode) {
         print(e);
       }
@@ -180,7 +185,7 @@ class OrderController extends GetxController {
       // Navigate to the order details page
       Get.toNamed(TRoutes.orderDetails, arguments: order);
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: 'Error',
         message: 'An error occurred while processing the order: $e',
       );
@@ -252,7 +257,7 @@ class OrderController extends GetxController {
         print("Filtered orders count for $entityName: ${currentOrders.length}");
       }
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: "Error: ${e.toString()}"); // Handle errors properly
       if (kDebugMode) {
         print("Error fetching $entityName orders: $e");
@@ -309,7 +314,7 @@ class OrderController extends GetxController {
       if (kDebugMode) {
         print('Error updating order status: $e');
       }
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'Status Update Error', message: e.toString());
       return '';
     } finally {
@@ -330,7 +335,7 @@ class OrderController extends GetxController {
       final orderItems = await orderRepository.fetchOrderItems(orderId);
       return orderItems;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
       if (kDebugMode) {
         print(e);
       }
@@ -343,7 +348,7 @@ class OrderController extends GetxController {
       final orderIds = await orderRepository.getOrderIdsByVariantId(varaintId);
       return orderIds;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
       print(e);
       return [];
     }
@@ -352,7 +357,7 @@ class OrderController extends GetxController {
   Future<void> restoreQuantity(List<OrderItemModel>? orderItems) async {
     try {
       if (orderItems == null || orderItems.isEmpty) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Oh Snap!', message: 'No order items to restore');
         return;
       }
@@ -381,7 +386,7 @@ class OrderController extends GetxController {
         }
       }
 
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
           title: 'Product Quantity Restored!',
           message:
               'Stock has been placed back, this order will not be considered in Profit Analysis');
@@ -389,7 +394,7 @@ class OrderController extends GetxController {
       if (kDebugMode) {
         print('Error in restoreQuantity: $e');
       }
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'Restore Error',
           message: 'Failed to restore product quantities');
     }
@@ -434,7 +439,7 @@ class OrderController extends GetxController {
   Future<void> addBackQuantity(List<OrderItemModel>? orderItems) async {
     try {
       if (orderItems == null || orderItems.isEmpty) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Oh Snap!', message: 'No order items to process');
         return;
       }
@@ -457,7 +462,7 @@ class OrderController extends GetxController {
       try {
         final productController = Get.find<ProductController>();
         await productController.refreshProducts();
-        TLoader.successSnackBar(
+        TLoaders.successSnackBar(
           title: 'Refreshed!',
           message: 'Order list has been updated.',
         );
@@ -467,14 +472,14 @@ class OrderController extends GetxController {
         }
       }
 
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
           title: 'Stock Updated!',
           message: 'Products have been removed from stock successfully.');
     } catch (e) {
       if (kDebugMode) {
         print('Error in addBackQuantity: $e');
       }
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'Subtract Error',
           message: 'Failed to subtract product quantities');
     }
@@ -486,10 +491,10 @@ class OrderController extends GetxController {
 
       if (success) {
         remainingAmount.value -= newAmount; // Update remaining amount in UI
-        TLoader.successSnackBar(
+        TLoaders.successSnackBar(
             title: 'Success!', message: 'paid amount updated.');
       } else {
-        TLoader.errorSnackBar(title: 'Oh Snap!', message: 'update failed!');
+        TLoaders.errorSnackBar(title: 'Oh Snap!', message: 'update failed!');
       }
     } catch (e) {
       if (kDebugMode) {

@@ -75,7 +75,7 @@ class ProductDetailBottomBar extends StatelessWidget {
                               if (productController.hasSerialNumbers.value &&
                                   productController
                                       .currentProductVariants.isEmpty) {
-                                TLoader.successSnackBar(
+                                TLoaders.successSnackBar(
                                   title: "Product Created",
                                   message:
                                       "Now add serial number variants for this product",
@@ -114,7 +114,7 @@ class ProductDetailBottomBar extends StatelessWidget {
                             }
                           } catch (e) {
                             debugPrint('❌ ERROR in save/update: $e');
-                            TLoader.errorSnackBar(
+                            TLoaders.errorSnackBar(
                               title: "Error",
                               message: e.toString(),
                             );

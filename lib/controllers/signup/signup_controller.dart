@@ -67,14 +67,14 @@ class SignUpController extends GetxController {
       //Form validation
       if (!signupFormkey.currentState!.validate()) {
         TFullScreenLoader.stopLoading();
-        TLoader.errorSnackBar(title: "Invalid Data");
+        TLoaders.errorSnackBar(title: "Invalid Data");
         return;
       }
 
       //privacy Policy Check
       if (!privacyPolicy.value) {
         TFullScreenLoader.stopLoading();
-        TLoader.warningSnackBar(
+        TLoaders.warningSnackBar(
             title: "Accept Privacy Policy",
             message:
                 'In order to create account, you must have to read and accept privacy policy & Terms of Use');
@@ -96,7 +96,7 @@ class SignUpController extends GetxController {
 
       if (!isValid) {
         TFullScreenLoader.stopLoading();
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: "Access Denied",
             message: "You need a valid admin key to create an account.");
 
@@ -116,7 +116,7 @@ class SignUpController extends GetxController {
       password.clear();
 
       //Show Success message
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
           title: "Congratulations",
           message: "Your account has been created! verify email to continue.");
       //move to verify Email Screen
@@ -124,7 +124,7 @@ class SignUpController extends GetxController {
       Get.offAndToNamed(TRoutes.dashboard);
     } catch (e) {
       TFullScreenLoader.stopLoading();
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
   }
 }

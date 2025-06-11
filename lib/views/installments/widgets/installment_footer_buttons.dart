@@ -108,7 +108,7 @@ class InstallmentFooterButtons extends StatelessWidget {
                             // Save the installment plan and guarantor images
                             await installmentController.savePlan();
                           } catch (e) {
-                            TLoader.errorSnackBar(
+                            TLoaders.errorSnackBar(
                                 title: 'Error', message: e.toString());
                           }
                         },

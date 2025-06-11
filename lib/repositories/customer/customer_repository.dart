@@ -21,7 +21,7 @@ class CustomerRepository extends GetxController {
 
       return customerList;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap', message: e.toString());
       return [];
     }
   }
@@ -29,7 +29,8 @@ class CustomerRepository extends GetxController {
   Future<void> updateCustomer(Map<String, dynamic> json) async {
     try {
       int? customerId = json['customer_id'];
-      if (customerId == null) throw Exception('Customer ID is required for update.');
+      if (customerId == null)
+        throw Exception('Customer ID is required for update.');
 
       // Remove customer_id from the update payload to avoid trying to update the primary key
       final updateData = Map<String, dynamic>.from(json)..remove('customer_id');
@@ -38,16 +39,14 @@ class CustomerRepository extends GetxController {
           .from('customers')
           .update(updateData)
           .eq('customer_id', customerId);
-
     } on PostgrestException catch (e) {
-      TLoader.errorSnackBar(title: 'Customer Repo', message: e.message);
+      TLoaders.errorSnackBar(title: 'Customer Repo', message: e.message);
       rethrow;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Customer Repo', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Customer Repo', message: e.toString());
       rethrow;
     }
   }
-
 
   Future<int> insertCustomerInTable(Map<String, dynamic> json) async {
     try {
@@ -59,33 +58,27 @@ class CustomerRepository extends GetxController {
 
       final customerId = response['customer_id'] as int;
       return customerId;
-
     } on PostgrestException catch (e) {
-      TLoader.errorSnackBar(title: 'Customer Repo', message: e.message);
+      TLoaders.errorSnackBar(title: 'Customer Repo', message: e.message);
       rethrow;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Customer Repo', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Customer Repo', message: e.toString());
       rethrow;
     }
   }
 
-
-
   Future<void> deleteCustomerFromTable(int customerId) async {
     try {
-
-     await supabase
+      await supabase
           .from('customers')
           .delete()
           .match({'customer_id': customerId});
 
-
-
-      TLoader.successSnackBar(title: "Success", message: "Customer deleted successfully");
-
+      TLoaders.successSnackBar(
+          title: "Success", message: "Customer deleted successfully");
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(title: 'Customer Repo', message: e.toString());
+        TLoaders.errorSnackBar(title: 'Customer Repo', message: e.toString());
         print("Error deleting customer: $e");
       }
     }

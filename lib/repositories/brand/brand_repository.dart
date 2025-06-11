@@ -15,14 +15,14 @@ class BrandRepository {
 
       await supabase.from('brands').update(updateData).eq('brandID', brandId);
 
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
           title: 'Brand Updated',
           message: '${json['bname']} has been updated.');
     } on PostgrestException catch (e) {
-      TLoader.errorSnackBar(title: 'Brand Repo Error', message: e.message);
+      TLoaders.errorSnackBar(title: 'Brand Repo Error', message: e.message);
       rethrow;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Unexpected Error', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Unexpected Error', message: e.toString());
       rethrow;
     }
   }
@@ -58,10 +58,10 @@ class BrandRepository {
       final brandId = response['brandID'] as int;
       return brandId;
     } on PostgrestException catch (e) {
-      TLoader.errorSnackBar(title: 'Brand Repo', message: e.message);
+      TLoaders.errorSnackBar(title: 'Brand Repo', message: e.message);
       rethrow;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Brand Repo', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Brand Repo', message: e.toString());
       rethrow;
     }
   }
@@ -76,7 +76,7 @@ class BrandRepository {
 
       return brandList;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Brand Repo', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Brand Repo', message: e.toString());
       return [];
     }
   }
@@ -101,11 +101,11 @@ class BrandRepository {
     try {
       await supabase.from('brands').delete().match({'brand_id': brandId});
 
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
           title: "Success", message: "Brand deleted successfully");
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(title: 'Brand Repo', message: e.toString());
+        TLoaders.errorSnackBar(title: 'Brand Repo', message: e.toString());
         print("Error deleting brand: $e");
       }
     }

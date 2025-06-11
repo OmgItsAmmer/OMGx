@@ -7,14 +7,13 @@ import '../../main.dart';
 class ExpenseRepository extends GetxController {
   static ExpenseRepository get instance => Get.find();
 
-
   Future<List<ExpenseModel>> fetchExpenses() async {
     try {
       final response = await supabase.from('expenses').select();
       return ExpenseModel.fromJsonList(response);
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(title: 'Expense Repo',message: e.toString());
+        TLoaders.errorSnackBar(title: 'Expense Repo', message: e.toString());
         print('Error fetching expenses: $e');
       }
       return []; // Return an empty list in case of an error
@@ -26,7 +25,7 @@ class ExpenseRepository extends GetxController {
       await supabase.from('expenses').insert(expense.toJson(isUpdate: true));
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(title: 'Expense Repo',message: e.toString());
+        TLoaders.errorSnackBar(title: 'Expense Repo', message: e.toString());
         print('Error inserting expense: $e');
       }
     }
@@ -37,10 +36,9 @@ class ExpenseRepository extends GetxController {
       await supabase.from('expenses').delete().eq('expense_id', expenseId);
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(title: 'Expense Repo',message: e.toString());
+        TLoaders.errorSnackBar(title: 'Expense Repo', message: e.toString());
         print('Error deleting expense: $e');
       }
     }
   }
-
 }

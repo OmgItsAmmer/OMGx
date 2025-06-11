@@ -354,12 +354,13 @@ class SalesmanReportPage extends StatelessWidget {
           '${directory!.path}/Salesman_Report_${startDateStr}_to_${endDateStr}.pdf');
       await file.writeAsBytes(pdfBytes);
 
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
         title: 'PDF Saved',
         message: 'File saved to: ${file.path}',
       );
     } catch (e) {
-      TLoader.errorSnackBar(title: "Failed to save PDF", message: e.toString());
+      TLoaders.errorSnackBar(
+          title: "Failed to save PDF", message: e.toString());
     }
   }
 }

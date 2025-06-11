@@ -63,7 +63,7 @@ class UserController extends GetxController {
 
       if (user == null) {
         // User is not logged in, navigate to login screen
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: "Oh Snap!",
             message: "Session expired. Please log in again.");
         Get.offAll(() => const LoginScreen()); // Navigate and clear stack
@@ -85,8 +85,9 @@ class UserController extends GetxController {
       //Setting UserDetails in App
       //   startUpController.setupUserDetails(currentUser.value);
     } catch (e) {
-      
-      TLoader.errorSnackBar(title: "Oh Snap!", message: "Something went wrong while fetching user details");
+      TLoaders.errorSnackBar(
+          title: "Oh Snap!",
+          message: "Something went wrong while fetching user details");
     } finally {
       profileLoading.value = false;
     }
@@ -100,7 +101,7 @@ class UserController extends GetxController {
       phoneNumber.text = currentUser.value.phoneNumber;
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(title: e.toString());
+        TLoaders.errorSnackBar(title: e.toString());
         print(e);
       }
     }
@@ -124,7 +125,7 @@ class UserController extends GetxController {
       currentUser.value = userModel;
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(title: e.toString());
+        TLoaders.errorSnackBar(title: e.toString());
         print(e);
       }
     } finally {
@@ -175,7 +176,7 @@ class UserController extends GetxController {
       TFullScreenLoader.stopLoading();
     } catch (e) {
       TFullScreenLoader.stopLoading();
-      TLoader.warningSnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoaders.warningSnackBar(title: 'Oh Snap!', message: e.toString());
     }
   }
 
@@ -274,7 +275,7 @@ class UserController extends GetxController {
     } catch (e) {
       TFullScreenLoader.stopLoading();
 
-      TLoader.errorSnackBar(title: "Oh Snap!", message: e.toString());
+      TLoaders.errorSnackBar(title: "Oh Snap!", message: e.toString());
     }
   }
 }

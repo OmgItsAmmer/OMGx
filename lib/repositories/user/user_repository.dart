@@ -1,6 +1,5 @@
 import 'dart:io';
 
-
 import 'package:admin_dashboard_v3/Models/user/user_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:flutter/foundation.dart';
@@ -18,16 +17,14 @@ import '../authentication/authicatioon_repository.dart';
 class UserRespository extends GetxController {
   static UserRespository get instance => Get.find();
 
-
 //   //Function to save user data to Firestore
 
 //
 //Function to fetch user details based on user ID.
   Future<List<UserModel>> fetchUserDetials(String? email) async {
     try {
-    
       if (email == null) throw 'Email cannot be null';
-      final data =  await  Supabase.instance.client
+      final data = await Supabase.instance.client
           .from('users')
           .select()
           .eq('email', email);
@@ -36,28 +33,25 @@ class UserRespository extends GetxController {
       }).toList();
 
       return userList;
-
     } on PlatformException catch (e) {
       throw TPlatformException(e.code).message;
     } catch (e) {
       throw 'Something went wrong. Please try again';
-
     }
-
   }
 
-  Future<void> updateProfileData(Map<String, dynamic> json, int userId)  async {
+  Future<void> updateProfileData(Map<String, dynamic> json, int userId) async {
     try {
       await supabase.from('users').update(json).eq('user_id', userId);
-      TLoader.successSnackBar(title: 'Profile Updated',message: 'your profile is updated Successfully');
+      TLoaders.successSnackBar(
+          title: 'Profile Updated',
+          message: 'your profile is updated Successfully');
     } on PlatformException catch (e) {
       throw TPlatformException(e.code).message;
     } catch (e) {
       throw 'Something went wrong. Please try again';
-
     }
   }
-
 
 //Function to update user details in Firestore
 // Future<void> updateUserDetails(UserModel updateUser) async {
@@ -110,7 +104,6 @@ class UserRespository extends GetxController {
 //   }
 // }
 
-
 //Function to remove user data from firestore
 // Future<void> removeUserRecord(String userId) async {
 //   try {
@@ -143,5 +136,4 @@ class UserRespository extends GetxController {
 //     throw 'Something went wrong. Please try again';
 //   }
 // }
-
 }

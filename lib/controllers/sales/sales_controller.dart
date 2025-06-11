@@ -2,7 +2,9 @@ import 'package:admin_dashboard_v3/Models/address/address_model.dart';
 import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
 import 'package:admin_dashboard_v3/Models/products/product_variant_model.dart';
 import 'package:admin_dashboard_v3/Models/sales/sale_model.dart';
+import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
+import 'package:admin_dashboard_v3/controllers/orders/orders_controller.dart';
 import 'package:admin_dashboard_v3/utils/popups/loaders.dart';
 import 'package:admin_dashboard_v3/controllers/media/media_controller.dart';
 import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
@@ -79,6 +81,9 @@ class SalesController extends GetxController {
 
   // Toggle for merging products with same ID and unit
   RxBool mergeIdenticalProducts = true.obs;
+
+  // Toggle for serialized product
+  RxBool isSerialziedProduct = false.obs;
 
   // Unit conversion factors (relative to base unit)
   final Map<UnitType, double> unitConversionFactors = {
@@ -261,6 +266,7 @@ class SalesController extends GetxController {
         }
 
         // VALIDATION CHECK 6: Valid price
+
         if (variant.sellingPrice <= 0) {
           TLoaders.errorSnackBar(
             title: "Invalid Price",
@@ -273,10 +279,10 @@ class SalesController extends GetxController {
         final sale = SaleModel(
           productId: selectedProductId.value,
           name: dropdownController.text.trim(),
-          salePrice: variant.sellingPrice.toString(),
+          salePrice: unitPrice.value.text.trim(),
           unit: selectedUnit.toString().trim(),
           quantity: "1", // Always 1 for serialized products
-          totalPrice: variant.sellingPrice.toString(),
+          totalPrice: totalPrice.value.text.trim(),
           buyPrice: variant.purchasePrice,
           variantId: variant.variantId,
         );
@@ -286,6 +292,8 @@ class SalesController extends GetxController {
         netTotal.value += newTotalPrice;
         originalNetTotal.value += newTotalPrice;
         buyingPriceTotal += variant.purchasePrice;
+
+        // print(buyingPriceTotal);
 
         // Update remaining amount
         double currentRemaining =
@@ -418,17 +426,17 @@ class SalesController extends GetxController {
           return;
         }
 
-        // VALIDATION CHECK 12: Price consistency
-        double calculatedTotal = unitPriceValue * quantityValue;
-        double tolerance = 0.01; // Allow small rounding differences
+        // // VALIDATION CHECK 12: Price consistency
+        // double calculatedTotal = unitPriceValue * quantityValue;
+        // double tolerance = 0.01; // Allow small rounding differences
 
-        if ((calculatedTotal - totalPriceValue).abs() > tolerance) {
-          TLoaders.warningSnackBar(
-            title: 'Price Discrepancy',
-            message:
-                'Total price doesn\'t match unit price × quantity. Continuing anyway.',
-          );
-        }
+        // // if ((calculatedTotal - totalPriceValue).abs() > tolerance) {
+        // //   TLoaders.warningSnackBar(
+        // //     title: 'Price Discrepancy',
+        // //     message:
+        // //         'Total price doesn\'t match unit price × quantity. Continuing anyway.',
+        // //   );
+        // // }
 
         // Try to find existing product with same ID and unit if merging is enabled
         if (mergeIdenticalProducts.value) {
@@ -498,11 +506,11 @@ class SalesController extends GetxController {
         // Clear input fields
         _clearInputFields();
 
-        // Show success feedback
-        TLoaders.successSnackBar(
-          title: "Product Added",
-          message: "${sale.name} added to sale",
-        );
+        // // Show success feedback
+        // TLoaders.successSnackBar(
+        //   title: "Product Added",
+        //   message: "${sale.name} added to sale",
+        // );
       }
     } catch (e) {
       if (kDebugMode) {
@@ -565,7 +573,8 @@ class SalesController extends GetxController {
       // Update totals
       netTotal.value += newTotalPrice;
       originalNetTotal.value += newTotalPrice;
-      buyingPriceTotal += buyingPriceIndividual * newQuantity;
+      // Use the existing sale's buyPrice to ensure consistency
+      buyingPriceTotal += existingSale.buyPrice * newQuantity;
 
       // Update remaining amount
       double currentRemaining =
@@ -596,6 +605,7 @@ class SalesController extends GetxController {
     unit.clear();
     quantity.text = '';
     totalPrice.value.clear();
+    isSerialziedProduct.value = false;
   }
 
   Future<int> checkOut() async {
@@ -675,6 +685,8 @@ class SalesController extends GetxController {
         }
       }
 
+      // print(buyingPriceTotal);
+
       // Create an OrderModel instance with formatted date
       OrderModel order = OrderModel(
         discount: double.tryParse(discount.value.replaceAll('%', '')) ?? 0.0,
@@ -701,17 +713,26 @@ class SalesController extends GetxController {
       );
 
       // Create order items with the correct variant IDs
-      final List<OrderItemModel> orderItems = allSales
-          .map((sale) => OrderItemModel(
-                productId: sale.productId,
-                orderId: -1,
-                quantity: int.tryParse(sale.quantity) ?? 0,
-                price: double.tryParse(sale.totalPrice) ?? 0.0,
-                unit: sale.unit.toString().split('.').last,
-                totalBuyPrice: sale.buyPrice,
-                variantId: sale.variantId,
-              ))
-          .toList();
+      final List<OrderItemModel> orderItems = allSales.map((sale) {
+        int quantity = int.tryParse(sale.quantity) ?? 0;
+        // For serialized products (variantId != null), quantity is always 1
+        // For regular products, multiply buyPrice by quantity to get total buying price
+        double totalBuyingPrice = sale.variantId != null
+            ? sale
+                .buyPrice // For serialized products, buyPrice is already the total
+            : sale.buyPrice *
+                quantity; // For regular products, multiply by quantity
+
+        return OrderItemModel(
+          productId: sale.productId,
+          orderId: -1,
+          quantity: quantity,
+          price: double.tryParse(sale.totalPrice) ?? 0.0,
+          unit: sale.unit.toString().split('.').last,
+          totalBuyPrice: totalBuyingPrice,
+          variantId: sale.variantId,
+        );
+      }).toList();
 
       order = order.copyWith(orderItems: orderItems);
 
@@ -730,6 +751,14 @@ class SalesController extends GetxController {
                   ))
               .toList(),
         );
+
+        // Add the order to the allOrders and currentOrders lists in OrderController
+        final OrderController orderController = Get.find<OrderController>();
+        orderController.allOrders.insert(0, order); // Insert at the beginning
+        orderController.currentOrders
+            .insert(0, order); // Insert at the beginning
+        orderController.allOrders.refresh(); // Refresh the list
+        orderController.currentOrders.refresh(); // Refresh the list
 
         final ProductController productController =
             Get.find<ProductController>();
@@ -930,6 +959,8 @@ class SalesController extends GetxController {
   // Reset form fields only - used internally
   void resetFields() {
     try {
+      isSerialziedProduct.value = false;
+
       // Clear form controllers - ensure direct text assignment
       unitPrice.value.text = '';
       unit.text = '';
@@ -1005,6 +1036,7 @@ class SalesController extends GetxController {
       originalNetTotal.value = 0.0;
       buyingPriceTotal = 0.0;
       buyingPriceIndividual = 0.0;
+      // isSerialziedProduct.value = false;
 
       // Reset form fields
       resetFields();
@@ -1022,10 +1054,10 @@ class SalesController extends GetxController {
 
   String statusCheck() {
     try {
-      if ('0' == remainingAmount.value.text) {
-        return 'PAID';
+      if ('0.00' == remainingAmount.value.text) {
+        return OrderStatus.completed.name.toString();
       } else {
-        return 'PENDING';
+        return OrderStatus.pending.name.toString();
       }
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
@@ -1083,6 +1115,19 @@ class SalesController extends GetxController {
             "Invalid remainingAmount: ${remainingAmount.value.text}");
       }
 
+      // Calculate buying price to subtract from buyingPriceTotal
+      double buyingPriceToSubtract = 0.0;
+
+      // For serialized products (variantId is not null)
+      if (saleItem.variantId != null) {
+        // For serialized products, quantity is always 1, so just subtract the buyPrice
+        buyingPriceToSubtract = saleItem.buyPrice;
+      } else {
+        // For regular products, multiply buyPrice by quantity
+        double quantity = double.tryParse(saleItem.quantity) ?? 0.0;
+        buyingPriceToSubtract = saleItem.buyPrice * quantity;
+      }
+
       // Update netTotal and remainingAmount
       double currentOriginalTotal = originalNetTotal.value;
       netTotal.value = (netTotal.value - totalPrice).abs() < 1e-10
@@ -1093,6 +1138,12 @@ class SalesController extends GetxController {
 
       // Update original total to reflect item removal
       originalNetTotal.value = currentOriginalTotal - totalPrice;
+
+      // Update buyingPriceTotal to reflect item removal
+      buyingPriceTotal =
+          (buyingPriceTotal - buyingPriceToSubtract).abs() < 1e-10
+              ? 0
+              : buyingPriceTotal - buyingPriceToSubtract;
 
       // Remove the item from the list
       allSales.removeAt(index);
@@ -1418,16 +1469,12 @@ class SalesController extends GetxController {
     final addressController = Get.find<AddressController>();
     final mediaController = Get.find<MediaController>();
     if (val.isEmpty) {
-      // Clear the customer name controller
-      customerNameController.clear();
-
       customerController.selectedCustomer.value = CustomerModel.empty();
       customerPhoneNoController.value.clear();
       customerCNICController.value.clear();
       addressController.selectedCustomerAddress.value = AddressModel.empty();
       customerAddressController.value.clear();
       selectedAddressId = null;
-      entityId.value = -1;
       mediaController.displayImage.value = null;
       return;
     }

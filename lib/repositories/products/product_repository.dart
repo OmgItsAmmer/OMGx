@@ -16,7 +16,7 @@ class ProductRepository {
 
       return productList;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Product Repo', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Product Repo', message: e.toString());
       return [];
     }
   }
@@ -32,10 +32,10 @@ class ProductRepository {
       final productId = response['product_id'] as int;
       return productId;
     } on PostgrestException catch (e) {
-      TLoader.errorSnackBar(title: 'Product Repo', message: e.message);
+      TLoaders.errorSnackBar(title: 'Product Repo', message: e.message);
       rethrow;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Product Repo', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Product Repo', message: e.toString());
       rethrow;
     }
   }
@@ -55,10 +55,10 @@ class ProductRepository {
           .update(updateData)
           .eq('product_id', productId);
     } on PostgrestException catch (e) {
-      TLoader.errorSnackBar(title: 'Product Repo', message: e.message);
+      TLoaders.errorSnackBar(title: 'Product Repo', message: e.message);
       rethrow;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Product Repo', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Product Repo', message: e.toString());
       rethrow;
     }
   }
@@ -80,12 +80,12 @@ class ProductRepository {
       return response['product_id'] as int;
     } on PostgrestException catch (e) {
       // Handle Supabase-specific errors
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'Can\'t get Product Id!', message: e.message);
       return -1; // Return -1 on error
     } catch (e) {
       // Handle other errors
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'Can\'t get Product Id!', message: e.toString());
       return -1; // Return -1 on error
     }
@@ -116,7 +116,7 @@ class ProductRepository {
       if (kDebugMode) {
         print('Stock Update Exception: $e');
       }
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'Stock Update Error',
           message: 'Failed to update stock: ${e.toString()}');
       rethrow;

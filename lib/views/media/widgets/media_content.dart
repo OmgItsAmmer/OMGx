@@ -384,7 +384,7 @@ class MediaContent extends StatelessWidget {
                             onPressed: () {
                               // Copy the image URL to the clipboard
                               Clipboard.setData(ClipboardData(text: image.url));
-                              TLoader.successSnackBar(
+                              TLoaders.successSnackBar(
                                   title: 'URL Copied!',
                                   message:
                                       'Tip: press Win+V to check Clipboard');

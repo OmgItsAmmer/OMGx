@@ -103,8 +103,8 @@ class InstallmentRow extends DataTableSource {
             ),
             child: Text(
               installmentItem.status?.toString() ?? 'unknown',
-            style: Theme.of(Get.context!)
-                .textTheme
+              style: Theme.of(Get.context!)
+                  .textTheme
                   .bodyMedium!
                   .apply(color: Colors.white),
             ),
@@ -117,9 +117,9 @@ class InstallmentRow extends DataTableSource {
             onDeletePressed: () {},
             onEditPressed: () {
               // Set initial remaining amount when dialog opens
-              installmentController.remainingAmount.value.text = 
+              installmentController.remainingAmount.value.text =
                   installmentItem.amountDue;
-              
+
               Get.defaultDialog(
                 title: 'Installment No ${installmentItem.sequenceNo}',
                 content: TRoundedContainer(
@@ -169,7 +169,7 @@ class InstallmentRow extends DataTableSource {
                                         "0.0";
                                     installmentController.remainingAmount.value
                                         .text = amountDue.toStringAsFixed(2);
-                                    TLoader.errorSnackBar(
+                                    TLoaders.errorSnackBar(
                                       title: "Invalid Payment",
                                       message:
                                           "Paid amount cannot exceed the total amount.",

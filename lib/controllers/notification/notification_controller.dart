@@ -43,7 +43,7 @@ class NotificationController extends GetxController {
       allNotifications.assignAll(notifications);
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Notification Controller', message: e.toString());
         print(e);
       }
@@ -115,7 +115,7 @@ class NotificationController extends GetxController {
     } catch (e) {
       if (kDebugMode) {
         print(e);
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Error opening product screen', message: e.toString());
       }
     }
@@ -134,7 +134,7 @@ class NotificationController extends GetxController {
     } catch (e) {
       if (kDebugMode) {
         print(e);
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Error opening product screen', message: e.toString());
       }
     }
@@ -153,7 +153,7 @@ class NotificationController extends GetxController {
     } catch (e) {
       if (kDebugMode) {
         print(e);
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Error opening product screen', message: e.toString());
       }
     }
@@ -180,7 +180,7 @@ class NotificationController extends GetxController {
       }
 
       allNotifications.refresh();
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
         title: 'Notifications',
         message: 'All notifications marked as read',
         duration: 2,
@@ -188,7 +188,7 @@ class NotificationController extends GetxController {
     } catch (e) {
       if (kDebugMode) {
         print(e);
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Error marking notifications as read',
             message: e.toString());
       }
@@ -230,7 +230,7 @@ class NotificationController extends GetxController {
         allNotifications.removeWhere(
             (notification) => notification.notificationId == notificationId);
 
-        TLoader.successSnackBar(
+        TLoaders.successSnackBar(
           title: 'Success',
           message: 'Notification deleted successfully',
           duration: 2,

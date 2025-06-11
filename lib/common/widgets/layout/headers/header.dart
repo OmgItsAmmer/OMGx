@@ -56,11 +56,11 @@ class THeader extends StatelessWidget implements PreferredSizeWidget {
                           prefixIcon: Icon(Iconsax.search_normal),
                           hintText: 'Search Anything'),
                       onChanged: (value) {
-                        // Show search overlay when user types
-                        if (!searchController.isSearchOverlayVisible.value) {
-                          searchController.toggleSearchOverlay();
-                        }
-                        searchController.filterSearchResults(value);
+                        // // Show search overlay when user types
+                        // if (!searchController.isSearchOverlayVisible.value) {
+                        //   searchController.toggleSearchOverlay();
+                        // }
+                        // searchController.filterSearchResults(value);
                       },
                       readOnly: false, // Allow direct input
                     ),
@@ -70,12 +70,12 @@ class THeader extends StatelessWidget implements PreferredSizeWidget {
               if (!TDeviceUtils.isDesktopScreen(context))
                 IconButton(
                     onPressed: () {
-                      // Show search overlay when icon is tapped on mobile/tablet
-                      searchController.toggleSearchOverlay();
-                      // Make sure to focus on the search field after opening
-                      Future.delayed(const Duration(milliseconds: 100), () {
-                        FocusScope.of(context).requestFocus(FocusNode());
-                      });
+                      // // Show search overlay when icon is tapped on mobile/tablet
+                      // searchController.toggleSearchOverlay();
+                      // // Make sure to focus on the search field after opening
+                      // Future.delayed(const Duration(milliseconds: 100), () {
+                      //   FocusScope.of(context).requestFocus(FocusNode());
+                      // });
                     },
                     icon: const Icon(Iconsax.search_normal)),
               (TDeviceUtils.isDesktopScreen(context))

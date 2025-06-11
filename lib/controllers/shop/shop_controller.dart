@@ -41,7 +41,10 @@ class ShopController extends GetxController {
       selectedShop?.value = shopData;
       setShopDetail();
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap', message: e.toString());
+      //  TLoader.errorSnackBar(title: 'Oh Snap', message: e.toString());
+      if (kDebugMode) {
+        print(e);
+      }
     } finally {
       isLoading.value = false;
     }
@@ -59,7 +62,7 @@ class ShopController extends GetxController {
       profile3.text = selectedShop?.value.profile3.toString() ?? ' ';
       //  productImagesController.setDesiredImage(MediaCategory.shop);
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
   }
 
@@ -95,7 +98,7 @@ class ShopController extends GetxController {
       selectedShop?.value = shopModel;
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(title: e.toString());
+        TLoaders.errorSnackBar(title: e.toString());
         print(e);
       }
     } finally {

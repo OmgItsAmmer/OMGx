@@ -60,24 +60,27 @@ class UnitPriceQuantity extends StatelessWidget {
               width: double.infinity,
 
               //  height: 80,
-              child: TextFormField(
-                focusNode: quantityFocus,
-                onChanged: (value) {
-                  salesController.calculateTotalPrice();
-                },
-                validator: (value) =>
-                    TValidator.validateEmptyText('quantity ', value),
-                controller: salesController.quantity,
-                decoration: const InputDecoration(labelText: 'Quantity'),
-                style: Theme.of(context).textTheme.bodyMedium,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(
-                    RegExp(
-                        r'^\d*\.?\d{0,2}'), // Allows numbers with up to 2 decimal places
-                  ),
-                ],
+              child: Obx(
+                () => TextFormField(
+                  focusNode: quantityFocus,
+                  onChanged: (value) {
+                    salesController.calculateTotalPrice();
+                  },
+                  readOnly: salesController.isSerialziedProduct.value,
+                  validator: (value) =>
+                      TValidator.validateEmptyText('quantity ', value),
+                  controller: salesController.quantity,
+                  decoration: const InputDecoration(labelText: 'Quantity'),
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(
+                      RegExp(
+                          r'^\d*\.?\d{0,2}'), // Allows numbers with up to 2 decimal places
+                    ),
+                  ],
+                ),
               ),
             ),
           )

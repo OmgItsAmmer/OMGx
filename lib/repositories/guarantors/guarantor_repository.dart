@@ -1,5 +1,3 @@
-
-
 import 'package:admin_dashboard_v3/Models/guarantors/guarantors_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:flutter/foundation.dart';
@@ -7,11 +5,8 @@ import 'package:get/get.dart';
 
 import '../../../main.dart';
 
-
 class GuarantorRepository extends GetxController {
   static GuarantorRepository get instance => Get.find();
-
-
 
   Future<List<GuarantorsModel>> fetchSpecificOrderGuarantors(int planId) async {
     try {
@@ -21,7 +16,7 @@ class GuarantorRepository extends GetxController {
           .select('guarantor1_id, guarantor2_id')
           .eq('installment_plans_id', planId)
           .single();
-    print(installmentPlan);
+      print(installmentPlan);
       // Extract guarantor IDs from the installment plan
       final int? guarantor1Id = installmentPlan['guarantor1_id'] as int?;
       final int? guarantor2Id = installmentPlan['guarantor2_id'] as int?;
@@ -81,12 +76,13 @@ class GuarantorRepository extends GetxController {
       return guarantorList;
     } catch (e) {
       // Handle errors and show a snackbar
-      TLoader.errorSnackBar(title: 'Oh Snap', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap', message: e.toString());
       return []; // Return an empty list in case of an error
     }
   }
 
-  Future<List<int>> uploadGuarantors(List<Map<String, dynamic>> guarantors) async {
+  Future<List<int>> uploadGuarantors(
+      List<Map<String, dynamic>> guarantors) async {
     try {
       // Insert guarantors into the 'guarantors' table and select the returned IDs
       final insertedData = await supabase
@@ -96,17 +92,12 @@ class GuarantorRepository extends GetxController {
 
       // Extract guarantor IDs from the inserted data
       List<int> guarantorIds =
-      insertedData.map<int>((item) => item['guarantor_id'] as int).toList();
+          insertedData.map<int>((item) => item['guarantor_id'] as int).toList();
 
       return guarantorIds;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap', message: e.toString());
       return [];
     }
   }
-
-
-
-
-
 }

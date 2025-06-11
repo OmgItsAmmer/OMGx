@@ -37,6 +37,7 @@ class ProductSearchBar extends StatelessWidget {
         },
         onSelected: (ProductModel selectedProduct) async {
           final isSerializedProduct = selectedProduct.hasSerialNumbers;
+          salesController.isSerialziedProduct.value = isSerializedProduct;
 
           // Load variants for serialized products
           if (isSerializedProduct) {

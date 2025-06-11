@@ -1,0 +1,12 @@
+
+  SELECT 
+    p.product_id AS id,
+    p.name,
+    SUM(oi.quantity) AS items_sold,
+    SUM((oi.price - oi.total_buy_price) * oi.quantity) AS profit,
+    p.stock_quantity AS stock_remaining
+  FROM order_items oi
+  JOIN products p ON oi.product_id = p.product_id
+  WHERE EXTRACT(MONTH FROM oi.created_at) = month_input
+    AND EXTRACT(YEAR FROM oi.created_at) = year_input
+  GROUP BY p.product_id, p.name, p.stock_quantity;

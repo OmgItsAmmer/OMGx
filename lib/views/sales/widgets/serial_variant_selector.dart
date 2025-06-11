@@ -124,37 +124,42 @@ class SerialVariantSelector extends StatelessWidget {
 
   Widget _buildVariantRow(BuildContext context, SalesController controller,
       ProductVariantModel variant) {
-    return Row(
-      children: [
-        Expanded(
-          flex: 3,
-          child: Text(variant.serialNumber),
-        ),
-        Expanded(
-          flex: 2,
-          child: Text('\$${variant.sellingPrice.toStringAsFixed(2)}'),
-        ),
-        Expanded(
-          flex: 1,
-          child: Obx(() => ElevatedButton(
-                onPressed:
-                    controller.selectedVariantId.value == variant.variantId
-                        ? null // Disable if already selected
-                        : () => controller.selectVariant(variant),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: TSizes.sm),
-                  minimumSize: const Size(80, 36),
-                  backgroundColor: TColors.primary,
-                ),
-                child: Text(
-                  controller.selectedVariantId.value == variant.variantId
-                      ? 'Selected'
-                      : 'Select',
-                  style: const TextStyle(fontSize: 12),
-                ),
-              )),
-        ),
-      ],
-    );
+    return Obx(() {
+      final isInCart = controller.allSales
+          .any((sale) => sale.variantId == variant.variantId);
+      return Row(
+        children: [
+          Expanded(
+            flex: 3,
+            child: Text(variant.serialNumber),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text('Rs ${variant.sellingPrice.toStringAsFixed(2)}'),
+          ),
+          Expanded(
+            flex: 1,
+            child: ElevatedButton(
+              onPressed: isInCart ||
+                      controller.selectedVariantId.value == variant.variantId
+                  ? null // Disable if already in cart or selected
+                  : () => controller.selectVariant(variant),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: TSizes.sm),
+                minimumSize: const Size(80, 36),
+                backgroundColor: isInCart ? Colors.grey : TColors.primary,
+              ),
+              child: Text(
+                isInCart ||
+                        controller.selectedVariantId.value == variant.variantId
+                    ? 'Selected'
+                    : 'Select',
+                style: const TextStyle(fontSize: 12),
+              ),
+            ),
+          ),
+        ],
+      );
+    });
   }
 }

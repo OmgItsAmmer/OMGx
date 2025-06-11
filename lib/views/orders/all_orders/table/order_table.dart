@@ -40,17 +40,16 @@ class OrderTable extends StatelessWidget {
         }).toList();
       }
 
-      // Sort orders by date (latest first) by default if no other sorting is active
+      // Sort orders by ID in descending order (bigger order ID first) by default
       if (tableSearchController.sortColumnIndex.value == null) {
-        filteredOrders.sort((a, b) =>
-            DateTime.parse(b.orderDate).compareTo(DateTime.parse(a.orderDate)));
+        filteredOrders.sort((a, b) => b.orderId.compareTo(a.orderId));
       } else if (tableSearchController.sortColumnIndex.value == 0) {
-        // Sort by Order ID
+        // Sort by Order ID based on the current sorting state
         filteredOrders.sort((a, b) {
           if (tableSearchController.sortAscending.value) {
-            return a.orderId.compareTo(b.orderId);
+            return a.orderId.compareTo(b.orderId); // Ascending
           } else {
-            return b.orderId.compareTo(a.orderId);
+            return b.orderId.compareTo(a.orderId); // Descending
           }
         });
       }
@@ -71,12 +70,12 @@ class OrderTable extends StatelessWidget {
           if (columnIndex == 0) {
             tableSearchController.sort(columnIndex, ascending);
 
-            // Sort orders by ID
+            // Sort orders by ID in descending order (bigger order ID first)
             filteredOrders.sort((a, b) {
               if (ascending) {
-                return a.orderId.compareTo(b.orderId);
+                return a.orderId.compareTo(b.orderId); // Ascending
               } else {
-                return b.orderId.compareTo(a.orderId);
+                return b.orderId.compareTo(a.orderId); // Descending
               }
             });
           }

@@ -49,7 +49,6 @@ class BrandController extends GetxController {
     }
 
     // Show snackbar to confirm action
- 
   }
 
   // Method to check if a brand name already exists
@@ -74,7 +73,7 @@ class BrandController extends GetxController {
 
       // Validate form first
       if (!brandDetail.currentState!.validate()) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: "Empty Fields",
           message: 'Kindly fill all the fields before proceeding.',
         );
@@ -84,7 +83,7 @@ class BrandController extends GetxController {
       // Check for duplicate brand name
       final brandNameText = brandName.text.trim();
       if (_brandNameExists(brandNameText)) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: "Duplicate Brand",
           message: 'A brand with the name "$brandNameText" already exists.',
         );
@@ -118,13 +117,13 @@ class BrandController extends GetxController {
       // Clear input fields
       cleanBrandDetail();
 
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
         title: 'Brand Added!',
         message: '${brandName.text} added to Database',
       );
       Navigator.of(Get.context!).pop();
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: "Error",
         message: e.toString(),
       );
@@ -139,7 +138,7 @@ class BrandController extends GetxController {
 
       // Validate form
       if (!brandDetail.currentState!.validate()) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: "Empty Fields",
           message: 'Kindly fill all the fields before proceeding.',
         );
@@ -149,7 +148,7 @@ class BrandController extends GetxController {
       // Check for duplicate brand name (excluding the current brand being edited)
       final brandNameText = brandName.text.trim();
       if (_brandNameExists(brandNameText, excludeBrandId: brandId)) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: "Duplicate Brand",
           message: 'A brand with the name "$brandNameText" already exists.',
         );
@@ -199,13 +198,13 @@ class BrandController extends GetxController {
       // Clear form
       cleanBrandDetail();
 
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
         title: 'Brand Updated!',
         message: '${brandNameText} updated in Database',
       );
       Navigator.of(Get.context!).pop();
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: "Error",
         message: e.toString(),
       );
@@ -239,13 +238,13 @@ class BrandController extends GetxController {
       update();
 
       // Show success message
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
           title: "Success",
           message: "${brandName ?? 'Brand'} deleted successfully");
     } catch (e) {
       if (kDebugMode) {
         print("Error deleting brand: $e");
-        TLoader.errorSnackBar(title: 'Error', message: e.toString());
+        TLoaders.errorSnackBar(title: 'Error', message: e.toString());
       }
     }
   }
@@ -256,7 +255,7 @@ class BrandController extends GetxController {
       brandName.text = brand.bname ?? ' ';
       productCount.text = brand.productsCount.toString();
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
   }
 
@@ -266,7 +265,7 @@ class BrandController extends GetxController {
       productCount.text = '';
       selectedBrand.value = BrandModel.empty();
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
   }
 
@@ -283,7 +282,7 @@ class BrandController extends GetxController {
           .map((brand) => brand.bname ?? '') // Replace null with empty string
           .toList();
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
 
       if (kDebugMode) {
         print(e);
@@ -296,7 +295,7 @@ class BrandController extends GetxController {
       final brandId = await brandRepository.getBrandId(brandName);
       return brandId;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
 
       if (kDebugMode) {
         print(e);
@@ -383,7 +382,7 @@ class BrandController extends GetxController {
     try {
       isLoading.value = true;
       await fetchBrands();
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
         title: 'Refreshed!',
         message: 'Brand list has been updated.',
       );
@@ -391,7 +390,7 @@ class BrandController extends GetxController {
       if (kDebugMode) {
         print('Error refreshing brands: $e');
       }
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: 'Error',
         message: 'Failed to refresh brands: ${e.toString()}',
       );

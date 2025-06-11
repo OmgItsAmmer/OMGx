@@ -19,15 +19,7 @@ class SalesSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     final SalesController salesController = Get.find<SalesController>();
     final shopController = Get.put(ShopController());
-
-    // Defer the fetchShop call to after the build is complete
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!shopController.isLoading.value &&
-          (shopController.selectedShop?.value.shopId == 0 ||
-              shopController.selectedShop?.value.shopname.isEmpty == true)) {
-        shopController.fetchShop();
-      }
-    });
+    shopController.fetchShop();
 
     // Check if the device is mobile
     final isMobile = TDeviceUtils.isMobileScreen(context);

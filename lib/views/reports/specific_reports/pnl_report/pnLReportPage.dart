@@ -273,12 +273,12 @@ class PnLReportPage extends StatelessWidget {
       final file = File('${directory!.path}/profit_loss_report.pdf');
       await file.writeAsBytes(pdfBytes);
 
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
         title: 'PDF Saved',
         message: 'File saved to: ${file.path}',
       );
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Error', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Error', message: e.toString());
     }
   }
 

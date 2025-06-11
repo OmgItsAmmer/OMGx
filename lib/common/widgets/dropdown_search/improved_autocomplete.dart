@@ -106,7 +106,7 @@ class _ImprovedAutocompleteState<T extends Object>
         widget.onInvalidInput!(currentText);
       } else {
         // Default error handling
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Invalid Selection',
             message:
                 '${widget.titleText} "${currentText}" not found in the list');

@@ -265,7 +265,7 @@ class OrderInfo extends StatelessWidget {
                       orderController.selectedStatus.value = updatedOrderStatus;
                     }
                   } catch (e) {
-                    TLoader.errorSnackBar(
+                    TLoaders.errorSnackBar(
                         title: 'Status Update Failed',
                         message:
                             'Could not update order status: ${e.toString()}');

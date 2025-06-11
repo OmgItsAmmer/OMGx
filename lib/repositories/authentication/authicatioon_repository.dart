@@ -96,7 +96,7 @@ class AuthenticationRepository extends GetxController {
     } catch (e) {
       print('Error during redirection: $e');
       // Optionally show an error snack bar or handle navigation errors
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'Error',
           message: 'An error occurred during screen redirection.');
     }
@@ -126,7 +126,7 @@ class AuthenticationRepository extends GetxController {
         if (kDebugMode) {
           print("Error: Service key not available for admin operations");
         }
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: "Error",
             message:
                 "This operation is not available in release mode. Please contact support.");
@@ -144,7 +144,7 @@ class AuthenticationRepository extends GetxController {
 
       // Ensure the user is logged in before proceeding
       if (currentUser == null) {
-        TLoader.errorSnackBar(title: "Error", message: "User is Null");
+        TLoaders.errorSnackBar(title: "Error", message: "User is Null");
         return;
       }
 
@@ -156,7 +156,7 @@ class AuthenticationRepository extends GetxController {
 
       // Delete user with the admin client
       await supabaseAdmin.auth.admin.deleteUser(currentUser.id);
-      TLoader.successSnackBar(title: "Account Deleted Successfully");
+      TLoaders.successSnackBar(title: "Account Deleted Successfully");
       Get.to(() => const LoginScreen());
     } on FormatException catch (_) {
       throw const TFormatException();
@@ -164,7 +164,7 @@ class AuthenticationRepository extends GetxController {
       if (kDebugMode) {
         print("Error deleting account: $e");
       }
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: "Error",
           message: "Could not delete account. Please try again later.");
     }
@@ -184,9 +184,9 @@ class AuthenticationRepository extends GetxController {
       // Navigate to login screen
       Get.offAll(() => const LoginScreen());
 
-      TLoader.successSnackBar(title: "Logged out successfully");
+      TLoaders.successSnackBar(title: "Logged out successfully");
     } catch (e) {
-      TLoader.errorSnackBar(title: "Logout Error", message: e.toString());
+      TLoaders.errorSnackBar(title: "Logout Error", message: e.toString());
     }
   }
 }

@@ -58,7 +58,7 @@ class CustomerController extends GetxController {
       // allCustomerNames.assignAll(names);
       // print(allCustomerNames);
     } catch (e) {
-      TLoader.errorSnackBar(title: "Oh Snap!", message: e.toString());
+      TLoaders.errorSnackBar(title: "Oh Snap!", message: e.toString());
     }
   }
 
@@ -67,7 +67,7 @@ class CustomerController extends GetxController {
     try {
       isLoading.value = true;
       await fetchAllCustomers();
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
         title: 'Refreshed!',
         message: 'Customer list has been updated.',
       );
@@ -75,7 +75,7 @@ class CustomerController extends GetxController {
       if (kDebugMode) {
         print('Error refreshing customers: $e');
       }
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: 'Error',
         message: 'Failed to refresh customers: ${e.toString()}',
       );
@@ -89,7 +89,7 @@ class CustomerController extends GetxController {
       // Validate the form
       isUpdating.value = true;
       if (!addCustomerKey.currentState!.validate()) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: "Empty Fields",
           message: 'Kindly fill all the fields before proceeding.',
         );
@@ -119,14 +119,14 @@ class CustomerController extends GetxController {
 
       // Clear the form after saving/updating
       cleanCustomerDetails();
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
           title: 'Customer Added!',
           message: '${firstName.text} added to Database ');
 
       // TLoader.successSnackBar(title: 'Customer Added!');
     } catch (e) {
       // Handle errors
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: "Error",
         message: e.toString(),
       );
@@ -140,7 +140,7 @@ class CustomerController extends GetxController {
       // Validate the form
       isUpdating.value = true;
       if (!addCustomerKey.currentState!.validate()) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: "Empty Fields",
           message: 'Kindly fill all the fields before proceeding.',
         );
@@ -174,12 +174,12 @@ class CustomerController extends GetxController {
       // Clear the form after saving/updating
       cleanCustomerDetails();
 
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
           title: 'Customer Added!',
           message: '${firstName.text} added to Database ');
     } catch (e) {
       // Handle errors
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: "Error",
         message: e.toString(),
       );
@@ -197,7 +197,7 @@ class CustomerController extends GetxController {
       phoneNumber.clear();
       AddressController.instance.address.clear();
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
   }
 
@@ -220,7 +220,7 @@ class CustomerController extends GetxController {
       AddressController.instance.address.text = matchingAddress.location ??
           ''; // Assuming `addressText` is the property holding the address as a String
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
   }
 
@@ -245,7 +245,7 @@ class CustomerController extends GetxController {
     } catch (e) {
       if (kDebugMode) {
         print("Error deleting customer: $e");
-        TLoader.errorSnackBar(title: 'Error', message: e.toString());
+        TLoaders.errorSnackBar(title: 'Error', message: e.toString());
       }
     }
   }
@@ -265,13 +265,13 @@ class CustomerController extends GetxController {
       if (customerData != CustomerModel.empty()) {
         selectedCustomer.value = customerData;
       } else {
-        TLoader.warningSnackBar(
+        TLoaders.warningSnackBar(
             title: 'Not Found',
             message: 'No customer found for the given order ID.');
       }
     } catch (e) {
       // Handle errors
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     } finally {
       // Set loading state to false
       isLoading.value = false;
@@ -293,7 +293,7 @@ class CustomerController extends GetxController {
       if (customerData != CustomerModel.empty()) {
         selectedCustomer.value = customerData;
       } else {
-        TLoader.errorSnackBar(title: 'Error', message: 'Customer not found');
+        TLoaders.errorSnackBar(title: 'Error', message: 'Customer not found');
         return;
       }
 
@@ -312,7 +312,7 @@ class CustomerController extends GetxController {
       // Navigate to details screen with customer model as argument
       Get.toNamed(TRoutes.customerDetails, arguments: customerData);
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Error', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Error', message: e.toString());
     } finally {
       isLoading.value = false;
     }

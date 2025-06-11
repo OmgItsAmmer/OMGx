@@ -40,8 +40,6 @@ class CategoryController extends GetxController {
     } else {
       Get.back(); // Fallback if context is null
     }
-
- 
   }
 
   // Method to check if a category name already exists
@@ -148,7 +146,7 @@ class CategoryController extends GetxController {
     try {
       isUpdating.value = true;
       if (!categoryDetail.currentState!.validate()) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: "Empty Fields",
           message: 'Kindly fill all the fields before proceeding.',
         );
@@ -158,7 +156,7 @@ class CategoryController extends GetxController {
       // Check for duplicate category name
       final categoryNameText = categoryName.text.trim();
       if (_categoryNameExists(categoryNameText)) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: "Duplicate Category",
           message:
               'A category with the name "$categoryNameText" already exists.',
@@ -191,13 +189,13 @@ class CategoryController extends GetxController {
       update();
 
       cleanCategoryDetail();
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
         title: 'Category Added!',
         message: '$categoryNameText successfully added.',
       );
       Navigator.of(Get.context!).pop();
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Error', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Error', message: e.toString());
     } finally {
       isUpdating.value = false;
     }
@@ -211,7 +209,7 @@ class CategoryController extends GetxController {
 
       // Validate the form before proceeding
       if (!categoryDetail.currentState!.validate()) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: "Empty Fields",
           message: 'Kindly fill all the fields before proceeding.',
         );
@@ -222,7 +220,7 @@ class CategoryController extends GetxController {
       final categoryNameText = categoryName.text.trim();
       if (_categoryNameExists(categoryNameText,
           excludeCategoryId: categoryId)) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: "Duplicate Category",
           message:
               'A category with the name "$categoryNameText" already exists.',
@@ -246,10 +244,10 @@ class CategoryController extends GetxController {
         isFeatured: existingCategory.isFeatured,
       );
 
-      final json = categoryModel.toJson();
+      // final json = categoryModel.toJson();
 
       // Update the category in the repository
-      await categoryRepository.updateCategory(json);
+      await categoryRepository.updateCategory(categoryModel);
 
       // Assign an image to the category
       await mediaController.imageAssigner(
@@ -274,13 +272,13 @@ class CategoryController extends GetxController {
       cleanCategoryDetail();
 
       // Show success message
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
         title: 'Category Updated!',
         message: '$categoryNameText updated successfully.',
       );
       Navigator.of(Get.context!).pop();
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Error', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Error', message: e.toString());
     } finally {
       isUpdating.value = false;
     }
@@ -292,7 +290,7 @@ class CategoryController extends GetxController {
       productCount.text =
           category.productCount?.toString() ?? '0'; // Show product count in UI
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
   }
 
@@ -301,7 +299,7 @@ class CategoryController extends GetxController {
       categoryName.clear();
       productCount.clear();
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
   }
 
@@ -313,7 +311,7 @@ class CategoryController extends GetxController {
       if (kDebugMode) {
         print('Error fetching categories: $e');
       }
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: "Error",
         message: 'Failed to load categories: ${e.toString()}',
       );
@@ -326,7 +324,7 @@ class CategoryController extends GetxController {
       final categoryidId = await categoryRepository.getCategoryId(categoryName);
       return categoryidId;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
 
       if (kDebugMode) {
         print(e);
@@ -361,12 +359,12 @@ class CategoryController extends GetxController {
       update();
 
       // Show success message
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
           title: "Success", message: "$catName deleted successfully");
     } catch (e) {
       if (kDebugMode) {
         print("Error deleting category: $e");
-        TLoader.errorSnackBar(title: 'Error', message: e.toString());
+        TLoaders.errorSnackBar(title: 'Error', message: e.toString());
       }
     }
   }
@@ -376,7 +374,7 @@ class CategoryController extends GetxController {
     try {
       isLoading.value = true;
       await fetchCategories();
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
         title: 'Refreshed!',
         message: 'Category list has been updated.',
       );
@@ -384,7 +382,7 @@ class CategoryController extends GetxController {
       if (kDebugMode) {
         print('Error refreshing categories: $e');
       }
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: 'Error',
         message: 'Failed to refresh categories: ${e.toString()}',
       );

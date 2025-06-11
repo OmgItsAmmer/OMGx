@@ -15,7 +15,7 @@ class ExpenseController extends GetxController {
 
   RxList<ExpenseModel> expenses = <ExpenseModel>[].obs;
 
-  RxBool isExpenseFetching  = false.obs;
+  RxBool isExpenseFetching = false.obs;
 
   @override
   void onInit() {
@@ -36,12 +36,11 @@ class ExpenseController extends GetxController {
       expenses.assignAll(await expenseRepository.fetchExpenses());
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Expense Controller', message: e.toString());
         print(e);
       }
-    }
-    finally{
+    } finally {
       isExpenseFetching.value = false;
     }
   }
@@ -49,7 +48,7 @@ class ExpenseController extends GetxController {
   Future<void> addExpense() async {
     try {
       if (description.text.isEmpty || amount.text.isEmpty) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Expense Controller', message: 'Please fill all fields');
         return;
       }
@@ -68,7 +67,7 @@ class ExpenseController extends GetxController {
       amount.clear();
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Expense Controller', message: e.toString());
         print(e);
       }
@@ -83,7 +82,7 @@ class ExpenseController extends GetxController {
       expenses.removeWhere((expense) => expense.expenseId == expenseId);
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: 'Expense Controller', message: e.toString());
         print(e);
       }

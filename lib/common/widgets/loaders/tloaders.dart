@@ -20,7 +20,7 @@ class _SnackBarItem {
   });
 }
 
-class TLoader {
+class TLoaders {
   static final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   static final List<_SnackBarItem> _snackBarQueue = [];
   static bool _isShowingSnackBar = false;

@@ -4,8 +4,6 @@ import 'package:get/get.dart';
 import '../../Models/notifications/notification_model.dart';
 import '../../main.dart';
 
-
-
 class NotificationRepository extends GetxController {
   static NotificationRepository get instance => Get.find();
 
@@ -13,8 +11,8 @@ class NotificationRepository extends GetxController {
   void onInit() {
     triggerInstallmentNotifications();
     super.onInit();
-
   }
+
   // Function to fetch notifications from Supabase
   Future<List<NotificationModel>> fetchNotifications({int limit = 10}) async {
     try {
@@ -29,18 +27,15 @@ class NotificationRepository extends GetxController {
       return response.map((json) => NotificationModel.fromJson(json)).toList();
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(title: 'Notification Repo Fetch issue',message: e.toString());
+        TLoaders.errorSnackBar(
+            title: 'Notification Repo Fetch issue', message: e.toString());
         print("Error fetching notifications: $e");
       }
       return [];
     }
   }
 
-
-
   Future<void> triggerInstallmentNotifications() async {
-
-
     try {
       final response = await supabase.rpc('notify_due_installments');
       if (kDebugMode) {
@@ -55,14 +50,11 @@ class NotificationRepository extends GetxController {
 
   Future<void> changeRead(bool newCondition, int notificationId) async {
     try {
-
-
       await supabase
-          .from('notifications')  // Table name
-          .update({'isRead': newCondition})  // Field to update
-          .eq('notification_id', notificationId);  // Condition to find the correct row
-
-
+          .from('notifications') // Table name
+          .update({'isRead': newCondition}) // Field to update
+          .eq('notification_id',
+              notificationId); // Condition to find the correct row
 
       if (kDebugMode) {
         print('Notification read status updated successfully.');
@@ -75,21 +67,15 @@ class NotificationRepository extends GetxController {
   }
 
   Future<void> deleteNotificationFromTable(int notificationId) async {
-
-
     try {
-       await supabase
+      await supabase
           .from('notifications')
           .delete()
           .eq('notification_id', notificationId);
-
-
     } catch (e) {
       if (kDebugMode) {
         print("Exception deleting notification: $e");
       }
     }
   }
-
-
 }

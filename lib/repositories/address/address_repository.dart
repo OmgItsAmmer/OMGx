@@ -6,18 +6,14 @@ import '../../../common/widgets/loaders/tloaders.dart';
 import '../../../main.dart';
 
 class AddressRepository extends GetxController {
-
   static AddressRepository get instance => Get.find();
 
-
-
-
   //fetch
-  Future<List<AddressModel>> fetchAddressTableForSpecificUser(int customerId) async {
+  Future<List<AddressModel>> fetchAddressTableForSpecificUser(
+      int customerId) async {
     try {
-      final data =  await supabase
-          .from('addresses')
-          .select().eq('user_id', customerId);
+      final data =
+          await supabase.from('addresses').select().eq('user_id', customerId);
 
       final addressList = data.map((item) {
         return AddressModel.fromJson(item);
@@ -26,15 +22,15 @@ class AddressRepository extends GetxController {
         print(addressList[1].country);
       }
       return addressList;
-
     } catch (e) {
-      TLoader.warningSnackBar(title: "Fetch Address", message: e.toString());
+      TLoaders.warningSnackBar(title: "Fetch Address", message: e.toString());
       return [];
     }
   }
 
   //fetch
-  Future<List<AddressModel>> fetchAddressTableForSpecificEntity(int entityId, String entityName) async {
+  Future<List<AddressModel>> fetchAddressTableForSpecificEntity(
+      int entityId, String entityName) async {
     try {
       final String columnName;
 
@@ -66,16 +62,18 @@ class AddressRepository extends GetxController {
 
       return addressList;
     } catch (e) {
-      TLoader.warningSnackBar(title: "Fetch Address", message: e.toString());
+      TLoaders.warningSnackBar(title: "Fetch Address", message: e.toString());
       return [];
     }
   }
 
-  Future<List<AddressModel>> fetchAddressTableForSpecificSalesman(int salesmanId) async {
+  Future<List<AddressModel>> fetchAddressTableForSpecificSalesman(
+      int salesmanId) async {
     try {
-      final data =  await supabase
+      final data = await supabase
           .from('addresses')
-          .select().eq('salesman_id', salesmanId);
+          .select()
+          .eq('salesman_id', salesmanId);
 
       final addressList = data.map((item) {
         return AddressModel.fromJson(item);
@@ -84,31 +82,22 @@ class AddressRepository extends GetxController {
         print(addressList[1].country);
       }
       return addressList;
-
     } catch (e) {
-      TLoader.warningSnackBar(title: "Fetch Address", message: e.toString());
+      TLoaders.warningSnackBar(title: "Fetch Address", message: e.toString());
       return [];
     }
   }
 
-
-
 //update
 
-  Future<void> updateAddressTable(Map<String,dynamic> singleAddressMap) async {
+  Future<void> updateAddressTable(Map<String, dynamic> singleAddressMap) async {
     try {
-      await supabase
-          .from('addresses')
-          .insert(singleAddressMap);
-
+      await supabase.from('addresses').insert(singleAddressMap);
     } catch (e) {
       if (kDebugMode) {
-        TLoader.warningSnackBar(title: "Address Repo", message: e.toString());
+        TLoaders.warningSnackBar(title: "Address Repo", message: e.toString());
         print(e);
       }
-
     }
   }
-
-
 }

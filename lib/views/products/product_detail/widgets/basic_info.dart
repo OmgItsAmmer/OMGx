@@ -94,38 +94,56 @@ class BasicInfo extends StatelessWidget {
                 Row(
                   children: [
                     // Base Price Field
-                    Expanded(
-                      child: TextFormField(
-                        controller: productController.basePrice,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
-                        validator: (value) =>
-                            TValidator.validateEmptyText('Basic price', value),
-                        decoration: const InputDecoration(
-                          labelText: 'Base Price',
-                          hintText: 'Basic price of product',
-                        ),
-                      ),
-                    ),
+                    Obx(() => Expanded(
+                          child: AnimatedOpacity(
+                            opacity: productController.hasSerialNumbers.value
+                                ? 0.5
+                                : 1.0,
+                            duration: const Duration(milliseconds: 300),
+                            child: TextFormField(
+                              controller: productController.basePrice,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly
+                              ],
+                              validator: (value) =>
+                                  TValidator.validateEmptyText(
+                                      'Basic price', value),
+                              decoration: const InputDecoration(
+                                labelText: 'Base Price',
+                                hintText: 'Basic price of product',
+                              ),
+                              readOnly:
+                                  productController.hasSerialNumbers.value,
+                            ),
+                          ),
+                        )),
                     const SizedBox(
                       width: TSizes.spaceBtwInputFields,
                     ),
                     // Sale Price Field
-                    Expanded(
-                      child: TextFormField(
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
-                        controller: productController.salePrice,
-                        validator: (value) =>
-                            TValidator.validateEmptyText('Sale price', value),
-                        decoration: const InputDecoration(
-                          labelText: 'Sale Price',
-                          hintText: 'Selling price of product',
-                        ),
-                      ),
-                    ),
+                    Obx(() => Expanded(
+                          child: AnimatedOpacity(
+                            opacity: productController.hasSerialNumbers.value
+                                ? 0.5
+                                : 1.0,
+                            duration: const Duration(milliseconds: 300),
+                            child: TextFormField(
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly
+                              ],
+                              controller: productController.salePrice,
+                              validator: (value) =>
+                                  TValidator.validateEmptyText(
+                                      'Sale price', value),
+                              decoration: const InputDecoration(
+                                labelText: 'Sale Price',
+                                hintText: 'Selling price of product',
+                              ),
+                              readOnly:
+                                  productController.hasSerialNumbers.value,
+                            ),
+                          ),
+                        )),
                   ],
                 ),
 

@@ -50,7 +50,11 @@ class SimplePnLReportPage extends StatelessWidget {
                         'https://www.omgz.com',
                     shopController.selectedShop?.value.softwareContactNo ?? '',
                   ),
+                  canChangeOrientation: false,
+                  canChangePageFormat: false,
                   canDebug: false,
+                  allowPrinting: true,
+                  allowSharing: true,
                   initialPageFormat: PdfPageFormat.a4,
                 ),
         ),
@@ -103,31 +107,119 @@ class SimplePnLReportPage extends StatelessWidget {
                     children: [
                       pw.Padding(
                         padding: const pw.EdgeInsets.all(8),
-                        child: pw.Text('Category',
+                        child: pw.Text('Field',
                             style:
                                 pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                       ),
                       pw.Padding(
                         padding: const pw.EdgeInsets.all(8),
-                        child: pw.Text('Amount',
+                        child: pw.Text('Value',
                             style:
                                 pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                       ),
                     ],
                   ),
-                  for (var report in reports)
+                  for (var report in reports) ...[
                     pw.TableRow(
                       children: [
                         pw.Padding(
                           padding: const pw.EdgeInsets.all(8),
-                          child: pw.Text(report.category),
+                          child: pw.Text('Report Period'),
                         ),
                         pw.Padding(
                           padding: const pw.EdgeInsets.all(8),
-                          child: pw.Text(report.amount.toStringAsFixed(2)),
+                          child: pw.Text(report.reportPeriod),
                         ),
                       ],
                     ),
+                    pw.TableRow(
+                      children: [
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8),
+                          child: pw.Text('Total Sales'),
+                        ),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8),
+                          child: pw.Text(report.totalSales.toStringAsFixed(2)),
+                        ),
+                      ],
+                    ),
+                    pw.TableRow(
+                      children: [
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8),
+                          child: pw.Text('Total COGS'),
+                        ),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8),
+                          child: pw.Text(report.totalCogs.toStringAsFixed(2)),
+                        ),
+                      ],
+                    ),
+                    pw.TableRow(
+                      children: [
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8),
+                          child: pw.Text('Total Profit'),
+                        ),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8),
+                          child: pw.Text(report.totalProfit.toStringAsFixed(2)),
+                        ),
+                      ],
+                    ),
+                    pw.TableRow(
+                      children: [
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8),
+                          child: pw.Text('Profit Margin %'),
+                        ),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8),
+                          child: pw.Text(
+                              report.profitMarginPercent.toStringAsFixed(2)),
+                        ),
+                      ],
+                    ),
+                    pw.TableRow(
+                      children: [
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8),
+                          child: pw.Text('Total Orders'),
+                        ),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8),
+                          child: pw.Text(report.totalOrders.toString()),
+                        ),
+                      ],
+                    ),
+                    pw.TableRow(
+                      children: [
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8),
+                          child: pw.Text('Total Installments Paid'),
+                        ),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8),
+                          child: pw.Text(
+                              report.totalInstallmentsPaid.toStringAsFixed(2)),
+                        ),
+                      ],
+                    ),
+                    pw.TableRow(
+                      children: [
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8),
+                          child: pw.Text('Total Installments Pending'),
+                        ),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8),
+                          child: pw.Text(report.totalInstallmentsPending
+                              .toStringAsFixed(2)),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
               pw.SizedBox(height: 30),
@@ -167,12 +259,12 @@ class SimplePnLReportPage extends StatelessWidget {
       final file = File('${directory!.path}/simple_pnl_report.pdf');
       await file.writeAsBytes(pdfBytes);
 
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
         title: 'PDF Saved',
         message: 'File saved to: ${file.path}',
       );
     } catch (e) {
-      TLoader.errorSnackBar(title: "Error saving PDF", message: e.toString());
+      TLoaders.errorSnackBar(title: "Error saving PDF", message: e.toString());
     }
   }
 }

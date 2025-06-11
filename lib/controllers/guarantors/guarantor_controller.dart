@@ -61,7 +61,7 @@ class GuarantorController extends GetxController {
         print(selectedGuarantors);
       }
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: 'Oh Snap! Guarantors!!',
         message: e.toString(),
       );
@@ -73,7 +73,7 @@ class GuarantorController extends GetxController {
       // Validate Form
       if ((!guraante1FormKey.currentState!.validate() &&
           !guraante2FormKey.currentState!.validate())) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
             title: "Guarantee Form Empty",
             message: 'Kindly fill all the Text fields before proceed');
         return [];
@@ -124,7 +124,7 @@ class GuarantorController extends GetxController {
       // Success Message
       return ids;
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'Oh Snap! Guarantors!!', message: e.toString());
       return [];
     }

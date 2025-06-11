@@ -153,7 +153,7 @@ class ReportController extends GetxController {
             year: year.toString(),
           ));
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'fetchMonthlySalesReport', message: e.toString());
     }
   }
@@ -167,7 +167,7 @@ class ReportController extends GetxController {
 
       salesReports.assignAll(salesReportData);
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'fetchMonthlySalesReport', message: e.toString());
     }
   }
@@ -251,25 +251,25 @@ class ReportController extends GetxController {
               onPressed: () {
                 // Validate the selected salesman
                 if (selectedSalesmanId == null) {
-                  TLoader.errorSnackBar(title: "Please select a salesman.");
+                  TLoaders.errorSnackBar(title: "Please select a salesman.");
                   return;
                 }
 
                 // Validate the selected dates
                 if (startDate == null || endDate == null) {
-                  TLoader.errorSnackBar(
+                  TLoaders.errorSnackBar(
                       title: "Please select a valid date range.");
                   return;
                 }
 
                 if (startDate!.isAfter(endDate!)) {
-                  TLoader.errorSnackBar(
+                  TLoaders.errorSnackBar(
                       title: "Start date cannot be after end date.");
                   return;
                 }
 
                 if (endDate!.isAfter(currentDate)) {
-                  TLoader.errorSnackBar(
+                  TLoaders.errorSnackBar(
                       title: "End date cannot exceed the current date.");
                   return;
                 }
@@ -300,7 +300,7 @@ class ReportController extends GetxController {
             endDate: endDate,
           ));
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'Error generating report', message: e.toString());
     }
   }
@@ -324,7 +324,7 @@ class ReportController extends GetxController {
             "Fetched ${salesmanDetailedReport.length} detailed records for salesman $salesmanId");
       }
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'Error fetching detailed report', message: e.toString());
       if (kDebugMode) {
         print("Error fetching detailed report: $e");
@@ -347,7 +347,7 @@ class ReportController extends GetxController {
 
       salesmanRecoveryData.assignAll(salesmanRecoveryList);
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'fetchRecoverySalesmanReport', message: e.toString());
       if (kDebugMode) {
         print(e);
@@ -362,7 +362,7 @@ class ReportController extends GetxController {
             products: productController.allProducts,
           ));
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'fetchRecoverySalesmanReport', message: e.toString());
       if (kDebugMode) {
         print(e);
@@ -420,19 +420,19 @@ class ReportController extends GetxController {
               onPressed: () {
                 // Validate the selected dates
                 if (startDate == null || endDate == null) {
-                  TLoader.errorSnackBar(
+                  TLoaders.errorSnackBar(
                       title: "Please select a valid date range.");
                   return;
                 }
 
                 if (startDate!.isAfter(endDate!)) {
-                  TLoader.errorSnackBar(
+                  TLoaders.errorSnackBar(
                       title: "Start date cannot be after end date.");
                   return;
                 }
 
                 if (endDate!.isAfter(currentDate)) {
-                  TLoader.errorSnackBar(
+                  TLoaders.errorSnackBar(
                       title: "End date cannot exceed the current date.");
                   return;
                 }
@@ -458,7 +458,7 @@ class ReportController extends GetxController {
           ));
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(title: e.toString());
+        TLoaders.errorSnackBar(title: e.toString());
         print("Error: $e");
       }
     }
@@ -472,7 +472,7 @@ class ReportController extends GetxController {
       pnLreportList.assignAll(data);
     } catch (e) {
       if (kDebugMode) {
-        TLoader.errorSnackBar(title: e.toString());
+        TLoaders.errorSnackBar(title: e.toString());
         print("Error: $e");
       }
     } finally {}
@@ -484,7 +484,7 @@ class ReportController extends GetxController {
       simplePnLReports.assignAll(
           await reportsRepository.fetchSimplePnLReport(startDate, endDate));
     } catch (e) {
-      TLoader.errorSnackBar(title: e.toString());
+      TLoaders.errorSnackBar(title: e.toString());
     }
   }
 
@@ -493,7 +493,7 @@ class ReportController extends GetxController {
       await fetchSimplePnLReport(startDate, endDate);
       Get.to(() => SimplePnLReportPage(reports: simplePnLReports));
     } catch (e) {
-      TLoader.errorSnackBar(title: e.toString());
+      TLoaders.errorSnackBar(title: e.toString());
     }
   }
 
@@ -538,19 +538,19 @@ class ReportController extends GetxController {
             TextButton(
               onPressed: () {
                 if (startDate == null || endDate == null) {
-                  TLoader.errorSnackBar(
+                  TLoaders.errorSnackBar(
                       title: "Please select a valid date range.");
                   return;
                 }
 
                 if (startDate!.isAfter(endDate!)) {
-                  TLoader.errorSnackBar(
+                  TLoaders.errorSnackBar(
                       title: "Start date cannot be after end date.");
                   return;
                 }
 
                 if (endDate!.isAfter(currentDate)) {
-                  TLoader.errorSnackBar(
+                  TLoaders.errorSnackBar(
                       title: "End date cannot exceed the current date.");
                   return;
                 }
@@ -632,7 +632,7 @@ class ReportController extends GetxController {
             daysAhead: daysAhead,
           ));
     } catch (e) {
-      TLoader.errorSnackBar(title: e.toString());
+      TLoaders.errorSnackBar(title: e.toString());
     }
   }
 
@@ -654,7 +654,7 @@ class ReportController extends GetxController {
             'Fetched ${upcomingInstallmentsReports.length} upcoming installments');
       }
     } catch (e) {
-      TLoader.errorSnackBar(title: e.toString());
+      TLoaders.errorSnackBar(title: e.toString());
       if (kDebugMode) {
         print('Error fetching upcoming installments: $e');
       }
@@ -667,7 +667,7 @@ class ReportController extends GetxController {
       Get.to(() =>
           OverdueInstallmentsReportPage(reports: overdueInstallmentsReports));
     } catch (e) {
-      TLoader.errorSnackBar(title: e.toString());
+      TLoaders.errorSnackBar(title: e.toString());
     }
   }
 
@@ -687,7 +687,7 @@ class ReportController extends GetxController {
             'Fetched ${overdueInstallmentsReports.length} overdue installments');
       }
     } catch (e) {
-      TLoader.errorSnackBar(title: e.toString());
+      TLoaders.errorSnackBar(title: e.toString());
       if (kDebugMode) {
         print('Error fetching overdue installments: $e');
       }

@@ -243,25 +243,29 @@ class SaleActionButtons extends StatelessWidget {
                                         ))),
                                 const SizedBox(
                                     width: TSizes.spaceBtwInputFields),
-                                Expanded(
-                                    child: ElevatedButton(
-                                        onPressed: () {
-                                          salesController.checkOut();
-                                          Get.offAllNamed(TRoutes.sales);
-                                        },
-                                        child: (salesController
-                                                .isCheckingOut.value)
-                                            ? const CircularProgressIndicator(
-                                                color: TColors.white,
-                                              )
-                                            : Text(
-                                                'Confirm',
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .bodyMedium!
-                                                    .apply(
-                                                        color: TColors.white),
-                                              ))),
+                                Expanded(child: Obx(() {
+                                  final isCheckingOut =
+                                      salesController.isCheckingOut.value;
+                                  return ElevatedButton(
+                                    onPressed: isCheckingOut
+                                        ? null // Disable the button when checking out
+                                        : () {
+                                            salesController.checkOut();
+                                            Get.toNamed(TRoutes.sales);
+                                          },
+                                    child: isCheckingOut
+                                        ? const CircularProgressIndicator(
+                                            color: TColors.white,
+                                          )
+                                        : Text(
+                                            'Confirm',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium!
+                                                .apply(color: TColors.white),
+                                          ),
+                                  );
+                                })),
                               ],
                             )
                           ],

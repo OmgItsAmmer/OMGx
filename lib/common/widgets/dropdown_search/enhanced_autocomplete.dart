@@ -124,7 +124,7 @@ class _EnhancedAutocompleteState<T extends Object>
         text.toLowerCase());
 
     if (!isValid) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
           title: 'Invalid Selection',
           message: '${widget.labelText} "${text}" not found in the list');
 

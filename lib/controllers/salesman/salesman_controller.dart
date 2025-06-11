@@ -59,7 +59,7 @@ class SalesmanController extends GetxController {
         print(allSalesmanNames);
       }
     } catch (e) {
-      TLoader.errorSnackBar(title: "Oh Snap!", message: e.toString());
+      TLoaders.errorSnackBar(title: "Oh Snap!", message: e.toString());
     }
   }
 
@@ -75,7 +75,7 @@ class SalesmanController extends GetxController {
       commission.clear();
       //AddressController.instance.address.clear();
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
   }
 
@@ -99,7 +99,7 @@ class SalesmanController extends GetxController {
       // Set the address text if a match is found
       //AddressController.instance.address.text = matchingAddress.location ?? ''; // Assuming `addressText` is the property holding the address as a String
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
   }
 
@@ -172,14 +172,14 @@ class SalesmanController extends GetxController {
         print(salesmanData);
         print(selectedSalesman?.value);
       } else {
-        TLoader.warningSnackBar(
+        TLoaders.warningSnackBar(
           title: 'Not Found',
           message: 'No salesman found for the given ID.',
         );
       }
     } catch (e) {
       // Handle errors
-      TLoader.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     } finally {
       // Set loading state to false
       isLoading.value = false;
@@ -201,7 +201,7 @@ class SalesmanController extends GetxController {
       if (salesmanData != SalesmanModel.empty()) {
         selectedSalesman?.value = salesmanData;
       } else {
-        TLoader.errorSnackBar(title: 'Error', message: 'Salesman not found');
+        TLoaders.errorSnackBar(title: 'Error', message: 'Salesman not found');
         return;
       }
 
@@ -219,7 +219,7 @@ class SalesmanController extends GetxController {
       // Navigate to details screen with salesman model as argument
       Get.toNamed(TRoutes.salesmanDetails, arguments: salesmanData);
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Error', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Error', message: e.toString());
     } finally {
       isLoading.value = false;
     }
@@ -231,7 +231,7 @@ class SalesmanController extends GetxController {
 
       // Validate the form
       if (!addSalesmanKey.currentState!.validate()) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: "Empty Fields",
           message: 'Kindly fill all the fields before proceeding.',
         );
@@ -277,12 +277,12 @@ class SalesmanController extends GetxController {
       // Clear the form
       cleanSalesmanDetails();
 
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
         title: 'Salesman Added!',
         message: '${firstName.text} added to Database',
       );
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: "Error",
         message: e.toString(),
       );
@@ -297,7 +297,7 @@ class SalesmanController extends GetxController {
 
       // Validate the form
       if (!addSalesmanKey.currentState!.validate()) {
-        TLoader.errorSnackBar(
+        TLoaders.errorSnackBar(
           title: "Empty Fields",
           message: 'Kindly fill all the fields before proceeding.',
         );
@@ -348,12 +348,12 @@ class SalesmanController extends GetxController {
       // Clear fields
       cleanSalesmanDetails();
 
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
         title: 'Salesman Updated!',
         message: '${firstName.text} updated in Database',
       );
     } catch (e) {
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: "Error",
         message: e.toString(),
       );
@@ -381,7 +381,7 @@ class SalesmanController extends GetxController {
       allSalesman.removeWhere((salesman) => salesman.salesmanId == salesmanId);
       allSalesmanNames.removeWhere((name) => name == salesmanToRemove.fullName);
 
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
         title: 'Deleted!',
         message: '${salesmanToRemove.fullName} removed from database.',
       );
@@ -389,7 +389,7 @@ class SalesmanController extends GetxController {
       if (kDebugMode) {
         print("Error deleting salesman: $e");
       }
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: 'Error',
         message: e.toString(),
       );
@@ -401,7 +401,7 @@ class SalesmanController extends GetxController {
     try {
       isLoading.value = true;
       await fetchAllSalesman();
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
         title: 'Refreshed!',
         message: 'Salesman list has been updated.',
       );
@@ -409,7 +409,7 @@ class SalesmanController extends GetxController {
       if (kDebugMode) {
         print('Error refreshing salesman list: $e');
       }
-      TLoader.errorSnackBar(
+      TLoaders.errorSnackBar(
         title: 'Error',
         message: 'Failed to refresh salesman list: ${e.toString()}',
       );

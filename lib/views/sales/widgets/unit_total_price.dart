@@ -34,19 +34,22 @@ class UnitTotalPrice extends StatelessWidget {
                           // Standard units dropdown
                           DropdownButtonHideUnderline(
                             child: DropdownButton<UnitType>(
+                              onChanged: salesController
+                                      .isSerialziedProduct.value
+                                  ? null
+                                  : (value) {
+                                      if (value != null) {
+                                        salesController.selectedUnit.value =
+                                            value;
+                                        salesController.calculateTotalPrice();
+                                      }
+                                    },
                               padding: EdgeInsets.zero,
                               value: salesController.selectedUnit.value,
                               isExpanded: true,
                               isDense: true,
                               items:
                                   _buildDropdownItems(salesController, context),
-                              onChanged: (value) {
-                                if (value != null) {
-                                  salesController.selectedUnit.value = value;
-                                  // Recalculate price when unit changes
-                                  salesController.calculateTotalPrice();
-                                }
-                              },
                             ),
                           ),
 
@@ -267,7 +270,7 @@ class UnitTotalPrice extends StatelessWidget {
                   // Recalculate price after changing unit
                   salesController.calculateTotalPrice();
                 } else {
-                  TLoader.errorSnackBar(
+                  TLoaders.errorSnackBar(
                     title: 'Invalid Unit Name',
                     message: 'Please enter a valid  name',
                   );

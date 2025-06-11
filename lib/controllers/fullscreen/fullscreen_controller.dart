@@ -1,4 +1,4 @@
-// fullscreen_controller.dart
+// fullscreen_ctroller.dart
 import 'package:get/get.dart';
 import 'package:window_manager/window_manager.dart';
 

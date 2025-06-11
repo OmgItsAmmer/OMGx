@@ -25,7 +25,7 @@ class ProductVariantsRepository {
 
       return variantList;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Variant Repo', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Variant Repo', message: e.toString());
       return [];
     }
   }
@@ -46,7 +46,7 @@ class ProductVariantsRepository {
 
       return variantList;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Variant Repo', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Variant Repo', message: e.toString());
       return [];
     }
   }
@@ -63,10 +63,10 @@ class ProductVariantsRepository {
       final variantId = response['variant_id'] as int;
       return variantId;
     } on PostgrestException catch (e) {
-      TLoader.errorSnackBar(title: 'Variant Repo', message: e.message);
+      TLoaders.errorSnackBar(title: 'Variant Repo', message: e.message);
       rethrow;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Variant Repo', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Variant Repo', message: e.toString());
       rethrow;
     }
   }
@@ -84,10 +84,10 @@ class ProductVariantsRepository {
           .update(variant.toJson(isUpdate: true))
           .eq('variant_id', variantId);
     } on PostgrestException catch (e) {
-      TLoader.errorSnackBar(title: 'Variant Repo', message: e.message);
+      TLoaders.errorSnackBar(title: 'Variant Repo', message: e.message);
       rethrow;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Variant Repo', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Variant Repo', message: e.toString());
       rethrow;
     }
   }
@@ -99,7 +99,7 @@ class ProductVariantsRepository {
           .from('product_variants')
           .update({'is_sold': true}).eq('variant_id', variantId);
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Variant Repo', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Variant Repo', message: e.toString());
       rethrow;
     }
   }
@@ -111,7 +111,7 @@ class ProductVariantsRepository {
           .from('product_variants')
           .update({'is_sold': false}).eq('variant_id', variantId);
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Variant Repo', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Variant Repo', message: e.toString());
       rethrow;
     }
   }
@@ -124,7 +124,7 @@ class ProductVariantsRepository {
           .delete()
           .eq('variant_id', variantId);
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Variant Repo', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Variant Repo', message: e.toString());
       rethrow;
     }
   }
@@ -139,7 +139,7 @@ class ProductVariantsRepository {
 
       await supabase.from('product_variants').insert(variantsData);
 
-      TLoader.successSnackBar(
+      TLoaders.successSnackBar(
         title: 'Success',
         message: '${variants.length} variants added successfully',
       );
@@ -147,7 +147,7 @@ class ProductVariantsRepository {
       if (kDebugMode) {
         print('Error in bulk import: $e');
       }
-      TLoader.errorSnackBar(title: 'Bulk Import Error', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Bulk Import Error', message: e.toString());
       rethrow;
     }
   }
@@ -168,7 +168,7 @@ class ProductVariantsRepository {
 
       return ProductVariantModel.fromJson(response);
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Variant Repo', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Variant Repo', message: e.toString());
       return null;
     }
   }
@@ -184,7 +184,7 @@ class ProductVariantsRepository {
 
       return data.length;
     } catch (e) {
-      TLoader.errorSnackBar(title: 'Variant Repo', message: e.toString());
+      TLoaders.errorSnackBar(title: 'Variant Repo', message: e.toString());
       return 0;
     }
   }
