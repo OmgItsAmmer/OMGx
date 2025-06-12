@@ -123,7 +123,7 @@ class InstallmentController extends GetxController {
             installment.planId == planId,
         orElse: () => throw Exception('Current installment not found'),
       );
-      print(planId);
+
       // Validate planId
       if (planId <= 0) {
         TLoaders.errorSnackBar(
@@ -136,6 +136,21 @@ class InstallmentController extends GetxController {
       final paidAmountValue = double.tryParse(paidAmount.text) ?? 0.0;
       final remainingAmountValue =
           double.tryParse(remainingAmount.value.text) ?? 0.0;
+
+      // Update the order's paidAmount with the installment payment
+      if (paidAmountValue > 0) {
+        final orderId = await installmentRepository.getOrderIdForPlan(planId);
+        if (orderId != null) {
+          final orderController = Get.find<OrderController>();
+          await orderController.orderRepository
+              .updatePaidAmount(orderId, paidAmountValue);
+
+          if (kDebugMode) {
+            print(
+                'Updated order $orderId with installment payment of $paidAmountValue');
+          }
+        }
+      }
 
       // Step 3: Update the current installment
       currentInstallment.paidDate = DateTime.now().toIso8601String();
@@ -221,6 +236,12 @@ class InstallmentController extends GetxController {
         final nextAmountDue = double.tryParse(nextInstallment.amountDue) ?? 0.0;
         final updatedAmountDue = nextAmountDue + remainingAmountValue;
         nextInstallment.amountDue = updatedAmountDue.toString();
+
+        // Also update the remaining amount for the next installment
+        nextInstallment.remaining = updatedAmountDue.toString();
+
+        // The database update for the next installment will be handled
+        // by the existing updateInstallmentPayment method below
       } else {
         // If no next installment exists
         if (planId == 0) {
@@ -269,9 +290,9 @@ class InstallmentController extends GetxController {
         final newInstallmentPayment = InstallmentTableModel(
           sequenceNo: nextSequenceNo,
           planId: planId,
-          description: 'Installment $nextSequenceNo',
+          description: 'Installment# $nextSequenceNo',
           dueDate: newDueDate.toIso8601String(),
-          paidDate: 'not yet',
+          paidDate: 'null',
           amountDue: remainingAmountValue.toString(),
           paidAmount: '0.0',
           remarks: currentInstallment.remarks,
@@ -287,11 +308,21 @@ class InstallmentController extends GetxController {
       currentInstallmentPayments.refresh();
 
       // Step 7: Call the repository to update the database
+      // When there's a next installment, we need to pass the updated amount for the next installment
+      String nextInstallmentAmount = remainingAmountValue.toString();
+
+      // If the next installment exists, use its updated amount_due
+      if (nextInstallmentIndex != -1) {
+        final nextInstallment =
+            currentInstallmentPayments[nextInstallmentIndex];
+        nextInstallmentAmount = nextInstallment.amountDue;
+      }
+
       await installmentRepository.updateInstallmentPayment(
         sequenceNo,
         planId,
         paidAmount.text,
-        remainingAmount.value.text,
+        nextInstallmentAmount,
       );
     } catch (e) {
       if (kDebugMode) {
@@ -646,6 +677,19 @@ class InstallmentController extends GetxController {
       currentInstallmentPlan.value.orderId = orderId;
       currentInstallmentPlan.value.guarantor1_id = guarranteIds[0];
       currentInstallmentPlan.value.guarantor2_id = guarranteIds[1];
+
+      // Save the advance payment amount to the order's paidAmount field
+      final advancePayment = double.tryParse(DownPayment.text) ?? 0.0;
+      if (advancePayment > 0) {
+        final orderController = Get.find<OrderController>();
+        await orderController.orderRepository
+            .updatePaidAmount(orderId, advancePayment);
+
+        if (kDebugMode) {
+          print('Advance payment of $advancePayment saved to order $orderId');
+        }
+      }
+
       // Now, call the uploadInstallmentPlan function to upload the generated plan
 
       // Call the uploadInstallmentPlan function
@@ -1202,5 +1246,16 @@ class InstallmentController extends GetxController {
         );
       }
     }
+  }
+
+  void sortInstallmentsByNumber(bool ascending) {
+    if (ascending) {
+      currentInstallmentPayments
+          .sort((a, b) => a.sequenceNo.compareTo(b.sequenceNo));
+    } else {
+      currentInstallmentPayments
+          .sort((a, b) => b.sequenceNo.compareTo(a.sequenceNo));
+    }
+    update();
   }
 }

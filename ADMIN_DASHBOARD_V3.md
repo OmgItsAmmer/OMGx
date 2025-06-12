@@ -218,6 +218,39 @@ If you encounter socket connection issues with Supabase in release mode:
 
 ## Recent Bug Fixes
 
+### Dashboard Pending Amount Calculation for Installment Orders (Latest Fix)
+
+**Issue Fixed**: The dashboard's order status count calculation was incorrectly calculating pending amounts for installment orders by not including margin, document charges, and other charges.
+
+**Problem**: The `calculateOrderStatusCounts` method in `DashboardController` was only considering:
+- Order subtotal
+- Tax
+- Shipping fee
+- Salesman commission
+
+**Missing Components for Installment Orders**:
+- Margin amount (calculated as percentage of financed amount)
+- Document charges
+- Other charges
+
+**Solution Implemented**:
+- Added `_calculateOrderTotalAmount()` helper method that properly calculates total amount for both regular and installment orders
+- For installment orders, the method fetches the installment plan and includes all relevant charges
+- Updated `calculateOrderStatusCounts()` to use the corrected total amount calculation
+- Ensures pending amounts accurately reflect what customers actually owe
+
+**Technical Details**:
+```dart
+// New helper method calculates proper total including installment charges
+Future<double> _calculateOrderTotalAmount(OrderModel order) async {
+  // For installment orders, fetch plan and add:
+  // - Document charges
+  // - Other charges  
+  // - Margin amount (percentage of financed amount after down payment)
+  // Returns accurate total amount owed
+}
+```
+
 ### Sales Controller - Buying Price Calculation (Latest Fix)
 
 **Issue Fixed**: The `buyingPriceTotal` calculation in the sales controller was incorrectly handling deletion of cart items and merging of products, especially for serialized products.
@@ -265,6 +298,27 @@ The application now includes comprehensive installment tracking with two special
   - Status tracking
   - Total overdue amount calculations
   - PDF export functionality
+
+## Installment Payment Flow
+
+The application implements a comprehensive installment payment system that automatically tracks and updates order payment status:
+
+### When Creating an Installment-Based Order:
+1. **Advance Payment Recording**: When an installment plan is saved, the advance payment (down payment) is automatically recorded in the order's `paid_amount` field
+2. **Plan Creation**: The installment plan and payment schedule are created and linked to the order
+3. **Initial Status**: The order maintains a running total of all payments received
+
+### When Processing Installment Payments:
+1. **Payment Processing**: When an installment payment is made through the installment table interface
+2. **Order Update**: The payment amount is automatically added to the order's `paid_amount` field in the database
+3. **Status Tracking**: The system maintains accurate payment tracking across both installment records and order records
+4. **Completion Handling**: When all installments are paid, the order status is automatically updated to "completed"
+
+### Technical Implementation:
+- **Controller Integration**: The `InstallmentController` now integrates with `OrderController` to update order payments
+- **Database Consistency**: Payment amounts are recorded in both the installment_payments table and the orders table
+- **Real-time Updates**: The UI reflects payment updates immediately across all relevant screens
+- **Automatic Calculations**: Running totals and remaining balances are calculated automatically
 
 ### Database Schema
 

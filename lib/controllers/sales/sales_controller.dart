@@ -67,8 +67,11 @@ class SalesController extends GetxController {
   Rx<String> selectedProductName = ''.obs;
   Rx<UnitType> selectedUnit = UnitType.item.obs;
   Rx<int> selectedProductId = (-1).obs;
-  RxDouble netTotal = (0.0).obs;
-  RxDouble originalNetTotal = (0.0).obs;
+  RxDouble subTotal = (0.0).obs; // Sum of all product prices only
+  RxDouble netTotal =
+      (0.0).obs; // subTotal + shipping + tax + salesman commission
+  RxDouble originalSubTotal = (0.0).obs; // Original subTotal before discounts
+  RxDouble originalNetTotal = (0.0).obs; // Original netTotal before discounts
   double buyingPriceIndividual = 0.0;
   double buyingPriceTotal = 0.0;
   Rx<String> discount = ''.obs;
@@ -183,10 +186,38 @@ class SalesController extends GetxController {
     // }
 
     // Initialize values
-    remainingAmount.value.text = netTotal.value.toString();
+    remainingAmount.value.text = "0.00";
 
     // Set current date
     selectedDate.value = DateTime.now();
+  }
+
+  @override
+  void onClose() {
+    // This method is called when the controller is being disposed
+    // Clear sales data when navigating away
+    try {
+      clearSaleDetails();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error in onClose: $e');
+      }
+    }
+    super.onClose();
+  }
+
+  // Method to manually reset sales data when navigating away (except to installments)
+  void onNavigateAway(String targetRoute) {
+    try {
+      // Only clear if not going to installments
+      if (targetRoute != '/installments') {
+        clearSaleDetails();
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error clearing sales data on navigation: $e');
+      }
+    }
   }
 
   void setupUserDetails() {
@@ -287,19 +318,15 @@ class SalesController extends GetxController {
           variantId: variant.variantId,
         );
 
-        // Update totals
+        // Update sub total (product prices only)
         final double newTotalPrice = variant.sellingPrice;
-        netTotal.value += newTotalPrice;
-        originalNetTotal.value += newTotalPrice;
+        subTotal.value += newTotalPrice;
+        originalSubTotal.value += newTotalPrice;
         buyingPriceTotal += variant.purchasePrice;
 
-        // print(buyingPriceTotal);
-
-        // Update remaining amount
-        double currentRemaining =
-            double.tryParse(remainingAmount.value.text) ?? 0.0;
-        remainingAmount.value.text =
-            (currentRemaining + newTotalPrice).toStringAsFixed(2);
+        // Calculate net total including fees
+        calculateNetTotal();
+        calculateOriginalNetTotal();
 
         // Add the sale and reset fields
         allSales.add(sale);
@@ -487,18 +514,16 @@ class SalesController extends GetxController {
           buyPrice: buyingPriceIndividual,
         );
 
-        // Update totals
+        // Update sub total (product prices only)
         double newTotalPrice = double.tryParse(totalPrice.value.text) ?? 0.0;
-        netTotal.value += newTotalPrice;
-        originalNetTotal.value += newTotalPrice;
+        subTotal.value += newTotalPrice;
+        originalSubTotal.value += newTotalPrice;
         buyingPriceTotal +=
             buyingPriceIndividual * (double.tryParse(quantity.text) ?? 0.0);
 
-        // Update remaining amount
-        double currentRemaining =
-            double.tryParse(remainingAmount.value.text) ?? 0.0;
-        remainingAmount.value.text =
-            (currentRemaining + newTotalPrice).toStringAsFixed(2);
+        // Calculate net total including fees
+        calculateNetTotal();
+        calculateOriginalNetTotal();
 
         // Add the sale and reset fields
         allSales.add(sale);
@@ -570,17 +595,15 @@ class SalesController extends GetxController {
       // Update in list
       allSales[index] = updatedSale;
 
-      // Update totals
-      netTotal.value += newTotalPrice;
-      originalNetTotal.value += newTotalPrice;
+      // Update sub total (product prices only)
+      subTotal.value += newTotalPrice;
+      originalSubTotal.value += newTotalPrice;
       // Use the existing sale's buyPrice to ensure consistency
       buyingPriceTotal += existingSale.buyPrice * newQuantity;
 
-      // Update remaining amount
-      double currentRemaining =
-          double.tryParse(remainingAmount.value.text) ?? 0.0;
-      remainingAmount.value.text =
-          (currentRemaining + newTotalPrice).toStringAsFixed(2);
+      // Calculate net total including fees
+      calculateNetTotal();
+      calculateOriginalNetTotal();
 
       // Show success message
       TLoaders.successSnackBar(
@@ -701,15 +724,18 @@ class SalesController extends GetxController {
         tax: shopController.selectedShop!.value.taxrate,
         orderId: -1, // Using -1 as a temporary ID instead of null
         orderDate: formatDate(selectedDate.value ?? DateTime.now()),
-        totalPrice: netTotal.value,
+        subTotal: subTotal.value, // Use actual subTotal (product prices only)
         buyingPrice: buyingPriceTotal,
         status: statusCheck(),
         saletype: selectedSaleType.value.toString().split('.').last,
         addressId: selectedAddressId,
-        userId: userController.currentUser.value.userId,
         salesmanId: selectedSalesmanId,
+        userId: userController.currentUser.value.userId,
         paidAmount: paidAmountValue,
         customerId: customerController.selectedCustomer.value.customerId,
+      
+      
+        
       );
 
       // Create order items with the correct variant IDs
@@ -895,7 +921,7 @@ class SalesController extends GetxController {
     bytes += generator.row([
       PosColumn(text: 'Subtotal:', width: 6),
       PosColumn(
-          text: '${order.totalPrice}',
+          text: '${order.subTotal}',
           width: 6,
           styles: const PosStyles(align: PosAlign.right)),
     ]);
@@ -907,9 +933,30 @@ class SalesController extends GetxController {
           styles: const PosStyles(align: PosAlign.right)),
     ]);
     bytes += generator.row([
+      PosColumn(text: 'Shipping:', width: 6),
+      PosColumn(
+          text: '${order.shippingFee}',
+          width: 6,
+          styles: const PosStyles(align: PosAlign.right)),
+    ]);
+    bytes += generator.row([
+      PosColumn(text: 'Commission:', width: 6),
+      PosColumn(
+          text: '${order.salesmanComission}',
+          width: 6,
+          styles: const PosStyles(align: PosAlign.right)),
+    ]);
+
+    // Calculate net total for receipt
+    double receiptNetTotal = order.subTotal +
+        order.tax +
+        order.shippingFee +
+        order.salesmanComission;
+
+    bytes += generator.row([
       PosColumn(text: 'Total:', width: 6, styles: const PosStyles(bold: true)),
       PosColumn(
-        text: '${order.totalPrice + order.tax}',
+        text: '${receiptNetTotal.toStringAsFixed(2)}',
         width: 6,
         styles: const PosStyles(bold: true, align: PosAlign.right),
       ),
@@ -924,7 +971,8 @@ class SalesController extends GetxController {
     bytes += generator.row([
       PosColumn(text: 'Change:', width: 6),
       PosColumn(
-        text: '${(order.paidAmount ?? 0) - (order.totalPrice + order.tax)}',
+        text:
+            '${((order.paidAmount ?? 0) - receiptNetTotal).toStringAsFixed(2)}',
         width: 6,
         styles: const PosStyles(align: PosAlign.right),
       ),
@@ -1032,7 +1080,9 @@ class SalesController extends GetxController {
 
       // Clear cart
       allSales.clear();
+      subTotal.value = 0.0;
       netTotal.value = 0.0;
+      originalSubTotal.value = 0.0;
       originalNetTotal.value = 0.0;
       buyingPriceTotal = 0.0;
       buyingPriceIndividual = 0.0;
@@ -1054,7 +1104,11 @@ class SalesController extends GetxController {
 
   String statusCheck() {
     try {
-      if ('0.00' == remainingAmount.value.text) {
+      double paidAmountValue = double.tryParse(paidAmount.text) ?? 0.0;
+      double remainingAmountValue = netTotal.value - paidAmountValue;
+
+      if (remainingAmountValue <= 0.01) {
+        // Allow small rounding differences
         return OrderStatus.completed.name.toString();
       } else {
         return OrderStatus.pending.name.toString();
@@ -1128,22 +1182,26 @@ class SalesController extends GetxController {
         buyingPriceToSubtract = saleItem.buyPrice * quantity;
       }
 
-      // Update netTotal and remainingAmount
-      double currentOriginalTotal = originalNetTotal.value;
-      netTotal.value = (netTotal.value - totalPrice).abs() < 1e-10
+      // Update sub total (product prices only)
+      subTotal.value = (subTotal.value - totalPrice).abs() < 1e-10
           ? 0
-          : netTotal.value - totalPrice;
-      remainingAmount.value.text = (remaining - totalPrice)
-          .toStringAsFixed(2); // Format to 2 decimal places
+          : subTotal.value - totalPrice;
 
-      // Update original total to reflect item removal
-      originalNetTotal.value = currentOriginalTotal - totalPrice;
+      // Update original sub total to reflect item removal
+      originalSubTotal.value =
+          (originalSubTotal.value - totalPrice).abs() < 1e-10
+              ? 0
+              : originalSubTotal.value - totalPrice;
 
       // Update buyingPriceTotal to reflect item removal
       buyingPriceTotal =
           (buyingPriceTotal - buyingPriceToSubtract).abs() < 1e-10
               ? 0
               : buyingPriceTotal - buyingPriceToSubtract;
+
+      // Recalculate net total including fees
+      calculateNetTotal();
+      calculateOriginalNetTotal();
 
       // Remove the item from the list
       allSales.removeAt(index);
@@ -1159,13 +1217,12 @@ class SalesController extends GetxController {
       if (selectedChipIndex.value == -1 || selectedChipValue.value.isEmpty)
         return;
 
-      // Reset netTotal to the original value
-      netTotal.value = originalNetTotal.value;
+      // Reset subTotal to the original value
+      subTotal.value = originalSubTotal.value;
 
-      // Update remaining amount to match the restored net total
-      double currentPaidAmount = double.tryParse(paidAmount.text) ?? 0.0;
-      remainingAmount.value.text =
-          (netTotal.value - currentPaidAmount).toStringAsFixed(2);
+      // Recalculate net total including fees
+      calculateNetTotal();
+      calculateOriginalNetTotal();
 
       // Clear the selected chip value and index
       selectedChipValue.value = '';
@@ -1253,17 +1310,15 @@ class SalesController extends GetxController {
         return;
       }
 
-      // Calculate the discount amount based on the original net total
+      // Calculate the discount amount based on the original sub total
       double discountAmount =
-          (originalNetTotal.value * discountPercentage) / 100;
+          (originalSubTotal.value * discountPercentage) / 100;
 
-      // Apply discount
-      netTotal.value = originalNetTotal.value - discountAmount;
+      // Apply discount to sub total
+      subTotal.value = originalSubTotal.value - discountAmount;
 
-      // Update remaining amount to match the new net total
-      double currentPaidAmount = double.tryParse(paidAmount.text) ?? 0.0;
-      remainingAmount.value.text =
-          (netTotal.value - currentPaidAmount).toStringAsFixed(2);
+      // Recalculate net total including fees
+      calculateNetTotal();
 
       // Update the selected chip value and index
       selectedChipValue.value = discountText;
@@ -1291,17 +1346,18 @@ class SalesController extends GetxController {
     // Parse the cleaned value as a percentage
     double enteredPercentage = double.tryParse(cleanedValue) ?? 0.0;
 
-    // Reset net total to original before applying a new discount
-    double currentOriginalTotal = originalNetTotal.value;
+    // Reset sub total to original before applying a new discount
+    double currentOriginalSubTotal = originalSubTotal.value;
 
     // Calculate discount amount
-    double discountAmount = (enteredPercentage / 100) * currentOriginalTotal;
+    double discountAmount = (enteredPercentage / 100) * currentOriginalSubTotal;
 
     // Validate the discount percentage (should not exceed 100%)
     if (enteredPercentage > 100) {
       discountController.text = "0.0";
       discount.value = "0.0";
-      netTotal.value = currentOriginalTotal;
+      subTotal.value = currentOriginalSubTotal;
+      calculateNetTotal();
 
       TLoaders.errorSnackBar(
         title: "Invalid Discount",
@@ -1309,12 +1365,10 @@ class SalesController extends GetxController {
       );
     } else {
       discount.value = "$cleanedValue%"; // Ensure percentage format
-      netTotal.value = currentOriginalTotal - discountAmount;
+      subTotal.value = currentOriginalSubTotal - discountAmount;
 
-      // Update remaining amount to match the new net total
-      double currentPaidAmount = double.tryParse(paidAmount.text) ?? 0.0;
-      remainingAmount.value.text =
-          (netTotal.value - currentPaidAmount).toStringAsFixed(2);
+      // Recalculate net total including fees
+      calculateNetTotal();
     }
   }
 
@@ -1449,7 +1503,9 @@ class SalesController extends GetxController {
       salesmanNameController.text = '';
       salesmanCityController.value.text = '';
       salesmanAreaController.value.text = '';
-      selectedSalesmanId = -1;
+
+      // Use the handleSalesmanSelection method to reset totals
+      handleSalesmanSelection(-1);
 
       // Make sure selection position is updated to trigger listeners
       salesmanNameController.selection =
@@ -1506,6 +1562,105 @@ class SalesController extends GetxController {
           .firstWhere((address) => address.location == firstAddress);
       selectedAddressId =
           addressController.selectedCustomerAddress.value.addressId;
+    }
+  }
+
+  // Add method to handle salesman selection changes
+  void handleSalesmanSelection(int salesmanId) {
+    try {
+      selectedSalesmanId = salesmanId;
+
+      // Recalculate net total with new salesman commission
+      calculateNetTotal();
+      calculateOriginalNetTotal();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error handling salesman selection: $e');
+      }
+    }
+  }
+
+  // Calculate net total from sub total plus fees
+  void calculateNetTotal() {
+    try {
+      double shippingFee =
+          shopController.selectedShop?.value.shippingPrice ?? 0.0;
+      double tax = shopController.selectedShop?.value.taxrate ?? 0.0;
+      double salesmanCommission = 0.0;
+
+      // Get salesman commission if a salesman is selected
+      if (selectedSalesmanId > 0) {
+        try {
+          final selectedSalesman = salesmanController.allSalesman.firstWhere(
+            (salesman) => salesman.salesmanId == selectedSalesmanId,
+            orElse: () => SalesmanModel.empty(),
+          );
+          double commissionPercent =
+              selectedSalesman.comission?.toDouble() ?? 0.0;
+          // Convert percentage to amount: (commission% * subTotal) / 100
+          salesmanCommission = (commissionPercent * subTotal.value) / 100;
+        } catch (e) {
+          salesmanCommission = 0.0;
+        }
+      }
+
+      // Calculate net total
+      netTotal.value = subTotal.value + shippingFee + tax + salesmanCommission;
+
+      // Update remaining amount based on net total
+      updateRemainingAmount();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error calculating net total: $e');
+      }
+    }
+  }
+
+  // Calculate original net total from original sub total plus fees
+  void calculateOriginalNetTotal() {
+    try {
+      double shippingFee =
+          shopController.selectedShop?.value.shippingPrice ?? 0.0;
+      double tax = shopController.selectedShop?.value.taxrate ?? 0.0;
+      double salesmanCommission = 0.0;
+
+      // Get salesman commission if a salesman is selected
+      if (selectedSalesmanId > 0) {
+        try {
+          final selectedSalesman = salesmanController.allSalesman.firstWhere(
+            (salesman) => salesman.salesmanId == selectedSalesmanId,
+            orElse: () => SalesmanModel.empty(),
+          );
+          double commissionPercent =
+              selectedSalesman.comission?.toDouble() ?? 0.0;
+          // Convert percentage to amount: (commission% * originalSubTotal) / 100
+          salesmanCommission =
+              (commissionPercent * originalSubTotal.value) / 100;
+        } catch (e) {
+          salesmanCommission = 0.0;
+        }
+      }
+
+      // Calculate original net total
+      originalNetTotal.value =
+          originalSubTotal.value + shippingFee + tax + salesmanCommission;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error calculating original net total: $e');
+      }
+    }
+  }
+
+  // Update remaining amount based on net total and paid amount
+  void updateRemainingAmount() {
+    try {
+      double currentPaidAmount = double.tryParse(paidAmount.text) ?? 0.0;
+      remainingAmount.value.text =
+          (netTotal.value - currentPaidAmount).toStringAsFixed(2);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error updating remaining amount: $e');
+      }
     }
   }
 }

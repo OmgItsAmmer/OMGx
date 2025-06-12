@@ -68,7 +68,7 @@ class SalesmanOrderRows extends DataTableSource {
                 color: THelperFunctions.getOrderStatusColor(orderStatus)),
           ),
         )),
-        DataCell(Text(orderItem.totalPrice.toStringAsFixed(2))),
+        DataCell(Text(orderItem.subTotal.toStringAsFixed(2))),
         DataCell(
           IconButton(
             onPressed: () {

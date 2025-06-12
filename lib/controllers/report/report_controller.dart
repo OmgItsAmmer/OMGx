@@ -481,8 +481,9 @@ class ReportController extends GetxController {
   Future<void> fetchSimplePnLReport(
       DateTime startDate, DateTime endDate) async {
     try {
-      simplePnLReports.assignAll(
-          await reportsRepository.fetchSimplePnLReport(startDate, endDate));
+      final reports =
+          await reportsRepository.fetchSimplePnLReport(startDate, endDate);
+      simplePnLReports.assignAll(reports);
     } catch (e) {
       TLoaders.errorSnackBar(title: e.toString());
     }

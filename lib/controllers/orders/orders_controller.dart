@@ -56,13 +56,8 @@ class OrderController extends GetxController {
       allOrders.assignAll(reversedOrders);
       currentOrders.assignAll(reversedOrders);
 
-      // Update dashboard if it's already initialized
-      if (Get.isRegistered<DashboardController>()) {
-        final dashboardController = Get.find<DashboardController>();
-        dashboardController.calculateWeeklySales1(allOrders);
-        dashboardController.calculateAverageOrderValue(allOrders);
-        dashboardController.calculateOrderStatusCounts(allOrders);
-      }
+      // Dashboard will auto-update through reactive listeners
+      // No need to manually trigger dashboard updates here
     } catch (e) {
       if (kDebugMode) {
         TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
@@ -74,7 +69,18 @@ class OrderController extends GetxController {
   }
 
   void setRemainingAmount(OrderModel order) {
-    remainingAmount.value = (order.totalPrice) - (order.paidAmount ?? 0.0);
+    // Convert salesman commission from percentage to amount
+    double salesmanCommissionAmount =
+        (order.subTotal * (order.salesmanComission)) / 100;
+
+    // Calculate the total amount including subtotal, shipping tax, and salesman commission
+    double totalAmount = order.subTotal +
+        (order.shippingFee) +
+        salesmanCommissionAmount +
+        (order.tax);
+
+    // Calculate the remaining amount
+    remainingAmount.value = totalAmount - (order.paidAmount ?? 0.0);
   }
 
   // Function to set the most recent order day with orderId
@@ -113,7 +119,7 @@ class OrderController extends GetxController {
 
     // Calculate the sum of all total prices
     double totalSum =
-        currentOrders.fold(0.0, (sum, order) => sum + order.totalPrice);
+        currentOrders.fold(0.0, (sum, order) => sum + order.subTotal);
 
     // Calculate the average and set the class variable
     double average = totalSum / currentOrders.length;
@@ -287,11 +293,7 @@ class OrderController extends GetxController {
       allOrders[index] = allOrders[index].copyWith(status: status);
       allOrders.refresh(); // Notify UI about the update
 
-      // Update dashboard if it's already initialized
-      if (Get.isRegistered<DashboardController>()) {
-        final dashboardController = Get.find<DashboardController>();
-        dashboardController.calculateOrderStatusCounts(allOrders);
-      }
+      // Dashboard will auto-update through reactive listeners
 
       // If moving to cancelled and order items exist, handle stock restoration
       if (status == 'cancelled' && originalStatus != 'cancelled') {
@@ -490,11 +492,42 @@ class OrderController extends GetxController {
       bool success = await orderRepository.updatePaidAmount(orderId, newAmount);
 
       if (success) {
-        remainingAmount.value -= newAmount; // Update remaining amount in UI
+        // Update remaining amount in UI
+        remainingAmount.value -= newAmount;
+
+        // Update the order in allOrders list
+        final allOrdersIndex =
+            allOrders.indexWhere((order) => order.orderId == orderId);
+        if (allOrdersIndex != -1) {
+          final updatedOrder = allOrders[allOrdersIndex].copyWith(
+            paidAmount:
+                (allOrders[allOrdersIndex].paidAmount ?? 0.0) + newAmount,
+          );
+          allOrders[allOrdersIndex] = updatedOrder;
+          allOrders.refresh(); // Notify UI about the update
+        }
+
+        // Update the order in currentOrders list
+        final currentOrdersIndex =
+            currentOrders.indexWhere((order) => order.orderId == orderId);
+        if (currentOrdersIndex != -1) {
+          final updatedOrder = currentOrders[currentOrdersIndex].copyWith(
+            paidAmount: (currentOrders[currentOrdersIndex].paidAmount ?? 0.0) +
+                newAmount,
+          );
+          currentOrders[currentOrdersIndex] = updatedOrder;
+          currentOrders.refresh(); // Notify UI about the update
+        }
+
         TLoaders.successSnackBar(
-            title: 'Success!', message: 'paid amount updated.');
+          title: 'Success!',
+          message: 'Paid amount updated.',
+        );
       } else {
-        TLoaders.errorSnackBar(title: 'Oh Snap!', message: 'update failed!');
+        TLoaders.errorSnackBar(
+          title: 'Oh Snap!',
+          message: 'Update failed!',
+        );
       }
     } catch (e) {
       if (kDebugMode) {

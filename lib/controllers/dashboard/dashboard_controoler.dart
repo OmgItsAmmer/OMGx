@@ -11,6 +11,8 @@ import '../../utils/helpers/helper_functions.dart';
 import '../expenses/expense_controller.dart';
 import '../orders/orders_controller.dart';
 import 'services/sales_service.dart';
+import '../../repositories/installment/installment_repository.dart';
+import '../../Models/installments/installemt_plan_model.dart';
 
 // Define possible data fetch states
 enum DataFetchState { initial, loading, success, error }
@@ -44,6 +46,8 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
   final ExpenseController expenseController = Get.find<ExpenseController>();
   final CustomerController customerController = Get.find<CustomerController>();
   final SalesService salesService = SalesService();
+  final InstallmentRepository installmentRepository =
+      Get.put(InstallmentRepository());
 
   var dataList = <Map<String, String>>[].obs;
 
@@ -93,6 +97,98 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
 
     // Start loading data
     loadDashboardData();
+
+    // Set up reactive listeners after initial load
+    _setupReactiveListeners();
+  }
+
+  void _setupReactiveListeners() {
+    // Listen to changes in orders array
+    ever(orderController.allOrders, (List<OrderModel> orders) {
+      if (orderDataInitialized.value) {
+        if (kDebugMode) {
+          print(
+              'Orders array changed, recalculating metrics. Orders count: ${orders.length}');
+        }
+        _recalculateOrderMetrics();
+      }
+    });
+
+    // Listen to changes in customers array
+    ever(customerController.allCustomers, (List<CustomerModel> customers) {
+      if (customerDataInitialized.value) {
+        if (kDebugMode) {
+          print(
+              'Customers array changed, recalculating metrics. Customers count: ${customers.length}');
+        }
+        _recalculateCustomerMetrics();
+      }
+    });
+
+    // Listen to changes in expenses array
+    ever(expenseController.expenses, (List<ExpenseModel> expenses) {
+      if (expenseDataInitialized.value) {
+        if (kDebugMode) {
+          print(
+              'Expenses array changed, recalculating metrics. Expenses count: ${expenses.length}');
+        }
+        _recalculateProfitMetrics();
+      }
+    });
+  }
+
+  Future<void> _recalculateOrderMetrics() async {
+    try {
+      // Recalculate sales card
+      await _calculateSalesCard();
+
+      // Recalculate average order card
+      await _calculateAvgOrderCard();
+
+      // Recalculate chart data
+      await _calculateChartData();
+
+      // Recalculate pie chart data
+      await _calculatePieChartData();
+
+      if (kDebugMode) {
+        print('Dashboard metrics updated due to order changes');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error recalculating order metrics: $e');
+      }
+    }
+  }
+
+  Future<void> _recalculateCustomerMetrics() async {
+    try {
+      // Recalculate customer card
+      await _calculateCustomerCard();
+
+      if (kDebugMode) {
+        print('Customer metrics updated due to customer changes');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error recalculating customer metrics: $e');
+      }
+    }
+  }
+
+  Future<void> _recalculateProfitMetrics() async {
+    try {
+      // Recalculate profit card (depends on both orders and expenses)
+      await _calculateProfitCard();
+
+      if (kDebugMode) {
+        print('Profit metrics updated due to expense changes');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error recalculating profit metrics: $e');
+      }
+    }
   }
 
   Future<void> loadDashboardData() async {
@@ -108,6 +204,50 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
       _handleGlobalError(e);
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  /// Force refresh all dashboard data and metrics
+  Future<void> forceRefreshDashboard() async {
+    try {
+      if (kDebugMode) {
+        print('Force refreshing dashboard data...');
+      }
+
+      // Reset initialization flags to force data reload
+      orderDataInitialized.value = false;
+      expenseDataInitialized.value = false;
+      customerDataInitialized.value = false;
+
+      // Reload all data and recalculate metrics
+      await loadDashboardData();
+
+      if (kDebugMode) {
+        print('Dashboard force refresh completed');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error during force refresh: $e');
+      }
+    }
+  }
+
+  /// Recalculate all metrics without reloading data
+  Future<void> recalculateAllMetrics() async {
+    try {
+      if (kDebugMode) {
+        print('Recalculating all dashboard metrics...');
+      }
+
+      await _calculateAllMetrics();
+
+      if (kDebugMode) {
+        print('All metrics recalculated successfully');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error recalculating metrics: $e');
+      }
     }
   }
 
@@ -189,13 +329,17 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
   Future<void> _calculateCustomerCard() async {
     customerCardState.value = DataFetchState.loading;
     try {
+      if (kDebugMode) {
+        print('Calculating customer metrics...');
+        print('Total customers: ${customerController.allCustomers.length}');
+      }
       fetchCustomerCard(customerController.allCustomers);
       customerCardState.value = DataFetchState.success;
     } catch (e) {
-      customerCardState.value = DataFetchState.error;
       if (kDebugMode) {
         print('Error calculating customer metrics: $e');
       }
+      customerCardState.value = DataFetchState.error;
     }
   }
 
@@ -293,15 +437,13 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
       // Calculate average for current month
       final currentAvg = currentMonthOrders.isEmpty
           ? 0.0
-          : currentMonthOrders
-                  .map((e) => e.totalPrice)
-                  .reduce((a, b) => a + b) /
+          : currentMonthOrders.map((e) => e.subTotal).reduce((a, b) => a + b) /
               currentMonthOrders.length;
 
       // Calculate average for previous month
       final lastAvg = lastMonthOrders.isEmpty
           ? 0.0
-          : lastMonthOrders.map((e) => e.totalPrice).reduce((a, b) => a + b) /
+          : lastMonthOrders.map((e) => e.subTotal).reduce((a, b) => a + b) /
               lastMonthOrders.length;
 
       // Set the average order value
@@ -339,7 +481,71 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
     }
   }
 
-  void calculateOrderStatusCounts(List<OrderModel> allOrders) {
+  // Helper method to calculate the correct total amount for an order
+  // considering installment charges if applicable
+  Future<double> _calculateOrderTotalAmount(OrderModel order) async {
+    try {
+      // Calculate base amounts
+      double salesmanCommissionAmount =
+          (order.subTotal * order.salesmanComission) / 100;
+      double baseTotal = order.subTotal +
+          order.tax +
+          order.shippingFee +
+          salesmanCommissionAmount;
+
+      // Check if this is an installment order
+      if (order.saletype != null &&
+          order.saletype!.toLowerCase() == 'installment') {
+        // Fetch installment plan for this order
+        final planId = await installmentRepository.fetchPlanId(order.orderId);
+        if (planId != null) {
+          final installmentPlan =
+              await installmentRepository.fetchInstallmentPlan(planId);
+          if (installmentPlan != null) {
+            // Add installment-specific charges
+            double documentCharges =
+                double.tryParse(installmentPlan.documentCharges ?? '0.0') ??
+                    0.0;
+            double otherCharges =
+                double.tryParse(installmentPlan.otherCharges ?? '0.0') ?? 0.0;
+
+            // Calculate margin amount
+            double marginPercentage =
+                double.tryParse(installmentPlan.margin ?? '0.0') ?? 0.0;
+            double downPayment =
+                double.tryParse(installmentPlan.downPayment ?? '0.0') ?? 0.0;
+            double marginAmount = 0.0;
+
+            if (marginPercentage > 0) {
+              double baseAmountForMargin = order.subTotal - order.discount;
+              double financedBase = baseAmountForMargin - downPayment;
+              if (financedBase < 0) financedBase = 0; // Ensure not negative
+              marginAmount = financedBase * (marginPercentage / 100.0);
+            }
+
+            // Return total including installment charges
+            return baseTotal + documentCharges + otherCharges + marginAmount;
+          }
+        }
+      }
+
+      // Return base total for non-installment orders or if installment data is unavailable
+      return baseTotal;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error calculating order total amount: $e');
+      }
+      // Fallback to base calculation
+      double salesmanCommissionAmount =
+          (order.subTotal * order.salesmanComission) / 100;
+      return order.subTotal +
+          order.tax +
+          order.shippingFee +
+          salesmanCommissionAmount;
+    }
+  }
+
+  void calculateOrderStatusCounts(List<OrderModel> allOrders) async {
     try {
       pendingOrders.value = 0;
       completedOrders.value = 0;
@@ -349,18 +555,25 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
       cancelledAmount.value = 0;
 
       for (var order in allOrders) {
+        // Calculate total amount for the order (already includes commission)
+        double totalAmount = await _calculateOrderTotalAmount(order);
+
+        // Calculate pending amount as totalAmount - paidAmount
+        double paidAmount = order.paidAmount ?? 0.0;
+        double pendingOrderAmount = totalAmount - paidAmount;
+
         switch (order.status.toLowerCase()) {
           case 'pending':
             pendingOrders.value++;
-            pendingAmount.value += order.totalPrice;
+            pendingAmount.value += pendingOrderAmount;
             break;
           case 'completed':
             completedOrders.value++;
-            completedAmount.value += order.totalPrice;
+            completedAmount.value += totalAmount;
             break;
           case 'cancelled':
             cancelledOrders.value++;
-            cancelledAmount.value += order.totalPrice;
+            cancelledAmount.value += totalAmount;
             break;
         }
       }
@@ -388,7 +601,7 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
           orderWeekStart.add(const Duration(days: 7)).isAfter(DateTime.now())) {
         int index = (orderDate.weekday - 1) % 7;
         index = index < 0 ? index + 7 : index;
-        weeklySales[index] += order.totalPrice;
+        weeklySales[index] += order.subTotal;
       }
     }
     return weeklySales;
@@ -443,5 +656,25 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
     } catch (e) {
       rethrow;
     }
+  }
+
+  /// Test method to verify reactive updates work
+  void testReactiveUpdates() {
+    if (kDebugMode) {
+      print('=== Dashboard Reactive Test ===');
+      print('Orders count: ${orderController.allOrders.length}');
+      print('Customers count: ${customerController.allCustomers.length}');
+      print('Expenses count: ${expenseController.expenses.length}');
+      print('Current month sales: ${currentMonthSales.value}');
+      print('Customer count: ${customerCount.value}');
+      print('Current month profit: ${currentMonthProfit.value}');
+      print('==============================');
+    }
+  }
+
+  @override
+  void onClose() {
+    // Clean up any resources if needed
+    super.onClose();
   }
 }

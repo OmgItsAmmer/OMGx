@@ -107,7 +107,7 @@ class OrderItemModel {
 class OrderModel {
   final int orderId;
   final String orderDate;
-  final double totalPrice;
+  final double subTotal;
   final String status;
   final String? saletype;
   final int? addressId;
@@ -125,7 +125,7 @@ class OrderModel {
   OrderModel({
     required this.orderId,
     required this.orderDate,
-    required this.totalPrice,
+    required this.subTotal,
     required this.status,
     this.saletype,
     this.addressId,
@@ -145,7 +145,7 @@ class OrderModel {
   static OrderModel empty() => OrderModel(
         orderId: 0,
         orderDate: DateTime.now().toIso8601String(),
-        totalPrice: 0.0,
+        subTotal: 0.0,
         status: "",
         saletype: "",
         addressId: null,
@@ -165,7 +165,7 @@ class OrderModel {
   Map<String, dynamic> toJson({bool isUpdate = false}) {
     final Map<String, dynamic> data = {
       'order_date': orderDate,
-      'total_price': totalPrice,
+      'sub_total': subTotal,
       'status': status,
       'saletype': saletype,
       'address_id': addressId,
@@ -196,7 +196,7 @@ class OrderModel {
     return OrderModel(
       orderId: json['order_id'] as int,
       orderDate: formattedDate,
-      totalPrice: (json['total_price'] as num).toDouble(),
+      subTotal: (json['sub_total'] as num).toDouble(),
       status: json['status'] as String,
       saletype: json['saletype'] as String?,
       addressId: json['address_id'] as int?,
@@ -220,7 +220,7 @@ class OrderModel {
   OrderModel copyWith({
     int? orderId,
     String? orderDate,
-    double? totalPrice,
+    double? subTotal,
     String? status,
     String? saletype,
     int? addressId,
@@ -238,7 +238,7 @@ class OrderModel {
     return OrderModel(
       orderId: orderId ?? this.orderId,
       orderDate: orderDate ?? this.orderDate,
-      totalPrice: totalPrice ?? this.totalPrice,
+      subTotal: subTotal ?? this.subTotal,
       status: status ?? this.status,
       saletype: saletype ?? this.saletype,
       addressId: addressId ?? this.addressId,

@@ -167,6 +167,9 @@ class CustomerController extends GetxController {
       await AddressController.instance.saveAddress(customerId, 'Customer');
       //locally adding in table
       allCustomers.add(customerModel);
+      if (kDebugMode) {
+        print('New customer added. Total customers: ${allCustomers.length}');
+      }
       //allCustomerNames.add(customerModel.fullName);
 
       customerModel.customerId = customerId; // idk why

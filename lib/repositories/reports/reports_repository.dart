@@ -141,6 +141,10 @@ class ReportsRepository extends GetxController {
         'end_date': endDate.toIso8601String().split('T')[0],
       });
 
+      if (response == null || response is! List) {
+        throw Exception('No data received or invalid format from Supabase.');
+      }
+
       return (response as List)
           .map((item) =>
               SimplePnLReportModel.fromJson(item as Map<String, dynamic>))

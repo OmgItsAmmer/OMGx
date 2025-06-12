@@ -22,11 +22,13 @@ import '../../../../views/reports/common/report_footer.dart';
 class InstallmentReportPage extends StatefulWidget {
   final List<InstallmentTableModel> installmentPlans;
   final bool isPrintOnly;
+  final bool fromOrderDetail;
 
   const InstallmentReportPage({
     super.key,
     required this.installmentPlans,
     this.isPrintOnly = false,
+    this.fromOrderDetail = false,
   });
 
   @override
@@ -102,6 +104,22 @@ class _InstallmentReportPageState extends State<InstallmentReportPage> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _generatePdfReport,
+          ),
+          IconButton(
+            icon: const Icon(Icons.done),
+            onPressed: () {
+              if (widget.fromOrderDetail) {
+                Navigator.of(context).pop();
+              } else {
+                if (widget.isPrintOnly) {
+                  Get.offAllNamed(TRoutes.installment);
+                } else {
+                  installmentController.clearAllFields();
+                  salesController.resetFields();
+                  Get.offAllNamed(TRoutes.sales);
+                }
+              }
+            },
           ),
         ],
       ),
@@ -197,12 +215,16 @@ class _InstallmentReportPageState extends State<InstallmentReportPage> {
                               IconButton(
                                 icon: const Icon(Icons.done),
                                 onPressed: () {
-                                  if (widget.isPrintOnly) {
-                                    Get.offAllNamed(TRoutes.installment);
+                                  if (widget.fromOrderDetail) {
+                                    Navigator.of(context).pop();
                                   } else {
-                                    installmentController.clearAllFields();
-                                    salesController.resetFields();
-                                    Get.offAllNamed(TRoutes.sales);
+                                    if (widget.isPrintOnly) {
+                                      Get.offAllNamed(TRoutes.installment);
+                                    } else {
+                                      installmentController.clearAllFields();
+                                      salesController.resetFields();
+                                      Get.offAllNamed(TRoutes.sales);
+                                    }
                                   }
                                 },
                               ),

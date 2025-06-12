@@ -64,7 +64,7 @@ class MediaUploader extends StatelessWidget {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       TAnimationLoaderWidget(
-                                        animation: TImages.animatedFile,
+                                        animation: TImages.imageUploading,
                                         height: 80,
                                         width: 80,
                                         text: (TDeviceUtils.isMobileScreen(

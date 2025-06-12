@@ -17,25 +17,34 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> with RouteAware {
   late DashboardController controller;
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   // Initialize controller if needed, or get existing one
-  //   if (!Get.isRegistered<DashboardController>()) {
-  //     controller = Get.put(DashboardController());
-  //   } else {
-  //     controller = Get.find<DashboardController>();
-  //     // Force refresh data when revisiting
-  //     WidgetsBinding.instance.addPostFrameCallback((_) {
-  //       controller.forceRefreshData();
-  //     });
-  //   }
-  // }
+  @override
+  void initState() {
+    super.initState();
+    // Initialize controller if needed, or get existing one
+    if (!Get.isRegistered<DashboardController>()) {
+      controller = Get.put(DashboardController());
+    } else {
+      controller = Get.find<DashboardController>();
+      // Force refresh metrics when revisiting dashboard
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.recalculateAllMetrics();
+      });
+    }
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Setup for route observer can be added here if needed
+  }
+
+  @override
+  void didPopNext() {
+    // Called when returning to this page from another page
+    super.didPopNext();
+    if (mounted) {
+      controller.recalculateAllMetrics();
+    }
   }
 
   @override

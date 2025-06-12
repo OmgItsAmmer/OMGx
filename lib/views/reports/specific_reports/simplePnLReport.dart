@@ -113,7 +113,7 @@ class SimplePnLReportPage extends StatelessWidget {
                       ),
                       pw.Padding(
                         padding: const pw.EdgeInsets.all(8),
-                        child: pw.Text('Value',
+                        child: pw.Text('Amount',
                             style:
                                 pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                       ),
@@ -124,23 +124,11 @@ class SimplePnLReportPage extends StatelessWidget {
                       children: [
                         pw.Padding(
                           padding: const pw.EdgeInsets.all(8),
-                          child: pw.Text('Report Period'),
+                          child: pw.Text('Total Revenue'),
                         ),
                         pw.Padding(
                           padding: const pw.EdgeInsets.all(8),
-                          child: pw.Text(report.reportPeriod),
-                        ),
-                      ],
-                    ),
-                    pw.TableRow(
-                      children: [
-                        pw.Padding(
-                          padding: const pw.EdgeInsets.all(8),
-                          child: pw.Text('Total Sales'),
-                        ),
-                        pw.Padding(
-                          padding: const pw.EdgeInsets.all(8),
-                          child: pw.Text(report.totalSales.toStringAsFixed(2)),
+                          child: pw.Text(report.totalRevenue.toStringAsFixed(2)),
                         ),
                       ],
                     ),
@@ -160,11 +148,49 @@ class SimplePnLReportPage extends StatelessWidget {
                       children: [
                         pw.Padding(
                           padding: const pw.EdgeInsets.all(8),
-                          child: pw.Text('Total Profit'),
+                          child: pw.Text('Gross Profit',
+                              style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                         ),
                         pw.Padding(
                           padding: const pw.EdgeInsets.all(8),
-                          child: pw.Text(report.totalProfit.toStringAsFixed(2)),
+                          child: pw.Text(report.grossProfit.toStringAsFixed(2),
+                              style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                        ),
+                      ],
+                    ),
+                    pw.TableRow(
+                      children: [
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8),
+                          child: pw.Text('Total Expenses'),
+                        ),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8),
+                          child: pw.Text(report.totalExpenses.toStringAsFixed(2)),
+                        ),
+                      ],
+                    ),
+                    pw.TableRow(
+                      decoration: const pw.BoxDecoration(color: PdfColors.grey100),
+                      children: [
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8),
+                          child: pw.Text('Net Profit/Loss',
+                              style: pw.TextStyle(
+                                  fontWeight: pw.FontWeight.bold, fontSize: 12)),
+                        ),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8),
+                          child: pw.Text(
+                              report.netProfit >= 0 
+                                  ? report.netProfit.toStringAsFixed(2)
+                                  : '(${report.netProfit.abs().toStringAsFixed(2)})',
+                              style: pw.TextStyle(
+                                  fontWeight: pw.FontWeight.bold, 
+                                  fontSize: 12,
+                                  color: report.netProfit >= 0 
+                                      ? PdfColors.green800 
+                                      : PdfColors.red800)),
                         ),
                       ],
                     ),
@@ -176,46 +202,7 @@ class SimplePnLReportPage extends StatelessWidget {
                         ),
                         pw.Padding(
                           padding: const pw.EdgeInsets.all(8),
-                          child: pw.Text(
-                              report.profitMarginPercent.toStringAsFixed(2)),
-                        ),
-                      ],
-                    ),
-                    pw.TableRow(
-                      children: [
-                        pw.Padding(
-                          padding: const pw.EdgeInsets.all(8),
-                          child: pw.Text('Total Orders'),
-                        ),
-                        pw.Padding(
-                          padding: const pw.EdgeInsets.all(8),
-                          child: pw.Text(report.totalOrders.toString()),
-                        ),
-                      ],
-                    ),
-                    pw.TableRow(
-                      children: [
-                        pw.Padding(
-                          padding: const pw.EdgeInsets.all(8),
-                          child: pw.Text('Total Installments Paid'),
-                        ),
-                        pw.Padding(
-                          padding: const pw.EdgeInsets.all(8),
-                          child: pw.Text(
-                              report.totalInstallmentsPaid.toStringAsFixed(2)),
-                        ),
-                      ],
-                    ),
-                    pw.TableRow(
-                      children: [
-                        pw.Padding(
-                          padding: const pw.EdgeInsets.all(8),
-                          child: pw.Text('Total Installments Pending'),
-                        ),
-                        pw.Padding(
-                          padding: const pw.EdgeInsets.all(8),
-                          child: pw.Text(report.totalInstallmentsPending
-                              .toStringAsFixed(2)),
+                          child: pw.Text('${report.profitMargin.toStringAsFixed(2)}%'),
                         ),
                       ],
                     ),

@@ -36,7 +36,7 @@ class OrderTable extends StatelessWidget {
           return order.orderId.toString().toLowerCase().contains(searchTerm) ||
               order.orderDate.toLowerCase().contains(searchTerm) ||
               order.status.toLowerCase().contains(searchTerm) ||
-              order.totalPrice.toString().toLowerCase().contains(searchTerm);
+              order.subTotal.toString().toLowerCase().contains(searchTerm);
         }).toList();
       }
 

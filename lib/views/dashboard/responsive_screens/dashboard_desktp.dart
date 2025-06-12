@@ -122,36 +122,37 @@ class DashboardDesktop extends StatelessWidget {
                     const SizedBox(
                       width: TSizes.spaceBtwItems,
                     ),
-                    Expanded(
-                        child: TDashBoardCard(
-                      isLoading: dashboardController.isLoading.value,
-                      iconWidget: const TCircularIcon(
-                        width: 40,
-                        height: 40,
-                        backgroundColor: Colors.green,
-                        icon: Iconsax.people,
-                        color: TColors.white,
-                      ),
-                      value: dashboardController.customerCount.value.toString(),
-                      stats: dashboardController.card4Percentage.value,
-                      title: 'Customers',
-                      subTitle:
-                          'Compared to ${dashboardController.lastMonth.value}',
-                      icon: (dashboardController.isCustomerIncrease.value)
-                          ? Iconsax.arrow_up_3
-                          : Iconsax.arrow_down,
-                      color: (dashboardController.isCustomerIncrease.value)
-                          ? Colors.green
-                          : Colors.red,
-                      cardState: dashboardController.customerCardState,
-                    )),
+                    Expanded(child: Obx(() {
+                      return TDashBoardCard(
+                        isLoading: dashboardController.isLoading.value,
+                        iconWidget: const TCircularIcon(
+                          width: 40,
+                          height: 40,
+                          backgroundColor: Colors.green,
+                          icon: Iconsax.people,
+                          color: TColors.white,
+                        ),
+                        value:
+                            dashboardController.customerCount.value.toString(),
+                        stats: dashboardController.card4Percentage.value,
+                        title: 'Customers',
+                        subTitle:
+                            'Compared to ${dashboardController.lastMonth.value}',
+                        icon: (dashboardController.isCustomerIncrease.value)
+                            ? Iconsax.arrow_up_3
+                            : Iconsax.arrow_down,
+                        color: (dashboardController.isCustomerIncrease.value)
+                            ? Colors.green
+                            : Colors.red,
+                        cardState: dashboardController.customerCardState,
+                      );
+                    })),
                     const SizedBox(
                       width: TSizes.spaceBtwItems,
                     ),
                   ],
                 );
-              }
-              ),
+              }),
               const SizedBox(
                 height: TSizes.spaceBtwSections,
               ),

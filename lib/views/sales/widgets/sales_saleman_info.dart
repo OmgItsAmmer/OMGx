@@ -68,19 +68,22 @@ class SalesSalemanInfo extends StatelessWidget {
                   final selectedSalesman = salesmanController.allSalesman
                       .firstWhere((user) => user.fullName == val);
 
-                  salesController.selectedSalesmanId =
-                      selectedSalesman.salesmanId!;
                   salesController.salesmanCityController.value.text =
                       selectedSalesman.city;
                   salesController.salesmanAreaController.value.text =
                       selectedSalesman.area;
+
+                  // Use the handleSalesmanSelection method to update totals
+                  salesController
+                      .handleSalesmanSelection(selectedSalesman.salesmanId!);
                 },
                 onManualTextEntry: (String text) {
                   if (text.isEmpty) {
                     // Reset logic when field is cleared
-                    salesController.selectedSalesmanId = -1;
                     salesController.salesmanCityController.value.text = '';
                     salesController.salesmanAreaController.value.text = '';
+                    // Use the handleSalesmanSelection method to reset totals
+                    salesController.handleSalesmanSelection(-1);
                   }
                 },
               ),

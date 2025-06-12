@@ -44,10 +44,21 @@ class TDashBoardCard extends StatelessWidget {
       statusColor = Colors.amber;
     }
 
-    // Handle NaN display for value and stats
-    double? numericValue = double.tryParse(value);
-    String displayValue = (numericValue != null && numericValue == 0) ? 'NaN' : value;
-    String displayStats = (stats == 0) ? 'NaN' : '$stats%';
+    // Handle NaN display for value and stats - only when data is successfully loaded
+    String displayValue = value;
+    String displayStats = '$stats%';
+
+    // Only show NaN when data has been successfully loaded but values are zero
+    if (cardState.value == DataFetchState.success) {
+      double? numericValue =
+          double.tryParse(value.replaceAll('Rs ', '').replaceAll(',', ''));
+      if (numericValue != null && numericValue == 0) {
+        displayValue = value.contains('Rs') ? 'Rs 0.00' : '0';
+      }
+      if (stats == 0) {
+        displayStats = '0%';
+      }
+    }
 
     return TRoundedContainer(
       onTap: onTap,

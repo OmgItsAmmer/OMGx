@@ -52,7 +52,7 @@ class SalesService {
       return orderDate
               .isAfter(firstDayOfCurrentMonth.subtract(Duration(days: 1))) &&
           orderDate.isBefore(now.add(Duration(days: 1)));
-    }).fold(0.0, (sum, order) => sum + order.totalPrice);
+    }).fold(0.0, (sum, order) => sum + order.subTotal);
 
     // Calculate sales for the same number of days from the previous month
     double previousMonthSales = filteredOrders.where((order) {
@@ -61,7 +61,7 @@ class SalesService {
               .isAfter(firstDayOfPreviousMonth.subtract(Duration(days: 1))) &&
           orderDate.isBefore(
               firstDayOfPreviousMonth.add(Duration(days: daysInCurrentMonth)));
-    }).fold(0.0, (sum, order) => sum + order.totalPrice);
+    }).fold(0.0, (sum, order) => sum + order.subTotal);
 
     int percentageChange = previousMonthSales == 0
         ? (currentMonthSales > 0 ? 100 : 0)
@@ -95,7 +95,7 @@ class SalesService {
           orderWeekStart.add(const Duration(days: 7)).isAfter(DateTime.now())) {
         int index = (orderDate.weekday - 1) % 7;
         index = index < 0 ? index + 7 : index;
-        weeklySales[index] += order.totalPrice;
+        weeklySales[index] += order.subTotal;
       }
     }
     return weeklySales;
@@ -118,7 +118,7 @@ class SalesService {
     for (var order in filteredOrders) {
       DateTime orderDate = DateTime.parse(order.orderDate);
       if (orderDate.isAfter(firstDayOfCurrentMonth)) {
-        currentMonthSales += order.totalPrice;
+        currentMonthSales += order.subTotal;
         currentMonthBuyingPrice += (order.buyingPrice ?? 0.0);
       }
     }
@@ -139,7 +139,7 @@ class SalesService {
       DateTime orderDate = DateTime.parse(order.orderDate);
       if (orderDate.isAfter(firstDayOfPreviousMonth) &&
           orderDate.isBefore(lastDayOfPreviousMonth)) {
-        previousMonthSales += order.totalPrice;
+        previousMonthSales += order.subTotal;
         previousMonthBuyingPrice += (order.buyingPrice ?? 0.0);
       }
     }

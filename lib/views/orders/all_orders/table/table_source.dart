@@ -115,7 +115,7 @@ class OrderRows extends DataTableSource {
                   color: THelperFunctions.getOrderStatusColor(orderStatus)),
             ),
           )),
-          DataCell(Text(order.totalPrice.toString())),
+          DataCell(Text(order.subTotal.toString())),
           DataCell(TTableActionButtons(
             delete: false,
             view: true,

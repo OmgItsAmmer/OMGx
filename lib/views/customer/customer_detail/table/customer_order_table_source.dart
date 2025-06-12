@@ -18,8 +18,6 @@ class CustomerOrderRows extends DataTableSource {
     required this.ordersCount,
   });
 
-
-
   @override
   DataRow getRow(int index) {
     if (index >= currentOrders.length) {
@@ -33,8 +31,8 @@ class CustomerOrderRows extends DataTableSource {
     }
 
     final OrderModel orderItem = currentOrders[index];
-      OrderStatus? orderStatus = OrderStatus.values.firstWhere(
-          (e) => e.name == orderItem.status,
+    OrderStatus? orderStatus = OrderStatus.values.firstWhere(
+      (e) => e.name == orderItem.status,
       orElse: () => OrderStatus.pending,
     );
     String formattedDate = '';
@@ -49,22 +47,19 @@ class CustomerOrderRows extends DataTableSource {
       cells: [
         DataCell(Text(orderItem.orderId.toString())),
         DataCell(Text(formattedDate)),
-         DataCell(TRoundedContainer(
-            radius: TSizes.cardRadiusSm,
-            padding: const EdgeInsets.symmetric(
-                vertical: TSizes.sm, horizontal: TSizes.md),
-            backgroundColor:
-                THelperFunctions.getOrderStatusColor(orderStatus)
-                    .withValues(alpha: 0.1),
-            child: Text(
-               orderController.allOrders[index].status.toString(),
-              style: TextStyle(
-                  color: THelperFunctions.getOrderStatusColor(
-                      orderStatus)),
-            ),
-
-          )),
-        DataCell(Text(orderItem.totalPrice.toStringAsFixed(2))),
+        DataCell(TRoundedContainer(
+          radius: TSizes.cardRadiusSm,
+          padding: const EdgeInsets.symmetric(
+              vertical: TSizes.sm, horizontal: TSizes.md),
+          backgroundColor: THelperFunctions.getOrderStatusColor(orderStatus)
+              .withValues(alpha: 0.1),
+          child: Text(
+            orderController.allOrders[index].status.toString(),
+            style: TextStyle(
+                color: THelperFunctions.getOrderStatusColor(orderStatus)),
+          ),
+        )),
+        DataCell(Text(orderItem.subTotal.toStringAsFixed(2))),
         DataCell(
           IconButton(
             onPressed: () {

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../common/widgets/icons/table_action_icon_buttons.dart';
 import '../../../common/widgets/containers/rounded_container.dart';
@@ -28,6 +29,8 @@ class InstallmentRow extends DataTableSource {
   DataRow? getRow(int index) {
     final installmentItem =
         installmentController.currentInstallmentPayments[index];
+    final dateFormat = DateFormat('dd/MM/yyyy');
+
     return DataRow2(
         onTap: () {},
         selected: false,
@@ -42,7 +45,7 @@ class InstallmentRow extends DataTableSource {
           )),
           DataCell(Text(
             installmentItem.description == ''
-                ? 'Installment No${installmentItem.sequenceNo}'
+                ? 'Installment# ${installmentItem.sequenceNo}'
                 : installmentItem.description,
             style: Theme.of(Get.context!)
                 .textTheme
@@ -50,7 +53,7 @@ class InstallmentRow extends DataTableSource {
                 .apply(color: TColors.primary),
           )),
           DataCell(Text(
-            installmentItem.dueDate.toString(),
+            dateFormat.format(DateTime.parse(installmentItem.dueDate)),
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
@@ -59,8 +62,8 @@ class InstallmentRow extends DataTableSource {
           DataCell(Text(
             installmentItem.paidDate == 'null' ||
                     installmentItem.paidDate == null
-                ? 'not yet'
-                : installmentItem.paidDate.toString(),
+                ? '--'
+                : dateFormat.format(DateTime.parse(installmentItem.paidDate ?? '--')),
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
@@ -87,13 +90,13 @@ class InstallmentRow extends DataTableSource {
                 .bodyLarge!
                 .apply(color: TColors.primary),
           )),
-          DataCell(Text(
-            installmentItem.remaining,
-            style: Theme.of(Get.context!)
-                .textTheme
-                .bodyLarge!
-                .apply(color: TColors.primary),
-          )),
+          // DataCell(Text(
+          //   installmentItem.remaining,
+          //   style: Theme.of(Get.context!)
+          //       .textTheme
+          //       .bodyLarge!
+          //       .apply(color: TColors.primary),
+          // )),
           DataCell(Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(

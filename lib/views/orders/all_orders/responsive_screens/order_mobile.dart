@@ -98,7 +98,7 @@ class OrdersMobileScreen extends StatelessWidget {
                           .contains(searchTerm) ||
                       order.orderDate.toLowerCase().contains(searchTerm) ||
                       order.status.toLowerCase().contains(searchTerm) ||
-                      order.totalPrice
+                      order.subTotal
                           .toString()
                           .toLowerCase()
                           .contains(searchTerm);
@@ -226,7 +226,7 @@ class OrderCard extends StatelessWidget {
                 const Icon(Iconsax.money, size: 18, color: TColors.white),
                 const SizedBox(width: 8),
                 Text(
-                  'Amount: Rs. ${order.totalPrice.toStringAsFixed(2)}',
+                  'Amount: Rs. ${order.subTotal.toStringAsFixed(2)}',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -247,11 +247,11 @@ class OrderCard extends StatelessWidget {
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(width: 8),
-                if ((order.paidAmount ?? 0) < order.totalPrice)
+                if ((order.paidAmount ?? 0) < order.subTotal)
                   Chip(
                     backgroundColor: TColors.warning.withOpacity(0.2),
                     label: Text(
-                      'Due: Rs. ${(order.totalPrice - (order.paidAmount ?? 0)).toStringAsFixed(2)}',
+                      'Due: Rs. ${(order.subTotal - (order.paidAmount ?? 0)).toStringAsFixed(2)}',
                       style: TextStyle(
                         color: TColors.warning,
                         fontSize: 12,

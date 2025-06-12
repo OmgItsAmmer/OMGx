@@ -33,11 +33,13 @@ class InstallmentTable extends StatelessWidget {
         sortAscending: tableSearchController.sortAscending.value,
         sortColumnIndex: tableSearchController.sortColumnIndex.value,
         minWidth: 700,
-        rowsperPage: 5, // Fixed value that exists in availableRowsPerPage
+        rowsperPage: 10, // Fixed value that exists in availableRowsPerPage
         availableRowsPerPage: tableSearchController.availableRowsPerPage,
         onSortChanged: (columnIndex, ascending) {
           tableSearchController.sort(columnIndex, ascending);
-          // Add sorting logic here if needed
+          if (columnIndex == 0) {
+            installmentController.sortInstallmentsByNumber(ascending);
+          }
         },
         columns: const [
           DataColumn2(label: Text('#')),
@@ -47,7 +49,7 @@ class InstallmentTable extends StatelessWidget {
           DataColumn2(label: Text('Amount')),
           DataColumn2(label: Text('Paid')),
           DataColumn2(label: Text('Remarks')),
-          DataColumn2(label: Text('Balance')),
+          // DataColumn2(label: Text('Balance')),
           DataColumn2(label: Text('Status')),
           DataColumn2(
             label: Text('Action'),
