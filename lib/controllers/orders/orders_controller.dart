@@ -49,12 +49,9 @@ class OrderController extends GetxController {
       isOrdersFetching.value = true;
       final orders = await orderRepository.fetchOrders();
 
-      // Reverse the order of the list
-      final reversedOrders = orders.reversed.toList();
-
-      // Assign the reversed list to allOrders and currentOrders
-      allOrders.assignAll(reversedOrders);
-      currentOrders.assignAll(reversedOrders);
+      // Assign the fetched orders directly without reversing
+      allOrders.assignAll(orders);
+      currentOrders.assignAll(orders);
 
       // Dashboard will auto-update through reactive listeners
       // No need to manually trigger dashboard updates here
@@ -286,6 +283,25 @@ class OrderController extends GetxController {
       // Get the original status for comparison
       final originalStatus = allOrders[index].status;
 
+      // CRITICAL: Check stock availability BEFORE making any changes
+      // If moving from cancelled to another status, validate stock first
+      if (originalStatus == 'cancelled' && status != 'cancelled') {
+        if (allOrders[index].orderItems != null &&
+            allOrders[index].orderItems!.isNotEmpty) {
+          // Check if there's enough stock available before allowing status change
+          bool hasStock = await orderRepository
+              .checkStockAvailability(allOrders[index].orderItems!);
+
+          if (!hasStock) {
+            TLoaders.errorSnackBar(
+                title: 'Insufficient Stock',
+                message:
+                    'Cannot change order status from cancelled to $status. Some products are out of stock or variants are already sold.');
+            return originalStatus; // Return original status if stock check fails
+          }
+        }
+      }
+
       // Update status in database
       await orderRepository.updateStatus(orderId, status);
 
@@ -307,6 +323,7 @@ class OrderController extends GetxController {
       else if (originalStatus == 'cancelled' && status != 'cancelled') {
         if (allOrders[index].orderItems != null &&
             allOrders[index].orderItems!.isNotEmpty) {
+          // Stock was already validated above, now subtract the quantity
           await addBackQuantity(allOrders[index].orderItems);
         }
       }

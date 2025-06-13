@@ -26,6 +26,10 @@ class ProductController extends GetxController {
   RxList<ProductModel> allProducts = <ProductModel>[].obs;
   RxList<ProductVariantModel> currentProductVariants =
       <ProductVariantModel>[].obs;
+  RxList<ProductVariantModel> availableVariants =
+      <ProductVariantModel>[].obs; // Store available variants only
+  RxList<ProductVariantModel> soldVariants =
+      <ProductVariantModel>[].obs; // Store sold variants separately
 
   // Store selected Rows
   RxList<bool> selectedRows = <bool>[].obs;
@@ -37,6 +41,10 @@ class ProductController extends GetxController {
   // New variables for serial-numbered products
   RxBool hasSerialNumbers = false.obs;
   RxBool isAddingVariants = false.obs;
+  RxBool showSoldVariants = false.obs; // Toggle for showing sold variants
+  RxBool isLoadingSoldVariants = false.obs; // Loading state for sold variants
+  RxBool soldVariantsFetched =
+      false.obs; // Track if sold variants have been fetched
   final serialNumber = TextEditingController();
   final purchasePrice = TextEditingController();
   final variantSellingPrice = TextEditingController();
@@ -75,6 +83,17 @@ class ProductController extends GetxController {
 
   // Track if we're in the middle of a variant fetch to prevent loops
   bool _isInVariantFetch = false;
+
+  // Computed property to get filtered variants based on toggle
+  List<ProductVariantModel> get filteredVariants {
+    if (showSoldVariants.value) {
+      // Show all variants (available + sold + unsaved)
+      return [...availableVariants, ...soldVariants, ...unsavedProductVariants];
+    } else {
+      // Show only available and unsaved variants
+      return [...availableVariants, ...unsavedProductVariants];
+    }
+  }
 
   @override
   void onInit() {
@@ -144,9 +163,24 @@ class ProductController extends GetxController {
         currentProductVariants.clear();
       }
 
+      if (availableVariants.isNotEmpty) {
+        availableVariants.clear();
+      }
+
+      if (soldVariants.isNotEmpty) {
+        soldVariants.clear();
+      }
+
+      // Reset sold variants state
+      isLoadingSoldVariants.value = false;
+      soldVariantsFetched.value = false;
+
       if (bulkImportVariants.isNotEmpty) {
         bulkImportVariants.clear();
       }
+
+      // Reset the sold variants toggle
+      showSoldVariants.value = false;
 
       csvData.clear();
       serialNumber.clear();
@@ -296,14 +330,14 @@ class ProductController extends GetxController {
         basePrice: basePrice.text.trim(),
         salePrice: salePrice.text.trim(),
         stockQuantity:
-            hasSerialNumbers.value ? 0 : (int.tryParse(stock.text.trim()) ?? 0),
+            (int.tryParse(stock.text.trim()) ?? 0),//not added if serial number is true
         alertStock: int.tryParse(alertStock.text.trim()) ?? 0,
         brandID: selectedBrandId,
         categoryId: selectedCategoryId,
         hasSerialNumbers: hasSerialNumbers.value,
       );
 
-      final json = productModel.toJson(isUpdate: true);
+      final json = productModel.toJson(isUpdate: true, isSerial: hasSerialNumbers.value);
       debugPrint('Updating product with data: $json');
 
       await productRepository.updateProduct(json);
@@ -471,18 +505,24 @@ class ProductController extends GetxController {
       // Use update to notify UI of loading state
       update(['variants_list']);
 
-      // Clear variants list before fetching
+      // Clear variants lists before fetching
       currentProductVariants.clear();
+      availableVariants.clear();
 
-      // Fetch variants with explicitly awaited result
-      debugPrint('Starting variant fetch for product $productId');
-      final variants = await productVariantsRepository
-          .fetchProductVariants(productId, limit: 100);
-      debugPrint('Fetch completed, found ${variants.length} variants');
+      // Fetch only available variants initially
+      debugPrint('Starting available variant fetch for product $productId');
+      final variants =
+          await productVariantsRepository.fetchAvailableVariants(productId);
+      debugPrint(
+          'Fetch completed, found ${variants.length} available variants');
 
-      // Update state with new variants (even if empty)
-      currentProductVariants.assignAll(variants);
-      debugPrint('Assigned ${variants.length} variants to UI list');
+      // Store available variants
+      availableVariants.assignAll(variants);
+
+      // Update currentProductVariants based on filter
+      updateFilteredVariantsList();
+      debugPrint(
+          'Assigned ${currentProductVariants.length} filtered variants to UI list');
 
       // Update the product stock count if needed
       debugPrint('About to update product stock from variants');
@@ -597,12 +637,8 @@ class ProductController extends GetxController {
     // Add new variant to unsaved list
     unsavedProductVariants.add(variant);
 
-    // Replace the entire list to trigger proper reactive updates
-    final updatedList = [...currentProductVariants, variant];
-    currentProductVariants.assignAll(updatedList);
-
-    // Call update to ensure GetBuilder widgets refresh
-    update(['variants_list']);
+    // Update the filtered variants list
+    updateFilteredVariantsList();
 
     // Clear the form fields after adding
     serialNumber.clear();
@@ -801,8 +837,12 @@ class ProductController extends GetxController {
     try {
       await productVariantsRepository.deleteVariant(variantId);
 
-      // Remove from the local list
-      currentProductVariants.removeWhere((v) => v.variantId == variantId);
+      // Remove from both the availableVariants and soldVariants lists
+      availableVariants.removeWhere((v) => v.variantId == variantId);
+      soldVariants.removeWhere((v) => v.variantId == variantId);
+
+      // Update the filtered variants list
+      updateFilteredVariantsList();
 
       // Update the in-memory product stock count for UI display
       updateProductStockFromVariants();
@@ -950,6 +990,54 @@ class ProductController extends GetxController {
     }
   }
 
+  /// Toggles the visibility of sold variants
+  void toggleSoldVariants(bool value) {
+    showSoldVariants.value = value;
+
+    // If enabling and sold variants haven't been fetched yet, fetch them
+    if (value && !soldVariantsFetched.value && productId.value > 0) {
+      fetchSoldVariants(productId.value);
+    } else {
+      // Update the current variants list based on the filter
+      updateFilteredVariantsList();
+    }
+  }
+
+  /// Fetches sold variants from the database
+  Future<void> fetchSoldVariants(int productId) async {
+    try {
+      isLoadingSoldVariants.value = true;
+
+      debugPrint('Fetching sold variants for product $productId');
+
+      // Fetch all variants then filter for sold ones
+      final allVariants = await productVariantsRepository
+          .fetchProductVariants(productId, limit: 100);
+
+      final soldVariantsList = allVariants.where((v) => v.isSold).toList();
+      debugPrint('Found ${soldVariantsList.length} sold variants');
+
+      // Store sold variants
+      soldVariants.assignAll(soldVariantsList);
+      soldVariantsFetched.value = true;
+
+      // Update the filtered variants list
+      updateFilteredVariantsList();
+    } catch (e) {
+      debugPrint('Error fetching sold variants: $e');
+      TLoaders.errorSnackBar(
+          title: "Error", message: "Failed to load sold variants: $e");
+    } finally {
+      isLoadingSoldVariants.value = false;
+    }
+  }
+
+  /// Updates the currentProductVariants list based on the filter
+  void updateFilteredVariantsList() {
+    currentProductVariants.assignAll(filteredVariants);
+    update(['variants_list']);
+  }
+
   // Get available (unsold) variants for a product
   Future<List<ProductVariantModel>> getAvailableVariants(int productId) async {
     try {
@@ -966,15 +1054,7 @@ class ProductController extends GetxController {
     // Remove from unsaved list
     unsavedProductVariants.removeWhere((v) => v.serialNumber == serialNumber);
 
-    // Create a new list without the removed variant
-    final updatedList = currentProductVariants
-        .where((v) => v.serialNumber != serialNumber)
-        .toList();
-
-    // Replace the entire list to trigger reactive updates
-    currentProductVariants.assignAll(updatedList);
-
-    // Call update to ensure GetBuilder widgets refresh
-    update(['variants_list']);
+    // Update the filtered variants list
+    updateFilteredVariantsList();
   }
 }

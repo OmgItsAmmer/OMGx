@@ -189,9 +189,9 @@ class OrderRepository extends GetxController {
             {'stock_quantity': newStock}).eq('product_id', item.productId);
 
         if (updateResponse.error != null) {
-          TLoaders.errorSnackBar(
-              title: 'Restore Quantity Error',
-              message: updateResponse.error!.message);
+          // TLoaders.errorSnackBar(
+          //     title: 'Restore Quantity Error',
+          //     message: updateResponse.error!.message);
         } else {
           // Update local product list in ProductController
           try {
@@ -324,6 +324,73 @@ class OrderRepository extends GetxController {
         print('Error updating paid amount: $e');
         TLoaders.errorSnackBar(title: 'Order Repo', message: e.toString());
       }
+      return false;
+    }
+  }
+
+  /// Check if there's enough stock available for the given order items
+  Future<bool> checkStockAvailability(List<OrderItemModel> orderItems) async {
+    try {
+      final productController = Get.find<ProductController>();
+
+      for (var item in orderItems) {
+        // Skip null items
+        if (item == null) continue;
+
+        // Find the product
+        final product = productController.allProducts.firstWhere(
+            (p) => p.productId == item.productId,
+            orElse: () => ProductModel.empty());
+
+        if (product.productId == -1) {
+          if (kDebugMode) {
+            print('Product not found with ID: ${item.productId}');
+          }
+          return false;
+        }
+
+        if (product.hasSerialNumbers && item.variantId != null) {
+          // For serialized products, check if the specific variant is available
+          final response = await supabase
+              .from('product_variants')
+              .select('is_sold')
+              .eq('variant_id', item.variantId!)
+              .single();
+
+          final bool isSold = response['is_sold'] as bool;
+
+          if (isSold) {
+            if (kDebugMode) {
+              print('Serial product variant ${item.variantId} is already sold');
+            }
+            return false;
+          }
+        } else {
+          // For regular products, check if there's enough quantity
+          final response = await supabase
+              .from('products')
+              .select('stock_quantity')
+              .eq('product_id', item.productId)
+              .single();
+
+          final int currentStock = response['stock_quantity'] as int;
+
+          if (currentStock < item.quantity) {
+            if (kDebugMode) {
+              print(
+                  'Not enough stock for product ${item.productId}. Required: ${item.quantity}, Available: $currentStock');
+            }
+            return false;
+          }
+        }
+      }
+
+      return true; // All items have sufficient stock
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error checking stock availability: $e');
+      }
+      TLoaders.errorSnackBar(title: 'Stock Check Error', message: e.toString());
       return false;
     }
   }

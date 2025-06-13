@@ -133,10 +133,9 @@ class _TPaginatedDataTableState extends State<TPaginatedDataTable> {
               topRight: Radius.circular(TSizes.borderRadiusMd),
             )),
 
-            empty:  TAnimationLoaderWidget(
-              text: (TDeviceUtils.isMobileScreen(context))
-                  ? ''
-                  : 'Nothing Found',
+            empty: TAnimationLoaderWidget(
+              text:
+                  (TDeviceUtils.isMobileScreen(context)) ? '' : 'Nothing Found',
               animation: TImages.noDataFound,
               showAction: false,
               width: 200,

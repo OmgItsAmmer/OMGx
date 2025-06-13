@@ -22,6 +22,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../Models/orders/order_item_model.dart';
+
 import '../../Models/products/product_model.dart';
 import '../../repositories/order/order_repository.dart';
 import '../customer/customer_controller.dart';
@@ -30,6 +31,7 @@ import '../../Models/salesman/salesman_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:iconsax/iconsax.dart';
+import '../../views/reports/specific_reports/receipt_report/receipt_report.dart';
 
 class SalesController extends GetxController {
   static SalesController get instance => Get.find();
@@ -317,9 +319,9 @@ class SalesController extends GetxController {
           buyPrice: variant.purchasePrice,
           variantId: variant.variantId,
         );
-
         // Update sub total (product prices only)
-        final double newTotalPrice = variant.sellingPrice;
+        final double newTotalPrice =
+            double.tryParse(totalPrice.value.text.trim()) ?? 0.0;
         subTotal.value += newTotalPrice;
         originalSubTotal.value += newTotalPrice;
         buyingPriceTotal += variant.purchasePrice;
@@ -733,9 +735,6 @@ class SalesController extends GetxController {
         userId: userController.currentUser.value.userId,
         paidAmount: paidAmountValue,
         customerId: customerController.selectedCustomer.value.customerId,
-      
-      
-        
       );
 
       // Create order items with the correct variant IDs
@@ -815,22 +814,23 @@ class SalesController extends GetxController {
             await productController.checkLowStock(productIds);
           }
 
-          // Generate receipt
-          try {
-            final receiptBytes = await _generateReceipt(order);
-            // You can add code here to print the receipt or save it
-            if (kDebugMode) {
-              print('Receipt generated successfully');
-            }
-          } catch (e) {
-            if (kDebugMode) {
-              print('Error generating receipt: $e');
-            }
-            // Don't throw the error since receipt generation is not critical
-          }
+         
 
           // Close loading dialog
           Navigator.of(Get.context!).pop();
+          
+           // Generate PDF receipt
+          try {
+            showReceiptPdfReport(order);
+            if (kDebugMode) {
+              print('PDF Receipt generated successfully');
+            }
+          } catch (e) {
+            if (kDebugMode) {
+              print('Error generating PDF receipt: $e');
+            }
+            // Don't throw the error since receipt generation is not critical
+          }
 
           // Clear all sales data
           clearSaleDetails();
@@ -881,6 +881,7 @@ class SalesController extends GetxController {
     }
   }
 
+  /* Commented out - replaced with PDF receipt
   Future<List<int>> _generateReceipt(OrderModel order) async {
     final profile = await CapabilityProfile.load();
     final generator = Generator(PaperSize.mm80, profile);
@@ -989,6 +990,7 @@ class SalesController extends GetxController {
 
     return bytes;
   }
+  */
 
   // Helper method to format date as YYYY-MM-DD
   String formatDate(DateTime date) {

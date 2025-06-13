@@ -218,6 +218,41 @@ If you encounter socket connection issues with Supabase in release mode:
 
 ## Recent Bug Fixes
 
+### Order Status Change Validation with Stock Availability Check (Latest Fix)
+
+**Issue Fixed**: A critical bug where changing order status from "cancelled" to active status (pending/completed) would subtract stock without checking availability first.
+
+**Problem**: 
+1. Order with "completed" status gets changed to "cancelled" → stock is restored
+2. Restocked products get sold to new customers → stock decreases 
+3. Original order status changed from "cancelled" to "pending/completed" → system tries to subtract stock again without checking availability
+4. This could result in negative stock quantities or attempting to mark already-sold serial products as sold
+
+**Solution Implemented**:
+- Added `checkStockAvailability()` method in `OrderRepository` that validates stock before status changes
+- For regular products: Checks if current stock >= required quantity
+- For serialized products: Checks if specific variants are available (not already sold)
+- Added stock validation in `OrderController.updateStatus()` before allowing status change from cancelled to active
+- If stock check fails, shows error message and prevents status change
+
+**Technical Details**:
+```dart
+// New validation in OrderController.updateStatus()
+if (originalStatus == 'cancelled' && status != 'cancelled') {
+  bool hasStock = await orderRepository.checkStockAvailability(orderItems);
+  if (!hasStock) {
+    // Show error and prevent status change
+    return originalStatus;
+  }
+  // Only proceed if stock is available
+  await addBackQuantity(orderItems);
+}
+```
+
+**Files Modified**:
+- `lib/repositories/order/order_repository.dart`: Added `checkStockAvailability()` method
+- `lib/controllers/orders/orders_controller.dart`: Added stock validation in `updateStatus()` method
+
 ### Dashboard Pending Amount Calculation for Installment Orders (Latest Fix)
 
 **Issue Fixed**: The dashboard's order status count calculation was incorrectly calculating pending amounts for installment orders by not including margin, document charges, and other charges.

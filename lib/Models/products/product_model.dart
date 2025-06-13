@@ -43,14 +43,14 @@ class ProductModel {
       );
 
   // Convert model to JSON for database insertion
-  Map<String, dynamic> toJson({bool isUpdate = false}) {
+  Map<String, dynamic> toJson({bool isUpdate = false, bool isSerial = false}) {
     final Map<String, dynamic> data = {
       'name': name,
       'description': description ?? "",
       'base_price': basePrice ?? "",
       'sale_price': salePrice ?? "",
       'category_id': categoryId,
-      'stock_quantity': stockQuantity ?? 0,
+      if (!isSerial) 'stock_quantity': stockQuantity,
       'brandID': brandID,
       'alert_stock': alertStock,
       'has_serial_numbers': hasSerialNumbers,
