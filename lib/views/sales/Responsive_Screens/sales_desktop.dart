@@ -1,4 +1,3 @@
-import 'package:admin_dashboard_v3/Models/address/address_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/common/widgets/icons/t_circular_icon.dart';
 import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
@@ -11,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
-import '../../../Models/customer/customer_model.dart';
 import '../../../controllers/media/media_controller.dart';
 import '../../../controllers/sales/sales_controller.dart';
 import '../table/sale_table.dart';

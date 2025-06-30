@@ -28,7 +28,7 @@ class THelperFunctions {
   static Color getNotificationColor(NotificationType type) {
     switch (type) {
       case NotificationType.company:
-        return TColors.secondary
+        return TColors.primary
             .withOpacity(0.9); // More readable yellow from theme
       case NotificationType.alertStock:
         return TColors.error; // Use theme error color

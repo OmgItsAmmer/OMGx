@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/common/widgets/icons/table_action_icon_buttons.dart';
 import 'package:admin_dashboard_v3/controllers/notification/notification_controller.dart';

@@ -1,4 +1,14 @@
 {
     "cmake.ignoreCMakeListsMissing": true,
-    "files.autoSave": "afterDelay"
+    "files.autoSave": "afterDelay",
+    "editor.lineHeight": 18,
+    "workbench.editor.tabSizing": "shrink",
+    "workbench.tree.indent": 10,
+"workbench.iconTheme": "vs-minimal", // or pick a minimal icon theme
+"terminal.integrated.fontSize": 11,
+"window.zoomLevel": -1,
+
+
+
+
 }

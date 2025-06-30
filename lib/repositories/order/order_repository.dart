@@ -6,14 +6,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../main.dart';
 
 import '../../Models/orders/order_item_model.dart';
-import '../../Models/salesman/salesman_model.dart';
 import '../../Models/products/product_model.dart';
 import '../../controllers/product/product_controller.dart';
 import '../../repositories/products/product_variants_repository.dart';
 
-class OrderRepository extends GetxController {
-  static OrderRepository get instance => Get.find();
-
+class OrderRepository {
   //fetch
   Future<List<OrderModel>> fetchCustomerOrders(int customerId) async {
     try {
@@ -40,9 +37,9 @@ class OrderRepository extends GetxController {
           .update({'status': newStatus}).eq('order_id', orderId);
 
       TLoaders.successSnackBar(
-          title: 'Status Updated', message: 'Status is Updated to$newStatus');
+          title: 'Status Updated', message: 'Status is Updated to $newStatus');
     } catch (e) {
-      // Show error if any
+      // Show error if anyJ
       TLoaders.errorSnackBar(
           title: 'Update Order Error', message: e.toString());
       if (kDebugMode) {
@@ -140,23 +137,19 @@ class OrderRepository extends GetxController {
 
   Future<void> restoreQuantity(OrderItemModel item) async {
     try {
-      // Fetch the product to determine if it has serial numbers
       final productController = Get.find<ProductController>();
       final product = productController.allProducts.firstWhere(
           (p) => p.productId == item.productId,
           orElse: () => ProductModel.empty());
 
       if (product.hasSerialNumbers && item.variantId != null) {
-        // For serialized products, update the variant's sold status
         final variantsRepository = Get.find<ProductVariantsRepository>();
         await variantsRepository.markVariantAsAvailable(item.variantId!);
 
-        // Update local product list in ProductController
         try {
           final productIndex = productController.allProducts
               .indexWhere((p) => p.productId == item.productId);
           if (productIndex != -1) {
-            // Get updated count of available variants
             final availableCount =
                 await variantsRepository.countAvailableVariants(item.productId);
             final updatedProduct =
@@ -167,55 +160,47 @@ class OrderRepository extends GetxController {
             productController.update();
           }
         } catch (e) {
-          if (kDebugMode) {
-            print('Failed to update local product list: $e');
-          }
+          if (kDebugMode) print('Local update error: $e');
         }
       } else {
-        // For regular products, update the quantity in the database
-        // Step 1: Fetch the current stock quantity
+        // For regular products
         final response = await supabase
             .from('products')
             .select('stock_quantity')
             .eq('product_id', item.productId)
-            .single(); // Ensures we get a single row
+            .single();
 
-        // Directly access the stock quantity from the response
         final int currentStock = response['stock_quantity'] as int;
         final int newStock = currentStock + item.quantity;
 
-        // Step 2: Update the stock quantity
+        // Fixed: Handle null response properly
         final updateResponse = await supabase.from('products').update(
             {'stock_quantity': newStock}).eq('product_id', item.productId);
 
-        if (updateResponse.error != null) {
-          // TLoaders.errorSnackBar(
-          //     title: 'Restore Quantity Error',
-          //     message: updateResponse.error!.message);
-        } else {
-          // Update local product list in ProductController
-          try {
-            final productIndex = productController.allProducts
-                .indexWhere((p) => p.productId == item.productId);
-            if (productIndex != -1) {
-              final currentProduct =
-                  productController.allProducts[productIndex];
-              final updatedProduct = currentProduct.copyWith(
-                stockQuantity: currentProduct.stockQuantity! + item.quantity,
-              );
-              productController.allProducts[productIndex] = updatedProduct;
-              productController.update();
-            }
-          } catch (e) {
-            if (kDebugMode) {
-              print('Failed to update local product list: $e');
-            }
+        if (updateResponse != null && updateResponse.error != null) {
+          throw Exception(updateResponse.error!.message);
+        }
+
+        // Update local product list
+        try {
+          final productIndex = productController.allProducts
+              .indexWhere((p) => p.productId == item.productId);
+          if (productIndex != -1) {
+            final currentProduct = productController.allProducts[productIndex];
+            final updatedProduct = currentProduct.copyWith(
+              stockQuantity: currentProduct.stockQuantity! + item.quantity,
+            );
+            productController.allProducts[productIndex] = updatedProduct;
+            productController.update();
           }
+        } catch (e) {
+          if (kDebugMode) print('Local update error: $e');
         }
       }
     } catch (e) {
       TLoaders.errorSnackBar(
           title: 'Restore Quantity Error', message: e.toString());
+      rethrow;
     }
   }
 
@@ -270,9 +255,9 @@ class OrderRepository extends GetxController {
             {'stock_quantity': newStock}).eq('product_id', item.productId);
 
         if (updateResponse != null && updateResponse.error != null) {
-          TLoaders.errorSnackBar(
-              title: 'Subtract Quantity Error',
-              message: updateResponse.error!.message);
+          // TLoaders.errorSnackBar(
+          //     title: 'Subtract Quantity Error',
+          //     message: updateResponse.error!.message);
         } else {
           // Update local product list in ProductController
           try {

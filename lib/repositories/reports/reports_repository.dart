@@ -86,7 +86,7 @@ class ReportsRepository extends GetxController {
       String endDateFormatted = endDate.toIso8601String().split("T")[0];
 
       final response = await supabase.rpc(
-        'get_salesman_detailed_report',
+        'get_salesman_report',
         params: {
           'start_date': startDateFormatted,
           'end_date': endDateFormatted,

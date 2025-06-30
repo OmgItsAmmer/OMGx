@@ -1,4 +1,5 @@
 import 'package:admin_dashboard_v3/common/layouts/templates/site_template.dart';
+import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/controllers/brands/brand_controller.dart';
 import 'package:admin_dashboard_v3/controllers/category/category_controller.dart';
 import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
@@ -6,6 +7,7 @@ import 'package:admin_dashboard_v3/views/products/product_detail/responsive_scre
 import 'package:admin_dashboard_v3/views/products/product_detail/responsive_screens/product_detail_mobile.dart';
 import 'package:admin_dashboard_v3/views/products/product_detail/responsive_screens/product_detail_tablet.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 class ProductDetailScreen extends StatefulWidget {
@@ -16,10 +18,8 @@ class ProductDetailScreen extends StatefulWidget {
 }
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
-  // Controllers
-  final ProductController productController = Get.find<ProductController>();
-  final BrandController brandController = Get.find<BrandController>();
-  final CategoryController categoryController = Get.find<CategoryController>();
+  final FocusNode _screenFocusNode =
+      FocusNode(debugLabel: 'ProductDetailScreen');
 
   @override
   void initState() {
@@ -27,7 +27,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
     // Initialize new product form if needed
     if (Get.arguments == null) {
-      productController.cleanProductDetail();
+      Get.find<ProductController>().cleanProductDetail();
     }
 
     // Refresh brand and category lists when screen loads
@@ -37,19 +37,81 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     });
   }
 
+  @override
+  void dispose() {
+    _screenFocusNode.dispose();
+    super.dispose();
+  }
+
   // Refresh data in controllers
   void _refreshControllerData() {
-    brandController.fetchBrands();
-    categoryController.fetchCategories();
+    Get.find<BrandController>().fetchBrands();
+    Get.find<CategoryController>().fetchCategories();
   }
 
   @override
   Widget build(BuildContext context) {
-    return const TSiteTemplate(
-      useLayout: false,
-      desktop: ProductDetailDesktop(),
-      tablet: ProductDetailTablet(),
-      mobile: ProductDetailMobile(),
+    return Focus(
+      focusNode: _screenFocusNode,
+      autofocus: true,
+      child: Shortcuts(
+        shortcuts: <LogicalKeySet, Intent>{
+          LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.enter):
+              const SaveIntent(),
+          LogicalKeySet(LogicalKeyboardKey.escape): const DiscardIntent(),
+        },
+        child: Actions(
+          actions: <Type, Action<Intent>>{
+            SaveIntent: CallbackAction<SaveIntent>(
+              onInvoke: (_) => _handleSave(),
+            ),
+            DiscardIntent: CallbackAction<DiscardIntent>(
+              onInvoke: (_) => _handleDiscard(),
+            ),
+          },
+          child: const TSiteTemplate(
+            useLayout: false,
+            desktop: ProductDetailDesktop(),
+            tablet: ProductDetailTablet(),
+            mobile: ProductDetailMobile(),
+          ),
+        ),
+      ),
     );
   }
+
+  Future<void> _handleSave() async {
+    final productController = Get.find<ProductController>();
+    if (productController.isUpdating.value) return;
+
+    try {
+      productController.isUpdating.value = true;
+      // Your save logic here
+      if (productController.productId.value == -1) {
+        await productController.insertProduct();
+      } else {
+        await productController.updateProduct();
+      }
+      // Additional save logic as needed
+    } catch (e) {
+      TLoaders.errorSnackBar(title: "Error", message: e.toString());
+    } finally {
+      productController.isUpdating.value = false;
+    }
+  }
+
+  void _handleDiscard() {
+    final productController = Get.find<ProductController>();
+    if (productController.isUpdating.value) return;
+    productController.cleanProductDetail();
+    Navigator.of(context).pop();
+  }
+}
+
+class SaveIntent extends Intent {
+  const SaveIntent();
+}
+
+class DiscardIntent extends Intent {
+  const DiscardIntent();
 }

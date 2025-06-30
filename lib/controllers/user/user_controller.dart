@@ -49,11 +49,11 @@ class UserController extends GetxController {
 
   // final RxBool isLoading = false.obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-    fetchUserRecord();
-  }
+  // @override
+  // void onInit() {
+  //   super.onInit();
+  //  // fetchUserRecord();
+  // }
 
   Future<void> fetchUserRecord() async {
     try {
@@ -85,9 +85,9 @@ class UserController extends GetxController {
       //Setting UserDetails in App
       //   startUpController.setupUserDetails(currentUser.value);
     } catch (e) {
-      TLoaders.errorSnackBar(
-          title: "Oh Snap!",
-          message: "Something went wrong while fetching user details");
+      // TLoaders.errorSnackBar(
+      //     title: "User Details Not Found!",
+      //     message: "Restart the app to fetch user details");
     } finally {
       profileLoading.value = false;
     }

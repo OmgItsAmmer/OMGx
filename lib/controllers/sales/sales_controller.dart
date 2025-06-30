@@ -814,12 +814,10 @@ class SalesController extends GetxController {
             await productController.checkLowStock(productIds);
           }
 
-         
-
           // Close loading dialog
           Navigator.of(Get.context!).pop();
-          
-           // Generate PDF receipt
+
+          // Generate PDF receipt
           try {
             showReceiptPdfReport(order);
             if (kDebugMode) {

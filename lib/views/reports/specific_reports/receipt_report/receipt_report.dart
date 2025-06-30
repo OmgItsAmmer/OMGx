@@ -1,14 +1,19 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:admin_dashboard_v3/Models/orders/order_item_model.dart';
+import 'package:admin_dashboard_v3/Models/products/product_model.dart';
+import 'package:admin_dashboard_v3/Models/products/product_variant_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/common/widgets/shimmers/shimmer.dart';
 import 'package:admin_dashboard_v3/controllers/shop/shop_controller.dart';
 import 'package:admin_dashboard_v3/controllers/user/user_controller.dart';
+import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
+import 'package:admin_dashboard_v3/controllers/salesman/salesman_controller.dart';
 
 import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
 import 'package:admin_dashboard_v3/Models/address/address_model.dart';
+import 'package:admin_dashboard_v3/Models/salesman/salesman_model.dart';
 import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
 import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
 import 'package:flutter/material.dart';
@@ -60,10 +65,12 @@ class _ReceiptReportPageState extends State<ReceiptReportPage> {
       final userController = Get.find<UserController>();
       final customerController = Get.find<CustomerController>();
       final addressController = Get.find<AddressController>();
+      final productController = Get.find<ProductController>();
 
       // Get customer and address information
       CustomerModel customer = CustomerModel.empty();
       AddressModel address = AddressModel.empty();
+      String salesmanName = '';
 
       try {
         if (widget.order.customerId != null) {
@@ -79,9 +86,71 @@ class _ReceiptReportPageState extends State<ReceiptReportPage> {
             orElse: () => AddressModel.empty(),
           );
         }
+
+        // Get salesman name
+        if (widget.order.salesmanId != null) {
+          final salesmanController = Get.find<SalesmanController>();
+          final salesman = salesmanController.allSalesman.firstWhere(
+            (s) => s.salesmanId == widget.order.salesmanId,
+            orElse: () => SalesmanModel.empty(),
+          );
+          salesmanName = salesman.fullName.isNotEmpty
+              ? salesman.fullName
+              : 'Salesman ID: ${widget.order.salesmanId}';
+        }
       } catch (e) {
         if (kDebugMode) {
-          print('Error getting customer/address: $e');
+          print('Error getting customer/address/salesman: $e');
+        }
+      }
+
+      // Prepare product information for all items
+      Map<int, String> productNames = {};
+      Map<int, String> variantSerialNumbers = {};
+
+      try {
+        for (var item in widget.order.orderItems ?? []) {
+          // Get product name
+          final product = productController.allProducts.firstWhere(
+            (p) => p.productId == item.productId,
+            orElse: () => ProductModel.empty(),
+          );
+          productNames[item.productId] = product.name.isNotEmpty
+              ? product.name
+              : 'Product ID: ${item.productId}';
+
+          // Get serial number if it's a serialized product
+          if (item.variantId != null) {
+            try {
+              final variants =
+                  await productController.getAvailableVariants(item.productId);
+              final allVariants = [...variants];
+
+              // Also check sold variants if needed
+              final soldVariants = await productController
+                  .productVariantsRepository
+                  .fetchProductVariants(item.productId, limit: 100);
+              allVariants.addAll(soldVariants.where((v) => v.isSold));
+
+              final variant = allVariants.firstWhere(
+                (v) => v.variantId == item.variantId,
+                orElse: () => ProductVariantModel.empty(),
+              );
+
+              if (variant.variantId != null &&
+                  variant.serialNumber.isNotEmpty) {
+                variantSerialNumbers[item.variantId!] = variant.serialNumber;
+              }
+            } catch (e) {
+              if (kDebugMode) {
+                print('Error getting variant for ${item.variantId}: $e');
+              }
+            }
+          }
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('Error preparing product information: $e');
         }
       }
 
@@ -89,10 +158,13 @@ class _ReceiptReportPageState extends State<ReceiptReportPage> {
         'order': widget.order,
         'customer': customer,
         'address': address,
+        'productNames': productNames,
+        'variantSerialNumbers': variantSerialNumbers,
         'shopName': shopController.selectedShop?.value.shopname ?? 'Shop Name',
         'shopAddress': '', // ShopModel doesn't have address field
         'shopPhone': '', // ShopModel doesn't have phoneNumber field
         'cashierName': userController.currentUser.value.fullName,
+        'salesmanName': salesmanName,
         'softwareCompanyName':
             shopController.selectedShop?.value.softwareCompanyName ?? 'OMGz',
         'softwareWebsiteLink':
@@ -276,10 +348,15 @@ class _ReceiptReportPageState extends State<ReceiptReportPage> {
     final OrderModel order = params['order'];
     final CustomerModel customer = params['customer'];
     final AddressModel address = params['address'];
+    final Map<int, String> productNames =
+        Map<int, String>.from(params['productNames'] ?? {});
+    final Map<int, String> variantSerialNumbers =
+        Map<int, String>.from(params['variantSerialNumbers'] ?? {});
     final String shopName = params['shopName'];
     final String shopAddress = params['shopAddress'];
     final String shopPhone = params['shopPhone'];
     final String cashierName = params['cashierName'];
+    final String salesmanName = params['salesmanName'] ?? '';
     final String softwareCompanyName = params['softwareCompanyName'];
     final String softwareWebsiteLink = params['softwareWebsiteLink'];
     final String softwareContactNo = params['softwareContactNo'];
@@ -288,11 +365,15 @@ class _ReceiptReportPageState extends State<ReceiptReportPage> {
     try {
       final pdf = pw.Document();
 
+      // Calculate the absolute commission value from percentage
+      // order.salesmanComission contains percentage (e.g., 3.0 for 3%)
+      // Convert to absolute value: (percentage * subTotal) / 100
+      double absoluteCommission =
+          (order.salesmanComission * order.subTotal) / 100;
+
       // Calculate receipt net total from subTotal plus fees
-      double receiptNetTotal = order.subTotal +
-          order.tax +
-          order.shippingFee +
-          order.salesmanComission;
+      double receiptNetTotal =
+          order.subTotal + order.tax + order.shippingFee + absoluteCommission;
 
       pdf.addPage(
         pw.Page(
@@ -340,22 +421,14 @@ class _ReceiptReportPageState extends State<ReceiptReportPage> {
               pw.SizedBox(height: 8),
 
               // Order Information
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Text(
+            
+               pw.Text(
                     'Order #${order.orderId}',
                     style: pw.TextStyle(
                       fontSize: 16,
                       fontWeight: pw.FontWeight.bold,
                     ),
                   ),
-                  pw.Text(
-                    'Date: ${order.orderDate}',
-                    style: const pw.TextStyle(fontSize: 12),
-                  ),
-                ],
-              ),
               pw.SizedBox(height: 8),
 
               // Customer Information
@@ -388,6 +461,11 @@ class _ReceiptReportPageState extends State<ReceiptReportPage> {
                         'Address: ${address.location}',
                         style: const pw.TextStyle(fontSize: 12),
                       ),
+                    if (salesmanName.isNotEmpty)
+                      pw.Text(
+                        'Salesman: $salesmanName',
+                        style: const pw.TextStyle(fontSize: 12),
+                      ),
                   ],
                 ),
               ),
@@ -417,7 +495,8 @@ class _ReceiptReportPageState extends State<ReceiptReportPage> {
                   for (var item in order.orderItems ?? [])
                     pw.TableRow(
                       children: [
-                        _tableCell('Product ID: ${item.productId}'),
+                        _tableCell(_getProductDisplayName(
+                            item, productNames, variantSerialNumbers)),
                         _tableCell('${item.quantity} ${item.unit}'),
                         _tableCell(item.price.toStringAsFixed(2)),
                         _tableCell(
@@ -444,8 +523,8 @@ class _ReceiptReportPageState extends State<ReceiptReportPage> {
                           _totalRow('Tax:', order.tax.toStringAsFixed(2)),
                           _totalRow('Shipping:',
                               order.shippingFee.toStringAsFixed(2)),
-                          _totalRow('Commission:',
-                              order.salesmanComission.toStringAsFixed(2)),
+                          _totalRow('Salesman Commission:',
+                              '${absoluteCommission.toStringAsFixed(2)}(${order.salesmanComission.toStringAsFixed(1)}%)'),
                           pw.Divider(),
                           _totalRow(
                               'Total:', receiptNetTotal.toStringAsFixed(2),
@@ -590,6 +669,26 @@ class _ReceiptReportPageState extends State<ReceiptReportPage> {
         ],
       ),
     );
+  }
+
+  static String _getProductDisplayName(
+    OrderItemModel item,
+    Map<int, String> productNames,
+    Map<int, String> variantSerialNumbers,
+  ) {
+    // Get the product name
+    String productName =
+        productNames[item.productId] ?? 'Product ID: ${item.productId}';
+
+    // If it's a serialized product (has variantId), add serial number
+    if (item.variantId != null) {
+      String serialNumber = variantSerialNumbers[item.variantId!] ?? '';
+      if (serialNumber.isNotEmpty) {
+        return '$productName ($serialNumber)';
+      }
+    }
+
+    return productName;
   }
 }
 

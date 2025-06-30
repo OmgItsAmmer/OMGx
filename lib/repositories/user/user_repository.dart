@@ -1,18 +1,13 @@
-import 'dart:io';
 
 import 'package:admin_dashboard_v3/Models/user/user_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../main.dart';
 
-import '../../Models/customer/customer_model.dart';
 import '../../utils/exceptions/platform_exceptions.dart';
-import '../authentication/authicatioon_repository.dart';
 
 class UserRespository extends GetxController {
   static UserRespository get instance => Get.find();

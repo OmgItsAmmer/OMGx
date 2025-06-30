@@ -22,6 +22,15 @@ class ProductController extends GetxController {
   final productVariantsRepository = Get.put(ProductVariantsRepository());
   final MediaController mediaController = Get.find<MediaController>();
 
+  // Focus nodes for tab order
+  final FocusNode nameFocusNode = FocusNode();
+  final FocusNode descriptionFocusNode = FocusNode();
+  final FocusNode serialNumbersFocusNode = FocusNode();
+  final FocusNode basePriceFocusNode = FocusNode();
+  final FocusNode salePriceFocusNode = FocusNode();
+  final FocusNode stockFocusNode = FocusNode();
+  final FocusNode alertStockFocusNode = FocusNode();
+
   // Lists to store models
   RxList<ProductModel> allProducts = <ProductModel>[].obs;
   RxList<ProductVariantModel> currentProductVariants =
@@ -103,7 +112,7 @@ class ProductController extends GetxController {
 
   @override
   void onClose() {
-    // Dispose all text controllers to prevent memory leaks
+    // Dispose all text controllers and focus nodes to prevent memory leaks
     productName.dispose();
     productDescription.dispose();
     basePrice.dispose();
@@ -117,6 +126,15 @@ class ProductController extends GetxController {
     purchasePrice.dispose();
     variantSellingPrice.dispose();
     csvData.dispose();
+
+    // Dispose focus nodes
+    nameFocusNode.dispose();
+    descriptionFocusNode.dispose();
+    serialNumbersFocusNode.dispose();
+    basePriceFocusNode.dispose();
+    salePriceFocusNode.dispose();
+    stockFocusNode.dispose();
+    alertStockFocusNode.dispose();
 
     // Clear any cached data to prevent stale state
     currentProductVariants.clear();
@@ -329,15 +347,16 @@ class ProductController extends GetxController {
         description: productDescription.text.trim(),
         basePrice: basePrice.text.trim(),
         salePrice: salePrice.text.trim(),
-        stockQuantity:
-            (int.tryParse(stock.text.trim()) ?? 0),//not added if serial number is true
+        stockQuantity: (int.tryParse(stock.text.trim()) ??
+            0), //not added if serial number is true
         alertStock: int.tryParse(alertStock.text.trim()) ?? 0,
         brandID: selectedBrandId,
         categoryId: selectedCategoryId,
         hasSerialNumbers: hasSerialNumbers.value,
       );
 
-      final json = productModel.toJson(isUpdate: true, isSerial: hasSerialNumbers.value);
+      final json =
+          productModel.toJson(isUpdate: true, isSerial: hasSerialNumbers.value);
       debugPrint('Updating product with data: $json');
 
       await productRepository.updateProduct(json);
@@ -1056,5 +1075,25 @@ class ProductController extends GetxController {
 
     // Update the filtered variants list
     updateFilteredVariantsList();
+  }
+
+  Future<void> handleSave() async {
+    if (isUpdating.value) return;
+    isUpdating.value = true;
+    try {
+      if (productId.value == -1) {
+        await insertProduct();
+      } else {
+        await updateProduct();
+      }
+    } finally {
+      isUpdating.value = false;
+    }
+  }
+
+  void handleDiscard() {
+    if (isUpdating.value) return;
+    cleanProductDetail();
+    Get.back();
   }
 }

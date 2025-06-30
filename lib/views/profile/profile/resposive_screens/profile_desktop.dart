@@ -5,6 +5,7 @@ import 'package:admin_dashboard_v3/controllers/user/user_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
@@ -175,6 +176,10 @@ class ProfileDetails extends StatelessWidget {
                     // salesController.customerCNICController.value,
                     validator: (value) =>
                         TValidator.validateEmptyText('Phone Number', value),
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                    ],
                     style: Theme.of(context).textTheme.bodyMedium,
                     decoration: const InputDecoration(
                       labelText: 'Phone Number',
