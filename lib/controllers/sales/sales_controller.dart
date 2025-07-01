@@ -1540,7 +1540,7 @@ class SalesController extends GetxController {
         .firstWhere((user) => user.fullName == val);
 
     await addressController.fetchEntityAddresses(
-        customerController.selectedCustomer.value.customerId!, 'Customer');
+        customerController.selectedCustomer.value.customerId!, EntityType.customer);
 
     entityId.value = customerController.selectedCustomer.value.customerId!;
 

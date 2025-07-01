@@ -29,7 +29,7 @@ class SalesmanRow extends DataTableSource {
     return DataRow2(
         onTap: () async {
           await addressController.fetchEntityAddresses(
-              salesman.salesmanId!, 'Salesman');
+              salesman.salesmanId!, EntityType.salesman);
           await orderController.fetchEntityOrders(
               salesman.salesmanId!, 'Salesman');
           orderController.setRecentOrderDay();

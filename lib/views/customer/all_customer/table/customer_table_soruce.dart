@@ -3,10 +3,10 @@ import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart
 import 'package:admin_dashboard_v3/controllers/orders/orders_controller.dart';
 import 'package:admin_dashboard_v3/routes/routes.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
+import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 
 import '../../../../common/widgets/icons/table_action_icon_buttons.dart';
 
@@ -31,7 +31,7 @@ class CustomerRow extends DataTableSource {
     return DataRow2(
         onTap: () async {
           await addressController.fetchEntityAddresses(
-              customer.customerId!, 'Customer');
+              customer.customerId!, EntityType.customer);
           await orderController.fetchEntityOrders(
               customer.customerId!, 'Customer');
           orderController.currentOrders.refresh();
@@ -78,7 +78,7 @@ class CustomerRow extends DataTableSource {
             delete: true,
             onEditPressed: () async {
               await addressController.fetchEntityAddresses(
-                  customer.customerId!, 'Customer');
+                  customer.customerId!, EntityType.customer);
               customerController.setCustomerDetail(customer);
               // productImagesController.setDesiredImage(MediaCategory.customers, customer.customerId);
               Get.toNamed(TRoutes.addCustomer, arguments: customer);

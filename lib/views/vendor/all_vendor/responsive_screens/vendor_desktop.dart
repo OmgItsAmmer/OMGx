@@ -1,7 +1,7 @@
-import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
+import 'package:admin_dashboard_v3/Models/vendor/vendor_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/common/widgets/icons/t_circular_icon.dart';
-import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
+import 'package:admin_dashboard_v3/controllers/vendor/vendor_controller.dart';
 import 'package:admin_dashboard_v3/controllers/table/table_search_controller.dart';
 import 'package:admin_dashboard_v3/routes/routes.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
@@ -10,20 +10,20 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
-import '../table/customer_table.dart';
+import '../table/vendor_table.dart';
 
-class CustomerDesktop extends StatelessWidget {
-  const CustomerDesktop({super.key});
+class VendorDesktop extends StatelessWidget {
+  const VendorDesktop({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Use a unique instance of TableSearchController for customers
-    if (!Get.isRegistered<TableSearchController>(tag: 'customers')) {
-      Get.put(TableSearchController(), tag: 'customers');
+    // Use a unique instance of TableSearchController for vendors
+    if (!Get.isRegistered<TableSearchController>(tag: 'vendors')) {
+      Get.put(TableSearchController(), tag: 'vendors');
     }
     final tableSearchController =
-        Get.find<TableSearchController>(tag: 'customers');
-    final customerController = Get.find<CustomerController>();
+        Get.find<TableSearchController>(tag: 'vendors');
+    final vendorController = Get.find<VendorController>();
 
     return Expanded(
       child: SizedBox(
@@ -36,7 +36,7 @@ class CustomerDesktop extends StatelessWidget {
               children: [
                 //Title
                 Text(
-                  'Customers',
+                  'Vendors',
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 const SizedBox(
@@ -48,7 +48,6 @@ class CustomerDesktop extends StatelessWidget {
 
                 //Table
                 TRoundedContainer(
-              
                   padding: const EdgeInsets.all(TSizes.defaultSpace),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -60,11 +59,11 @@ class CustomerDesktop extends StatelessWidget {
                             width: 200,
                             child: ElevatedButton(
                                 onPressed: () {
-                                  Get.toNamed(TRoutes.addCustomer,
-                                      arguments: CustomerModel.empty());
+                                  Get.toNamed(TRoutes.addVendor,
+                                      arguments: VendorModel.empty());
                                 },
                                 child: Text(
-                                  'Add New Customer',
+                                  'Add New Vendor',
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodyMedium!
@@ -95,7 +94,7 @@ class CustomerDesktop extends StatelessWidget {
                                 backgroundColor: TColors.primary,
                                 color: TColors.white,
                                 onPressed: () {
-                                  customerController.refreshCustomers();
+                                  vendorController.refreshVendors();
                                 },
                               ),
                             ],
@@ -105,7 +104,7 @@ class CustomerDesktop extends StatelessWidget {
                       const SizedBox(
                         height: TSizes.spaceBtwSections,
                       ),
-                      const CustomerTable(),
+                      const VendorTable(),
                     ],
                   ),
                 )

@@ -1,3 +1,4 @@
+import 'package:admin_dashboard_v3/controllers/account_book/account_book_controller.dart';
 import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
 import 'package:admin_dashboard_v3/controllers/brands/brand_controller.dart';
 import 'package:admin_dashboard_v3/controllers/dashboard/dashboard_controoler.dart';
@@ -10,6 +11,7 @@ import 'package:admin_dashboard_v3/controllers/salesman/salesman_controller.dart
 import 'package:admin_dashboard_v3/controllers/search/search_controller.dart';
 import 'package:admin_dashboard_v3/controllers/shop/shop_controller.dart';
 import 'package:admin_dashboard_v3/controllers/user/user_controller.dart';
+import 'package:admin_dashboard_v3/controllers/vendor/vendor_controller.dart';
 import 'package:admin_dashboard_v3/utils/network/supabase_network_manager.dart';
 import 'package:get/get.dart';
 
@@ -28,13 +30,15 @@ class GeneralBindings extends Bindings {
 
     // Register controllers
     Get.put(UserController());
-    Get.put(ProductController());
+     Get.put(ProductController());
     Get.put(OrderController());
     Get.put(CustomerController());
+    Get.put(VendorController());
     Get.put(SalesController());
     Get.put(InstallmentController());
     Get.put(ExpenseController());
     Get.put(DashboardController());
+    Get.put(AccountBookController());
 
     Get.put(AddressController());
     Get.put(SalesmanController());

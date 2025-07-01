@@ -1,27 +1,28 @@
-import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
+import 'package:admin_dashboard_v3/Models/vendor/vendor_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/controllers/orders/orders_controller.dart';
+import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../table/customer_order_table.dart';
-import '../widgets/customer_shipping_info.dart';
-import '../widgets/user_info.dart';
+import '../table/vendor_order_table.dart';
+import '../widgets/entity_shipping_info.dart';
+import '../widgets/entity_advance_info_card.dart';
 
-class CustomerDetailDesktop extends StatelessWidget {
-  const CustomerDetailDesktop({super.key, required this.customerModel});
-  final CustomerModel customerModel;
+class VendorDetailDesktop extends StatelessWidget {
+  const VendorDetailDesktop({super.key, required this.vendorModel});
+  final VendorModel vendorModel;
 
   @override
   Widget build(BuildContext context) {
-    // Initialize the order controller and fetch orders for this customer
+    // Initialize the order controller and fetch orders for this vendor
     final OrderController orderController = Get.find<OrderController>();
 
-    // Fetch orders for this customer when the view is built
+    // Fetch orders for this vendor when the view is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (customerModel.customerId != null) {
-        orderController.fetchEntityOrders(
-            customerModel.customerId!, 'Customer');
+      if (vendorModel.vendorId != null) {
+       // orderController.fetchEntityOrders(vendorModel.vendorId!, 'Vendor'); //T
+       //TODO : fetch purchases
         orderController.setRecentOrderDay();
         orderController.setAverageTotalAmount();
       }
@@ -37,7 +38,7 @@ class CustomerDetailDesktop extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Customer Detail",
+                  "Vendor Detail",
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 const SizedBox(
@@ -50,17 +51,19 @@ class CustomerDetailDesktop extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          //user Info
-                          UserInfo(
-                            customerModel: customerModel,
+                          //vendor Info
+                          EntityAdvanceInfoCard(
+                            model: vendorModel,
+                            entityType: EntityType.vendor,
                           ),
                           const SizedBox(
                             height: TSizes.spaceBtwSections,
                           ),
 
                           //shipping info
-                          CustomerShippingInfo(
-                            customerModel: customerModel,
+                          EntityShippingInfo(
+                            model: vendorModel,
+                            entityType: EntityType.vendor,
                           ),
                         ],
                       ),
@@ -84,7 +87,7 @@ class CustomerDetailDesktop extends StatelessWidget {
                                 const SizedBox(
                                   height: TSizes.spaceBtwSections,
                                 ),
-                                const CustomerOrderTable(),
+                                const VendorOrderTable(),
                               ],
                             )))
                   ],

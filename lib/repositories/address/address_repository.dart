@@ -1,4 +1,5 @@
 import 'package:admin_dashboard_v3/Models/address/address_model.dart';
+import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
@@ -18,9 +19,7 @@ class AddressRepository extends GetxController {
       final addressList = data.map((item) {
         return AddressModel.fromJson(item);
       }).toList();
-      if (kDebugMode) {
-        print(addressList[1].country);
-      }
+
       return addressList;
     } catch (e) {
       TLoaders.warningSnackBar(title: "Fetch Address", message: e.toString());
@@ -30,30 +29,28 @@ class AddressRepository extends GetxController {
 
   //fetch
   Future<List<AddressModel>> fetchAddressTableForSpecificEntity(
-      int entityId, String entityName) async {
+      int entityId, EntityType entityType) async {
     try {
       final String columnName;
 
-      // Determine the column name based on the entityName
-      switch (entityName) {
-        case 'Customer':
+      // Determine the column name based on the EntityType
+      switch (entityType) {
+        case EntityType.customer:
           columnName = 'customer_id';
           break;
-        case 'User':
+        case EntityType.user:
           columnName = 'user_id';
           break;
-        case 'Salesman':
-          columnName = 'salesmanId';
+        case EntityType.salesman:
+          columnName = 'salesman_id';
           break;
         default:
-          throw Exception('Invalid entity name: $entityName');
+          throw Exception('Invalid entity type: $entityType');
       }
 
       // Fetch data from the 'addresses' table using the appropriate column name
-      final data = await supabase
-          .from('addresses')
-          .select()
-          .eq(columnName, entityId); // Filter by the appropriate column
+      final data =
+          await supabase.from('addresses').select().eq(columnName, entityId);
 
       // Convert the fetched data into a list of AddressModel objects
       final addressList = data.map((item) {
@@ -78,9 +75,7 @@ class AddressRepository extends GetxController {
       final addressList = data.map((item) {
         return AddressModel.fromJson(item);
       }).toList();
-      if (kDebugMode) {
-        print(addressList[1].country);
-      }
+
       return addressList;
     } catch (e) {
       TLoaders.warningSnackBar(title: "Fetch Address", message: e.toString());

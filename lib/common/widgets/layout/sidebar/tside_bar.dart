@@ -169,6 +169,11 @@ class TSideBar extends StatelessWidget {
                       route: TRoutes.customer,
                     ),
                     const TMenuItem(
+                      icon: Iconsax.people,
+                      itemName: 'Vendors',
+                      route: TRoutes.vendor,
+                    ),
+                    const TMenuItem(
                       icon: Iconsax.profile_2user,
                       itemName: 'Salesman',
                       route: TRoutes.salesman,
@@ -183,6 +188,12 @@ class TSideBar extends StatelessWidget {
                       itemName: 'Categories',
                       route: TRoutes.category,
                     ),
+                    const TMenuItem(
+                      icon: Iconsax.folder_open,
+                      itemName: 'Account Book',
+                      route: TRoutes.accountBook,
+                    ),
+
 
                     Text(
                       'OTHER',

@@ -1,4 +1,4 @@
-import 'package:admin_dashboard_v3/Models/orders/order_item_model.dart';
+import '../../../../Models/orders/order_item_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/controllers/orders/orders_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
@@ -8,12 +8,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
-class CustomerOrderRows extends DataTableSource {
+class VendorOrderRows extends DataTableSource {
   final OrderController orderController = Get.find();
   final List<OrderModel> currentOrders;
   final int ordersCount;
 
-  CustomerOrderRows({
+  VendorOrderRows({
     required this.currentOrders,
     required this.ordersCount,
   });
@@ -76,19 +76,6 @@ class CustomerOrderRows extends DataTableSource {
       },
     );
   }
-
-  // Color _getStatusColor(String status) {
-  //   switch (status.toLowerCase()) {
-  //     case 'completed':
-  //       return Colors.green;
-  //     case 'pending':
-  //       return Colors.orange;
-  //     case 'cancelled':
-  //       return Colors.red;
-  //     default:
-  //       return Colors.grey;
-  //   }
-  // }
 
   @override
   bool get isRowCountApproximate => false;

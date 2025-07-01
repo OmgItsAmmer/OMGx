@@ -4,10 +4,10 @@ import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../paginated_data_table.dart';
-import 'customer_order_table_source.dart';
+import 'vendor_order_table_source.dart';
 
-class CustomerOrderTable extends StatelessWidget {
-  const CustomerOrderTable({super.key});
+class VendorOrderTable extends StatelessWidget {
+  const VendorOrderTable({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class CustomerOrderTable extends StatelessWidget {
           const DataColumn2(label: Text('Amount')),
           const DataColumn2(label: Text('Action'), fixedWidth: 100),
         ],
-        source: CustomerOrderRows(
+        source: VendorOrderRows(
           currentOrders: orderController.currentOrders,
           ordersCount: orderController.currentOrders.length,
         ),

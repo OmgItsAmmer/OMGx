@@ -207,7 +207,7 @@ class SalesmanController extends GetxController {
 
       // Fetch related data
       await Get.find<AddressController>()
-          .fetchEntityAddresses(salesmanId, 'Salesman');
+          .fetchEntityAddresses(salesmanId, EntityType.salesman);
       await Get.find<OrderController>()
           .fetchEntityOrders(salesmanId, 'Salesman');
 
@@ -265,7 +265,7 @@ class SalesmanController extends GetxController {
       );
 
       // Save address for the salesman
-      await AddressController.instance.saveAddress(salesmanId, 'Salesman');
+      await AddressController.instance.saveAddress(salesmanId, EntityType.salesman);
 
       // Add to local lists if needed
       allSalesman.add(salesmanModel);
@@ -330,7 +330,7 @@ class SalesmanController extends GetxController {
       );
 
       // Address update
-      await AddressController.instance.saveAddress(salesmanId, 'Salesman');
+      await AddressController.instance.saveAddress(salesmanId, EntityType.salesman);
 
       // ✅ Update locally in observable list
       int index = allSalesman.indexWhere((s) => s.salesmanId == salesmanId);

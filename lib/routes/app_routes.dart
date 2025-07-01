@@ -1,5 +1,6 @@
 import 'package:admin_dashboard_v3/routes/routes.dart';
 import 'package:admin_dashboard_v3/routes/routes_MIDDLEWARE.dart';
+import 'package:admin_dashboard_v3/views/account_book/account_book.dart';
 import 'package:admin_dashboard_v3/views/brands/all_brands/brands.dart';
 import 'package:admin_dashboard_v3/views/category/all_categories/category.dart';
 import 'package:admin_dashboard_v3/views/expenses/expenses.dart';
@@ -27,6 +28,9 @@ import '../views/salesman/all_salesman/salesman.dart';
 import '../views/salesman/salesman_detail/saleman_details.dart';
 import '../views/splashScreen/splash_screen.dart';
 import '../views/store/store.dart';
+import '../views/vendor/add_vendor/add_vendor.dart';
+import '../views/vendor/all_vendor/all_vendor.dart';
+import '../views/vendor/vendor_detail/vendor_detail.dart';
 
 class TAppRoutes {
   static final List<GetPage> pages = [
@@ -151,13 +155,30 @@ class TAppRoutes {
         page: () => const ExpenseScreen(),
         middlewares: [TRouteMiddleware()]),
 
-      GetPage(
+    GetPage(
         name: TRoutes.UnkownRoute,
         page: () => const UnkownRoute(),
         middlewares: [TRouteMiddleware()]),
-        
-   
 
-  
+    //Vendor Screens
+    GetPage(
+        name: TRoutes.vendor,
+        page: () => const AllVendorScreen(),
+        middlewares: [TRouteMiddleware()]),
+    GetPage(
+        name: TRoutes.vendorDetails,
+        page: () => const VendorDetailScreen(),
+        middlewares: [TRouteMiddleware()]),
+
+    GetPage(
+        name: TRoutes.addVendor,
+        page: () => const AddVendorScreen(),
+        middlewares: [TRouteMiddleware()]),
+
+    //Account Book Screens
+    GetPage(
+        name: TRoutes.accountBook,
+        page: () => const AccountBookScreen(),
+        middlewares: [TRouteMiddleware()]),
   ];
 }

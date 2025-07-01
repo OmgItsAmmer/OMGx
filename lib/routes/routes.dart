@@ -4,7 +4,6 @@ class TRoutes {
   static const resetPassword = '/login';
   static const dashboard = '/dashboard';
 
-
   static const String responsiveScreenDesignScreen = '/ResponsiveDesignScreen/';
   static const firstScreen = '/';
 
@@ -31,6 +30,11 @@ class TRoutes {
   static const customer = '/customer';
   static const customerDetails = '/customerDetails';
   static const addCustomer = '/addCustomer';
+
+  //Vendor Screens
+  static const vendor = '/vendor';
+  static const vendorDetails = '/vendorDetails';
+  static const addVendor = '/addVendor';
 
   //Salesman Screens
   static const salesman = '/salesman';
@@ -64,4 +68,7 @@ class TRoutes {
   static const UnkownRoute = '/UnkowntScreen';
 
   static const splashScreen = '/splashScreen';
+
+  // Account Book
+  static const accountBook = '/account-book';
 }

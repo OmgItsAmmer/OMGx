@@ -1,8 +1,8 @@
-import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
+import 'package:admin_dashboard_v3/Models/vendor/vendor_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/common/widgets/icons/t_circular_icon.dart';
 import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
-import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
+import 'package:admin_dashboard_v3/controllers/vendor/vendor_controller.dart';
 import 'package:admin_dashboard_v3/controllers/media/media_controller.dart';
 import 'package:admin_dashboard_v3/controllers/table/table_search_controller.dart';
 import 'package:admin_dashboard_v3/routes/routes.dart';
@@ -13,19 +13,19 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
-class CustomerMobile extends StatelessWidget {
-  const CustomerMobile({super.key});
+class VendorMobile extends StatelessWidget {
+  const VendorMobile({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Use a unique instance of TableSearchController for customers
-    if (!Get.isRegistered<TableSearchController>(tag: 'customers')) {
-      Get.put(TableSearchController(), tag: 'customers');
+    // Use a unique instance of TableSearchController for vendors
+    if (!Get.isRegistered<TableSearchController>(tag: 'vendors')) {
+      Get.put(TableSearchController(), tag: 'vendors');
     }
 
     final tableSearchController =
-        Get.find<TableSearchController>(tag: 'customers');
-    final customerController = Get.find<CustomerController>();
+        Get.find<TableSearchController>(tag: 'vendors');
+    final vendorController = Get.find<VendorController>();
     final mediaController = Get.find<MediaController>();
 
     return SingleChildScrollView(
@@ -36,7 +36,7 @@ class CustomerMobile extends StatelessWidget {
           children: [
             // Title
             Text(
-              'Customers',
+              'Vendors',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(height: TSizes.spaceBtwItems),
@@ -52,11 +52,11 @@ class CustomerMobile extends StatelessWidget {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        Get.toNamed(TRoutes.addCustomer,
-                            arguments: CustomerModel.empty());
+                        Get.toNamed(TRoutes.addVendor,
+                            arguments: VendorModel.empty());
                       },
                       child: Text(
-                        'Add New Customer',
+                        'Add New Vendor',
                         style: Theme.of(context)
                             .textTheme
                             .bodyMedium!
@@ -87,7 +87,7 @@ class CustomerMobile extends StatelessWidget {
                         backgroundColor: TColors.primary,
                         color: TColors.white,
                         onPressed: () {
-                          customerController.refreshCustomers();
+                          vendorController.refreshVendors();
                         },
                       ),
                     ],
@@ -97,31 +97,30 @@ class CustomerMobile extends StatelessWidget {
             ),
             const SizedBox(height: TSizes.spaceBtwItems),
 
-            // Customer Cards List
+            // Vendor Cards List
             Obx(() {
               // Get the search term from the controller
               String searchTerm =
                   tableSearchController.searchTerm.value.toLowerCase();
 
-              // Create a filtered customers list based on search term
-              var filteredCustomers = [
-                ...customerController.allCustomers
+              // Create a filtered vendors list based on search term
+              var filteredVendors = [
+                ...vendorController.allVendors
               ]; // Create a copy
               if (searchTerm.isNotEmpty) {
-                filteredCustomers =
-                    customerController.allCustomers.where((customer) {
-                  return customer.fullName.toLowerCase().contains(searchTerm) ||
-                      customer.email.toLowerCase().contains(searchTerm) ||
-                      customer.phoneNumber.toLowerCase().contains(searchTerm);
+                filteredVendors = vendorController.allVendors.where((vendor) {
+                  return vendor.fullName.toLowerCase().contains(searchTerm) ||
+                      vendor.email.toLowerCase().contains(searchTerm) ||
+                      vendor.phoneNumber.toLowerCase().contains(searchTerm);
                 }).toList();
               }
 
-              if (filteredCustomers.isEmpty) {
+              if (filteredVendors.isEmpty) {
                 return Center(
                   child: Padding(
                     padding: const EdgeInsets.all(TSizes.defaultSpace),
                     child: Text(
-                      'No customers found',
+                      'No vendors found',
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                   ),
@@ -131,15 +130,15 @@ class CustomerMobile extends StatelessWidget {
               return ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: filteredCustomers.length,
+                itemCount: filteredVendors.length,
                 itemBuilder: (context, index) {
-                  final customer = filteredCustomers[index];
-                  return CustomerCard(
-                    customer: customer,
+                  final vendor = filteredVendors[index];
+                  return VendorCard(
+                    vendor: vendor,
                     mediaController: mediaController,
                     onView: () async {
-                      await customerController
-                          .prepareCustomerDetails(customer.customerId);
+                      await vendorController
+                          .prepareVendorDetails(vendor.vendorId);
                     },
                   );
                 },
@@ -152,24 +151,24 @@ class CustomerMobile extends StatelessWidget {
   }
 }
 
-class CustomerCard extends StatelessWidget {
-  final CustomerModel customer;
+class VendorCard extends StatelessWidget {
+  final VendorModel vendor;
   final MediaController mediaController;
   final VoidCallback onView;
 
-  const CustomerCard({
+  const VendorCard({
     Key? key,
-    required this.customer,
+    required this.vendor,
     required this.mediaController,
     required this.onView,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Safely get customer ID for image retrieval
-    final int customerId = customer.customerId is int
-        ? customer.customerId as int
-        : int.tryParse(customer.customerId?.toString() ?? '-1') ?? -1;
+    // Safely get vendor ID for image retrieval
+    final int vendorId = vendor.vendorId is int
+        ? vendor.vendorId as int
+        : int.tryParse(vendor.vendorId?.toString() ?? '-1') ?? -1;
 
     return TRoundedContainer(
       margin: const EdgeInsets.only(bottom: TSizes.spaceBtwItems),
@@ -177,15 +176,15 @@ class CustomerCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Customer info row
+          // Vendor info row
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Customer image
+              // Vendor image
               FutureBuilder<String?>(
                 future: mediaController.fetchMainImage(
-                  customerId,
-                  MediaCategory.customers.toString().split('.').last,
+                  vendorId,
+                  MediaCategory.shop.toString().split('.').last,
                 ),
                 builder: (context, snapshot) {
                   return Container(
@@ -198,112 +197,94 @@ class CustomerCard extends StatelessWidget {
                         ? TRoundedImage(
                             width: 60,
                             height: 60,
-                            isNetworkImage: true,
+                            borderRadius: TSizes.sm,
                             imageurl: snapshot.data!,
+                            isNetworkImage: true,
                           )
-                        : const CircleAvatar(
-                            radius: 30,
-                            child: Icon(
+                        : Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: TColors.grey.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(TSizes.sm),
+                            ),
+                            child: const Icon(
                               Iconsax.user,
+                              color: TColors.darkGrey,
                               size: 30,
-                              color: TColors.white,
                             ),
                           ),
                   );
                 },
               ),
-              const SizedBox(width: TSizes.sm),
+              const SizedBox(width: TSizes.spaceBtwItems),
 
-              // Customer name and details
+              // Vendor details
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      customer.fullName,
-                      style: Theme.of(context).textTheme.titleMedium,
+                      vendor.fullName,
+                      style: Theme.of(context).textTheme.titleMedium!.apply(
+                            color: TColors.primary,
+                          ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: TSizes.xs),
-                    Row(
-                      children: [
-                        const Icon(
-                          Iconsax.sms,
-                          size: 14,
-                          color: TColors.white,
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            customer.email,
-                            style: Theme.of(context).textTheme.bodySmall,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      vendor.email,
+                      style: Theme.of(context).textTheme.bodySmall,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: TSizes.xs / 2),
+                    Text(
+                      vendor.phoneNumber,
+                      style: Theme.of(context).textTheme.bodySmall,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ),
             ],
           ),
+          const SizedBox(height: TSizes.spaceBtwItems),
 
-          const SizedBox(height: TSizes.sm),
-          const Divider(),
-
-          // Contact details
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: TSizes.xs),
-            child: Row(
-              children: [
-                const Icon(
-                  Iconsax.call,
-                  size: 16,
-                  color: TColors.white,
+          // Action buttons
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: onView,
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: TSizes.sm),
+                  ),
+                  child: const Text('View Details'),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  customer.phoneNumber,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ],
-            ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: TSizes.xs),
-            child: Row(
-              children: [
-                const Icon(
-                  Iconsax.card,
-                  size: 16,
-                  color: TColors.white,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  customer.cnic.isNotEmpty ? customer.cnic : 'No CNIC provided',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: TSizes.sm),
-
-          // View details button
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: onView,
-              icon: const Icon(Iconsax.eye, color: TColors.white),
-              label: const Text('View Details'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: TColors.primary,
-                foregroundColor: TColors.white,
               ),
-            ),
+              const SizedBox(width: TSizes.sm),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    Get.find<VendorController>().selectedVendor.value = vendor;
+                    Get.toNamed(TRoutes.addVendor, arguments: vendor);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: TSizes.sm),
+                  ),
+                  child: Text(
+                    'Edit',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium!
+                        .apply(color: TColors.white),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

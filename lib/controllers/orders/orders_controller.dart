@@ -180,7 +180,7 @@ class OrderController extends GetxController {
 
       // Fetch customer addresses
       addressController.fetchEntityAddresses(
-          order.customerId ?? -1, 'Customer');
+          order.customerId ?? -1, EntityType.customer);
 
       // Set remaining amount for the order
       orderController.setRemainingAmount(order);

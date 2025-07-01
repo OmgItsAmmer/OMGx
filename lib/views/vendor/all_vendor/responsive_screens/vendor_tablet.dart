@@ -1,7 +1,7 @@
-import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
+import 'package:admin_dashboard_v3/Models/vendor/vendor_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/common/widgets/icons/t_circular_icon.dart';
-import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
+import 'package:admin_dashboard_v3/controllers/vendor/vendor_controller.dart';
 import 'package:admin_dashboard_v3/controllers/table/table_search_controller.dart';
 import 'package:admin_dashboard_v3/routes/routes.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
@@ -10,20 +10,20 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
-import '../table/customer_table.dart';
+import '../table/vendor_table.dart';
 
-class CustomerTablet extends StatelessWidget {
-  const CustomerTablet({super.key});
+class VendorTablet extends StatelessWidget {
+  const VendorTablet({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Use a unique instance of TableSearchController for customers
-    if (!Get.isRegistered<TableSearchController>(tag: 'customers')) {
-      Get.put(TableSearchController(), tag: 'customers');
+    // Use a unique instance of TableSearchController for vendors
+    if (!Get.isRegistered<TableSearchController>(tag: 'vendors')) {
+      Get.put(TableSearchController(), tag: 'vendors');
     }
     final tableSearchController =
-        Get.find<TableSearchController>(tag: 'customers');
-    final customerController = Get.find<CustomerController>();
+        Get.find<TableSearchController>(tag: 'vendors');
+    final vendorController = Get.find<VendorController>();
 
     return SingleChildScrollView(
       child: Padding(
@@ -33,7 +33,7 @@ class CustomerTablet extends StatelessWidget {
           children: [
             // Title
             Text(
-              'Customers',
+              'Vendors',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(height: TSizes.spaceBtwItems),
@@ -53,11 +53,11 @@ class CustomerTablet extends StatelessWidget {
                         width: 200,
                         child: ElevatedButton(
                           onPressed: () {
-                            Get.toNamed(TRoutes.addCustomer,
-                                arguments: CustomerModel.empty());
+                            Get.toNamed(TRoutes.addVendor,
+                                arguments: VendorModel.empty());
                           },
                           child: Text(
-                            'Add New Customer',
+                            'Add New Vendor',
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium!
@@ -88,7 +88,7 @@ class CustomerTablet extends StatelessWidget {
                             backgroundColor: TColors.primary,
                             color: TColors.white,
                             onPressed: () {
-                              customerController.refreshCustomers();
+                              vendorController.refreshVendors();
                             },
                           ),
                         ],
@@ -97,12 +97,12 @@ class CustomerTablet extends StatelessWidget {
                   ),
                   const SizedBox(height: TSizes.spaceBtwItems),
 
-                  // Customer table with horizontal scroll for tablet
+                  // Vendor table with horizontal scroll for tablet
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: SizedBox(
                       width: MediaQuery.of(context).size.width - 2 * TSizes.md,
-                      child: const CustomerTable(),
+                      child: const VendorTable(),
                     ),
                   ),
                 ],

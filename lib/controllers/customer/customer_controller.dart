@@ -9,10 +9,7 @@ import '../../Models/customer/customer_model.dart';
 import '../../common/widgets/loaders/tloaders.dart';
 import '../../utils/constants/enums.dart';
 import '../../routes/routes.dart';
-import '../product/product_images_controller.dart';
 import '../orders/orders_controller.dart';
-import '../address/address_controller.dart';
-import '../media/media_controller.dart';
 
 class CustomerController extends GetxController {
   static CustomerController get instance => Get.find();
@@ -113,7 +110,7 @@ class CustomerController extends GetxController {
       await mediaController.imageAssigner(
           customerId, MediaCategory.customers.toString().split('.').last, true);
 
-      await AddressController.instance.saveAddress(customerId, 'Customer');
+      await AddressController.instance.saveAddress(customerId, EntityType.customer);
 
       customerModel.customerId = customerId;
 
@@ -164,7 +161,7 @@ class CustomerController extends GetxController {
       await mediaController.imageAssigner(
           customerId, MediaCategory.customers.toString().split('.').last, true);
 
-      await AddressController.instance.saveAddress(customerId, 'Customer');
+      await AddressController.instance.saveAddress(customerId, EntityType.customer);
       //locally adding in table
       allCustomers.add(customerModel);
       if (kDebugMode) {
@@ -302,7 +299,7 @@ class CustomerController extends GetxController {
 
       // Fetch related data
       await Get.find<AddressController>()
-          .fetchEntityAddresses(customerId, 'Customer');
+          .fetchEntityAddresses(customerId, EntityType.customer);
       await Get.find<OrderController>()
           .fetchEntityOrders(customerId, 'Customer');
 

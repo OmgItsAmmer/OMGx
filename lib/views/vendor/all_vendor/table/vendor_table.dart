@@ -3,40 +3,36 @@ import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../controllers/customer/customer_controller.dart';
-import '../../../../utils/device/device_utility.dart';
+import '../../../../controllers/vendor/vendor_controller.dart';
 import '../../../paginated_data_table.dart';
-import 'customer_table_soruce.dart';
+import 'vendor_table_soruce.dart';
 
-class CustomerTable extends StatelessWidget {
-  const CustomerTable({super.key});
+class VendorTable extends StatelessWidget {
+  const VendorTable({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final CustomerController customerController =
-        Get.find<CustomerController>();
+    final VendorController vendorController = Get.find<VendorController>();
 
-    // Use a unique instance of TableSearchController for customers
-    if (!Get.isRegistered<TableSearchController>(tag: 'customers')) {
-      Get.put(TableSearchController(), tag: 'customers');
+    // Use a unique instance of TableSearchController for vendors
+    if (!Get.isRegistered<TableSearchController>(tag: 'vendors')) {
+      Get.put(TableSearchController(), tag: 'vendors');
     }
     final tableSearchController =
-        Get.find<TableSearchController>(tag: 'customers');
+        Get.find<TableSearchController>(tag: 'vendors');
 
     return Obx(() {
       // Get the search term from the controller
       String searchTerm = tableSearchController.searchTerm.value.toLowerCase();
 
-      // Create a filtered customers list based on search term
-      var filteredCustomers = [
-        ...customerController.allCustomers
-      ]; // Create a copy
+      // Create a filtered vendors list based on search term
+      var filteredVendors = [...vendorController.allVendors]; // Create a copy
       if (searchTerm.isNotEmpty) {
-        filteredCustomers = customerController.allCustomers.where((customer) {
+        filteredVendors = vendorController.allVendors.where((vendor) {
           // Search using correct property names
-          return customer.fullName.toLowerCase().contains(searchTerm) ||
-              customer.email.toLowerCase().contains(searchTerm) ||
-              customer.phoneNumber.toLowerCase().contains(searchTerm);
+          return vendor.fullName.toLowerCase().contains(searchTerm) ||
+              vendor.email.toLowerCase().contains(searchTerm) ||
+              vendor.phoneNumber.toLowerCase().contains(searchTerm);
         }).toList();
       }
 
@@ -52,14 +48,14 @@ class CustomerTable extends StatelessWidget {
           // Add sorting logic here if needed
         },
         columns: const [
-          DataColumn2(label: Text('Customer'), tooltip: 'Customer Name'),
+          DataColumn2(label: Text('Vendor'), tooltip: 'Vendor Name'),
           DataColumn2(label: Text('Email'), tooltip: 'Email Address'),
           DataColumn2(label: Text('Phone Number'), tooltip: 'Contact Number'),
           DataColumn2(label: Text('Action'), fixedWidth: 100),
         ],
-        source: CustomerRow(
-          customerCount: filteredCustomers.length,
-          filteredCustomers: filteredCustomers,
+        source: VendorRow(
+          vendorCount: filteredVendors.length,
+          filteredVendors: filteredVendors,
         ),
       );
     });

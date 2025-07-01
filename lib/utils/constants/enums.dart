@@ -8,6 +8,13 @@ enum AppRole { admin, user }
 
 enum TransactionType { buy, sell }
 
+enum EntityType {
+  customer,
+  salesman,
+  vendor,
+  user,
+}
+
 enum ProductType { single, variable }
 
 enum ProductVisibility { published, hidden }

@@ -11,6 +11,8 @@ A comprehensive admin dashboard for business management built with Flutter and S
 - **Order Management**: Track and manage customer orders
 - **Product Management**: CRUD operations for products
 - **Customer Management**: Track customer information and purchase history
+- **Vendor Management**: Comprehensive vendor management with CRUD operations, address tracking, and order history
+- **Account Book Management**: Complete financial tracking system for incoming and outgoing payments with vendor, customer, and salesman integration
 - **Sales Tracking**: Monitor sales performance with analytics
 - **Salesman Management**: Manage sales team and track performance
 - **Brand & Category Management**: Organize products by brands and categories
@@ -104,6 +106,45 @@ return TSiteTemplate(
 ```
 
 The `TSiteTemplate` component automatically detects the device screen size and displays the appropriate layout version.
+
+### Account Book Feature
+
+The application includes a comprehensive account book system for tracking financial transactions:
+
+#### Features:
+- **Payment Tracking**: Record incoming and outgoing payments for customers, vendors, and salesmen
+- **Transaction Types**: Support for buy (incoming) and sell (outgoing) transaction types
+- **Entity Integration**: Direct integration with customer, vendor, and salesman entities
+- **Date-based Filtering**: Filter transactions by date ranges
+- **Search Functionality**: Search transactions by entity name, description, or reference
+- **Financial Summary**: Real-time calculation of total incoming, outgoing, and net balance
+- **Responsive Design**: Optimized layouts for desktop, tablet, and mobile devices
+
+#### Database Schema:
+```sql
+CREATE TABLE account_book (
+    account_book_id BIGSERIAL PRIMARY KEY,
+    entity_type VARCHAR(20) CHECK (entity_type IN ('customer', 'vendor', 'salesman')),
+    entity_id BIGINT NOT NULL,
+    entity_name VARCHAR(255) NOT NULL,
+    transaction_type VARCHAR(10) CHECK (transaction_type IN ('buy', 'sell')),
+    amount DECIMAL(15, 2) NOT NULL,
+    description TEXT NOT NULL,
+    reference VARCHAR(100),
+    transaction_date DATE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+#### Components:
+- **AccountBookController**: Manages all business logic and state
+- **AccountBookRepository**: Handles database operations
+- **AccountBookModel**: Data model with proper validation
+- **Responsive Screens**: Desktop, tablet, and mobile optimized layouts
+- **Summary Cards**: Financial overview widgets
+- **Data Table**: Sortable and filterable transaction table
+- **Mobile Cards**: Touch-friendly mobile interface
 
 ## Tech Stack
 

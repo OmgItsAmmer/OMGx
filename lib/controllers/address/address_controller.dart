@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../common/widgets/loaders/tloaders.dart';
 import '../../repositories/address/address_repository.dart';
+import '../../utils/constants/enums.dart';
 
 class AddressController extends GetxController {
   static AddressController get instance => Get.find();
@@ -13,6 +14,7 @@ class AddressController extends GetxController {
   RxList<AddressModel> allAddresses = <AddressModel>[].obs;
   RxList<AddressModel> allCustomerAddresses = <AddressModel>[].obs;
   RxList<AddressModel> allSalesmanAddresses = <AddressModel>[].obs;
+  RxList<AddressModel> allVendorAddresses = <AddressModel>[].obs;
   RxList<AddressModel> currentAddresses = <AddressModel>[].obs;
 
   // only locations for dopdown
@@ -32,43 +34,45 @@ class AddressController extends GetxController {
 
   final address = TextEditingController();
 
-  Future<void> fetchEntityAddresses(int entityId, String entityName) async {
+  Future<void> fetchEntityAddresses(int entityId, EntityType entityType) async {
     try {
       isLoading.value = true;
       allCustomerAddresses.clear();
       allCustomerAddressesLocation.clear();
 
-      if (entityName == 'Customer') {
-        // Fetch addresses for Customer
-        final customerAddress = await addressRepository
-            .fetchAddressTableForSpecificEntity(entityId, entityName);
-        allCustomerAddresses.assignAll(customerAddress);
+   //   final entityName = entityType.toString().split('.').last;
 
-        // Extract locations and filter out null values
-        final locations = allCustomerAddresses
-            .map((address) => address.location)
-            .whereType<String>() // This removes null values
-            .toList();
+      switch (entityType) {
+        case EntityType.customer:
+          final customerAddress = await addressRepository
+              .fetchAddressTableForSpecificEntity(entityId, entityType);
+          allCustomerAddresses.assignAll(customerAddress);
 
-        allCustomerAddressesLocation.assignAll(locations);
-      } else if (entityName == 'User') {
-        // TODO: Fetch addresses for User
-        // Logic will be similar to Customer but tailored for User entity
-        // Example:
-        // final userAddress = await addressRepository.fetchAddressTableForUser(entityId);
-        // allCustomerAddresses.assignAll(userAddress);
-        // final locations = allCustomerAddresses.map((address) => address.location).whereType<String>().toList();
-        // allCustomerAddressesLocation.assignAll(locations);
-      } else if (entityName == 'Salesman') {
-        final salesmanAddress = await addressRepository
-            .fetchAddressTableForSpecificEntity(entityId, entityName);
-        allSalesmanAddresses.assignAll(salesmanAddress);
-      } else {
-        throw Exception('Invalid entity name: $entityName');
+          final locations = allCustomerAddresses
+              .map((address) => address.location)
+              .whereType<String>()
+              .toList();
+          allCustomerAddressesLocation.assignAll(locations);
+          break;
+
+        case EntityType.salesman:
+          final salesmanAddress = await addressRepository
+              .fetchAddressTableForSpecificEntity(entityId, entityType);
+          allSalesmanAddresses.assignAll(salesmanAddress);
+          break;
+
+        case EntityType.vendor:
+          final vendorAddress = await addressRepository
+              .fetchAddressTableForSpecificEntity(entityId, entityType);
+          allVendorAddresses.assignAll(vendorAddress);
+          break;
+
+        case EntityType.user:
+          break;
       }
     } catch (e) {
       if (kDebugMode) {
-        TLoaders.errorSnackBar(title: e.toString()); // TODO: Remove it
+        TLoaders.errorSnackBar(title: e.toString());
         print(e);
       }
     } finally {
@@ -76,46 +80,32 @@ class AddressController extends GetxController {
     }
   }
 
-  Future<void> saveAddress(int entityId, String entityName) async {
+  Future<void> saveAddress(int entityId, EntityType entityType) async {
     try {
+   //   final entityName = entityType.toString().split('.').last;
       AddressModel addressModel = AddressModel.empty();
-      if (entityName == 'Customer') {
-        addressModel = AddressModel(
-            // addressId: 0,
-            location: address.text,
-            customerId: entityId,
-            phoneNumber: '',
-            street: '',
-            postalCode: '',
-            city: '',
-            state: '',
-            country: '');
-      } else if (entityName == 'User') {
-        addressModel = AddressModel(
-            //  addressId: 0,
-            location: address.text,
-            userId: entityId,
-            phoneNumber: '',
-            street: '',
-            postalCode: '',
-            city: '',
-            state: '',
-            country: '');
-      } else if (entityName == 'Salesman') {
-        addressModel = AddressModel(
-            //  addressId: 0,
-            location: address.text,
-            salesmanId: entityId,
-            phoneNumber: '',
-            street: '',
-            postalCode: '',
-            city: '',
-            state: '',
-            country: '');
+
+      switch (entityType) {
+        case EntityType.customer:
+          addressModel =
+              AddressModel(location: address.text, customerId: entityId);
+          break;
+
+        case EntityType.salesman:
+          addressModel =
+              AddressModel(location: address.text, salesmanId: entityId);
+          break;
+
+        case EntityType.vendor:
+          addressModel =
+              AddressModel(location: address.text, vendorId: entityId);
+          break;
+
+        case EntityType.user:
+          break;
       }
 
       final json = addressModel.toJson(isUpdate: true);
-
       await addressRepository.updateAddressTable(json);
     } catch (e) {
       if (kDebugMode) {
@@ -124,47 +114,4 @@ class AddressController extends GetxController {
       }
     }
   }
-
-  // void saveAddress() async {
-  //
-  //   try
-  //   {
-  //
-  //     //Check Internet Connectivity
-  //     final isConnected = await NetworkManager.instance.isConnected();
-  //     if (!isConnected) {
-  //       TLoader.errorSnackBar(title: "Network Issue" , message: "Try again later");
-  //       return;
-  //     }
-  //     //Form validation
-  //     if (!addressFormKey.currentState!.validate()) {
-  //       TFullScreenLoader.stopLoading();
-  //       TLoader.errorSnackBar(title: "Invalid Data");
-  //       return;
-  //     }
-  //
-  //     Map<String, dynamic> addressMap = {
-  //       'location': location.text,
-  //       'street': street.text,
-  //       'postal_code': postal_code.text,
-  //       'city': city.text,
-  //       'state': state.text,
-  //       'country': country.text,
-  //       'phone_number': phoneNumber.text,
-  //       'user_id' : userController.current_user?.value['user_id']
-  //     };
-  //     addressRepository.updateAddressTable(addressMap);
-  //
-  //
-  //   }
-  //   catch(e)
-  //   {
-  //     TFullScreenLoader.stopLoading();
-  //     TLoader.errorsnackBar(title: e.toString());
-  //
-  //   }
-  //
-  //
-  //
-  // }
 }
