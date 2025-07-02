@@ -93,7 +93,9 @@ class PurchaseUnitTotalPrice extends StatelessWidget {
                       RegExp(
                           r'^\d*\.?\d{0,2}'), // Allows numbers with up to 2 decimal places
                     ),
+                  
                   ],
+                  enabled: !purchaseSalesController.isSerializedProduct.value,
                 ),
               ),
             ),

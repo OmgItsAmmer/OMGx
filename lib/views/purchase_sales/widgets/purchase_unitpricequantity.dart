@@ -19,7 +19,8 @@ class PurchaseUnitPriceQuantity extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final PurchaseSalesController purchaseSalesController = Get.find<PurchaseSalesController>();
+    final PurchaseSalesController purchaseSalesController =
+        Get.find<PurchaseSalesController>();
 
     return Form(
       key: purchaseSalesController.addUnitPriceAndQuantityKey,
@@ -50,6 +51,8 @@ class PurchaseUnitPriceQuantity extends StatelessWidget {
                           r'^\d*\.?\d{0,2}'), // Allows numbers with up to 2 decimal places
                     ),
                   ],
+                  enabled: !purchaseSalesController
+                      .isSerializedProduct.value, // Disable if serialized
                 ),
               ),
             ),
@@ -82,6 +85,8 @@ class PurchaseUnitPriceQuantity extends StatelessWidget {
                           r'^\d*\.?\d{0,2}'), // Allows numbers with up to 2 decimal places
                     ),
                   ],
+                  enabled: !purchaseSalesController
+                      .isSerializedProduct.value, // Disable if serialized
                 ),
               ),
             ),

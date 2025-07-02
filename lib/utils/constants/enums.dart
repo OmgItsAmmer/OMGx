@@ -38,6 +38,8 @@ enum MediaCategory {
 
 enum OrderStatus { pending, completed, cancelled }
 
+enum PurchaseStatus { pending, received, cancelled }
+
 enum PaymentMethods {
   paypal,
   googlePay,

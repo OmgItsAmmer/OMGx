@@ -1,5 +1,4 @@
 import 'package:admin_dashboard_v3/common/widgets/icons/table_action_icon_buttons.dart';
-import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
 import 'package:admin_dashboard_v3/controllers/vendor/vendor_controller.dart';
 import 'package:admin_dashboard_v3/controllers/purchase/purchase_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
@@ -11,8 +10,8 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../Models/purchase/purchase_model.dart';
-import '../../../../Models/vendor/vendor_model.dart';
 import '../../../../common/widgets/containers/rounded_container.dart';
+import '../../../../utils/constants/enums.dart';
 
 class PurchaseRows extends DataTableSource {
   PurchaseRows({
@@ -45,25 +44,11 @@ class PurchaseRows extends DataTableSource {
     }
   }
 
-  // Get purchase status color
-  Color getPurchaseStatusColor(PurchaseStatus status) {
-    switch (status) {
-      case PurchaseStatus.pending:
-        return Colors.orange;
-      case PurchaseStatus.processing:
-        return Colors.blue;
-      case PurchaseStatus.received:
-        return Colors.green;
-      case PurchaseStatus.cancelled:
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
+
 
   @override
   DataRow? getRow(int index) {
-    final AddressController addressController = Get.find<AddressController>();
+  //  final AddressController addressController = Get.find<AddressController>();
 
     // Use the filtered purchases list
     final PurchaseModel purchase = filteredPurchases[index];
@@ -108,10 +93,10 @@ class PurchaseRows extends DataTableSource {
             padding: const EdgeInsets.symmetric(
                 vertical: TSizes.sm, horizontal: TSizes.md),
             backgroundColor:
-                getPurchaseStatusColor(purchaseStatus).withValues(alpha: 0.1),
+                THelperFunctions.getPurchaseStatusColor(purchaseStatus).withValues(alpha: 0.1),
             child: Text(
               purchase.status.toString(),
-              style: TextStyle(color: getPurchaseStatusColor(purchaseStatus)),
+              style: TextStyle(color: THelperFunctions.getPurchaseStatusColor(purchaseStatus)),
             ),
           )),
           DataCell(Text(purchase.subTotal.toString())),

@@ -12,8 +12,7 @@ import 'package:admin_dashboard_v3/repositories/products/product_variants_reposi
 import 'package:admin_dashboard_v3/repositories/purchase/purchase_repository.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -28,6 +27,7 @@ class PurchaseCartItem {
   final int productId;
   final String name;
   final String purchasePrice;
+  final String sellingPrice;
   final String unit;
   final String quantity;
   final String totalPrice;
@@ -37,6 +37,7 @@ class PurchaseCartItem {
     required this.productId,
     required this.name,
     required this.purchasePrice,
+    this.sellingPrice = '0.00',
     required this.unit,
     required this.quantity,
     required this.totalPrice,
@@ -67,6 +68,7 @@ class PurchaseSalesController extends GetxController {
   // Loading states
   final isLoading = false.obs;
   final isCheckingOut = false.obs;
+  final isLoadingFinalizePurchaseVariants = false.obs;
 
   // Variables
   Rx<String> selectedProductName = ''.obs;
@@ -88,6 +90,9 @@ class PurchaseSalesController extends GetxController {
 
   // Toggle for serialized product
   RxBool isSerializedProduct = false.obs;
+
+  // Popup state for serialized products
+  RxBool isSerializedProductPopupVisible = false.obs;
 
   // Unit conversion factors (relative to base unit)
   final Map<UnitType, double> unitConversionFactors = {
@@ -151,6 +156,18 @@ class PurchaseSalesController extends GetxController {
   RxInt selectedVariantId = (-1).obs;
   RxBool isManualTextEntry = false.obs;
 
+  // Purchase Variant Management
+  RxBool isLoadingPurchaseVariants = false.obs;
+  RxList<ProductVariantModel> purchaseVariants = <ProductVariantModel>[].obs;
+  RxList<ProductVariantModel> bulkPurchaseVariants =
+      <ProductVariantModel>[].obs;
+
+  // Purchase Variant Controllers
+  final purchaseVariantSerialNumber = TextEditingController();
+  final purchaseVariantPurchasePrice = TextEditingController();
+  final purchaseVariantSellingPrice = TextEditingController();
+  final purchaseVariantCsvData = TextEditingController();
+
   // Focus Nodes for Tab Order
   final FocusNode productNameFocus = FocusNode();
   final FocusNode unitPriceFocus = FocusNode();
@@ -169,6 +186,10 @@ class PurchaseSalesController extends GetxController {
   void onClose() {
     try {
       clearPurchaseDetails();
+      purchaseVariantSerialNumber.dispose();
+      purchaseVariantPurchasePrice.dispose();
+      purchaseVariantSellingPrice.dispose();
+      purchaseVariantCsvData.dispose();
     } catch (e) {
       if (kDebugMode) {
         print('Error in onClose: $e');
@@ -228,178 +249,122 @@ class PurchaseSalesController extends GetxController {
         return;
       }
 
-      // For serialized products handling
+      // For serialized products - prevent adding directly, use variant manager instead
       if (product.hasSerialNumbers) {
-        // VALIDATION CHECK 4: Serial number selected
-        if (selectedVariantId.value == -1) {
-          TLoaders.errorSnackBar(
-            title: "Select Serial Number",
-            message: 'Please select a specific serial number for this product',
-          );
-          return;
-        }
-
-        // VALIDATION CHECK 5: Valid variant
-        final variant = availableVariants.firstWhere(
-          (v) => v.variantId == selectedVariantId.value,
-          orElse: () => ProductVariantModel.empty(),
+        TLoaders.warningSnackBar(
+          title: "Use Variant Manager",
+          message:
+              'For serialized products, please add variants using the variant manager below and then click "Finalize" to add them to the cart.',
         );
-
-        if (variant.variantId == null) {
-          TLoaders.errorSnackBar(
-            title: "Invalid Selection",
-            message: 'The selected variant is no longer available',
-          );
-          return;
-        }
-
-        // VALIDATION CHECK 6: Valid price
-        if (variant.purchasePrice <= 0) {
-          TLoaders.errorSnackBar(
-            title: "Invalid Price",
-            message: 'The selected product has an invalid purchase price',
-          );
-          return;
-        }
-
-        // For serialized products, create a purchase item with quantity = 1
-        final purchaseItem = PurchaseCartItem(
-          productId: selectedProductId.value,
-          name: dropdownController.text.trim(),
-          purchasePrice: unitPrice.value.text.trim(),
-          unit: selectedUnit.toString().trim(),
-          quantity: "1", // Always 1 for serialized products
-          totalPrice: totalPrice.value.text.trim(),
-          variantId: variant.variantId,
-        );
-
-        // Update sub total
-        final double newTotalPrice =
-            double.tryParse(totalPrice.value.text.trim()) ?? 0.0;
-        subTotal.value += newTotalPrice;
-        originalSubTotal.value += newTotalPrice;
-
-        // Calculate net total including fees
-        calculateNetTotal();
-        calculateOriginalNetTotal();
-
-        // Add the purchase item and reset fields
-        allPurchases.add(purchaseItem);
-
-        // Remove the used variant from available list
-        availableVariants.removeWhere((v) => v.variantId == variant.variantId);
-        selectedVariantId.value = -1;
-
-        // Clear input fields
-        _clearInputFields();
-
-        // Show success feedback
-        TLoaders.successSnackBar(
-          title: "Product Added",
-          message: "Serial number ${variant.serialNumber} added to purchase",
-        );
-      } else {
-        // For regular products
-
-        // VALIDATION CHECK 7: Form validation
-        if (!addUnitPriceAndQuantityKey.currentState!.validate() ||
-            !addUnitTotalKey.currentState!.validate()) {
-          TLoaders.errorSnackBar(
-            title: 'Required Fields Missing',
-            message: 'Please fill all required fields to continue',
-          );
-          return;
-        }
-
-        // VALIDATION CHECK 8: Empty values
-        if (unitPrice.value.text.isEmpty ||
-            quantity.text.isEmpty ||
-            totalPrice.value.text.isEmpty) {
-          TLoaders.errorSnackBar(
-            title: 'Missing Values',
-            message: 'Please enter price and quantity values',
-          );
-          return;
-        }
-
-        // VALIDATION CHECK 9: Numeric values
-        double? unitPriceValue = double.tryParse(unitPrice.value.text);
-        double? quantityValue = double.tryParse(quantity.text);
-        double? totalPriceValue = double.tryParse(totalPrice.value.text);
-
-        if (unitPriceValue == null ||
-            quantityValue == null ||
-            totalPriceValue == null) {
-          TLoaders.errorSnackBar(
-            title: 'Invalid Values',
-            message: 'Price and quantity must be valid numbers',
-          );
-          return;
-        }
-
-        // VALIDATION CHECK 10: Non-negative values
-        if (unitPriceValue <= 0) {
-          TLoaders.errorSnackBar(
-            title: 'Invalid Unit Price',
-            message: 'Unit price must be greater than zero',
-          );
-          return;
-        }
-
-        if (quantityValue <= 0) {
-          TLoaders.errorSnackBar(
-            title: 'Invalid Quantity',
-            message: 'Quantity must be greater than zero',
-          );
-          return;
-        }
-
-        if (totalPriceValue <= 0) {
-          TLoaders.errorSnackBar(
-            title: 'Invalid Total Price',
-            message: 'Total price must be greater than zero',
-          );
-          return;
-        }
-
-        // Try to find existing product with same ID and unit if merging is enabled
-        if (mergeIdenticalProducts.value) {
-          int index = _findExistingProductIndex(
-              selectedProductId.value, selectedUnit.value);
-
-          if (index >= 0) {
-            // Existing product found, update its quantity and total price
-            _mergeWithExistingProduct(index, quantityValue, totalPriceValue);
-            _clearInputFields();
-            return;
-          }
-        }
-
-        // Create a regular purchase item as a new entry
-        PurchaseCartItem purchaseItem = PurchaseCartItem(
-          productId: selectedProductId.value,
-          name: dropdownController.text.trim(),
-          purchasePrice: unitPrice.value.text.trim(),
-          unit: selectedUnit.toString().split('.').last.trim(),
-          quantity: quantity.text.trim(),
-          totalPrice: totalPrice.value.text.trim(),
-        );
-
-        // Update sub total
-        double newTotalPrice = double.tryParse(totalPrice.value.text) ?? 0.0;
-        subTotal.value += newTotalPrice;
-        originalSubTotal.value += newTotalPrice;
-
-        // Calculate net total including fees
-        calculateNetTotal();
-        calculateOriginalNetTotal();
-
-        // Add the purchase item and reset fields
-        allPurchases.add(purchaseItem);
-
-        // Clear input fields
-        _clearInputFields();
+        return;
       }
+
+      // For regular (non-serialized) products - continue with existing logic
+
+      // VALIDATION CHECK 4: Form validation
+      if (!addUnitPriceAndQuantityKey.currentState!.validate() ||
+          !addUnitTotalKey.currentState!.validate()) {
+        TLoaders.errorSnackBar(
+          title: 'Required Fields Missing',
+          message: 'Please fill all required fields to continue',
+        );
+        return;
+      }
+
+      // VALIDATION CHECK 5: Empty values
+      if (unitPrice.value.text.isEmpty ||
+          quantity.text.isEmpty ||
+          totalPrice.value.text.isEmpty) {
+        TLoaders.errorSnackBar(
+          title: 'Missing Values',
+          message: 'Please enter price and quantity values',
+        );
+        return;
+      }
+
+      // VALIDATION CHECK 6: Numeric values
+      double? unitPriceValue = double.tryParse(unitPrice.value.text);
+      double? quantityValue = double.tryParse(quantity.text);
+      double? totalPriceValue = double.tryParse(totalPrice.value.text);
+
+      if (unitPriceValue == null ||
+          quantityValue == null ||
+          totalPriceValue == null) {
+        TLoaders.errorSnackBar(
+          title: 'Invalid Values',
+          message: 'Price and quantity must be valid numbers',
+        );
+        return;
+      }
+
+      // VALIDATION CHECK 7: Non-negative values
+      if (unitPriceValue <= 0) {
+        TLoaders.errorSnackBar(
+          title: 'Invalid Unit Price',
+          message: 'Unit price must be greater than zero',
+        );
+        return;
+      }
+
+      if (quantityValue <= 0) {
+        TLoaders.errorSnackBar(
+          title: 'Invalid Quantity',
+          message: 'Quantity must be greater than zero',
+        );
+        return;
+      }
+
+      if (totalPriceValue <= 0) {
+        TLoaders.errorSnackBar(
+          title: 'Invalid Total Price',
+          message: 'Total price must be greater than zero',
+        );
+        return;
+      }
+
+      // Try to find existing product with same ID and unit if merging is enabled
+      if (mergeIdenticalProducts.value) {
+        int index = _findExistingProductIndex(
+            selectedProductId.value, selectedUnit.value);
+
+        if (index >= 0) {
+          // Existing product found, update its quantity and total price
+          _mergeWithExistingProduct(index, quantityValue, totalPriceValue);
+          _clearInputFields();
+          return;
+        }
+      }
+
+      // Create a regular purchase item as a new entry
+      PurchaseCartItem purchaseItem = PurchaseCartItem(
+        productId: selectedProductId.value,
+        name: dropdownController.text.trim(),
+        purchasePrice: unitPrice.value.text.trim(),
+        sellingPrice: unitPrice.value.text.trim(),
+        unit: selectedUnit.toString().split('.').last.trim(),
+        quantity: quantity.text.trim(),
+        totalPrice: totalPrice.value.text.trim(),
+      );
+
+      // Update sub total
+      double newTotalPrice = double.tryParse(totalPrice.value.text) ?? 0.0;
+      subTotal.value += newTotalPrice;
+      originalSubTotal.value += newTotalPrice;
+
+      // Calculate net total including fees
+      calculateNetTotal();
+      calculateOriginalNetTotal();
+
+      // Add the purchase item and reset fields
+      allPurchases.add(purchaseItem);
+
+      // Clear input fields
+      _clearInputFields();
+
+      TLoaders.successSnackBar(
+        title: "Product Added",
+        message: "Product added to purchase cart successfully.",
+      );
     } catch (e) {
       if (kDebugMode) {
         print('Error in addProduct: $e');
@@ -488,7 +453,7 @@ class PurchaseSalesController extends GetxController {
     unit.clear();
     quantity.text = '';
     totalPrice.value.clear();
-    isSerializedProduct.value = false;
+    resetSerializedProductState();
   }
 
   Future<int> checkOut() async {
@@ -513,8 +478,8 @@ class PurchaseSalesController extends GetxController {
       // Validate user form fields
       if (!userFormKey.currentState!.validate()) {
         TLoaders.errorSnackBar(
-            title: 'User Information Error',
-            message: 'Please fill all required user fields.');
+            title: 'Cashier Information Error',
+            message: 'Please fill all required cashier fields.');
         return -1;
       }
 
@@ -548,9 +513,29 @@ class PurchaseSalesController extends GetxController {
 
       // Store serialized variants to mark as available later (since we're purchasing them)
       final List<int> serializedVariantIds = [];
+      final List<ProductVariantModel> newVariantsToSave = [];
+
       for (var item in allPurchases) {
         if (item.variantId != null) {
           serializedVariantIds.add(item.variantId!);
+        } else if (item.variantId == null && item.name.contains('(SN:')) {
+          // This is a newly created variant from the finalize process
+          // We need to create the variant record first
+          try {
+            final serialNumber = item.name.split('(SN: ')[1].split(')')[0];
+            final newVariant = ProductVariantModel(
+              productId: item.productId,
+              serialNumber: serialNumber,
+              purchasePrice: double.tryParse(item.purchasePrice) ?? 0.0,
+              sellingPrice: double.tryParse(item.sellingPrice) ?? 0.0,
+              isSold: false,
+            );
+            newVariantsToSave.add(newVariant);
+          } catch (e) {
+            if (kDebugMode) {
+              print('Error parsing variant info from cart item: $e');
+            }
+          }
         }
       }
 
@@ -591,13 +576,87 @@ class PurchaseSalesController extends GetxController {
 
       // Ensure purchaseId is valid before proceeding
       if (purchaseId > 0) {
+        // Save new variants to database first and get their IDs
+        final Map<String, int> variantIdMap = {};
+        if (newVariantsToSave.isNotEmpty) {
+          final productVariantsRepository =
+              Get.find<ProductVariantsRepository>();
+          for (var variant in newVariantsToSave) {
+            try {
+              final variantId =
+                  await productVariantsRepository.insertVariant(variant);
+              if (variantId > 0) {
+                variantIdMap[variant.variantId.toString()] = variantId;
+                if (kDebugMode) {
+                  print(
+                      '✓ Created new variant: ${variant.serialNumber} with ID: $variantId');
+                }
+              }
+            } catch (e) {
+              if (kDebugMode) {
+                print('Error creating variant ${variant.serialNumber}: $e');
+              }
+            }
+          }
+        }
+
+        // Update purchase items with correct variant IDs for newly created variants
+        final updatedPurchaseItems = purchase.purchaseItems?.map((item) {
+          // Find corresponding cart item to get serial number
+          final cartItem = allPurchases.firstWhere(
+            (cart) =>
+                cart.productId == item.productId &&
+                cart.variantId == null &&
+                cart.name.contains('(SN:'),
+            orElse: () => PurchaseCartItem(
+              productId: item.productId,
+              name: '',
+              purchasePrice: '0',
+              sellingPrice: '0',
+              unit: '',
+              quantity: '0',
+              totalPrice: '0',
+            ),
+          );
+
+          if (cartItem.name.contains('(SN:')) {
+            try {
+              final serialNumber =
+                  cartItem.name.split('(SN: ')[1].split(')')[0];
+              // Find the variant in newVariantsToSave by serial number
+              final newVariant = newVariantsToSave.firstWhere(
+                (v) => v.serialNumber == serialNumber,
+                orElse: () => ProductVariantModel.empty(),
+              );
+              if (newVariant.variantId != null) {
+                // Use the variantId from the map
+                final variantId = variantIdMap[newVariant.variantId.toString()];
+                if (variantId != null) {
+                  return item.copyWith(variantId: variantId);
+                }
+              }
+            } catch (e) {
+              if (kDebugMode) {
+                print('Error updating variant ID for purchase item: $e');
+              }
+            }
+          }
+
+          return item;
+        }).toList();
+
         // Assign actual purchaseId to each purchase item
         purchase = purchase.copyWith(
           purchaseId: purchaseId,
-          purchaseItems: purchase.purchaseItems
+          purchaseItems: updatedPurchaseItems
               ?.map((item) => item.copyWith(purchaseId: purchaseId))
               .toList(),
         );
+
+        // Save purchase variants to database if any exist
+        if (purchaseVariants.isNotEmpty) {
+          await _savePurchaseVariantsToDatabase(purchaseId);
+        }
 
         // Add the purchase to the allPurchases list in PurchaseController
         final PurchaseController purchaseController =
@@ -611,7 +670,7 @@ class PurchaseSalesController extends GetxController {
           // For purchases, we don't update stock automatically - that happens when status changes to "received"
           // But we can mark serialized variants as available (assuming they're now in our inventory)
           if (serializedVariantIds.isNotEmpty &&
-              purchase.status == 'received') {
+              purchase.status == PurchaseStatus.pending.name) {
             final productVariantsRepository =
                 Get.find<ProductVariantsRepository>();
             for (var variantId in serializedVariantIds) {
@@ -672,7 +731,7 @@ class PurchaseSalesController extends GetxController {
   // Reset form fields only - used internally
   void resetFields() {
     try {
-      isSerializedProduct.value = false;
+      resetSerializedProductState();
       unitPrice.value.text = '';
       unit.text = '';
       quantity.text = '';
@@ -682,10 +741,6 @@ class PurchaseSalesController extends GetxController {
       selectedProductName.value = '';
       selectedProductId.value = -1;
       isManualTextEntry.value = false;
-      selectedVariantId.value = -1;
-      if (availableVariants.isNotEmpty) {
-        availableVariants.clear();
-      }
       selectedChipIndex.value = -1;
       selectedChipValue.value = '';
       selectedUnit.value = UnitType.item;
@@ -732,6 +787,9 @@ class PurchaseSalesController extends GetxController {
       netTotal.value = 0.0;
       originalSubTotal.value = 0.0;
       originalNetTotal.value = 0.0;
+
+      // Clear purchase variants
+      clearPurchaseVariants();
 
       // Reset form fields
       resetFields();
@@ -813,15 +871,18 @@ class PurchaseSalesController extends GetxController {
       // Remove the item from the list
       allPurchases.removeAt(index);
     } catch (e) {
-      print("Error: $e");
+      if (kDebugMode) {
+        print("Error: $e");
+      }
       TLoaders.errorSnackBar(title: e.toString());
     }
   }
 
   void restoreDiscount() {
     try {
-      if (selectedChipIndex.value == -1 || selectedChipValue.value.isEmpty)
+      if (selectedChipIndex.value == -1 || selectedChipValue.value.isEmpty) {
         return;
+      }
 
       subTotal.value = originalSubTotal.value;
       calculateNetTotal();
@@ -948,8 +1009,11 @@ class PurchaseSalesController extends GetxController {
 
     if (variant.variantId != null) {
       unitPrice.value.text = variant.purchasePrice.toString();
-      quantity.text = "1";
+      quantity.text = "1"; // Always 1 for serialized products
       totalPrice.value.text = variant.purchasePrice.toString();
+
+      // For serialized products, total price equals unit price since quantity is always 1
+      calculateTotalPrice();
     }
   }
 
@@ -1127,5 +1191,643 @@ class PurchaseSalesController extends GetxController {
     }
   }
 
-  
+  /// Shows popup for serialized product variant selection
+  Future<void> showSerializedProductPopup(ProductModel product) async {
+    try {
+      isSerializedProductPopupVisible.value = true;
+
+      // Load available variants for the product
+      await loadAvailableVariants(product.productId!);
+
+      if (availableVariants.isEmpty) {
+        TLoaders.warningSnackBar(
+          title: 'No Variants Available',
+          message: 'This product has no available serial numbers for purchase.',
+        );
+        isSerializedProductPopupVisible.value = false;
+        return;
+      }
+
+      // Show the popup with the variants
+      await _showVariantSelectionDialog(product);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error showing serialized product popup: $e');
+      }
+      TLoaders.errorSnackBar(
+        title: 'Error',
+        message: 'Failed to load product variants: $e',
+      );
+    } finally {
+      isSerializedProductPopupVisible.value = false;
+    }
+  }
+
+  /// Internal method to show the variant selection dialog
+  Future<void> _showVariantSelectionDialog(ProductModel product) async {
+    return Get.dialog(
+      Obx(() => AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            child: Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Container(
+                width: Get.width * 0.8,
+                height: Get.height * 0.8,
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  children: [
+                    // Header
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Select Serial Number',
+                                style: Get.textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Product: ${product.name}',
+                                style: Get.textTheme.bodyMedium?.copyWith(
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            selectedVariantId.value = -1;
+                            Get.back();
+                          },
+                          icon: const Icon(Icons.close),
+                        ),
+                      ],
+                    ),
+                    const Divider(height: 32),
+
+                    // Variants list
+                    Expanded(
+                      child: isLoadingVariants.value
+                          ? const Center(child: CircularProgressIndicator())
+                          : availableVariants.isEmpty
+                              ? Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.inventory_2_outlined,
+                                        size: 48,
+                                        color: Colors.grey[400],
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Text(
+                                        'No variants available',
+                                        style:
+                                            Get.textTheme.titleMedium?.copyWith(
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              : ListView.separated(
+                                  itemCount: availableVariants.length,
+                                  separatorBuilder: (context, index) =>
+                                      const Divider(),
+                                  itemBuilder: (context, index) {
+                                    final variant = availableVariants[index];
+                                    return Obx(() => Card(
+                                          elevation: selectedVariantId.value ==
+                                                  variant.variantId
+                                              ? 4
+                                              : 1,
+                                          color: selectedVariantId.value ==
+                                                  variant.variantId
+                                              ? TColors.primary
+                                                  .withValues(alpha: 0.1)
+                                              : null,
+                                          child: ListTile(
+                                            leading: CircleAvatar(
+                                              backgroundColor:
+                                                  selectedVariantId.value ==
+                                                          variant.variantId
+                                                      ? TColors.primary
+                                                      : Colors.grey[300],
+                                              child: Icon(
+                                                Icons.tag,
+                                                color:
+                                                    selectedVariantId.value ==
+                                                            variant.variantId
+                                                        ? Colors.white
+                                                        : Colors.grey[600],
+                                              ),
+                                            ),
+                                            title: Text(
+                                              'Serial: ${variant.serialNumber}',
+                                              style: TextStyle(
+                                                fontWeight:
+                                                    selectedVariantId.value ==
+                                                            variant.variantId
+                                                        ? FontWeight.bold
+                                                        : FontWeight.normal,
+                                              ),
+                                            ),
+                                            subtitle: Text(
+                                              'Purchase Price: Rs ${variant.purchasePrice.toStringAsFixed(2)}\n'
+                                              'Selling Price: Rs ${variant.sellingPrice.toStringAsFixed(2)}',
+                                            ),
+                                            trailing: selectedVariantId.value ==
+                                                    variant.variantId
+                                                ? const Icon(Icons.check_circle,
+                                                    color: TColors.primary)
+                                                : null,
+                                            onTap: () => selectVariant(variant),
+                                          ),
+                                        ));
+                                  },
+                                ),
+                    ),
+
+                    // Action buttons
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            selectedVariantId.value = -1;
+                            Get.back();
+                          },
+                          child: const Text('Cancel'),
+                        ),
+                        const SizedBox(width: 12),
+                        Obx(() => ElevatedButton(
+                              onPressed: selectedVariantId.value == -1
+                                  ? null
+                                  : () {
+                                      Get.back();
+                                      // Focus on add button since variant is selected
+                                      addButtonFocus.requestFocus();
+                                    },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: TColors.primary,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 12,
+                                ),
+                              ),
+                              child: const Text('Select'),
+                            )),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          )),
+      barrierDismissible: false,
+    );
+  }
+
+  /// Reset the serialized product state
+  void resetSerializedProductState() {
+    isSerializedProduct.value = false;
+    isSerializedProductPopupVisible.value = false;
+    selectedVariantId.value = -1;
+    availableVariants.clear();
+  }
+
+  // Purchase Variant Management Methods
+
+  /// Refreshes the purchase variants list
+  void refreshPurchaseVariants() {
+    try {
+      purchaseVariants.refresh();
+      TLoaders.successSnackBar(
+        title: 'Refreshed',
+        message: 'Purchase variants list has been refreshed.',
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error refreshing purchase variants: $e');
+      }
+    }
+  }
+
+  /// Removes a purchase variant at the specified index
+  void removePurchaseVariant(int index) {
+    try {
+      if (index >= 0 && index < purchaseVariants.length) {
+        final removedVariant = purchaseVariants.removeAt(index);
+        TLoaders.successSnackBar(
+          title: 'Variant Removed',
+          message:
+              'Serial number ${removedVariant.serialNumber} removed from purchase.',
+        );
+      }
+    } catch (e) {
+      TLoaders.errorSnackBar(
+        title: 'Error',
+        message: 'Failed to remove variant: $e',
+      );
+    }
+  }
+
+  /// Adds a new purchase variant
+  Future<void> addPurchaseVariant() async {
+    try {
+      isLoadingPurchaseVariants.value = true;
+
+      // Get values from controllers
+      final serialNumber = purchaseVariantSerialNumber.text.trim();
+      final purchasePrice =
+          double.tryParse(purchaseVariantPurchasePrice.text.trim()) ?? 0.0;
+      final sellingPrice =
+          double.tryParse(purchaseVariantSellingPrice.text.trim()) ?? 0.0;
+
+      // Create the variant
+      final variant = ProductVariantModel(
+        productId: selectedProductId.value,
+        serialNumber: serialNumber,
+        purchasePrice: purchasePrice,
+        sellingPrice: sellingPrice,
+        isSold: false, // New variants for purchase are available
+      );
+
+      // Add to the purchase variants list
+      purchaseVariants.add(variant);
+
+      // Clear the form fields
+      purchaseVariantSerialNumber.clear();
+      purchaseVariantPurchasePrice.clear();
+      purchaseVariantSellingPrice.clear();
+
+      TLoaders.successSnackBar(
+        title: 'Variant Added',
+        message: 'Serial number $serialNumber added to purchase.',
+      );
+    } catch (e) {
+      TLoaders.errorSnackBar(
+        title: 'Error',
+        message: 'Failed to add variant: $e',
+      );
+    } finally {
+      isLoadingPurchaseVariants.value = false;
+    }
+  }
+
+  /// Parses CSV data for bulk purchase variant import
+  void parsePurchaseVariantCsv() {
+    try {
+      bulkPurchaseVariants.clear();
+
+      if (selectedProductId.value == -1) {
+        TLoaders.errorSnackBar(
+          title: 'Error',
+          message: 'Please select a product first before adding variants',
+        );
+        return;
+      }
+
+      final lines = purchaseVariantCsvData.text.trim().split('\n');
+
+      if (lines.isEmpty) {
+        TLoaders.errorSnackBar(
+          title: 'Empty CSV',
+          message: 'No data found in the CSV input',
+        );
+        return;
+      }
+
+      // Process each line
+      for (int i = 0; i < lines.length; i++) {
+        final line = lines[i].trim();
+        if (line.isEmpty) continue;
+
+        final parts = line.split(',');
+        if (parts.length < 3) {
+          TLoaders.errorSnackBar(
+            title: 'Invalid CSV Format',
+            message:
+                'Line ${i + 1} has invalid format. Expected: SerialNumber,PurchasePrice,SellingPrice',
+          );
+          bulkPurchaseVariants.clear();
+          return;
+        }
+
+        // Parse the data
+        final serialNumber = parts[0].trim();
+        final purchasePrice = double.tryParse(parts[1].trim()) ?? 0.0;
+        final sellingPrice = double.tryParse(parts[2].trim()) ?? 0.0;
+
+        // Check for duplicates in existing purchase variants
+        if (purchaseVariants.any((v) => v.serialNumber == serialNumber)) {
+          TLoaders.errorSnackBar(
+            title: 'Duplicate Serial Number',
+            message:
+                'Serial number "$serialNumber" already exists in the purchase list',
+          );
+          bulkPurchaseVariants.clear();
+          return;
+        }
+
+        // Create a variant
+        final variant = ProductVariantModel(
+          productId: selectedProductId.value,
+          serialNumber: serialNumber,
+          purchasePrice: purchasePrice,
+          sellingPrice: sellingPrice,
+          isSold: false,
+        );
+
+        bulkPurchaseVariants.add(variant);
+      }
+
+      if (bulkPurchaseVariants.isEmpty) {
+        TLoaders.errorSnackBar(
+          title: 'No Valid Data',
+          message: 'No valid variant data found in the CSV input',
+        );
+        return;
+      }
+
+      TLoaders.successSnackBar(
+        title: 'CSV Parsed',
+        message: '${bulkPurchaseVariants.length} variants ready for import',
+      );
+    } catch (e) {
+      TLoaders.errorSnackBar(
+        title: 'CSV Parse Error',
+        message: e.toString(),
+      );
+      bulkPurchaseVariants.clear();
+    }
+  }
+
+  /// Bulk imports purchase variants
+  Future<void> bulkImportPurchaseVariants() async {
+    try {
+      isLoadingPurchaseVariants.value = true;
+
+      if (bulkPurchaseVariants.isEmpty) {
+        TLoaders.errorSnackBar(
+          title: 'No Variants',
+          message: 'No variants to import. Parse CSV data first.',
+        );
+        return;
+      }
+
+      // Add all variants to the purchase list
+      purchaseVariants.addAll(bulkPurchaseVariants);
+
+      final importCount = bulkPurchaseVariants.length;
+
+      // Clear the CSV data and import list
+      purchaseVariantCsvData.clear();
+      bulkPurchaseVariants.clear();
+
+      TLoaders.successSnackBar(
+        title: 'Success',
+        message: '$importCount variants added to purchase list.',
+      );
+    } catch (e) {
+      TLoaders.errorSnackBar(
+        title: 'Import Error',
+        message: e.toString(),
+      );
+    } finally {
+      isLoadingPurchaseVariants.value = false;
+    }
+  }
+
+  /// Clears all purchase variants
+  void clearPurchaseVariants() {
+    try {
+      purchaseVariants.clear();
+      bulkPurchaseVariants.clear();
+      purchaseVariantSerialNumber.clear();
+      purchaseVariantPurchasePrice.clear();
+      purchaseVariantSellingPrice.clear();
+      purchaseVariantCsvData.clear();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error clearing purchase variants: $e');
+      }
+    }
+  }
+
+  /// Saves purchase variants to the database
+  Future<void> _savePurchaseVariantsToDatabase(int purchaseId) async {
+    try {
+      if (purchaseVariants.isEmpty) return;
+
+      final productController = Get.find<ProductController>();
+      final productVariantsRepository = Get.find<ProductVariantsRepository>();
+
+      for (final variant in purchaseVariants) {
+        try {
+          // Save variant to database
+          final variantId =
+              await productVariantsRepository.insertVariant(variant);
+
+          if (variantId > 0) {
+            if (kDebugMode) {
+              print(
+                  '✓ Saved purchase variant: ${variant.serialNumber} with ID: $variantId');
+            }
+
+            // Update the product stock count for serialized products
+            if (variant.productId != null) {
+              final productIndex = productController.allProducts
+                  .indexWhere((p) => p.productId == variant.productId);
+              if (productIndex != -1) {
+                final product = productController.allProducts[productIndex];
+                if (product.hasSerialNumbers) {
+                  // Refresh the product stock count
+                  final availableCount = await productVariantsRepository
+                      .countAvailableVariants(variant.productId!);
+                  final updatedProduct = product.copyWith(
+                    stockQuantity: availableCount,
+                  );
+                  productController.allProducts[productIndex] = updatedProduct;
+                }
+              }
+            }
+          } else {
+            if (kDebugMode) {
+              print('✗ Failed to save variant: ${variant.serialNumber}');
+            }
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print('Error saving variant ${variant.serialNumber}: $e');
+          }
+          // Continue with other variants even if one fails
+        }
+      }
+
+      // Clear the purchase variants after successful save
+      purchaseVariants.clear();
+
+      if (kDebugMode) {
+        print('Purchase variants saved successfully for purchase #$purchaseId');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error saving purchase variants to database: $e');
+      }
+      TLoaders.errorSnackBar(
+        title: 'Variant Save Error',
+        message: 'Failed to save some variants: $e',
+      );
+    }
+  }
+
+  /// Finalizes purchase variants by adding them as separate cart items
+  Future<void> finalizePurchaseVariants() async {
+    try {
+      // Prevent multiple simultaneous operations
+      if (isLoadingFinalizePurchaseVariants.value) return;
+
+      isLoadingFinalizePurchaseVariants.value = true;
+
+      if (purchaseVariants.isEmpty) {
+        TLoaders.warningSnackBar(
+          title: 'No Variants',
+          message: 'No variants to finalize. Please add variants first.',
+        );
+        return;
+      }
+
+      if (selectedProductId.value == -1) {
+        TLoaders.errorSnackBar(
+          title: 'No Product Selected',
+          message: 'Please select a product before finalizing variants.',
+        );
+        return;
+      }
+
+      // Get product name for cart items
+      final productController = Get.find<ProductController>();
+      final product = productController.allProducts.firstWhere(
+        (p) => p.productId == selectedProductId.value,
+        orElse: () => ProductModel.empty(),
+      );
+
+      if (product.productId == null) {
+        TLoaders.errorSnackBar(
+          title: 'Product Not Found',
+          message: 'Selected product not found in the database.',
+        );
+        return;
+      }
+
+      int addedCount = 0;
+
+      // Add each variant as a separate cart item
+      for (final variant in purchaseVariants) {
+        try {
+          // Create a purchase cart item for each variant
+          final purchaseItem = PurchaseCartItem(
+            productId: variant.productId,
+            name: '${product.name} (SN: ${variant.serialNumber})',
+            purchasePrice: variant.purchasePrice.toString(),
+            sellingPrice: variant.sellingPrice.toString(),
+            unit: selectedUnit.toString().split('.').last.trim(),
+            quantity: "1", // Always 1 for serialized products
+            totalPrice: variant.purchasePrice.toString(),
+            variantId: variant.variantId, // Will be null for new variants
+          );
+
+          // Update sub total
+          double variantPrice = variant.purchasePrice;
+          subTotal.value += variantPrice;
+          originalSubTotal.value += variantPrice;
+
+          // Add the purchase item to cart
+          allPurchases.add(purchaseItem);
+          addedCount++;
+        } catch (e) {
+          if (kDebugMode) {
+            print('Error adding variant ${variant.serialNumber} to cart: $e');
+          }
+          // Continue with other variants
+        }
+      }
+
+      if (addedCount > 0) {
+        // Calculate net total including fees
+        calculateNetTotal();
+        calculateOriginalNetTotal();
+
+        // Clear the purchase variants since they're now in the cart
+        purchaseVariants.clear();
+
+        // Reset the serialized product state
+        resetSerializedProductState();
+
+        // Clear product selection to prepare for next product
+        _clearProductSelection();
+
+        TLoaders.successSnackBar(
+          title: 'Variants Finalized',
+          message: '$addedCount variants added to purchase cart successfully.',
+        );
+
+        // Focus back to product selection for next entry
+        productNameFocus.requestFocus();
+      } else {
+        TLoaders.errorSnackBar(
+          title: 'Finalization Failed',
+          message: 'No variants were added to the cart. Please try again.',
+        );
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error finalizing purchase variants: $e');
+      }
+      TLoaders.errorSnackBar(
+        title: 'Finalization Error',
+        message: 'An error occurred while finalizing variants: ${e.toString()}',
+      );
+    } finally {
+      isLoadingFinalizePurchaseVariants.value = false;
+    }
+  }
+
+  /// Helper method to clear product selection after finalizing variants
+  void _clearProductSelection() {
+    dropdownController.clear();
+    selectedProductName.value = '';
+    selectedProductId.value = -1;
+    isManualTextEntry.value = false;
+    selectedChipIndex.value = -1;
+    selectedChipValue.value = '';
+    selectedUnit.value = UnitType.item;
+
+    // Clear unit price fields
+    unitPrice.value.clear();
+    quantity.text = '';
+    totalPrice.value.clear();
+  }
+
+  /// Check if there are unsaved purchase variants
+  bool hasUnsavedVariants() {
+    return purchaseVariants.isNotEmpty;
+  }
+
+  /// Get the count of variants ready to be finalized
+  int getPendingVariantsCount() {
+    return purchaseVariants.length;
+  }
 }

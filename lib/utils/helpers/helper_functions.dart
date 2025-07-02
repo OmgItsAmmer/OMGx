@@ -25,6 +25,18 @@ class THelperFunctions {
     }
   }
 
+  // Get purchase status color
+  static Color getPurchaseStatusColor(PurchaseStatus status) {
+   if (PurchaseStatus.pending == status) {
+      return Colors.blue;
+    } else if (PurchaseStatus.received == status) {
+      return Colors.green;
+    } else if (PurchaseStatus.cancelled == status) {
+      return Colors.red;
+    } else {
+      return Colors.grey;
+    }
+  }
   static Color getNotificationColor(NotificationType type) {
     switch (type) {
       case NotificationType.company:

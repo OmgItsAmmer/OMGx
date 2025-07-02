@@ -37,23 +37,31 @@ class PurchaseProductSearchBar extends StatelessWidget {
           // Clear variants and product id if the user is typing manually
           purchaseSalesController.availableVariants.clear();
           purchaseSalesController.selectedVariantId.value = -1;
+          purchaseSalesController.isSerializedProduct.value = false;
+          purchaseSalesController
+              .clearPurchaseVariants(); // Clear purchase variants
         },
         onSelected: (ProductModel selectedProduct) async {
           final isSerializedProduct = selectedProduct.hasSerialNumbers;
           purchaseSalesController.isSerializedProduct.value =
               isSerializedProduct;
 
-          // Load variants for serialized products
           if (isSerializedProduct) {
-            await purchaseSalesController
-                .loadAvailableVariants(selectedProduct.productId ?? -1);
+            // For serialized products - clear any existing variants and prepare for variant manager
+            purchaseSalesController.clearPurchaseVariants();
+            purchaseSalesController.availableVariants.clear();
+            purchaseSalesController.selectedVariantId.value = -1;
 
-            // For serialized products, quantity is always 1
-            purchaseSalesController.quantity.text = "1";
-            purchaseSalesController.unitPrice.value
-                .clear(); // Will be set when variant is selected
-            purchaseSalesController.totalPrice.value
-                .clear(); // Will be set when variant is selected
+            // Set base price from product for new variants
+            purchaseSalesController.purchaseVariantPurchasePrice.text =
+                selectedProduct.basePrice ?? "0";
+            purchaseSalesController.purchaseVariantSellingPrice.text =
+                selectedProduct.salePrice ?? "0";
+
+            // Clear the unit price and quantity fields since we'll use variant manager
+            purchaseSalesController.unitPrice.value.clear();
+            purchaseSalesController.quantity.text = '';
+            purchaseSalesController.totalPrice.value.clear();
           } else {
             // For non-serialized products - use base price for purchases (cost price)
             purchaseSalesController.unitPrice.value.text =
@@ -62,10 +70,11 @@ class PurchaseProductSearchBar extends StatelessWidget {
             // Clear any previously loaded variants
             purchaseSalesController.availableVariants.clear();
             purchaseSalesController.selectedVariantId.value = -1;
-          }
+            purchaseSalesController.clearPurchaseVariants();
 
-          // Request focus on the unit price field after selection logic is complete
-          purchaseSalesController.unitPriceFocus.requestFocus();
+            // Request focus on the unit price field after selection logic is complete
+            purchaseSalesController.unitPriceFocus.requestFocus();
+          }
         },
         validator: (value) =>
             TValidator.validateEmptyText('Product Name', value),

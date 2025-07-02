@@ -306,12 +306,19 @@ class PurchaseActionButtons extends StatelessWidget {
                                       ? const CircularProgressIndicator(
                                           color: TColors.white,
                                         )
-                                      : Text(
-                                          'Confirm Purchase',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium!
-                                              .apply(color: TColors.white),
+                                      : Container(
+                                          width: TDeviceUtils.isMobileScreen(context) ? 120 : 160,
+                                          padding: const EdgeInsets.symmetric(vertical: 12),
+                                          child: Center(
+                                            child: Text(
+                                              'Confirm Purchase',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyLarge!
+                                                  .apply(color: TColors.white),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
                                         ),
                                 );
                               })),

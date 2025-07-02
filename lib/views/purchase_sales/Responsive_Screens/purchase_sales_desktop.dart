@@ -19,6 +19,7 @@ import '../widgets/purchase_product_bar.dart';
 import '../widgets/purchase_summary.dart';
 import '../widgets/purchase_action_buttons.dart';
 import '../widgets/purchase_user_info.dart';
+import '../widgets/purchase_variant_manager.dart';
 
 class PurchaseSalesDesktop extends GetView<PurchaseSalesController> {
   const PurchaseSalesDesktop({super.key});
@@ -115,11 +116,11 @@ class PurchaseSalesDesktop extends GetView<PurchaseSalesController> {
                                           value: controller
                                               .mergeIdenticalProducts.value,
                                           activeColor: TColors.primary,
-                                          activeTrackColor:
-                                              TColors.primary.withValues(alpha: 0.5),
+                                          activeTrackColor: TColors.primary
+                                              .withValues(alpha: 0.5),
                                           inactiveThumbColor: TColors.grey,
-                                          inactiveTrackColor:
-                                              TColors.grey.withValues(alpha: 0.5),
+                                          inactiveTrackColor: TColors.grey
+                                              .withValues(alpha: 0.5),
                                           onChanged: (value) {
                                             controller.mergeIdenticalProducts
                                                 .value = value;
@@ -178,7 +179,10 @@ class PurchaseSalesDesktop extends GetView<PurchaseSalesController> {
                                     width: double.infinity,
                                     child: Obx(() => ElevatedButton(
                                           focusNode: controller.addButtonFocus,
-                                          onPressed: controller.isLoading.value
+                                          onPressed: controller
+                                                      .isLoading.value ||
+                                                  controller
+                                                      .isSerializedProduct.value
                                               ? null
                                               : () {
                                                   controller.addProduct();
@@ -239,8 +243,86 @@ class PurchaseSalesDesktop extends GetView<PurchaseSalesController> {
                   ),
                   const SizedBox(height: TSizes.spaceBtwSections / 2),
 
-                  // Serial Numbers Selector (for products with serial numbers)
-                  const SerialVariantSelector(),
+                  // Serialized Product Indicator (shows when a serialized product with variant is selected)
+                  Obx(() => controller.isSerializedProduct.value &&
+                          controller.selectedVariantId.value != -1
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: TSizes.spaceBtwItems),
+                          child: TRoundedContainer(
+                            backgroundColor:
+                                TColors.primary.withValues(alpha: 0.1),
+                            showBorder: true,
+                            borderColor: TColors.primary.withValues(alpha: 0.3),
+                            padding: const EdgeInsets.all(TSizes.md),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Iconsax.tag,
+                                  color: TColors.primary,
+                                  size: 24,
+                                ),
+                                const SizedBox(width: TSizes.sm),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        'Serialized Product Selected',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: TColors.primary,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Obx(() {
+                                        final selectedVariant = controller
+                                            .availableVariants
+                                            .where((v) =>
+                                                v.variantId ==
+                                                controller
+                                                    .selectedVariantId.value)
+                                            .firstOrNull;
+                                        return Text(
+                                          selectedVariant != null
+                                              ? 'Serial: ${selectedVariant.serialNumber} | Price: Rs ${selectedVariant.purchasePrice.toStringAsFixed(2)}'
+                                              : 'Variant information loading...',
+                                          style: const TextStyle(
+                                            color: TColors.darkGrey,
+                                            fontSize: 12,
+                                          ),
+                                        );
+                                      }),
+                                    ],
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: () {
+                                    controller.resetSerializedProductState();
+                                    controller.dropdownController.clear();
+                                    controller.selectedProductName.value = '';
+                                    controller.selectedProductId.value = -1;
+                                    controller.unitPrice.value.clear();
+                                    controller.totalPrice.value.clear();
+                                    controller.productNameFocus.requestFocus();
+                                  },
+                                  icon: const Icon(
+                                    Icons.close,
+                                    color: TColors.primary,
+                                    size: 20,
+                                  ),
+                                  tooltip: 'Clear selection',
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      : const SizedBox.shrink()),
+
+                  // Purchase Variant Manager (for serialized product management)
+                  const PurchaseVariantManager(),
 
                   const SizedBox(height: TSizes.spaceBtwSections / 2),
 

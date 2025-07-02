@@ -79,7 +79,7 @@ class PurchaseSummary extends StatelessWidget {
         TRoundedContainer(
           padding: const EdgeInsets.symmetric(
               vertical: TSizes.sm, horizontal: TSizes.md),
-          backgroundColor: TColors.primaryBackground.withOpacity(0.1),
+          backgroundColor: TColors.primaryBackground.withValues(alpha: 0.1),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [

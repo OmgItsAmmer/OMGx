@@ -162,6 +162,59 @@ CREATE TABLE account_book (
 - `fetchSalesmenForSelection()`: Retrieves salesman list for dropdown
 - All methods return formatted data with ID, name, and phone number
 
+### Purchase Management System
+
+The application includes a comprehensive purchase management system that handles both regular and serialized products:
+
+#### Purchase Features:
+- **Product Selection**: Interactive product search with autocomplete functionality
+- **Serialized Product Support**: Special handling for products with serial numbers
+- **Variant Selection Popup**: Animated popup dialog for selecting specific serial numbers
+- **Stock Management**: Automatic stock updates when purchases are received or cancelled
+- **Vendor Integration**: Full vendor management with address and contact details
+- **Unit Price & Quantity Management**: Flexible pricing and quantity handling
+- **Merge Functionality**: Option to merge identical products in the same purchase
+- **Payment Tracking**: Partial payment support with remaining balance calculation
+- **Status Management**: Purchase status tracking (pending, received, cancelled)
+
+#### Serialized Product Workflow:
+1. **Product Selection**: When a serialized product is selected from the product search bar
+2. **Popup Display**: An animated popup appears showing all available serial numbers
+3. **Variant Selection**: User selects a specific serial number with purchase and selling prices displayed
+4. **Price Population**: Unit price and total price are automatically populated from the selected variant
+5. **Quantity Locked**: Quantity is automatically set to 1 for serialized products
+6. **Visual Indicator**: A visual indicator shows the selected serialized product with variant details
+7. **Stock Integration**: Selected variants are properly tracked and removed from available inventory
+
+#### Purchase Components:
+- **PurchaseSalesController**: Main controller handling purchase logic and serialized product popup
+- **PurchaseProductSearchBar**: Enhanced product search with serialized product detection
+- **Serialized Product Popup**: Animated dialog for variant selection with visual feedback
+- **Purchase Table**: Displays purchase items with support for both regular and serialized products
+- **Visual Indicators**: Clear indicators when serialized products are selected
+- **Stock Management**: Automatic inventory updates for serialized products
+
+#### Backend Integration:
+- **Variant Repository**: Handles marking variants as available/sold
+- **Purchase Repository**: Manages purchase creation and stock updates
+- **Product Controller**: Integrates with variant management for stock tracking
+- **Animation Support**: Smooth animations for popup dialogs and state transitions
+
+#### Database Schema Updates:
+- Purchase items table includes `variant_id` field for serialized products
+- Variant status tracking for available/sold states
+- Automatic stock quantity updates based on available variants
+
+#### Key Features:
+- **Real-time Validation**: Prevents adding sold or invalid variants
+- **Error Handling**: Comprehensive error messages for invalid selections
+- **Focus Management**: Proper tab order and focus handling for improved UX
+- **Responsive Design**: Popup adapts to different screen sizes
+- **State Management**: Reactive state updates using GetX observables
+- **Separated Concerns**: Product detail screen shows read-only variants, purchase screen handles variant creation
+- **Bulk Import**: CSV support for importing multiple variants at once
+- **Database Integration**: Automatic saving of variants to database on purchase completion
+
 ## Tech Stack
 
 - **Flutter**: UI framework (^3.5.0)

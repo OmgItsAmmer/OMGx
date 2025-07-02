@@ -223,4 +223,4 @@ class PurchaseModel {
   }
 }
 
-enum PurchaseStatus { pending, processing, received, cancelled }
+
