@@ -247,4 +247,67 @@ class AccountBookRepository extends GetxController {
       return [];
     }
   }
+
+  /// Fetch all customers for entity selection
+  Future<List<Map<String, dynamic>>> fetchCustomersForSelection() async {
+    try {
+      final data = await supabase
+          .from('customers')
+          .select('customer_id, first_name, last_name, phone_number')
+          .order('first_name');
+
+      return data
+          .map((item) => {
+                'id': item['customer_id'],
+                'name': '${item['first_name']} ${item['last_name']}',
+                'phone': item['phone_number'],
+              })
+          .toList();
+    } catch (e) {
+      TLoaders.errorSnackBar(title: 'Oh Snap', message: e.toString());
+      return [];
+    }
+  }
+
+  /// Fetch all vendors for entity selection
+  Future<List<Map<String, dynamic>>> fetchVendorsForSelection() async {
+    try {
+      final data = await supabase
+          .from('vendors')
+          .select('vendor_id, first_name, last_name, phone_number')
+          .order('first_name');
+
+      return data
+          .map((item) => {
+                'id': item['vendor_id'],
+                'name': '${item['first_name']} ${item['last_name']}',
+                'phone': item['phone_number'],
+              })
+          .toList();
+    } catch (e) {
+      TLoaders.errorSnackBar(title: 'Oh Snap', message: e.toString());
+      return [];
+    }
+  }
+
+  /// Fetch all salesmen for entity selection
+  Future<List<Map<String, dynamic>>> fetchSalesmenForSelection() async {
+    try {
+      final data = await supabase
+          .from('salesman')
+          .select('salesman_id, first_name, last_name, phone_number')
+          .order('first_name');
+
+      return data
+          .map((item) => {
+                'id': item['salesman_id'],
+                'name': '${item['first_name']} ${item['last_name']}',
+                'phone': item['phone_number'],
+              })
+          .toList();
+    } catch (e) {
+      TLoaders.errorSnackBar(title: 'Oh Snap', message: e.toString());
+      return [];
+    }
+  }
 }

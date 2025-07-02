@@ -20,6 +20,8 @@ import '../controllers/customer/customer_controller.dart';
 import '../controllers/guarantors/guarantor_image_controller.dart';
 import '../controllers/media/media_controller.dart';
 import '../controllers/orders/orders_controller.dart';
+import '../controllers/purchase/purchase_controller.dart';
+import '../controllers/purchase_sales/purchase_sales_controller.dart';
 import '../network_manager.dart';
 
 class GeneralBindings extends Bindings {
@@ -30,11 +32,13 @@ class GeneralBindings extends Bindings {
 
     // Register controllers
     Get.put(UserController());
-     Get.put(ProductController());
+    Get.put(ProductController());
     Get.put(OrderController());
+    Get.put(PurchaseController());
     Get.put(CustomerController());
     Get.put(VendorController());
     Get.put(SalesController());
+    Get.put(PurchaseSalesController());
     Get.put(InstallmentController());
     Get.put(ExpenseController());
     Get.put(DashboardController());

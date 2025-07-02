@@ -193,7 +193,16 @@ class TSideBar extends StatelessWidget {
                       itemName: 'Account Book',
                       route: TRoutes.accountBook,
                     ),
-
+                    const TMenuItem(
+                      icon: Iconsax.receipt_item,
+                      itemName: 'Purchases',
+                      route: TRoutes.purchases,
+                    ),
+                    const TMenuItem(
+                      icon: Iconsax.shopping_cart,
+                      itemName: 'Purchase Entry',
+                      route: TRoutes.purchaseSales,
+                    ),
 
                     Text(
                       'OTHER',
@@ -203,10 +212,9 @@ class TSideBar extends StatelessWidget {
                           .apply(letterSpacingDelta: 1.2),
                     ),
                     const TMenuItem(
-                      icon: Iconsax.image,
-                      itemName: 'Media',
-                      route: TRoutes.mediaScreen
-                    ),
+                        icon: Iconsax.image,
+                        itemName: 'Media',
+                        route: TRoutes.mediaScreen),
                     const TMenuItem(
                       icon: Iconsax.note,
                       itemName: 'Reports',

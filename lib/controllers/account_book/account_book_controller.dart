@@ -1,10 +1,15 @@
 import 'package:admin_dashboard_v3/Models/account_book/account_book_model.dart';
+import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
+import 'package:admin_dashboard_v3/Models/entity/entity_model.dart';
 import 'package:admin_dashboard_v3/repositories/account_book/account_book_repository.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../common/widgets/loaders/tloaders.dart';
 import '../../utils/constants/enums.dart';
+import '../customer/customer_controller.dart';
+import '../vendor/vendor_controller.dart';
+import '../salesman/salesman_controller.dart';
 
 class AccountBookController extends GetxController {
   static AccountBookController get instance => Get.find();
@@ -32,6 +37,7 @@ class AccountBookController extends GetxController {
   final entityTypeController = TextEditingController();
   final entityIdController = TextEditingController();
   final entityNameController = TextEditingController();
+  final entitySearchController = TextEditingController(); // For autocomplete
   final amountController = TextEditingController();
   final descriptionController = TextEditingController();
   final referenceController = TextEditingController();
@@ -41,6 +47,11 @@ class AccountBookController extends GetxController {
   Rx<TransactionType> selectedTransactionType = TransactionType.sell.obs;
   Rx<EntityType> selectedEntityType = EntityType.customer.obs;
   Rx<DateTime> selectedTransactionDate = DateTime.now().obs;
+
+  // Entity selection
+  RxList<EntityModel> availableEntities = <EntityModel>[].obs;
+  Rx<EntityModel?> selectedEntity = Rx<EntityModel?>(null);
+  final isLoadingEntities = false.obs;
 
   // Form key
   GlobalKey<FormState> accountBookFormKey = GlobalKey<FormState>();
@@ -58,6 +69,7 @@ class AccountBookController extends GetxController {
     super.onInit();
     fetchAllAccountBookEntries();
     loadSummaryData();
+    loadEntitiesForCurrentType();
 
     // Listen to search changes
     searchController.addListener(() {
@@ -70,6 +82,9 @@ class AccountBookController extends GetxController {
     ever(filterTransactionType, (_) => filterEntries());
     ever(filterStartDate, (_) => filterEntries());
     ever(filterEndDate, (_) => filterEntries());
+
+    // Listen to entity type changes to load relevant entities
+    ever(selectedEntityType, (_) => loadEntitiesForCurrentType());
   }
 
   @override
@@ -77,6 +92,7 @@ class AccountBookController extends GetxController {
     entityTypeController.dispose();
     entityIdController.dispose();
     entityNameController.dispose();
+    entitySearchController.dispose();
     amountController.dispose();
     descriptionController.dispose();
     referenceController.dispose();
@@ -226,6 +242,15 @@ class AccountBookController extends GetxController {
         return;
       }
 
+      if (selectedEntity.value == null) {
+        TLoaders.errorSnackBar(
+          title: "Entity Required",
+          message:
+              'Please select a ${selectedEntityType.value.toString().split('.').last}.',
+        );
+        return;
+      }
+
       final accountBookModel = AccountBookModel(
         accountBookId: null,
         entityType: selectedEntityType.value.toString().split('.').last,
@@ -276,6 +301,15 @@ class AccountBookController extends GetxController {
         TLoaders.errorSnackBar(
           title: "Empty Fields",
           message: 'Kindly fill all the fields before proceeding.',
+        );
+        return;
+      }
+
+      if (selectedEntity.value == null) {
+        TLoaders.errorSnackBar(
+          title: "Entity Required",
+          message:
+              'Please select a ${selectedEntityType.value.toString().split('.').last}.',
         );
         return;
       }
@@ -365,12 +399,23 @@ class AccountBookController extends GetxController {
         selectedEntityType.value = EntityType.salesman;
         break;
     }
+
+    // Set selected entity for editing
+    selectedEntity.value = EntityModel(
+      id: entry.entityId,
+      name: entry.entityName,
+      type: selectedEntityType.value,
+    );
+
+    // Set search controller for autocomplete display
+    entitySearchController.text = entry.entityName;
   }
 
   /// Clear form
   void clearForm() {
     entityIdController.clear();
     entityNameController.clear();
+    entitySearchController.clear();
     amountController.clear();
     descriptionController.clear();
     referenceController.clear();
@@ -379,6 +424,8 @@ class AccountBookController extends GetxController {
     selectedEntityType.value = EntityType.customer;
     selectedTransactionDate.value = DateTime.now();
     selectedEntry.value = AccountBookModel.empty();
+    selectedEntity.value = null;
+    // Note: availableEntities will be refreshed when entity type changes
   }
 
   /// Get entries by entity type
@@ -398,5 +445,75 @@ class AccountBookController extends GetxController {
             entry.entityType == entityTypeString &&
             entry.transactionType == transactionType)
         .fold(0.0, (sum, entry) => sum + entry.amount);
+  }
+
+  /// Load entities based on currently selected entity type
+  Future<void> loadEntitiesForCurrentType() async {
+    try {
+      isLoadingEntities.value = true;
+      selectedEntity.value = null; // Clear current selection
+      entitySearchController.clear(); // Clear search field
+
+      List<EntityModel> entities = [];
+
+      switch (selectedEntityType.value) {
+        case EntityType.customer:
+          final customerController = Get.find<CustomerController>();
+          await customerController.fetchAllCustomers();
+          entities = customerController.allCustomers
+              .map((customer) => EntityModel.fromCustomer(customer))
+              .toList();
+          break;
+        case EntityType.vendor:
+          final vendorController = Get.find<VendorController>();
+          await vendorController.fetchAllVendors();
+          entities = vendorController.allVendors
+              .map((vendor) => EntityModel.fromVendor(vendor))
+              .toList();
+          break;
+        case EntityType.salesman:
+          final salesmanController = Get.find<SalesmanController>();
+          await salesmanController.fetchAllSalesman();
+          entities = salesmanController.allSalesman
+              .map((salesman) => EntityModel.fromSalesman(salesman))
+              .toList();
+          break;
+        case EntityType.user:
+          // User type is not supported for account book entries
+          entities = [];
+          break;
+      }
+
+      availableEntities.assignAll(entities);
+    } catch (e) {
+      TLoaders.errorSnackBar(title: "Error", message: e.toString());
+    } finally {
+      isLoadingEntities.value = false;
+    }
+  }
+
+  /// Handle entity selection
+  void onEntitySelected(EntityModel? entity) {
+    selectedEntity.value = entity;
+    if (entity != null) {
+      entityIdController.text = entity.id.toString();
+      entityNameController.text = entity.name;
+
+      // Update search controller for autocomplete display
+      String display = entity.name;
+      if (entity.phoneNumber != null && entity.phoneNumber!.isNotEmpty) {
+        display += ' - ${entity.phoneNumber}';
+      }
+      entitySearchController.text = display;
+    }
+  }
+
+  /// Clear entity selection
+  void clearEntitySelection() {
+    selectedEntity.value = null;
+    availableEntities.clear();
+    entityIdController.clear();
+    entityNameController.clear();
+    entitySearchController.clear();
   }
 }

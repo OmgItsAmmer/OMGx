@@ -1,8 +1,10 @@
+import 'package:admin_dashboard_v3/Models/entity/entity_model.dart';
 import 'package:admin_dashboard_v3/controllers/account_book/account_book_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:admin_dashboard_v3/utils/validators/validation.dart';
+import 'package:admin_dashboard_v3/common/widgets/dropdown_search/enhanced_autocomplete.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
@@ -66,6 +68,9 @@ class AddAccountBookDialog extends StatelessWidget {
                                     ? 'Please select entity type'
                                     : null,
                                 items: EntityType.values
+                                    .where((type) =>
+                                        type !=
+                                        EntityType.user) // Exclude user type
                                     .map((type) => DropdownMenuItem(
                                           value: type,
                                           child: Text(type
@@ -132,39 +137,96 @@ class AddAccountBookDialog extends StatelessWidget {
                     ),
                     const SizedBox(height: TSizes.spaceBtwInputFields),
 
-                    // Entity ID and Entity Name Row
-                    Row(
-                      children: [
-                        // Entity ID
-                        Expanded(
-                          child: TextFormField(
-                            controller: controller.entityIdController,
-                            decoration: const InputDecoration(
-                              labelText: 'Entity ID *',
-                              prefixIcon: Icon(Iconsax.hashtag_1),
-                            ),
-                            validator: (value) => TValidator.validateEmptyText(
-                                'Entity ID', value),
-                            keyboardType: TextInputType.number,
-                          ),
-                        ),
-                        const SizedBox(width: TSizes.spaceBtwInputFields),
-
-                        // Entity Name
-                        Expanded(
-                          flex: 2,
-                          child: TextFormField(
-                            controller: controller.entityNameController,
-                            decoration: const InputDecoration(
-                              labelText: 'Entity Name *',
-                              prefixIcon: Icon(Iconsax.user),
-                            ),
-                            validator: (value) => TValidator.validateEmptyText(
-                                'Entity Name', value),
-                          ),
-                        ),
-                      ],
-                    ),
+                    // Entity Selection Autocomplete
+                    Obx(() => Container(
+                          child: controller.isLoadingEntities.value
+                              ? Container(
+                                  padding: const EdgeInsets.all(16.0),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: TColors.grey),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Text(
+                                        'Loading ${controller.selectedEntityType.value.toString().split('.').last.toLowerCase()}s...',
+                                        style:
+                                            const TextStyle(color: TColors.darkGrey),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              : controller.availableEntities.isEmpty
+                                  ? Container(
+                                      padding: const EdgeInsets.all(16.0),
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color: TColors.grey),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          const Icon(Iconsax.info_circle,
+                                              color: TColors.warning, size: 16),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            'No ${controller.selectedEntityType.value.toString().split('.').last.toLowerCase()}s found',
+                                            style: const TextStyle(
+                                                color: TColors.darkGrey),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  : EnhancedAutocomplete<EntityModel>(
+                                      labelText:
+                                          '${controller.selectedEntityType.value.toString().split('.').last.capitalize!} *',
+                                      hintText:
+                                          'Search and select a ${controller.selectedEntityType.value.toString().split('.').last.toLowerCase()}',
+                                      displayStringForOption: (entity) {
+                                        String display = entity.name;
+                                        if (entity.phoneNumber != null &&
+                                            entity.phoneNumber!.isNotEmpty) {
+                                          display += ' - ${entity.phoneNumber}';
+                                        }
+                                        return display;
+                                      },
+                                      options: controller.availableEntities,
+                                      externalController:
+                                          controller.entitySearchController,
+                                      showOptionsOnFocus: true,
+                                      getItemId: (entity) => entity.id,
+                                      onSelected: (entity) {
+                                        controller.onEntitySelected(entity);
+                                      },
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please select a ${controller.selectedEntityType.value.toString().split('.').last.toLowerCase()}';
+                                        }
+                                        // Check if the entered value matches any entity
+                                        bool isValid = controller
+                                            .availableEntities
+                                            .any((entity) {
+                                          String display = entity.name;
+                                          if (entity.phoneNumber != null &&
+                                              entity.phoneNumber!.isNotEmpty) {
+                                            display += ' - ${entity.phoneNumber}';
+                                          }
+                                          return display.toLowerCase() ==
+                                              value.toLowerCase();
+                                        });
+                                        if (!isValid) {
+                                          return 'Please select a valid ${controller.selectedEntityType.value.toString().split('.').last.toLowerCase()} from the list';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                        )),
                     const SizedBox(height: TSizes.spaceBtwInputFields),
 
                     // Amount and Date Row
@@ -176,8 +238,8 @@ class AddAccountBookDialog extends StatelessWidget {
                             controller: controller.amountController,
                             decoration: const InputDecoration(
                               labelText: 'Amount *',
-                              prefixIcon: Icon(Iconsax.dollar_circle),
-                              prefixText: '\$ ',
+                              prefixIcon: Icon(Iconsax.money),
+                              prefixText: 'Rs ',
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {

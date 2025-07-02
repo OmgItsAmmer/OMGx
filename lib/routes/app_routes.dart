@@ -6,6 +6,7 @@ import 'package:admin_dashboard_v3/views/category/all_categories/category.dart';
 import 'package:admin_dashboard_v3/views/expenses/expenses.dart';
 import 'package:admin_dashboard_v3/views/login/login.dart';
 import 'package:admin_dashboard_v3/views/orders/all_orders/orders.dart';
+import 'package:admin_dashboard_v3/views/purchases/all_purchases/purchases.dart';
 import 'package:admin_dashboard_v3/views/unkown_route.dart';
 import 'package:get/get.dart';
 
@@ -21,6 +22,7 @@ import '../views/orders/order_details/order_detail.dart';
 import '../views/products/all_products/all_products.dart';
 import '../views/products/product_detail/product_detail.dart';
 import '../views/profile/profile/profile_screen.dart';
+import '../views/purchase_sales/purchase_sales.dart';
 import '../views/reports/all_reports/all_reports.dart';
 import '../views/sales/sales.dart';
 import '../views/salesman/add_salesman/add_salesman.dart';
@@ -62,6 +64,12 @@ class TAppRoutes {
     GetPage(
         name: TRoutes.sales,
         page: () => const Sales(),
+        middlewares: [TRouteMiddleware()]),
+
+    //Purchase Sales Screens
+    GetPage(
+        name: TRoutes.purchaseSales,
+        page: () => const PurchaseSales(),
         middlewares: [TRouteMiddleware()]),
 
     //Customer Screens
@@ -180,5 +188,12 @@ class TAppRoutes {
         name: TRoutes.accountBook,
         page: () => const AccountBookScreen(),
         middlewares: [TRouteMiddleware()]),
+
+    //Purchase Screens
+    GetPage(
+        name: TRoutes.purchases,
+        page: () => const TPurchaseScreen(),
+        middlewares: [TRouteMiddleware()]),
   ];
+  
 }

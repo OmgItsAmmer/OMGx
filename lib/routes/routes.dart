@@ -19,12 +19,19 @@ class TRoutes {
   static const orders = '/TOrderScreen/';
   static const orderDetails = '/OrderDetailDesktopScreen/';
 
+//Purchase Screens
+  static const purchases = '/TPurchaseScreen/';
+  static const purchaseDetails = '/PurchaseDetailDesktopScreen/';
+
   //Product Screens
   static const products = '/AllProducts';
   static const productsDetail = '/ProductDetail';
 
 // Sales Screen
   static const sales = '/sales';
+
+// Purchase Sales Screen
+  static const purchaseSales = '/purchase-sales';
 
   //Customer Screens
   static const customer = '/customer';
