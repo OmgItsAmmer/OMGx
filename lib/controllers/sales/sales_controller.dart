@@ -226,6 +226,8 @@ class SalesController extends GetxController {
     try {
       cashierNameController.value.text =
           userController.currentUser.value.firstName;
+
+          
     } catch (e) {
       if (kDebugMode) {
         TLoaders.errorSnackBar(title: e.toString());

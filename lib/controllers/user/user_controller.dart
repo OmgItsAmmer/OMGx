@@ -1,4 +1,5 @@
 import 'package:admin_dashboard_v3/Models/user/user_model.dart';
+import 'package:admin_dashboard_v3/controllers/purchase_sales/purchase_sales_controller.dart';
 import 'package:admin_dashboard_v3/controllers/sales/sales_controller.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -79,6 +80,7 @@ class UserController extends GetxController {
       currentUser.value = matchedUser;
 
       SalesController.instance.setupUserDetails();
+      PurchaseSalesController.instance.setupUserDetails();
 
       setupProfileDetails();
 

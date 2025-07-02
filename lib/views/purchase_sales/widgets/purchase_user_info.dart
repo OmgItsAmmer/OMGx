@@ -25,47 +25,26 @@ class PurchaseUserInfo extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'User Information',
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-                TCircularIcon(
-                  icon: Iconsax.refresh,
-                  backgroundColor: TColors.primary.withOpacity(0.1),
-                  color: TColors.primary,
-                  onPressed: () {
-                    // Reset user fields
-                    purchaseSalesController.userNameController.value.clear();
-                    purchaseSalesController.selectedDate.value = DateTime.now();
-
-                    // Set a very short delay to ensure UI updates
-                    Future.microtask(() {
-                      if (purchaseSalesController.userFormKey.currentState !=
-                          null) {
-                        purchaseSalesController.update();
-                      }
-                    });
-                  },
-                ),
-              ],
+            Text(
+              'Cashier Information',
+              style: Theme.of(context).textTheme.headlineMedium,
             ),
-            const SizedBox(height: TSizes.spaceBtwItems),
+            const SizedBox(height: TSizes.spaceBtwItems), 
 
             // User Name Field
             SizedBox(
               width: double.infinity,
               child: Obx(() => TextFormField(
+                    readOnly: true,
                     controller:
                         purchaseSalesController.userNameController.value,
                     validator: (value) =>
-                        TValidator.validateEmptyText('User Name', value),
+                        TValidator.validateEmptyText('Cashier Name', value),
                     style: Theme.of(context).textTheme.bodyMedium,
                     decoration: const InputDecoration(
-                      labelText: 'User Name',
-                      hintText: 'Enter user name',
+                      labelText: 'Cashier Name',
+                      hintText: 'Enter cashier name',
+
                     ),
                   )),
             ),

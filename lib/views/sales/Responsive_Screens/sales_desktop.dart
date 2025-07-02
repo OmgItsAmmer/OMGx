@@ -27,8 +27,8 @@ class SalesDesktop extends GetView<SalesController> {
   @override
   Widget build(BuildContext context) {
     final customerController = Get.find<CustomerController>();
-    final addressController = Get.find<AddressController>();
-    final mediaController = Get.find<MediaController>();
+    // final addressController = Get.find<AddressController>();
+    // final mediaController = Get.find<MediaController>();
 
     // Mark ready for GetX to manage reactive rebuilds
     final isContentReady = true.obs;
@@ -128,7 +128,7 @@ class SalesDesktop extends GetView<SalesController> {
                                 textStyle: const TextStyle(
                                     color: TColors.white, fontSize: 12),
                                 decoration: BoxDecoration(
-                                  color: TColors.dark.withOpacity(0.8),
+                                  color: TColors.dark.withValues(alpha: 0.8),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Row(

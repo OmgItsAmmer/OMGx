@@ -20,11 +20,13 @@ class AddressController extends GetxController {
   // only locations for dopdown
   // RxList<AddressModel> allAddresses = <AddressModel>[].obs;
   RxList<String> allCustomerAddressesLocation = <String>[].obs;
+  RxList<String> allVendorAddressesLocation = <String>[].obs;
   // RxList<AddressModel> allSalesmanAddresses = <AddressModel>[].obs;
 
   //Current user addresses
   Rx<AddressModel>? currentUserAddress;
   Rx<AddressModel> selectedCustomerAddress = AddressModel.empty().obs;
+  Rx<AddressModel> selectedVendorAddress = AddressModel.empty().obs;
   Rx<AddressModel>? currentSalesmanAddress;
 
   RxMap<String, dynamic>? selectedAddress;
@@ -65,6 +67,12 @@ class AddressController extends GetxController {
           final vendorAddress = await addressRepository
               .fetchAddressTableForSpecificEntity(entityId, entityType);
           allVendorAddresses.assignAll(vendorAddress);
+
+          final locations = allVendorAddresses
+              .map((address) => address.location)
+              .whereType<String>()
+              .toList();
+          allVendorAddressesLocation.assignAll(locations);
           break;
 
         case EntityType.user:

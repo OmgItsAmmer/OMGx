@@ -1,3 +1,4 @@
+import 'package:admin_dashboard_v3/Models/products/product_variant_model.dart';
 import 'package:admin_dashboard_v3/Models/purchase/purchase_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/controllers/dashboard/dashboard_controoler.dart';
@@ -8,6 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
+import '../../Models/products/product_model.dart';
 import '../../routes/routes.dart';
 import '../address/address_controller.dart';
 import '../vendor/vendor_controller.dart';
@@ -33,6 +35,13 @@ class PurchaseController extends GetxController {
 
   TextEditingController newPaidAmount = TextEditingController();
   RxDouble remainingAmount = (0.0).obs;
+
+  RxList<ProductVariantModel> availableVariants = <ProductVariantModel>[].obs;
+  Rx<TextEditingController> unitPrice = TextEditingController().obs;
+  Rx<TextEditingController> quantity = TextEditingController().obs;
+  Rx<TextEditingController> totalPrice = TextEditingController().obs;
+  Rx<bool> isLoadingVariants = false.obs;
+  Rx<int> selectedVariantId = (-1).obs;
 
   @override
   void onInit() {
@@ -445,6 +454,50 @@ class PurchaseController extends GetxController {
       if (kDebugMode) {
         print('Controller Error: $e');
       }
+    }
+  }
+
+  Future<void> loadAvailableVariants(int productId) async {
+    try {
+      isLoadingVariants.value = true;
+      selectedVariantId.value = -1;
+      availableVariants.clear();
+
+      if (productId <= 0) return;
+
+      final productController = Get.find<ProductController>();
+      final product = productController.allProducts.firstWhere(
+        (p) => p.productId == productId,
+        orElse: () => ProductModel.empty(),
+      );
+
+      if (!product.hasSerialNumbers) return;
+
+      final variants = await productController.getAvailableVariants(productId);
+      availableVariants.assignAll(variants);
+
+      if (variants.isNotEmpty) {
+        unitPrice.value.text = "";
+        quantity.value.text = "1";
+        totalPrice.value.text = "";
+      }
+    } catch (e) {
+      TLoaders.errorSnackBar(
+          title: 'Error', message: 'Failed to load variants: $e');
+    } finally {
+      isLoadingVariants.value = false;
+    }
+  }
+
+  void calculateTotalPrice() {
+    try {
+      double unitPriceValue = double.tryParse(unitPrice.value.text) ?? 0.0;
+      double quantityValue = double.tryParse(quantity.value.text) ?? 0.0;
+      double totalPriceValue = unitPriceValue * quantityValue;
+      totalPrice.value.text = totalPriceValue.toStringAsFixed(2);
+    } catch (e) {
+      TLoaders.errorSnackBar(
+          title: 'Error', message: 'Failed to calculate total price: $e');
     }
   }
 }

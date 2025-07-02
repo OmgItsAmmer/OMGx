@@ -1,6 +1,5 @@
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/common/widgets/icons/t_circular_icon.dart';
-import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
 import 'package:admin_dashboard_v3/controllers/vendor/vendor_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
@@ -10,10 +9,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
-import '../../../controllers/media/media_controller.dart';
 import '../../../controllers/purchase_sales/purchase_sales_controller.dart';
 import '../../../views/sales/widgets/serial_variant_selector.dart';
 import '../table/purchase_table.dart';
+import '../widgets/purchase_unitPriceQuantity.dart';
+import '../widgets/purchase_unit_total_price.dart';
 import '../widgets/purchase_vendor_info.dart';
 import '../widgets/purchase_product_bar.dart';
 import '../widgets/purchase_summary.dart';
@@ -26,8 +26,8 @@ class PurchaseSalesDesktop extends GetView<PurchaseSalesController> {
   @override
   Widget build(BuildContext context) {
     final vendorController = Get.find<VendorController>();
-    final addressController = Get.find<AddressController>();
-    final mediaController = Get.find<MediaController>();
+    // final addressController = Get.find<AddressController>();
+    // final mediaController = Get.find<MediaController>();
 
     // Mark ready for GetX to manage reactive rebuilds
     final isContentReady = true.obs;
@@ -99,7 +99,7 @@ class PurchaseSalesDesktop extends GetView<PurchaseSalesController> {
                                 textStyle: const TextStyle(
                                     color: TColors.white, fontSize: 12),
                                 decoration: BoxDecoration(
-                                  color: TColors.dark.withOpacity(0.8),
+                                  color: TColors.dark.withValues(alpha: 0.8),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Row(
@@ -116,10 +116,10 @@ class PurchaseSalesDesktop extends GetView<PurchaseSalesController> {
                                               .mergeIdenticalProducts.value,
                                           activeColor: TColors.primary,
                                           activeTrackColor:
-                                              TColors.primary.withOpacity(0.5),
+                                              TColors.primary.withValues(alpha: 0.5),
                                           inactiveThumbColor: TColors.grey,
                                           inactiveTrackColor:
-                                              TColors.grey.withOpacity(0.5),
+                                              TColors.grey.withValues(alpha: 0.5),
                                           onChanged: (value) {
                                             controller.mergeIdenticalProducts
                                                 .value = value;
@@ -152,7 +152,7 @@ class PurchaseSalesDesktop extends GetView<PurchaseSalesController> {
                               Expanded(
                                   child: FocusTraversalOrder(
                                 order: const NumericFocusOrder(2.0),
-                                child: UnitPriceQuantity(
+                                child: PurchaseUnitPriceQuantity(
                                   unitPriceFocus: controller.unitPriceFocus,
                                   quantityFocus: controller.quantityFocus,
                                 ),
@@ -163,7 +163,7 @@ class PurchaseSalesDesktop extends GetView<PurchaseSalesController> {
                               Expanded(
                                   child: FocusTraversalOrder(
                                 order: const NumericFocusOrder(4.0),
-                                child: UnitTotalPrice(
+                                child: PurchaseUnitTotalPrice(
                                     totalPriceFocus:
                                         controller.totalPriceFocus),
                               )),
@@ -222,7 +222,7 @@ class PurchaseSalesDesktop extends GetView<PurchaseSalesController> {
                               TCircularIcon(
                                 icon: Iconsax.refresh,
                                 backgroundColor:
-                                    TColors.primary.withOpacity(0.1),
+                                    TColors.primary.withValues(alpha: 0.1),
                                 color: TColors.primary,
                                 onPressed: () {
                                   // Reset product form fields

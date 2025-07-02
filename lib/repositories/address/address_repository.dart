@@ -44,9 +44,10 @@ class AddressRepository extends GetxController {
         case EntityType.salesman:
           columnName = 'salesman_id';
           break;
-        default:
-          throw Exception('Invalid entity type: $entityType');
-      }
+        case EntityType.vendor:
+          columnName = 'vendor_id';
+          break;
+        }
 
       // Fetch data from the 'addresses' table using the appropriate column name
       final data =

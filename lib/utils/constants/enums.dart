@@ -32,7 +32,8 @@ enum MediaCategory {
   customers,
   salesman,
   guarantors,
-  shop
+  shop,
+  vendors,
 }
 
 enum OrderStatus { pending, completed, cancelled }

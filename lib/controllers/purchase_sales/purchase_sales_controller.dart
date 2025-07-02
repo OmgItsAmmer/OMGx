@@ -1073,16 +1073,16 @@ class PurchaseSalesController extends GetxController {
 
     // Use the existing address controller properties for customer addresses
     // since vendor addresses might use the same structure
-    if (addressController.allCustomerAddressesLocation.isNotEmpty) {
-      final firstAddress = addressController.allCustomerAddressesLocation.first;
+    if (addressController.allVendorAddressesLocation.isNotEmpty) {
+      final firstAddress = addressController.allVendorAddressesLocation.first;
 
       vendorAddressController.value.text = firstAddress;
 
-      addressController.selectedCustomerAddress.value = addressController
-          .allCustomerAddresses
+      addressController.selectedVendorAddress.value = addressController
+          .allVendorAddresses
           .firstWhere((address) => address.location == firstAddress);
       selectedAddressId =
-          addressController.selectedCustomerAddress.value.addressId;
+          addressController.selectedVendorAddress.value.addressId;
     }
   }
 
@@ -1126,4 +1126,6 @@ class PurchaseSalesController extends GetxController {
       }
     }
   }
+
+  
 }

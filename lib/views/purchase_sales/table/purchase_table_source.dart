@@ -2,6 +2,7 @@ import 'package:admin_dashboard_v3/common/widgets/icons/t_circular_icon.dart';
 import 'package:admin_dashboard_v3/controllers/purchase_sales/purchase_sales_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:data_table_2/data_table_2.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
@@ -30,69 +31,54 @@ class PurchaseRow extends DataTableSource {
         DataCell(Text(purchase.unit)),
         DataCell(Text(purchase.totalPrice)),
         DataCell(
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TCircularIcon(
-                icon: Iconsax.edit,
-                backgroundColor: TColors.primary.withOpacity(0.1),
-                color: TColors.primary,
-                onPressed: () {
-                  // Edit functionality - populate fields with selected item data
-                  _editPurchaseItem(purchase, purchaseSalesController);
-                },
-              ),
-              const SizedBox(width: 8),
-              TCircularIcon(
-                icon: Iconsax.trash,
-                backgroundColor: TColors.error.withOpacity(0.1),
-                color: TColors.error,
-                onPressed: () {
-                  // Delete functionality
-                  _deletePurchaseItem(purchase, purchaseSalesController);
-                },
-              ),
-            ],
+          TCircularIcon(
+            icon: Iconsax.trash,
+            backgroundColor: TColors.error.withValues(alpha: 0.1),
+            color: TColors.error,
+            onPressed: () {
+              // Delete functionality
+              _deletePurchaseItem(purchase, purchaseSalesController);
+            },
           ),
         ),
       ],
     );
   }
 
-  void _editPurchaseItem(
-      PurchaseCartItem purchase, PurchaseSalesController controller) {
-    try {
-      // Set the dropdown to the product name
-      controller.dropdownController.text = purchase.name;
-      controller.selectedProductName.value = purchase.name;
-      controller.selectedProductId.value = purchase.productId;
+  // void _editPurchaseItem(
+  //     PurchaseCartItem purchase, PurchaseSalesController controller) {
+  //   try {
+  //     // Set the dropdown to the product name
+  //     controller.dropdownController.text = purchase.name;
+  //     controller.selectedProductName.value = purchase.name;
+  //     controller.selectedProductId.value = purchase.productId;
 
-      // Set the form fields
-      controller.unitPrice.value.text = purchase.purchasePrice;
-      controller.quantity.text = purchase.quantity;
-      controller.unit.text = purchase.unit;
-      controller.totalPrice.value.text = purchase.totalPrice;
+  //     // Set the form fields
+  //     controller.unitPrice.value.text = purchase.purchasePrice;
+  //     controller.quantity.text = purchase.quantity;
+  //     controller.unit.text = purchase.unit;
+  //     controller.totalPrice.value.text = purchase.totalPrice;
 
-      // If variant is selected, set it
-      if (purchase.variantId != null) {
-        controller.selectedVariantId.value = purchase.variantId!;
-      }
+  //     // If variant is selected, set it
+  //     if (purchase.variantId != null) {
+  //       controller.selectedVariantId.value = purchase.variantId!;
+  //     }
 
-      // Remove the item from cart so it can be re-added with new values
-      controller.allPurchases.removeWhere((p) =>
-          p.productId == purchase.productId &&
-          p.variantId == purchase.variantId &&
-          p.unit == purchase.unit);
+  //     // Remove the item from cart so it can be re-added with new values
+  //     controller.allPurchases.removeWhere((p) =>
+  //         p.productId == purchase.productId &&
+  //         p.variantId == purchase.variantId &&
+  //         p.unit == purchase.unit);
 
-      // Recalculate totals
-      controller.calculateNetTotal();
+  //     // Recalculate totals
+  //     controller.calculateNetTotal();
 
-      // Focus on unit price field for editing
-      controller.unitPriceFocus.requestFocus();
-    } catch (e) {
-      print('Error editing purchase item: $e');
-    }
-  }
+  //     // Focus on unit price field for editing
+  //     controller.unitPriceFocus.requestFocus();
+  //   } catch (e) {
+  //     print('Error editing purchase item: $e');
+  //   }
+  // }
 
   void _deletePurchaseItem(
       PurchaseCartItem purchase, PurchaseSalesController controller) {
@@ -106,7 +92,9 @@ class PurchaseRow extends DataTableSource {
       // Recalculate totals
       controller.calculateNetTotal();
     } catch (e) {
-      print('Error deleting purchase item: $e');
+      if (kDebugMode) {
+        print('Error deleting purchase item: $e');
+      }
     }
   }
 

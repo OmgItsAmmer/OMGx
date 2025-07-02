@@ -126,7 +126,7 @@ class PurchaseVendorInfo extends StatelessWidget {
                         return FutureBuilder<String?>(
                           future: mediaController.fetchMainImage(
                             id,
-                            MediaCategory.shop.toString().split('.').last,
+                            MediaCategory.vendors.toString().split('.').last,
                           ),
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
