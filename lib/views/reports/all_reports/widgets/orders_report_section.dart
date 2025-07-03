@@ -68,6 +68,13 @@ class OrderReportSection extends StatelessWidget {
                   reportController.showOverdueInstallmentsReport();
                 },
               ),
+              HoverableCard(
+                text: 'Account Book Report by Entity',
+                animation: TImages.docerAnimation,
+                onPressed: () {
+                  reportController.showAccountBookReportDialog(context);
+                },
+              ),
             ],
           ),
         ],

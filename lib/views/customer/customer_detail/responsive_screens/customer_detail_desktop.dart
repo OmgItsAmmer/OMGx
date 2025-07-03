@@ -4,6 +4,7 @@ import 'package:admin_dashboard_v3/controllers/orders/orders_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../../utils/constants/enums.dart';
 import '../table/customer_order_table.dart';
 import '../widgets/customer_shipping_info.dart';
 import '../widgets/user_info.dart';
@@ -21,7 +22,7 @@ class CustomerDetailDesktop extends StatelessWidget {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (customerModel.customerId != null) {
         orderController.fetchEntityOrders(
-            customerModel.customerId!, 'Customer');
+            customerModel.customerId!, EntityType.customer);
         orderController.setRecentOrderDay();
         orderController.setAverageTotalAmount();
       }

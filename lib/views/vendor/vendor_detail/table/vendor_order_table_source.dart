@@ -1,3 +1,6 @@
+import 'package:admin_dashboard_v3/Models/purchase/purchase_model.dart';
+import 'package:admin_dashboard_v3/controllers/purchase/purchase_controller.dart';
+
 import '../../../../Models/orders/order_item_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/controllers/orders/orders_controller.dart';
@@ -9,18 +12,18 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 class VendorOrderRows extends DataTableSource {
-  final OrderController orderController = Get.find();
-  final List<OrderModel> currentOrders;
-  final int ordersCount;
+  final PurchaseController purchaseController = Get.find();
+  final List<PurchaseModel> currentPurchases;
+  final int purchasesCount;
 
   VendorOrderRows({
-    required this.currentOrders,
-    required this.ordersCount,
+    required this.currentPurchases,
+    required this.purchasesCount,
   });
 
   @override
   DataRow getRow(int index) {
-    if (index >= currentOrders.length) {
+    if (index >= currentPurchases.length) {
       return const DataRow(cells: [
         DataCell(Text('')),
         DataCell(Text('')),
@@ -30,40 +33,40 @@ class VendorOrderRows extends DataTableSource {
       ]);
     }
 
-    final OrderModel orderItem = currentOrders[index];
-    OrderStatus? orderStatus = OrderStatus.values.firstWhere(
-      (e) => e.name == orderItem.status,
-      orElse: () => OrderStatus.pending,
-    );
+    final PurchaseModel purchaseItem = currentPurchases[index];
+    PurchaseStatus? purchaseStatus = PurchaseStatus.values.firstWhere(
+      (e) => e.name == purchaseItem.status,
+      orElse: () => PurchaseStatus.pending,
+    ); 
     String formattedDate = '';
     try {
       formattedDate =
-          DateFormat('MM/dd/yyyy').format(DateTime.parse(orderItem.orderDate));
+          DateFormat('MM/dd/yyyy').format(DateTime.parse(purchaseItem.purchaseDate));
     } catch (e) {
-      formattedDate = orderItem.orderDate.toString();
+      formattedDate = purchaseItem.purchaseDate.toString();
     }
 
     return DataRow(
       cells: [
-        DataCell(Text(orderItem.orderId.toString())),
+        DataCell(Text(purchaseItem.purchaseId.toString())),
         DataCell(Text(formattedDate)),
         DataCell(TRoundedContainer(
           radius: TSizes.cardRadiusSm,
           padding: const EdgeInsets.symmetric(
               vertical: TSizes.sm, horizontal: TSizes.md),
-          backgroundColor: THelperFunctions.getOrderStatusColor(orderStatus)
+          backgroundColor: THelperFunctions.getPurchaseStatusColor(purchaseStatus)
               .withValues(alpha: 0.1),
           child: Text(
-            orderController.allOrders[index].status.toString(),
+            purchaseController.allPurchases[index].status.toString(),
             style: TextStyle(
-                color: THelperFunctions.getOrderStatusColor(orderStatus)),
+                color: THelperFunctions.getPurchaseStatusColor(purchaseStatus)),
           ),
         )),
-        DataCell(Text(orderItem.subTotal.toStringAsFixed(2))),
+        DataCell(Text(purchaseItem.subTotal.toStringAsFixed(2))),
         DataCell(
           IconButton(
             onPressed: () {
-              orderController.setUpOrderDetails(orderItem);
+              purchaseController.setUpPurchaseDetails(purchaseItem);
             },
             icon: const Icon(Icons.visibility),
           ),
@@ -71,7 +74,7 @@ class VendorOrderRows extends DataTableSource {
       ],
       onSelectChanged: (value) {
         if (value == true) {
-          orderController.setUpOrderDetails(orderItem);
+          purchaseController.setUpPurchaseDetails(purchaseItem);
         }
       },
     );
@@ -81,7 +84,7 @@ class VendorOrderRows extends DataTableSource {
   bool get isRowCountApproximate => false;
 
   @override
-  int get rowCount => ordersCount;
+  int get rowCount => purchasesCount;
 
   @override
   int get selectedRowCount => 0;

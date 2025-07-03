@@ -24,6 +24,9 @@ class PurchaseRepository {
     } catch (e) {
       TLoaders.warningSnackBar(
           title: "Fetch Vendor Purchases", message: e.toString());
+      if (kDebugMode) {
+        print('Error in fetchVendorPurchases: $e');
+      }
       return [];
     }
   }

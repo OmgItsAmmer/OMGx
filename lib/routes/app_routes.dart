@@ -19,6 +19,7 @@ import '../views/dashboard/dashboard.dart';
 import '../views/installments/installments.dart';
 import '../views/media/media_screen.dart';
 import '../views/orders/order_details/order_detail.dart';
+import '../views/purchases/purchase_details/purchase_detail.dart';
 import '../views/products/all_products/all_products.dart';
 import '../views/products/product_detail/product_detail.dart';
 import '../views/profile/profile/profile_screen.dart';
@@ -194,6 +195,9 @@ class TAppRoutes {
         name: TRoutes.purchases,
         page: () => const TPurchaseScreen(),
         middlewares: [TRouteMiddleware()]),
+    GetPage(
+        name: TRoutes.purchaseDetails,
+        page: () => const PurchaseDetailScreen(),
+        middlewares: [TRouteMiddleware()]),
   ];
-  
 }

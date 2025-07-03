@@ -209,7 +209,7 @@ class SalesmanController extends GetxController {
       await Get.find<AddressController>()
           .fetchEntityAddresses(salesmanId, EntityType.salesman);
       await Get.find<OrderController>()
-          .fetchEntityOrders(salesmanId, 'Salesman');
+          .fetchEntityOrders(salesmanId, EntityType.salesman);
 
       // Process order data
       final orderController = Get.find<OrderController>();

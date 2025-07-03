@@ -40,14 +40,14 @@ class SalesDesktop extends GetView<SalesController> {
               child: Column(
                 children: [
                   // Page title
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Sales',
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                  ),
-                  const SizedBox(height: TSizes.spaceBtwSections),
+                  // Align(
+                  //   alignment: Alignment.centerLeft,
+                  //   child: Text(
+                  //     'Sales',
+                  //     style: Theme.of(context).textTheme.headlineMedium,
+                  //   ),
+                  // ),
+                  // const SizedBox(height: TSizes.spaceBtwSections),
 
                   // Remove ExpansionTile, keep its content
                   // ExpansionTile(

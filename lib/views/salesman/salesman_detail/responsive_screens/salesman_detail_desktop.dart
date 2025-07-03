@@ -5,6 +5,7 @@ import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../utils/constants/enums.dart';
 import '../table/salesman_order_table.dart';
 import '../widgets/SalesmanInfo.dart';
 import '../widgets/salesman_shipping_info.dart';
@@ -22,7 +23,7 @@ class SalesmanDetailDesktop extends StatelessWidget {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (salesmanModel.salesmanId != null) {
         orderController.fetchEntityOrders(
-            salesmanModel.salesmanId!, 'Salesman');
+            salesmanModel.salesmanId!, EntityType.salesman);
         orderController.setRecentOrderDay();
         orderController.setAverageTotalAmount();
       }

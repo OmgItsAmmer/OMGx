@@ -301,7 +301,7 @@ class CustomerController extends GetxController {
       await Get.find<AddressController>()
           .fetchEntityAddresses(customerId, EntityType.customer);
       await Get.find<OrderController>()
-          .fetchEntityOrders(customerId, 'Customer');
+          .fetchEntityOrders(customerId, EntityType.customer);
 
       // Process order data
       final orderController = Get.find<OrderController>();

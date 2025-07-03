@@ -104,7 +104,7 @@ class PurchaseSummary extends StatelessWidget {
         const SizedBox(height: TSizes.spaceBtwItems),
 
         // Payment tracking section
-        _buildPaymentTracking(context, purchaseSalesController),
+   //     _buildPaymentTracking(context, purchaseSalesController),
       ],
     );
   }
@@ -177,7 +177,7 @@ class PurchaseSummary extends StatelessWidget {
         ),
         const SizedBox(height: TSizes.spaceBtwItems),
         // Payment tracking section
-        _buildPaymentTracking(context, purchaseSalesController),
+      //  _buildPaymentTracking(context, purchaseSalesController),
       ],
     );
   }

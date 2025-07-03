@@ -1,6 +1,7 @@
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
 import 'package:admin_dashboard_v3/common/widgets/shimmers/shimmer.dart';
+import 'package:admin_dashboard_v3/controllers/purchase/purchase_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
@@ -27,9 +28,9 @@ class EntityAdvanceInfoCard<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final OrderController orderController = Get.find<OrderController>();
     final MediaController mediaController = Get.find<MediaController>();
-
+    final PurchaseController purchaseController =
+        Get.find<PurchaseController>();
     return TRoundedContainer(
       width: 400,
       padding: const EdgeInsets.all(TSizes.defaultSpace),
@@ -134,18 +135,18 @@ class EntityAdvanceInfoCard<T> extends StatelessWidget {
             children: [
               Expanded(
                 child: OUserAdvanceInfoTile(
-                  firstTile: 'Last Order',
-                  secondTile: (orderController.recentOrderDay == '0')
-                      ? 'No Orders yet'
-                      : orderController.recentOrderDay,
+                  firstTile: 'Last Purchase',
+                  secondTile: (purchaseController.recentPurchaseDay == '0')
+                      ? 'No Purchases yet'
+                      : purchaseController.recentPurchaseDay,
                 ),
               ),
               Expanded(
                 child: OUserAdvanceInfoTile(
-                  firstTile: 'Average Order',
-                  secondTile: (orderController.averageTotalAmount == '0.0')
-                      ? 'No Orders yet'
-                      : orderController.averageTotalAmount,
+                  firstTile: 'Average Purchase',
+                  secondTile: (purchaseController.averageTotalAmount == '0.0')
+                      ? 'No Purchases yet'
+                      : purchaseController.averageTotalAmount,
                 ),
               ),
             ],

@@ -127,8 +127,8 @@ class AccountBookDataSource extends DataTableSource {
                 horizontal: TSizes.xs, vertical: TSizes.xs / 2),
             decoration: BoxDecoration(
               color: entry.isIncoming
-                  ? TColors.success.withOpacity(0.1)
-                  : TColors.error.withOpacity(0.1),
+                  ? TColors.success.withValues(alpha: 0.1)
+                  : TColors.error.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(TSizes.xs),
             ),
             child: Row(
@@ -153,7 +153,7 @@ class AccountBookDataSource extends DataTableSource {
         ),
         DataCell(
           Text(
-            '\$${entry.amount.toStringAsFixed(2)}',
+            'Rs ${entry.amount.toStringAsFixed(2)}',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: entry.isIncoming ? TColors.success : TColors.error,

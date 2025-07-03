@@ -144,64 +144,98 @@ class TSideBar extends StatelessWidget {
 
                     //Menu Items
                     const TMenuItem(
-                      icon: Iconsax.status,
+                      icon: Iconsax.status_up,
                       itemName: 'DashBoard',
                       route: TRoutes.dashboard,
                     ),
+                    Text(
+                      'BUY/SELL',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall!
+                          .apply(letterSpacingDelta: 1.2),
+                    ),
                     const TMenuItem(
-                      icon: Iconsax.money,
-                      itemName: 'Sales',
+                      icon: Iconsax.money_send,
+                      itemName: 'Sale',
                       route: TRoutes.sales,
                     ),
                     const TMenuItem(
-                      icon: Iconsax.receipt_item,
+                      icon: Iconsax.receive_square,
+                      itemName: 'Purchase',
+                      route: TRoutes.purchaseSales,
+                    ),
+                    Text(
+                      'LOGS',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall!
+                          .apply(letterSpacingDelta: 1.2),
+                    ),
+                    const TMenuItem(
+                      icon: Iconsax.box_time,
                       itemName: 'Orders',
                       route: TRoutes.orders,
                     ),
                     const TMenuItem(
-                      icon: Iconsax.box,
-                      itemName: 'Products',
-                      route: TRoutes.products,
-                    ),
-                    const TMenuItem(
-                      icon: Iconsax.people,
-                      itemName: 'Customers',
-                      route: TRoutes.customer,
-                    ),
-                    const TMenuItem(
-                      icon: Iconsax.people,
-                      itemName: 'Vendors',
-                      route: TRoutes.vendor,
-                    ),
-                    const TMenuItem(
-                      icon: Iconsax.profile_2user,
-                      itemName: 'Salesman',
-                      route: TRoutes.salesman,
-                    ),
-                    const TMenuItem(
-                      icon: Iconsax.convert_3d_cube,
-                      itemName: 'Brands',
-                      route: TRoutes.brand,
-                    ),
-                    const TMenuItem(
-                      icon: Iconsax.folder_open,
-                      itemName: 'Categories',
-                      route: TRoutes.category,
-                    ),
-                    const TMenuItem(
-                      icon: Iconsax.folder_open,
-                      itemName: 'Account Book',
-                      route: TRoutes.accountBook,
-                    ),
-                    const TMenuItem(
-                      icon: Iconsax.receipt_item,
+                      icon: Iconsax.buy_crypto,
                       itemName: 'Purchases',
                       route: TRoutes.purchases,
                     ),
                     const TMenuItem(
-                      icon: Iconsax.shopping_cart,
-                      itemName: 'Purchase Entry',
-                      route: TRoutes.purchaseSales,
+                      icon: Iconsax.receipt_1,
+                      itemName: 'Account Book',
+                      route: TRoutes.accountBook,
+                    ),
+                    const TMenuItem(
+                      icon: Iconsax.ticket_star,
+                      itemName: 'Expenses',
+                      route: TRoutes.expenseScreen,
+                    ),
+                    Text(
+                      'PEOPLE',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall!
+                          .apply(letterSpacingDelta: 1.2),
+                    ),
+
+                    const TMenuItem(
+                      icon: Iconsax.user_tag,
+                      itemName: 'Customers',
+                      route: TRoutes.customer,
+                    ),
+                    const TMenuItem(
+                      icon: Iconsax.profile_add,
+                      itemName: 'Vendors',
+                      route: TRoutes.vendor,
+                    ),
+                    const TMenuItem(
+                      icon: Iconsax.user_octagon,
+                      itemName: 'Salesman',
+                      route: TRoutes.salesman,
+                    ),
+                    Text(
+                      'INVENTORY',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall!
+                          .apply(letterSpacingDelta: 1.2),
+                    ),
+                    const TMenuItem(
+                      icon: Iconsax.box_search,
+                      itemName: 'Products',
+                      route: TRoutes.products,
+                    ),
+                    const TMenuItem(
+                      icon: Iconsax.bookmark_2,
+                      itemName: 'Brands',
+                      route: TRoutes.brand,
+                    ),
+                    const TMenuItem(
+                      icon: Iconsax.category,
+                      itemName: 'Categories',
+                      route: TRoutes.category,
                     ),
 
                     Text(
@@ -216,15 +250,11 @@ class TSideBar extends StatelessWidget {
                         itemName: 'Media',
                         route: TRoutes.mediaScreen),
                     const TMenuItem(
-                      icon: Iconsax.note,
+                      icon: Iconsax.chart_1,
                       itemName: 'Reports',
                       route: TRoutes.reportScreen,
                     ),
-                    const TMenuItem(
-                      icon: Iconsax.ticket,
-                      itemName: 'Expenses',
-                      route: TRoutes.expenseScreen,
-                    ),
+
                     const TMenuItem(
                       icon: Iconsax.profile_circle,
                       itemName: 'Profile',

@@ -226,10 +226,10 @@ class OrderController extends GetxController {
   //   }
   //
   // }
-  Future<void> fetchEntityOrders(int entityId, String entityName) async {
+  Future<void> fetchEntityOrders(int entityId, EntityType entityType) async {
     try {
       if (kDebugMode) {
-        print("Fetching orders for $entityName ID: $entityId");
+        print("Fetching orders for ${entityType.name} ID: $entityId");
       }
 
       isOrderLoading.value = true;
@@ -237,33 +237,38 @@ class OrderController extends GetxController {
       // Clear the previous data
       currentOrders.clear();
 
-      if (entityName == 'Customer') {
-        // Fetch and filter orders for Customer
-        final customerOrders =
-            allOrders.where((order) => order.customerId == entityId).toList();
-        currentOrders.assignAll(customerOrders);
-      } else if (entityName == 'User') {
-        // Fetch and filter orders for User
-        final userOrders =
-            allOrders.where((order) => order.userId == entityId).toList();
-        currentOrders.assignAll(userOrders);
-      } else if (entityName == 'Salesman') {
-        // Fetch and filter orders for Salesman
-        final salesmanOrders =
-            allOrders.where((order) => order.salesmanId == entityId).toList();
-        currentOrders.assignAll(salesmanOrders);
-      } else {
-        throw Exception('Invalid entity name: $entityName');
+      switch (entityType) {
+        case EntityType.customer:
+          // Fetch and filter orders for Customer
+          final customerOrders =
+              allOrders.where((order) => order.customerId == entityId).toList();
+          currentOrders.assignAll(customerOrders);
+          break;
+        case EntityType.user:
+          // Fetch and filter orders for User
+          final userOrders =
+              allOrders.where((order) => order.userId == entityId).toList();
+          currentOrders.assignAll(userOrders);
+          break;
+        case EntityType.salesman:
+          // Fetch and filter orders for Salesman
+          final salesmanOrders =
+              allOrders.where((order) => order.salesmanId == entityId).toList();
+          currentOrders.assignAll(salesmanOrders);
+          break;
+        default:
+          throw Exception('Invalid entity type: ${entityType.name}');
       }
 
       if (kDebugMode) {
-        print("Filtered orders count for $entityName: ${currentOrders.length}");
+        print(
+            "Filtered orders count for ${entityType.name}: ${currentOrders.length}");
       }
     } catch (e) {
       TLoaders.errorSnackBar(
           title: "Error: ${e.toString()}"); // Handle errors properly
       if (kDebugMode) {
-        print("Error fetching $entityName orders: $e");
+        print("Error fetching ${entityType.name} orders: $e");
       }
     } finally {
       isOrderLoading.value = false;

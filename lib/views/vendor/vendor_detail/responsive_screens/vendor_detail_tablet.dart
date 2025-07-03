@@ -1,6 +1,7 @@
 import 'package:admin_dashboard_v3/Models/vendor/vendor_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/controllers/orders/orders_controller.dart';
+import 'package:admin_dashboard_v3/controllers/purchase/purchase_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
@@ -16,14 +17,15 @@ class VendorDetailTablet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Initialize the order controller and fetch orders for this vendor
-    final OrderController orderController = Get.find<OrderController>();
 
+    final PurchaseController purchaseController =
+        Get.find<PurchaseController>();
     // Fetch orders for this vendor when the view is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (vendorModel.vendorId != null) {
-        orderController.fetchEntityOrders(vendorModel.vendorId!, 'Vendor');
-        orderController.setRecentOrderDay();
-        orderController.setAverageTotalAmount();
+        purchaseController.fetchVendorPurchases(vendorModel.vendorId!);
+        purchaseController.setRecentPurchaseDay();
+        purchaseController.setAverageTotalAmount();
       }
     });
 
@@ -69,7 +71,7 @@ class VendorDetailTablet extends StatelessWidget {
                     scrollDirection: Axis.horizontal,
                     child: SizedBox(
                       width: MediaQuery.of(context).size.width - 2 * TSizes.md,
-                      child: const VendorOrderTable(),
+                      child: const VendorPurchaseTable(),
                     ),
                   ),
                 ],

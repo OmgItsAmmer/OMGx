@@ -1,6 +1,7 @@
 import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/controllers/orders/orders_controller.dart';
+import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -21,7 +22,7 @@ class CustomerDetailTablet extends StatelessWidget {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (customerModel.customerId != null) {
         orderController.fetchEntityOrders(
-            customerModel.customerId!, 'Customer');
+            customerModel.customerId!, EntityType.customer);
         orderController.setRecentOrderDay();
         orderController.setAverageTotalAmount();
       }

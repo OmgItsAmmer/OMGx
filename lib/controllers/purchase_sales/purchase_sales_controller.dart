@@ -1,4 +1,3 @@
-import 'package:admin_dashboard_v3/Models/address/address_model.dart';
 import 'package:admin_dashboard_v3/Models/vendor/vendor_model.dart';
 import 'package:admin_dashboard_v3/Models/products/product_variant_model.dart';
 import 'package:admin_dashboard_v3/Models/purchase/purchase_model.dart';
@@ -12,12 +11,10 @@ import 'package:admin_dashboard_v3/repositories/products/product_variants_reposi
 import 'package:admin_dashboard_v3/repositories/purchase/purchase_repository.dart';
 import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-
 import '../../Models/products/product_model.dart';
 import '../vendor/vendor_controller.dart';
 import '../shop/shop_controller.dart';
@@ -515,28 +512,63 @@ class PurchaseSalesController extends GetxController {
       final List<int> serializedVariantIds = [];
       final List<ProductVariantModel> newVariantsToSave = [];
 
-      for (var item in allPurchases) {
-        if (item.variantId != null) {
-          serializedVariantIds.add(item.variantId!);
-        } else if (item.variantId == null && item.name.contains('(SN:')) {
-          // This is a newly created variant from the finalize process
-          // We need to create the variant record first
+      final List<PurchaseItemModel> purchaseItemsToUpload = [];
+      final productVariantsRepository = Get.find<ProductVariantsRepository>();
+
+      for (var cartItem in allPurchases) {
+        int? finalVariantId = cartItem.variantId;
+
+        // If it's a new serialized product (variantId is null, but name indicates SN)
+        if (cartItem.variantId == null && cartItem.name.contains('(SN:')) {
           try {
-            final serialNumber = item.name.split('(SN: ')[1].split(')')[0];
+            final serialNumber = cartItem.name.split('(SN: ')[1].split(')')[0];
             final newVariant = ProductVariantModel(
-              productId: item.productId,
+              productId: cartItem.productId,
               serialNumber: serialNumber,
-              purchasePrice: double.tryParse(item.purchasePrice) ?? 0.0,
-              sellingPrice: double.tryParse(item.sellingPrice) ?? 0.0,
+              purchasePrice: double.tryParse(cartItem.purchasePrice) ?? 0.0,
+              sellingPrice: double.tryParse(cartItem.sellingPrice) ?? 0.0,
               isSold: false,
             );
-            newVariantsToSave.add(newVariant);
+            // Insert the new variant and get its ID
+            finalVariantId =
+                await productVariantsRepository.insertVariant(newVariant);
+            if (finalVariantId! > 0) {
+              if (kDebugMode) {
+                print(
+                    '✓ Created new variant: ${newVariant.serialNumber} with ID: $finalVariantId');
+              }
+            } else {
+              if (kDebugMode) {
+                print('✗ Failed to create variant: ${newVariant.serialNumber}');
+              }
+              // Handle error, maybe skip this item or throw an exception
+              continue;
+            }
           } catch (e) {
             if (kDebugMode) {
-              print('Error parsing variant info from cart item: $e');
+              print('Error processing new serialized product: $e');
             }
+            TLoaders.errorSnackBar(
+                title: 'Variant Creation Error',
+                message: 'Failed to create variant for ' + cartItem.name);
+            continue;
           }
         }
+
+        // Create PurchaseItemModel with the determined variantId
+        int qty = int.tryParse(cartItem.quantity) ?? 0;
+        double price = double.tryParse(cartItem.totalPrice) ?? 0.0;
+        purchaseItemsToUpload.add(
+          PurchaseItemModel(
+            productId: cartItem.productId,
+            price: price,
+            quantity: qty,
+            purchaseId: -1, // Will be updated after purchase creation
+            unit: cartItem.unit.toString().split('.').last,
+            variantId:
+                finalVariantId, // Now correctly assigned for new or existing
+          ),
+        );
       }
 
       // Create a PurchaseModel instance with formatted date
@@ -554,21 +586,7 @@ class PurchaseSalesController extends GetxController {
         vendorId: vendorController.selectedVendor.value.vendorId,
       );
 
-      // Create purchase items from cart items (convert to database model)
-      final List<PurchaseItemModel> purchaseItems = allPurchases.map((item) {
-        int qty = int.tryParse(item.quantity) ?? 0;
-        double price = double.tryParse(item.totalPrice) ?? 0.0;
-        return PurchaseItemModel(
-          productId: item.productId,
-          price: price,
-          quantity: qty,
-          purchaseId: -1, // Will be updated after purchase creation
-          unit: item.unit.toString().split('.').last,
-          variantId: item.variantId,
-        );
-      }).toList();
-
-      purchase = purchase.copyWith(purchaseItems: purchaseItems);
+      purchase = purchase.copyWith(purchaseItems: purchaseItemsToUpload);
 
       // Upload purchase to repository
       int purchaseId = await purchaseRepository.uploadPurchase(
@@ -576,87 +594,20 @@ class PurchaseSalesController extends GetxController {
 
       // Ensure purchaseId is valid before proceeding
       if (purchaseId > 0) {
-        // Save new variants to database first and get their IDs
-        final Map<String, int> variantIdMap = {};
-        if (newVariantsToSave.isNotEmpty) {
-          final productVariantsRepository =
-              Get.find<ProductVariantsRepository>();
-          for (var variant in newVariantsToSave) {
-            try {
-              final variantId =
-                  await productVariantsRepository.insertVariant(variant);
-              if (variantId > 0) {
-                variantIdMap[variant.variantId.toString()] = variantId;
-                if (kDebugMode) {
-                  print(
-                      '✓ Created new variant: ${variant.serialNumber} with ID: $variantId');
-                }
-              }
-            } catch (e) {
-              if (kDebugMode) {
-                print('Error creating variant ${variant.serialNumber}: $e');
-              }
-            }
-          }
-        }
-
-        // Update purchase items with correct variant IDs for newly created variants
-        final updatedPurchaseItems = purchase.purchaseItems?.map((item) {
-          // Find corresponding cart item to get serial number
-          final cartItem = allPurchases.firstWhere(
-            (cart) =>
-                cart.productId == item.productId &&
-                cart.variantId == null &&
-                cart.name.contains('(SN:'),
-            orElse: () => PurchaseCartItem(
-              productId: item.productId,
-              name: '',
-              purchasePrice: '0',
-              sellingPrice: '0',
-              unit: '',
-              quantity: '0',
-              totalPrice: '0',
-            ),
-          );
-
-          if (cartItem.name.contains('(SN:')) {
-            try {
-              final serialNumber =
-                  cartItem.name.split('(SN: ')[1].split(')')[0];
-              // Find the variant in newVariantsToSave by serial number
-              final newVariant = newVariantsToSave.firstWhere(
-                (v) => v.serialNumber == serialNumber,
-                orElse: () => ProductVariantModel.empty(),
-              );
-              if (newVariant.variantId != null) {
-                // Use the variantId from the map
-                final variantId = variantIdMap[newVariant.variantId.toString()];
-                if (variantId != null) {
-                  return item.copyWith(variantId: variantId);
-                }
-              }
-            } catch (e) {
-              if (kDebugMode) {
-                print('Error updating variant ID for purchase item: $e');
-              }
-            }
-          }
-
-          return item;
-        }).toList();
+        // No need to save new variants to database here; they are already handled above.
 
         // Assign actual purchaseId to each purchase item
         purchase = purchase.copyWith(
           purchaseId: purchaseId,
-          purchaseItems: updatedPurchaseItems
+          purchaseItems: purchase.purchaseItems
               ?.map((item) => item.copyWith(purchaseId: purchaseId))
               .toList(),
         );
 
-        // Save purchase variants to database if any exist
-        if (purchaseVariants.isNotEmpty) {
-          await _savePurchaseVariantsToDatabase(purchaseId);
-        }
+        // The _savePurchaseVariantsToDatabase method is now redundant here
+        // if (purchaseVariants.isNotEmpty) {
+        //   await _savePurchaseVariantsToDatabase(purchaseId);
+        // }
 
         // Add the purchase to the allPurchases list in PurchaseController
         final PurchaseController purchaseController =
@@ -667,16 +618,17 @@ class PurchaseSalesController extends GetxController {
         purchaseController.currentPurchases.refresh();
 
         try {
-          // For purchases, we don't update stock automatically - that happens when status changes to "received"
-          // But we can mark serialized variants as available (assuming they're now in our inventory)
-          if (serializedVariantIds.isNotEmpty &&
-              purchase.status == PurchaseStatus.pending.name) {
-            final productVariantsRepository =
-                Get.find<ProductVariantsRepository>();
-            for (var variantId in serializedVariantIds) {
-              await productVariantsRepository.markVariantAsAvailable(variantId);
+          // Mark serialized variants as available (assuming they're now in our inventory)
+          // This part only needs to handle *existing* serialized variants if they were marked as sold before purchase
+          // For new variants, they are already inserted as available.
+
+          // For regular products, update stock
+          for (var item in purchase.purchaseItems ?? []) {
+            if (item.variantId == null) {
+              // Only add stock for non-serialized products or if status is received
+              await purchaseRepository.addStockQuantity(item);
               if (kDebugMode) {
-                print('Marked variant $variantId as available');
+                print('Added stock for regular product: ${item.productId}');
               }
             }
           }
@@ -1623,73 +1575,6 @@ class PurchaseSalesController extends GetxController {
       if (kDebugMode) {
         print('Error clearing purchase variants: $e');
       }
-    }
-  }
-
-  /// Saves purchase variants to the database
-  Future<void> _savePurchaseVariantsToDatabase(int purchaseId) async {
-    try {
-      if (purchaseVariants.isEmpty) return;
-
-      final productController = Get.find<ProductController>();
-      final productVariantsRepository = Get.find<ProductVariantsRepository>();
-
-      for (final variant in purchaseVariants) {
-        try {
-          // Save variant to database
-          final variantId =
-              await productVariantsRepository.insertVariant(variant);
-
-          if (variantId > 0) {
-            if (kDebugMode) {
-              print(
-                  '✓ Saved purchase variant: ${variant.serialNumber} with ID: $variantId');
-            }
-
-            // Update the product stock count for serialized products
-            if (variant.productId != null) {
-              final productIndex = productController.allProducts
-                  .indexWhere((p) => p.productId == variant.productId);
-              if (productIndex != -1) {
-                final product = productController.allProducts[productIndex];
-                if (product.hasSerialNumbers) {
-                  // Refresh the product stock count
-                  final availableCount = await productVariantsRepository
-                      .countAvailableVariants(variant.productId!);
-                  final updatedProduct = product.copyWith(
-                    stockQuantity: availableCount,
-                  );
-                  productController.allProducts[productIndex] = updatedProduct;
-                }
-              }
-            }
-          } else {
-            if (kDebugMode) {
-              print('✗ Failed to save variant: ${variant.serialNumber}');
-            }
-          }
-        } catch (e) {
-          if (kDebugMode) {
-            print('Error saving variant ${variant.serialNumber}: $e');
-          }
-          // Continue with other variants even if one fails
-        }
-      }
-
-      // Clear the purchase variants after successful save
-      purchaseVariants.clear();
-
-      if (kDebugMode) {
-        print('Purchase variants saved successfully for purchase #$purchaseId');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error saving purchase variants to database: $e');
-      }
-      TLoaders.errorSnackBar(
-        title: 'Variant Save Error',
-        message: 'Failed to save some variants: $e',
-      );
     }
   }
 

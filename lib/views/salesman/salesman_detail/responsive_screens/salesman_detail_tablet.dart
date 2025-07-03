@@ -1,6 +1,7 @@
 import 'package:admin_dashboard_v3/Models/salesman/salesman_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/controllers/orders/orders_controller.dart';
+import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -21,7 +22,7 @@ class SalesmanDetailTablet extends StatelessWidget {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (salesmanModel.salesmanId != null) {
         orderController.fetchEntityOrders(
-            salesmanModel.salesmanId!, 'Salesman');
+            salesmanModel.salesmanId!, EntityType.salesman);
         orderController.setRecentOrderDay();
       }
     });

@@ -339,7 +339,7 @@ class PurchaseSalesDesktop extends GetView<PurchaseSalesController> {
                       children: [
                         Expanded(child: PurchaseActionButtons()),
                         Expanded(flex: 2, child: PurchaseSummary()),
-                      ],
+                      ],  
                     ),
                   ),
                 ],

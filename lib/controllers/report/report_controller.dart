@@ -2,6 +2,9 @@ import 'package:admin_dashboard_v3/Models/reports/sale_report_model.dart';
 import 'package:admin_dashboard_v3/Models/reports/simple_pnl_report_model.dart';
 import 'package:admin_dashboard_v3/Models/reports/upcoming_installments_report_model.dart';
 import 'package:admin_dashboard_v3/Models/reports/overdue_installments_report_model.dart';
+import 'package:admin_dashboard_v3/Models/account_book/account_book_model.dart';
+import 'package:admin_dashboard_v3/Models/entity/entity_model.dart';
+import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
 import 'package:admin_dashboard_v3/controllers/salesman/salesman_controller.dart';
@@ -10,6 +13,8 @@ import 'package:admin_dashboard_v3/views/reports/specific_reports/recovery_repor
 import 'package:admin_dashboard_v3/views/reports/specific_reports/simplePnLReport.dart';
 import 'package:admin_dashboard_v3/views/reports/specific_reports/upcoming_installments_report/upcoming_installments_report.dart';
 import 'package:admin_dashboard_v3/views/reports/specific_reports/overdue_installments_report/overdue_installments_report.dart';
+import 'package:admin_dashboard_v3/views/reports/all_reports/widgets/account_book_report_dialog.dart';
+import 'package:admin_dashboard_v3/views/reports/specific_reports/account_book_report/account_book_report_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -58,6 +63,9 @@ class ReportController extends GetxController {
 //Overdue Installments Report
   RxList<OverdueInstallmentsReportModel> overdueInstallmentsReports =
       <OverdueInstallmentsReportModel>[].obs;
+
+//Account Book Report by Entity
+  RxList<AccountBookModel> accountBookReports = <AccountBookModel>[].obs;
 
   //Monthly Sales Report
   void openMonthYearPicker(BuildContext context) {
@@ -691,6 +699,66 @@ class ReportController extends GetxController {
       TLoaders.errorSnackBar(title: e.toString());
       if (kDebugMode) {
         print('Error fetching overdue installments: $e');
+      }
+    }
+  }
+
+  // Account Book Report by Entity Methods
+  void showAccountBookReportDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => const AccountBookReportDialog(),
+    );
+  }
+
+  Future<void> showAccountBookReportByEntity(
+    EntityModel entity,
+    EntityType entityType,
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    try {
+      await fetchAccountBookReportByEntity(
+          entity.id!, entityType, startDate, endDate);
+
+      // Navigate to the report page
+      Get.to(() => AccountBookReportPage(
+            reports: accountBookReports,
+            entity: entity,
+            entityType: entityType,
+            startDate: startDate,
+            endDate: endDate,
+          ));
+    } catch (e) {
+      TLoaders.errorSnackBar(title: e.toString());
+    }
+  }
+
+  Future<void> fetchAccountBookReportByEntity(
+    int entityId,
+    EntityType entityType,
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    try {
+      // Get the account book repository
+      // For now, we'll use a placeholder - you'll need to add this method to the reports repository
+      final accountBookData = await reportsRepository.fetchAccountBookByEntity(
+        entityId: entityId,
+        entityType: entityType.toString().split('.').last,
+        startDate: startDate,
+        endDate: endDate,
+      );
+
+      accountBookReports.assignAll(accountBookData);
+
+      if (kDebugMode) {
+        print('Fetched ${accountBookReports.length} account book entries');
+      }
+    } catch (e) {
+      TLoaders.errorSnackBar(title: e.toString());
+      if (kDebugMode) {
+        print('Error fetching account book report: $e');
       }
     }
   }

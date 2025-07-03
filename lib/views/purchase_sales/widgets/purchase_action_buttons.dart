@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-
 import '../../../common/widgets/loaders/tloaders.dart';
 import '../../../controllers/purchase_sales/purchase_sales_controller.dart';
 import '../../../routes/routes.dart';
@@ -300,6 +299,7 @@ class PurchaseActionButtons extends StatelessWidget {
                                       ? null // Disable the button when checking out
                                       : () {
                                           purchaseSalesController.checkOut();
+                                          Navigator.of(context).pop();
                                           Get.toNamed(TRoutes.purchaseSales);
                                         },
                                   child: isCheckingOut

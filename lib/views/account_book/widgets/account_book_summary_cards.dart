@@ -112,7 +112,7 @@ class _SummaryCard extends StatelessWidget {
                   ),
                   const SizedBox(height: TSizes.xs),
                   Text(
-                    '\$${amount.toStringAsFixed(2)}',
+                    'Rs ${amount.toStringAsFixed(2)}',
                     style: Theme.of(context).textTheme.headlineSmall?.apply(
                           color: color,
                           fontWeightDelta: 2,

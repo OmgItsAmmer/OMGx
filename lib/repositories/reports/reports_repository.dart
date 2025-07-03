@@ -1,6 +1,7 @@
 import 'package:admin_dashboard_v3/Models/reports/simple_pnl_report_model.dart';
 import 'package:admin_dashboard_v3/Models/reports/upcoming_installments_report_model.dart';
 import 'package:admin_dashboard_v3/Models/reports/overdue_installments_report_model.dart';
+import 'package:admin_dashboard_v3/Models/account_book/account_book_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -262,4 +263,37 @@ class ReportsRepository extends GetxController {
   //     }
   //   }
   // }
+
+  /// Fetch account book entries by entity for report generation
+  Future<List<AccountBookModel>> fetchAccountBookByEntity({
+    required int entityId,
+    required String entityType,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    try {
+      String startDateFormatted = startDate.toIso8601String().split("T")[0];
+      String endDateFormatted = endDate.toIso8601String().split("T")[0];
+
+      final response = await supabase
+          .from('account_book')
+          .select()
+          .eq('entity_id', entityId)
+          .eq('entity_type', entityType)
+          .gte('transaction_date', startDateFormatted)
+          .lte('transaction_date', endDateFormatted)
+          .order('transaction_date', ascending: false);
+
+      return response
+          .map(
+              (item) => AccountBookModel.fromJson(item as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      if (kDebugMode) {
+        TLoaders.errorSnackBar(title: e.toString());
+        print('Error fetching account book by entity: $e');
+      }
+      return [];
+    }
+  }
 }

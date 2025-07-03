@@ -1,6 +1,7 @@
 import 'package:admin_dashboard_v3/Models/vendor/vendor_model.dart';
 import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
 import 'package:admin_dashboard_v3/controllers/orders/orders_controller.dart';
+import 'package:admin_dashboard_v3/controllers/purchase/purchase_controller.dart';
 import 'package:admin_dashboard_v3/utils/constants/enums.dart';
 import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
@@ -16,14 +17,15 @@ class VendorDetailMobile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Initialize the order controller and fetch orders for this vendor
-    final OrderController orderController = Get.find<OrderController>();
 
+    final PurchaseController purchaseController =
+        Get.find<PurchaseController>();
     // Fetch orders for this vendor when the view is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (vendorModel.vendorId != null) {
-        orderController.fetchEntityOrders(vendorModel.vendorId!, 'Vendor');
-        orderController.setRecentOrderDay();
-        orderController.setAverageTotalAmount();
+        purchaseController.fetchVendorPurchases(vendorModel.vendorId!);
+        purchaseController.setRecentPurchaseDay();
+        purchaseController.setAverageTotalAmount();
       }
     });
 
@@ -65,11 +67,11 @@ class VendorDetailMobile extends StatelessWidget {
                   ),
                   const SizedBox(height: TSizes.spaceBtwItems),
                   // Add horizontal scroll for table on mobile
-                  SingleChildScrollView(
+                  const SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: SizedBox(
                       width: 800, // Fixed width for mobile table scrolling
-                      child: const VendorOrderTable(),
+                      child: VendorPurchaseTable(),
                     ),
                   ),
                 ],

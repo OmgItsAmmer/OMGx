@@ -33,7 +33,7 @@ class CustomerRow extends DataTableSource {
           await addressController.fetchEntityAddresses(
               customer.customerId!, EntityType.customer);
           await orderController.fetchEntityOrders(
-              customer.customerId!, 'Customer');
+              customer.customerId!, EntityType.customer);
           orderController.currentOrders.refresh();
           orderController.setRecentOrderDay();
           orderController.setAverageTotalAmount();

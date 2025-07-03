@@ -422,9 +422,9 @@ if (saleItem.variantId != null) {
 }
 ```
 
-## Installment Reports
+## Report Management System
 
-The application now includes comprehensive installment tracking with two specialized reports:
+The application now includes comprehensive reporting capabilities with multiple specialized reports:
 
 ### 1. Upcoming Installments Report
 - **Purpose**: Track installments due within a specified number of days (7, 15, 30, 60, or 90 days)
@@ -443,6 +443,50 @@ The application now includes comprehensive installment tracking with two special
   - Status tracking
   - Total overdue amount calculations
   - PDF export functionality
+
+### 3. Account Book Report by Entity
+- **Purpose**: Generate detailed account book reports for specific entities (customers, vendors, salesmen) within a date range
+- **Features**:
+  - **Entity Selection**: Smart dropdown selection that auto-populates based on selected entity type
+  - **Date Range Filter**: Flexible date range selection using Syncfusion date picker
+  - **Transaction Summary**: Visual summary cards showing total incoming, outgoing, and net balance
+  - **Detailed Transaction List**: Complete transaction history with dates, types, amounts, references, and descriptions
+  - **Running Balance**: Shows cumulative balance for each transaction
+  - **Professional PDF Export**: Generates comprehensive PDF reports with company branding
+  - **Responsive Design**: Optimized for desktop, tablet, and mobile viewing
+
+#### Account Book Report Features:
+- **Interactive Dialog**: User-friendly dialog for selecting entity type, specific entity, and date range
+- **Real-time Validation**: Ensures only valid entities and date ranges are selected
+- **Visual Indicators**: Clear icons and color coding for incoming (green) and outgoing (red) transactions
+- **Multi-page PDF Support**: Automatically handles large datasets with proper pagination
+- **Empty State Handling**: Graceful handling when no transactions are found for the selected criteria
+- **Entity Integration**: Direct integration with existing customer, vendor, and salesman data
+
+#### Technical Implementation:
+```dart
+// Report Controller Method
+await reportController.showAccountBookReportByEntity(
+  selectedEntity,
+  entityType,
+  startDate,
+  endDate,
+);
+
+// Repository Method for Data Fetching
+Future<List<AccountBookModel>> fetchAccountBookByEntity({
+  required int entityId,
+  required String entityType,
+  required DateTime startDate,
+  required DateTime endDate,
+})
+```
+
+#### Report Components:
+- **AccountBookReportDialog**: Entity and date selection interface
+- **AccountBookReportPage**: Report display and PDF generation
+- **ReportsRepository**: Backend data fetching with proper filtering
+- **ReportController**: Business logic and navigation management
 
 ## Installment Payment Flow
 

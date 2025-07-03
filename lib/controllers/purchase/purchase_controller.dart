@@ -82,6 +82,7 @@ class PurchaseController extends GetxController {
   void setRecentPurchaseDay() {
     if (currentPurchases.isEmpty) {
       recentPurchaseDay = "No purchases available";
+      recentPurchaseDay = "0"; // Reset difference if no purchases
       return;
     }
 
@@ -171,10 +172,10 @@ class PurchaseController extends GetxController {
     }
   }
 
-  Future<void> fetchEntityPurchases(int entityId, String entityName) async {
+  Future<void> fetchEntityPurchases(int entityId, EntityType entityType) async {
     try {
       if (kDebugMode) {
-        print("Fetching purchases for $entityName ID: $entityId");
+        print("Fetching purchases for ${entityType.name} ID: $entityId");
       }
 
       isPurchaseLoading.value = true;
@@ -182,31 +183,27 @@ class PurchaseController extends GetxController {
       // Clear the previous data
       currentPurchases.clear();
 
-      if (entityName == 'Vendor') {
-        // Fetch and filter purchases for Vendor
-        final vendorPurchases = allPurchases
-            .where((purchase) => purchase.vendorId == entityId)
-            .toList();
-        currentPurchases.assignAll(vendorPurchases);
-      } else if (entityName == 'User') {
-        // Fetch and filter purchases for User
-        final userPurchases = allPurchases
-            .where((purchase) => purchase.userId == entityId)
-            .toList();
-        currentPurchases.assignAll(userPurchases);
-      } else {
-        throw Exception('Invalid entity name: $entityName');
+      switch (entityType) {
+        case EntityType.user:
+          // Fetch and filter purchases for User
+          final userPurchases = allPurchases
+              .where((purchase) => purchase.userId == entityId)
+              .toList();
+          currentPurchases.assignAll(userPurchases);
+          break;
+        default:
+          throw Exception('Invalid entity type: ${entityType.name}');
       }
 
       if (kDebugMode) {
         print(
-            "Filtered purchases count for $entityName: ${currentPurchases.length}");
+            "Filtered purchases count for ${entityType.name}: ${currentPurchases.length}");
       }
     } catch (e) {
       TLoaders.errorSnackBar(
           title: "Error: ${e.toString()}"); // Handle errors properly
       if (kDebugMode) {
-        print("Error fetching $entityName purchases: $e");
+        print("Error fetching ${entityType.name} purchases: $e");
       }
     } finally {
       isPurchaseLoading.value = false;
@@ -498,6 +495,24 @@ class PurchaseController extends GetxController {
     } catch (e) {
       TLoaders.errorSnackBar(
           title: 'Error', message: 'Failed to calculate total price: $e');
+    }
+  }
+
+  Future<void> fetchVendorPurchases(int vendorId) async {
+    try {
+      isPurchaseLoading.value = true;
+      currentPurchases.clear();
+      final vendorPurchases =
+          await purchaseRepository.fetchVendorPurchases(vendorId);
+      currentPurchases.assignAll(vendorPurchases);
+      //currentPurchases.refresh();
+    } catch (e) {
+      TLoaders.errorSnackBar(title: "Error: ${e.toString()}");
+      if (kDebugMode) {
+        print("Error fetching vendor purchases: $e");
+      }
+    } finally {
+      isPurchaseLoading.value = false;
     }
   }
 }

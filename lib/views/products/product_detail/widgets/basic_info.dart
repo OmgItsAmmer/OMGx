@@ -207,6 +207,7 @@ class BasicInfo extends StatelessWidget {
                                       ? 'Auto-managed for serialized products'
                                       : null,
                                 ),
+                                readOnly: true,
                               ),
                             ),
                           )),

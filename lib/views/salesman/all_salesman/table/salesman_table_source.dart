@@ -6,11 +6,9 @@ import 'package:admin_dashboard_v3/utils/constants/colors.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import '../../../../common/widgets/icons/table_action_icon_buttons.dart';
 import '../../../../controllers/address/address_controller.dart';
 import '../../../../controllers/orders/orders_controller.dart';
-import '../../../../controllers/product/product_images_controller.dart';
 import '../../../../utils/constants/enums.dart';
 
 class SalesmanRow extends DataTableSource {
@@ -31,7 +29,7 @@ class SalesmanRow extends DataTableSource {
           await addressController.fetchEntityAddresses(
               salesman.salesmanId!, EntityType.salesman);
           await orderController.fetchEntityOrders(
-              salesman.salesmanId!, 'Salesman');
+              salesman.salesmanId!, EntityType.salesman);
           orderController.setRecentOrderDay();
           // orderController.setAverageTotalAmount();
           //  productImagesController.setDesiredImage(MediaCategory.salesman, salesman.salesmanId);

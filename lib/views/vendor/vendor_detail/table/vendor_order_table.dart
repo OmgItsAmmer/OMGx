@@ -1,4 +1,5 @@
 import 'package:admin_dashboard_v3/controllers/orders/orders_controller.dart';
+import 'package:admin_dashboard_v3/controllers/purchase/purchase_controller.dart';
 import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
@@ -6,12 +7,13 @@ import 'package:get/get.dart';
 import '../../../paginated_data_table.dart';
 import 'vendor_order_table_source.dart';
 
-class VendorOrderTable extends StatelessWidget {
-  const VendorOrderTable({super.key});
+class VendorPurchaseTable extends StatelessWidget {
+  const VendorPurchaseTable({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final OrderController orderController = Get.find<OrderController>();
+    final PurchaseController purchaseController =
+        Get.find<PurchaseController>();
 
     return Obx(
       () => TPaginatedDataTable(
@@ -29,8 +31,8 @@ class VendorOrderTable extends StatelessWidget {
           const DataColumn2(label: Text('Action'), fixedWidth: 100),
         ],
         source: VendorOrderRows(
-          currentOrders: orderController.currentOrders,
-          ordersCount: orderController.currentOrders.length,
+          currentPurchases: purchaseController.currentPurchases,
+          purchasesCount: purchaseController.currentPurchases.length,
         ),
       ),
     );

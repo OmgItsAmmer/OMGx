@@ -1078,7 +1078,8 @@ class ProductController extends GetxController {
   }
 
   Future<void> handleSave() async {
-    if (isUpdating.value) return;
+    try {
+      if (isUpdating.value) return;
     isUpdating.value = true;
     try {
       if (productId.value == -1) {
@@ -1088,6 +1089,10 @@ class ProductController extends GetxController {
       }
     } finally {
       isUpdating.value = false;
+      Navigator.of(Get.context!).pop();
+    }
+    } catch (e) {
+      TLoaders.errorSnackBar(title: 'Error', message: e.toString());
     }
   }
 
