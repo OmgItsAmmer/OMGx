@@ -1,5 +1,5 @@
-import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
-import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
+import 'package:ecommerce_dashboard/Models/customer/customer_model.dart';
+import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -32,28 +32,29 @@ class CustomerShippingInfo extends StatelessWidget {
 
           TProfilemenu(
             title: "Name",
-            value: customerModel.fullName ,
+            value: customerModel.fullName,
             onPressed: () {},
             isTap: false,
           ),
-          const SizedBox(height: TSizes.spaceBtwItems,),
-
-
+          const SizedBox(
+            height: TSizes.spaceBtwItems,
+          ),
 
           TProfilemenu(
             title: "Phone Number",
-            value: customerModel.phoneNumber ,
+            value: customerModel.phoneNumber,
             onPressed: () {},
             isTap: false,
           ),
-          const SizedBox(height: TSizes.spaceBtwItems,),
+          const SizedBox(
+            height: TSizes.spaceBtwItems,
+          ),
           TProfilemenu(
             title: "Address",
             value: addressController.allCustomerAddresses[0].location ?? '',
             onPressed: () {},
             isTap: false,
           ),
-
         ],
       ),
     );

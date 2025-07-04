@@ -1,9 +1,9 @@
-import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
-import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
-import 'package:admin_dashboard_v3/controllers/orders/orders_controller.dart';
-import 'package:admin_dashboard_v3/routes/routes.dart';
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/utils/constants/enums.dart';
+import 'package:ecommerce_dashboard/controllers/address/address_controller.dart';
+import 'package:ecommerce_dashboard/controllers/customer/customer_controller.dart';
+import 'package:ecommerce_dashboard/controllers/orders/orders_controller.dart';
+import 'package:ecommerce_dashboard/routes/routes.dart';
+import 'package:ecommerce_dashboard/utils/constants/colors.dart';
+import 'package:ecommerce_dashboard/utils/constants/enums.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

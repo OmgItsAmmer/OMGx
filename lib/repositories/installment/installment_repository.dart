@@ -1,12 +1,12 @@
-import 'package:admin_dashboard_v3/Models/installments/installment_table_model/installment_table_model.dart';
-import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
+import 'package:ecommerce_dashboard/Models/installments/installment_table_model/installment_table_model.dart';
+import 'package:ecommerce_dashboard/common/widgets/loaders/tloaders.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../Models/installments/installemt_plan_model.dart';
 import '../../main.dart';
-import 'package:admin_dashboard_v3/Models/installments/installment_payment_model.dart';
+import 'package:ecommerce_dashboard/Models/installments/installment_payment_model.dart';
 
 class InstallmentRepository extends GetxController {
   static InstallmentRepository get instance => Get.find();

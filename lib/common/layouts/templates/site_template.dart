@@ -1,9 +1,10 @@
-import 'package:admin_dashboard_v3/common/widgets/responsive/responsive_design.dart';
-import 'package:admin_dashboard_v3/common/widgets/responsive/screens/desktop_layout.dart';
-import 'package:admin_dashboard_v3/common/widgets/responsive/screens/mobile_layout.dart';
-import 'package:admin_dashboard_v3/common/widgets/responsive/screens/tablet_layout.dart';
-import 'package:admin_dashboard_v3/common/widgets/search/search_overlay.dart';
+
+import 'package:ecommerce_dashboard/common/widgets/responsive/screens/desktop_layout.dart';
 import 'package:flutter/material.dart';
+
+import '../../widgets/responsive/responsive_design.dart';
+import '../../widgets/responsive/screens/mobile_layout.dart';
+import '../../widgets/responsive/screens/tablet_layout.dart';
 
 class TSiteTemplate extends StatelessWidget {
   const TSiteTemplate(

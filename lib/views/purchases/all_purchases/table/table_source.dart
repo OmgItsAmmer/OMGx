@@ -1,9 +1,9 @@
-import 'package:admin_dashboard_v3/common/widgets/icons/table_action_icon_buttons.dart';
-import 'package:admin_dashboard_v3/controllers/vendor/vendor_controller.dart';
-import 'package:admin_dashboard_v3/controllers/purchase/purchase_controller.dart';
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
-import 'package:admin_dashboard_v3/utils/helpers/helper_functions.dart';
+import 'package:ecommerce_dashboard/common/widgets/icons/table_action_icon_buttons.dart';
+import 'package:ecommerce_dashboard/controllers/vendor/vendor_controller.dart';
+import 'package:ecommerce_dashboard/controllers/purchase/purchase_controller.dart';
+import 'package:ecommerce_dashboard/utils/constants/colors.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/utils/helpers/helper_functions.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -44,11 +44,9 @@ class PurchaseRows extends DataTableSource {
     }
   }
 
-
-
   @override
   DataRow? getRow(int index) {
-  //  final AddressController addressController = Get.find<AddressController>();
+    //  final AddressController addressController = Get.find<AddressController>();
 
     // Use the filtered purchases list
     final PurchaseModel purchase = filteredPurchases[index];
@@ -93,10 +91,13 @@ class PurchaseRows extends DataTableSource {
             padding: const EdgeInsets.symmetric(
                 vertical: TSizes.sm, horizontal: TSizes.md),
             backgroundColor:
-                THelperFunctions.getPurchaseStatusColor(purchaseStatus).withValues(alpha: 0.1),
+                THelperFunctions.getPurchaseStatusColor(purchaseStatus)
+                    .withValues(alpha: 0.1),
             child: Text(
               purchase.status.toString(),
-              style: TextStyle(color: THelperFunctions.getPurchaseStatusColor(purchaseStatus)),
+              style: TextStyle(
+                  color:
+                      THelperFunctions.getPurchaseStatusColor(purchaseStatus)),
             ),
           )),
           DataCell(Text(purchase.subTotal.toString())),

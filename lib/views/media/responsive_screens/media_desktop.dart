@@ -1,7 +1,6 @@
-
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
-import 'package:admin_dashboard_v3/views/media/widgets/media_uploader.dart';
+import 'package:ecommerce_dashboard/utils/constants/colors.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/views/media/widgets/media_uploader.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
@@ -16,7 +15,7 @@ class MediaDesktopScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final MediaController mediaController = Get.find<MediaController>();
 
-    return  Expanded(
+    return Expanded(
       child: Scaffold(
         body: SingleChildScrollView(
           child: Padding(
@@ -32,17 +31,23 @@ class MediaDesktopScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     //Bread Crumbs
-                    Text('Media',style: Theme.of(context).textTheme.headlineMedium,),
+                    Text(
+                      'Media',
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
                     //Upload Button
                     SizedBox(
-                      width: TSizes.buttonWidth*1.5,
+                      width: TSizes.buttonWidth * 1.5,
                       child: ElevatedButton.icon(
                         onPressed: () {
-
-                          mediaController.showImagesUploaderSection.value = !mediaController.showImagesUploaderSection.value;
+                          mediaController.showImagesUploaderSection.value =
+                              !mediaController.showImagesUploaderSection.value;
                         },
                         label: const Text('Upload Images'),
-                        icon: const Icon(Iconsax.cloud_add,color: TColors.white,),
+                        icon: const Icon(
+                          Iconsax.cloud_add,
+                          color: TColors.white,
+                        ),
                       ),
                     )
                   ],
@@ -51,20 +56,18 @@ class MediaDesktopScreen extends StatelessWidget {
                   height: TSizes.spaceBtwSections,
                 ),
                 //Upload Area
-                 MediaUploader(),
-                const SizedBox(height: TSizes.spaceBtwSections,),
+                MediaUploader(),
+                const SizedBox(
+                  height: TSizes.spaceBtwSections,
+                ),
                 //Media
                 MediaContent(
                   allowMultipleSelection: false,
                   allowSelection: false,
-                  onSelectedImage: (val){
-
-                 //   mediaController.selectedImages.value = val; //do it but its useless
-
+                  onSelectedImage: (val) {
+                    //   mediaController.selectedImages.value = val; //do it but its useless
                   },
-
                 ),
-      
               ],
             ),
           ),

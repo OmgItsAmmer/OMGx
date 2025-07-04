@@ -1,8 +1,8 @@
-import 'package:admin_dashboard_v3/Models/salesman/salesman_model.dart';
-import 'package:admin_dashboard_v3/Models/salesman/salesman_model.dart';
-import 'package:admin_dashboard_v3/controllers/salesman/salesman_controller.dart';
-import 'package:admin_dashboard_v3/routes/routes.dart';
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
+import 'package:ecommerce_dashboard/Models/salesman/salesman_model.dart';
+import 'package:ecommerce_dashboard/Models/salesman/salesman_model.dart';
+import 'package:ecommerce_dashboard/controllers/salesman/salesman_controller.dart';
+import 'package:ecommerce_dashboard/routes/routes.dart';
+import 'package:ecommerce_dashboard/utils/constants/colors.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

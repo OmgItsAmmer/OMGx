@@ -1,5 +1,5 @@
-import 'package:admin_dashboard_v3/Models/salesman/salesman_model.dart';
-import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
+import 'package:ecommerce_dashboard/Models/salesman/salesman_model.dart';
+import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../utils/constants/sizes.dart';
@@ -11,7 +11,7 @@ class SalesmanShippingInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-   // final AddressController addressController = Get.find<AddressController>();
+    // final AddressController addressController = Get.find<AddressController>();
 
     return TRoundedContainer(
       width: 400,
@@ -30,35 +30,38 @@ class SalesmanShippingInfo extends StatelessWidget {
 
           TProfilemenu(
             title: "Name",
-            value: salesmanModel.fullName ,
+            value: salesmanModel.fullName,
             onPressed: () {},
             isTap: false,
           ),
-          const SizedBox(height: TSizes.spaceBtwItems,),
-
-
+          const SizedBox(
+            height: TSizes.spaceBtwItems,
+          ),
 
           TProfilemenu(
             title: "Phone Number",
-            value: salesmanModel.phoneNumber ,
+            value: salesmanModel.phoneNumber,
             onPressed: () {},
             isTap: false,
           ),
-          const SizedBox(height: TSizes.spaceBtwItems,),
+          const SizedBox(
+            height: TSizes.spaceBtwItems,
+          ),
           TProfilemenu(
             title: "Area",
-            value:  salesmanModel.area,
+            value: salesmanModel.area,
             onPressed: () {},
             isTap: false,
           ),
-          const SizedBox(height: TSizes.spaceBtwItems,),
+          const SizedBox(
+            height: TSizes.spaceBtwItems,
+          ),
           TProfilemenu(
             title: "City",
-            value:  salesmanModel.city,
+            value: salesmanModel.city,
             onPressed: () {},
             isTap: false,
           ),
-
         ],
       ),
     );

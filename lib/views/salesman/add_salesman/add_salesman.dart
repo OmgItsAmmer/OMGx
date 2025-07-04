@@ -1,7 +1,7 @@
-import 'package:admin_dashboard_v3/common/layouts/templates/site_template.dart';
-import 'package:admin_dashboard_v3/views/salesman/add_salesman/responsive_screen/add_salesman_desktop.dart';
-import 'package:admin_dashboard_v3/views/salesman/add_salesman/responsive_screen/add_salesman_mobile.dart';
-import 'package:admin_dashboard_v3/views/salesman/add_salesman/responsive_screen/add_salesman_tablet.dart';
+import 'package:ecommerce_dashboard/common/layouts/templates/site_template.dart';
+import 'package:ecommerce_dashboard/views/salesman/add_salesman/responsive_screen/add_salesman_desktop.dart';
+import 'package:ecommerce_dashboard/views/salesman/add_salesman/responsive_screen/add_salesman_mobile.dart';
+import 'package:ecommerce_dashboard/views/salesman/add_salesman/responsive_screen/add_salesman_tablet.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -11,7 +11,7 @@ import '../../../controllers/salesman/salesman_controller.dart';
 class AddSalesmanScreen extends StatelessWidget {
   const AddSalesmanScreen({super.key});
 
-  @override 
+  @override
   Widget build(BuildContext context) {
     final SalesmanModel salesmanModel = Get.arguments;
     final SalesmanController salesmanController =

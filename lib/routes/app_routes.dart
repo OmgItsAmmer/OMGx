@@ -1,13 +1,13 @@
-import 'package:admin_dashboard_v3/routes/routes.dart';
-import 'package:admin_dashboard_v3/routes/routes_MIDDLEWARE.dart';
-import 'package:admin_dashboard_v3/views/account_book/account_book.dart';
-import 'package:admin_dashboard_v3/views/brands/all_brands/brands.dart';
-import 'package:admin_dashboard_v3/views/category/all_categories/category.dart';
-import 'package:admin_dashboard_v3/views/expenses/expenses.dart';
-import 'package:admin_dashboard_v3/views/login/login.dart';
-import 'package:admin_dashboard_v3/views/orders/all_orders/orders.dart';
-import 'package:admin_dashboard_v3/views/purchases/all_purchases/purchases.dart';
-import 'package:admin_dashboard_v3/views/unkown_route.dart';
+import 'package:ecommerce_dashboard/routes/routes.dart';
+import 'package:ecommerce_dashboard/routes/routes_MIDDLEWARE.dart';
+import 'package:ecommerce_dashboard/views/account_book/account_book.dart';
+import 'package:ecommerce_dashboard/views/brands/all_brands/brands.dart';
+import 'package:ecommerce_dashboard/views/category/all_categories/category.dart';
+import 'package:ecommerce_dashboard/views/expenses/expenses.dart';
+import 'package:ecommerce_dashboard/views/login/login.dart';
+import 'package:ecommerce_dashboard/views/orders/all_orders/orders.dart';
+import 'package:ecommerce_dashboard/views/purchases/all_purchases/purchases.dart';
+import 'package:ecommerce_dashboard/views/unkown_route.dart';
 import 'package:get/get.dart';
 
 import '../views/brands/brand_details/brand_detail_screen.dart';

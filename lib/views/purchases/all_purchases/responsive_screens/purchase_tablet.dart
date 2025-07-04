@@ -1,4 +1,4 @@
-import 'package:admin_dashboard_v3/views/purchases/all_purchases/table/purchase_table.dart';
+import 'package:ecommerce_dashboard/views/purchases/all_purchases/table/purchase_table.dart';
 import 'package:flutter/material.dart';
 
 class PurchasesTabletScreen extends StatelessWidget {

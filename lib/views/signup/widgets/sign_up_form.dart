@@ -1,4 +1,4 @@
-import 'package:admin_dashboard_v3/views/signup/widgets/terms_conditions.dart';
+import 'package:ecommerce_dashboard/views/signup/widgets/terms_conditions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';

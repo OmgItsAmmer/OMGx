@@ -1,8 +1,8 @@
-import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
-import 'package:admin_dashboard_v3/common/widgets/icons/t_circular_icon.dart';
-import 'package:admin_dashboard_v3/controllers/purchase_sales/purchase_sales_controller.dart';
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
+import 'package:ecommerce_dashboard/common/widgets/icons/t_circular_icon.dart';
+import 'package:ecommerce_dashboard/controllers/purchase_sales/purchase_sales_controller.dart';
+import 'package:ecommerce_dashboard/utils/constants/colors.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
@@ -29,7 +29,7 @@ class PurchaseUserInfo extends StatelessWidget {
               'Cashier Information',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
-            const SizedBox(height: TSizes.spaceBtwItems), 
+            const SizedBox(height: TSizes.spaceBtwItems),
 
             // User Name Field
             SizedBox(
@@ -44,7 +44,6 @@ class PurchaseUserInfo extends StatelessWidget {
                     decoration: const InputDecoration(
                       labelText: 'Cashier Name',
                       hintText: 'Enter cashier name',
-
                     ),
                   )),
             ),

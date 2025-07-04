@@ -1,12 +1,12 @@
-import 'package:admin_dashboard_v3/Models/purchase/purchase_model.dart';
-import 'package:admin_dashboard_v3/controllers/purchase/purchase_controller.dart';
+import 'package:ecommerce_dashboard/Models/purchase/purchase_model.dart';
+import 'package:ecommerce_dashboard/controllers/purchase/purchase_controller.dart';
 
 import '../../../../Models/orders/order_item_model.dart';
-import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
-import 'package:admin_dashboard_v3/controllers/orders/orders_controller.dart';
-import 'package:admin_dashboard_v3/utils/constants/enums.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
-import 'package:admin_dashboard_v3/utils/helpers/helper_functions.dart';
+import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
+import 'package:ecommerce_dashboard/controllers/orders/orders_controller.dart';
+import 'package:ecommerce_dashboard/utils/constants/enums.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/utils/helpers/helper_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -37,11 +37,11 @@ class VendorOrderRows extends DataTableSource {
     PurchaseStatus? purchaseStatus = PurchaseStatus.values.firstWhere(
       (e) => e.name == purchaseItem.status,
       orElse: () => PurchaseStatus.pending,
-    ); 
+    );
     String formattedDate = '';
     try {
-      formattedDate =
-          DateFormat('MM/dd/yyyy').format(DateTime.parse(purchaseItem.purchaseDate));
+      formattedDate = DateFormat('MM/dd/yyyy')
+          .format(DateTime.parse(purchaseItem.purchaseDate));
     } catch (e) {
       formattedDate = purchaseItem.purchaseDate.toString();
     }
@@ -54,8 +54,9 @@ class VendorOrderRows extends DataTableSource {
           radius: TSizes.cardRadiusSm,
           padding: const EdgeInsets.symmetric(
               vertical: TSizes.sm, horizontal: TSizes.md),
-          backgroundColor: THelperFunctions.getPurchaseStatusColor(purchaseStatus)
-              .withValues(alpha: 0.1),
+          backgroundColor:
+              THelperFunctions.getPurchaseStatusColor(purchaseStatus)
+                  .withValues(alpha: 0.1),
           child: Text(
             purchaseController.allPurchases[index].status.toString(),
             style: TextStyle(

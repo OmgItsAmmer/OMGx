@@ -1,5 +1,5 @@
-import 'package:admin_dashboard_v3/Models/brand/brand_model.dart';
-import 'package:admin_dashboard_v3/repositories/brand/brand_repository.dart';
+import 'package:ecommerce_dashboard/Models/brand/brand_model.dart';
+import 'package:ecommerce_dashboard/repositories/brand/brand_repository.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';

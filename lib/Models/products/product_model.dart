@@ -1,4 +1,4 @@
-import 'package:admin_dashboard_v3/Models/products/variant_model.dart';
+import 'package:ecommerce_dashboard/Models/products/variant_model.dart';
 
 class ProductModel {
   int? productId;

@@ -1,5 +1,5 @@
-import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -11,38 +11,50 @@ class InstallmentActionButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final InstallmentController installmentController = Get.find<InstallmentController>();
+    final InstallmentController installmentController =
+        Get.find<InstallmentController>();
 
     return TRoundedContainer(
       backgroundColor: TColors.primaryBackground,
       padding: EdgeInsets.all(TSizes.defaultSpace),
-      child:
-      Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
             height: 60,
             width: double.infinity,
-            child: ElevatedButton(onPressed: (){
-              installmentController.generatePlan();
-
-            }, child: Text('Generate Plan',style: Theme.of(context).textTheme.bodyMedium!.apply(color: TColors.white),)),
-
+            child: ElevatedButton(
+                onPressed: () {
+                  installmentController.generatePlan();
+                },
+                child: Text(
+                  'Generate Plan',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium!
+                      .apply(color: TColors.white),
+                )),
           ),
-          const SizedBox(height: TSizes.spaceBtwInputFields,),
+          const SizedBox(
+            height: TSizes.spaceBtwInputFields,
+          ),
           SizedBox(
             height: 60,
             width: double.infinity,
-            child: OutlinedButton(onPressed: (){
-
-              installmentController.clearAllFields();
-            }, child: Text('Reset',style: Theme.of(context).textTheme.bodyLarge!.apply(color: TColors.black    ),)),
-
+            child: OutlinedButton(
+                onPressed: () {
+                  installmentController.clearAllFields();
+                },
+                child: Text(
+                  'Reset',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyLarge!
+                      .apply(color: TColors.black),
+                )),
           )
-
         ],
       ),
-
     );
   }
 }

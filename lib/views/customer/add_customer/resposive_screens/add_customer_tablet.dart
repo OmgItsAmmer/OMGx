@@ -1,5 +1,5 @@
-import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/Models/customer/customer_model.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import '../widget/add_customer_bottom_bar.dart';
 import '../widget/customer_basic_info.dart';

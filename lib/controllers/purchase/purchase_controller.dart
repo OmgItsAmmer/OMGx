@@ -1,10 +1,10 @@
-import 'package:admin_dashboard_v3/Models/products/product_variant_model.dart';
-import 'package:admin_dashboard_v3/Models/purchase/purchase_model.dart';
-import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
-import 'package:admin_dashboard_v3/controllers/dashboard/dashboard_controoler.dart';
-import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
-import 'package:admin_dashboard_v3/repositories/purchase/purchase_repository.dart';
-import 'package:admin_dashboard_v3/utils/constants/enums.dart';
+import 'package:ecommerce_dashboard/Models/products/product_variant_model.dart';
+import 'package:ecommerce_dashboard/Models/purchase/purchase_model.dart';
+import 'package:ecommerce_dashboard/common/widgets/loaders/tloaders.dart';
+import 'package:ecommerce_dashboard/controllers/dashboard/dashboard_controoler.dart';
+import 'package:ecommerce_dashboard/controllers/product/product_controller.dart';
+import 'package:ecommerce_dashboard/repositories/purchase/purchase_repository.dart';
+import 'package:ecommerce_dashboard/utils/constants/enums.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';

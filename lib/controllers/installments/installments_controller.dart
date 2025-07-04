@@ -1,9 +1,9 @@
-import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
-import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
-import 'package:admin_dashboard_v3/controllers/orders/orders_controller.dart';
-import 'package:admin_dashboard_v3/Models/orders/order_item_model.dart';
-import 'package:admin_dashboard_v3/repositories/installment/installment_repository.dart';
-import 'package:admin_dashboard_v3/utils/constants/enums.dart';
+import 'package:ecommerce_dashboard/common/widgets/loaders/tloaders.dart';
+import 'package:ecommerce_dashboard/controllers/customer/customer_controller.dart';
+import 'package:ecommerce_dashboard/controllers/orders/orders_controller.dart';
+import 'package:ecommerce_dashboard/Models/orders/order_item_model.dart';
+import 'package:ecommerce_dashboard/repositories/installment/installment_repository.dart';
+import 'package:ecommerce_dashboard/utils/constants/enums.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

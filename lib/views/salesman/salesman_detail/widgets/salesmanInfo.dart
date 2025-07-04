@@ -1,7 +1,7 @@
-import 'package:admin_dashboard_v3/Models/salesman/salesman_model.dart';
-import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
-import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/Models/salesman/salesman_model.dart';
+import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
+import 'package:ecommerce_dashboard/common/widgets/images/t_rounded_image.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
@@ -27,8 +27,6 @@ class SalesmanInfo extends StatelessWidget {
     // final ProductImagesController productImagesController = Get.find<ProductImagesController>();
     final MediaController mediaController = Get.find<MediaController>();
 
-
-
     return TRoundedContainer(
       width: 400,
       padding: const EdgeInsets.all(TSizes.defaultSpace),
@@ -48,41 +46,46 @@ class SalesmanInfo extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Obx(
-                    () {
-                      final image = mediaController.displayImage.value;
+                () {
+                  final image = mediaController.displayImage.value;
 
-                      if (image != null) {
-                        //print(image.filename);
-                        return FutureBuilder<String?>(
-                          future: mediaController.getImageFromBucket(
-                            MediaCategory.salesman.toString().split('.').last,
-                            image.filename ?? '',
-                          ),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return const TShimmerEffect(width: 80, height: 80);
-                            } else if (snapshot.hasError || snapshot.data == null) {
-                              return const Icon(Icons.error);
-                            } else {
-                              return TRoundedImage(
-                                isNetworkImage: true,
-                                width: 80,
-                                height: 80,
-                                imageurl: snapshot.data!,
-                              );
-                            }
-                          },
-                        );
-                      }
+                  if (image != null) {
+                    //print(image.filename);
+                    return FutureBuilder<String?>(
+                      future: mediaController.getImageFromBucket(
+                        MediaCategory.salesman.toString().split('.').last,
+                        image.filename ?? '',
+                      ),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const TShimmerEffect(width: 80, height: 80);
+                        } else if (snapshot.hasError || snapshot.data == null) {
+                          return const Icon(Icons.error);
+                        } else {
+                          return TRoundedImage(
+                            isNetworkImage: true,
+                            width: 80,
+                            height: 80,
+                            imageurl: snapshot.data!,
+                          );
+                        }
+                      },
+                    );
+                  }
                   // Check if selectedImages is empty
                   return FutureBuilder<String?>(
-                    future: mediaController.fetchMainImage(salesmanModel.salesmanId ?? -1, MediaCategory.salesman.toString().split('.').last),
-
+                    future: mediaController.fetchMainImage(
+                        salesmanModel.salesmanId ?? -1,
+                        MediaCategory.salesman.toString().split('.').last),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const TShimmerEffect(width: 80, height: 80); // Show shimmer while loading
+                        return const TShimmerEffect(
+                            width: 80,
+                            height: 80); // Show shimmer while loading
                       } else if (snapshot.hasError) {
-                        return const Text('Error loading image'); // Handle error case
+                        return const Text(
+                            'Error loading image'); // Handle error case
                       } else if (snapshot.hasData && snapshot.data != null) {
                         return TRoundedImage(
                           isNetworkImage: true,
@@ -91,14 +94,20 @@ class SalesmanInfo extends StatelessWidget {
                           imageurl: snapshot.data!,
                         );
                       } else {
-                        return const TCircularIcon(icon: Iconsax.image,width: 80,height: 80,backgroundColor: TColors.primaryBackground,); // Handle case where no image is available
-
+                        return const TCircularIcon(
+                          icon: Iconsax.image,
+                          width: 80,
+                          height: 80,
+                          backgroundColor: TColors.primaryBackground,
+                        ); // Handle case where no image is available
                       }
                     },
                   );
                 },
               ),
-              const SizedBox(width: TSizes.spaceBtwItems,),
+              const SizedBox(
+                width: TSizes.spaceBtwItems,
+              ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -106,17 +115,20 @@ class SalesmanInfo extends StatelessWidget {
                     salesmanModel.fullName,
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
-                  const SizedBox(height: TSizes.spaceBtwItems/2,),
+                  const SizedBox(
+                    height: TSizes.spaceBtwItems / 2,
+                  ),
                   Text(
                     salesmanModel.email,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
               ),
-
             ],
           ),
-          const SizedBox(height: TSizes.spaceBtwItems,),
+          const SizedBox(
+            height: TSizes.spaceBtwItems,
+          ),
           TProfilemenu(
             title: "Name",
             value: salesmanModel.fullName,
@@ -124,21 +136,34 @@ class SalesmanInfo extends StatelessWidget {
             isTap: false,
           ),
 
-          const SizedBox(height: TSizes.spaceBtwItems,),
+          const SizedBox(
+            height: TSizes.spaceBtwItems,
+          ),
           TProfilemenu(
             title: "Phone Number",
             value: salesmanModel.phoneNumber,
             onPressed: () {},
             isTap: false,
           ),
-          const SizedBox(height: TSizes.spaceBtwItems,),
+          const SizedBox(
+            height: TSizes.spaceBtwItems,
+          ),
           const Divider(),
           Row(
-
             // mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Expanded(child: OUserAdvanceInfoTile(firstTile: 'Last Order', secondTile: (orderController.recentOrderDay == '0')  ? 'No Orders yet' : orderController.recentOrderDay  )),
-              Expanded(child: OUserAdvanceInfoTile(firstTile: 'Commission', secondTile: (salesmanModel.comission != null) ? salesmanModel.comission.toString() : '0%')),
+              Expanded(
+                  child: OUserAdvanceInfoTile(
+                      firstTile: 'Last Order',
+                      secondTile: (orderController.recentOrderDay == '0')
+                          ? 'No Orders yet'
+                          : orderController.recentOrderDay)),
+              Expanded(
+                  child: OUserAdvanceInfoTile(
+                      firstTile: 'Commission',
+                      secondTile: (salesmanModel.comission != null)
+                          ? salesmanModel.comission.toString()
+                          : '0%')),
             ],
           ),
           const SizedBox(height: TSizes.spaceBtwSections),
@@ -149,17 +174,17 @@ class SalesmanInfo extends StatelessWidget {
                 child: OUserAdvanceInfoTile(
                   firstTile: 'Registered At',
                   secondTile: salesmanModel.createdAt != null
-                      ? DateFormat('dd MMM yyyy, hh:mm a').format(salesmanModel.createdAt!)
+                      ? DateFormat('dd MMM yyyy, hh:mm a')
+                          .format(salesmanModel.createdAt!)
                       : 'N/A', // Fallback text if createdAt is null
                 ),
               ),
-              const Expanded(child: OUserAdvanceInfoTile(firstTile: 'Email Marketing', secondTile: 'UnSubscribed')),
+              const Expanded(
+                  child: OUserAdvanceInfoTile(
+                      firstTile: 'Email Marketing',
+                      secondTile: 'UnSubscribed')),
             ],
           ),
-
-
-
-
         ],
       ),
     );

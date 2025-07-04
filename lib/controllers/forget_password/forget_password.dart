@@ -1,5 +1,5 @@
-import 'package:admin_dashboard_v3/controllers/forget_password/widgets/reset_password.dart';
-import 'package:admin_dashboard_v3/main.dart';
+import 'package:ecommerce_dashboard/controllers/forget_password/widgets/reset_password.dart';
+import 'package:ecommerce_dashboard/main.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 

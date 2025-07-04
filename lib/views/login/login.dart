@@ -1,7 +1,7 @@
-import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
-import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
-import 'package:admin_dashboard_v3/views/login/widgets/login_form.dart';
-import 'package:admin_dashboard_v3/views/login/widgets/login_header.dart';
+import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
+import 'package:ecommerce_dashboard/utils/device/device_utility.dart';
+import 'package:ecommerce_dashboard/views/login/widgets/login_form.dart';
+import 'package:ecommerce_dashboard/views/login/widgets/login_header.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../utils/constants/sizes.dart';
@@ -22,7 +22,7 @@ class LoginScreen extends StatelessWidget {
         child: SingleChildScrollView(
           child: TRoundedContainer(
             width: TDeviceUtils.isMobileScreen(context) ? double.infinity : 500,
-          //  height: 500,
+            //  height: 500,
             padding: EdgeInsets.all(TSizes.defaultSpace),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

@@ -1,8 +1,8 @@
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+
 import 'package:flutter/material.dart';
 
+import '../../../utils/constants/colors.dart';
+import '../../../utils/constants/sizes.dart';
 import '../loaders/animation_loader.dart';
 
 class HoverableCard extends StatefulWidget {

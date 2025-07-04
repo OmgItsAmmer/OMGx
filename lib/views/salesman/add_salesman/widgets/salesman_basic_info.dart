@@ -1,7 +1,7 @@
-import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
-import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
-import 'package:admin_dashboard_v3/controllers/salesman/salesman_controller.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
+import 'package:ecommerce_dashboard/controllers/address/address_controller.dart';
+import 'package:ecommerce_dashboard/controllers/salesman/salesman_controller.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -12,19 +12,25 @@ class SalesmanBasicInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SalesmanController salesmanController = Get.find<SalesmanController>();
-Get.find<AddressController>();
+    final SalesmanController salesmanController =
+        Get.find<SalesmanController>();
+    Get.find<AddressController>();
 
     return Form(
-      key: salesmanController.addSalesmanKey ,
+      key: salesmanController.addSalesmanKey,
       child: TRoundedContainer(
         padding: const EdgeInsets.all(TSizes.defaultSpace),
         child: Column(
           // mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Salesman Detail',style: Theme.of(context).textTheme.bodyLarge,),
-            const SizedBox(height: TSizes.spaceBtwSections,),
+            Text(
+              'Salesman Detail',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            const SizedBox(
+              height: TSizes.spaceBtwSections,
+            ),
             TextFormField(
               validator: (value) =>
                   TValidator.validateEmptyText('First Name', value),
@@ -33,7 +39,9 @@ Get.find<AddressController>();
               style: Theme.of(context).textTheme.bodyLarge,
               decoration: const InputDecoration(labelText: 'First Name'),
             ),
-            const SizedBox(height: TSizes.spaceBtwSections,),
+            const SizedBox(
+              height: TSizes.spaceBtwSections,
+            ),
             TextFormField(
               validator: (value) =>
                   TValidator.validateEmptyText('Last Name', value),
@@ -42,7 +50,9 @@ Get.find<AddressController>();
               style: Theme.of(context).textTheme.bodyLarge,
               decoration: const InputDecoration(labelText: 'Last Name'),
             ),
-            const SizedBox(height: TSizes.spaceBtwSections,),
+            const SizedBox(
+              height: TSizes.spaceBtwSections,
+            ),
 
             TextFormField(
               validator: (value) =>
@@ -54,14 +64,15 @@ Get.find<AddressController>();
               decoration: const InputDecoration(labelText: 'Email'),
             ),
 
-            const SizedBox(height: TSizes.spaceBtwSections,),
+            const SizedBox(
+              height: TSizes.spaceBtwSections,
+            ),
 
             TextFormField(
-              validator: (value) =>
-                  TValidator.validateEmptyText('CNIC', value),
+              validator: (value) => TValidator.validateEmptyText('CNIC', value),
               controller: salesmanController.cnic,
-              keyboardType: TextInputType
-                  .number, // Ensure numeric keyboard is shown
+              keyboardType:
+                  TextInputType.number, // Ensure numeric keyboard is shown
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly
               ], // Allow only digits
@@ -70,40 +81,49 @@ Get.find<AddressController>();
               decoration: const InputDecoration(labelText: 'CNIC'),
             ),
 
-            const SizedBox(height: TSizes.spaceBtwSections,),
+            const SizedBox(
+              height: TSizes.spaceBtwSections,
+            ),
 
             TextFormField(
               validator: (value) =>
                   TValidator.validateEmptyText('Phone Number', value),
               controller: salesmanController.phoneNumber,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true), // Allow decimal input
+              keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true), // Allow decimal input
               inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allow numbers with one optional decimal point
+                FilteringTextInputFormatter.allow(RegExp(
+                    r'^\d*\.?\d*$')), // Allow numbers with one optional decimal point
               ], // Allow only digits
 
               maxLines: 1,
               style: Theme.of(context).textTheme.bodyLarge,
               decoration: const InputDecoration(labelText: 'Phone Number'),
             ),
-            const SizedBox(height: TSizes.spaceBtwSections,),
+            const SizedBox(
+              height: TSizes.spaceBtwSections,
+            ),
 
             TextFormField(
               validator: (value) =>
                   TValidator.validateEmptyText('Commission', value),
               controller: salesmanController.commission,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true), // Allow decimal input
+              keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true), // Allow decimal input
               inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allow numbers with one optional decimal point
+                FilteringTextInputFormatter.allow(RegExp(
+                    r'^\d*\.?\d*$')), // Allow numbers with one optional decimal point
               ], // Allow only digits
 
               maxLines: 1,
               style: Theme.of(context).textTheme.bodyLarge,
               decoration: const InputDecoration(labelText: 'Commission(%)'),
             ),
-            const SizedBox(height: TSizes.spaceBtwSections,),
+            const SizedBox(
+              height: TSizes.spaceBtwSections,
+            ),
             TextFormField(
-              validator: (value) =>
-                  TValidator.validateEmptyText('Area', value),
+              validator: (value) => TValidator.validateEmptyText('Area', value),
               controller: salesmanController.area,
 
               // maxLines: 5,
@@ -111,19 +131,17 @@ Get.find<AddressController>();
               decoration: const InputDecoration(labelText: 'Area'),
             ),
 
-            const SizedBox(height: TSizes.spaceBtwSections,),
+            const SizedBox(
+              height: TSizes.spaceBtwSections,
+            ),
             TextFormField(
-              validator: (value) =>
-                  TValidator.validateEmptyText('City', value),
+              validator: (value) => TValidator.validateEmptyText('City', value),
               controller: salesmanController.city,
 
               // maxLines: 5,
               style: Theme.of(context).textTheme.bodyLarge,
               decoration: const InputDecoration(labelText: 'City'),
             ),
-
-
-
 
             // Row(
             //   children: [
@@ -150,8 +168,6 @@ Get.find<AddressController>();
             //   ],
             // ),
 
-
-
             // const SizedBox(height: TSizes.spaceBtwSections,),
 
             // TextFormField(
@@ -162,7 +178,6 @@ Get.find<AddressController>();
             //   decoration: const InputDecoration(labelText: 'Description'),
             // ),
           ],
-
         ),
       ),
     );

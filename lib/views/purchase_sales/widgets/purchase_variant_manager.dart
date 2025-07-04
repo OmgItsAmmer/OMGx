@@ -1,11 +1,11 @@
-import 'package:admin_dashboard_v3/Models/products/product_variant_model.dart';
-import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
-import 'package:admin_dashboard_v3/common/widgets/texts/section_heading.dart';
-import 'package:admin_dashboard_v3/common/widgets/shimmers/shimmer.dart';
-import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
-import 'package:admin_dashboard_v3/controllers/purchase_sales/purchase_sales_controller.dart';
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/Models/products/product_variant_model.dart';
+import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
+import 'package:ecommerce_dashboard/common/widgets/texts/section_heading.dart';
+import 'package:ecommerce_dashboard/common/widgets/shimmers/shimmer.dart';
+import 'package:ecommerce_dashboard/common/widgets/loaders/tloaders.dart';
+import 'package:ecommerce_dashboard/controllers/purchase_sales/purchase_sales_controller.dart';
+import 'package:ecommerce_dashboard/utils/constants/colors.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -598,8 +598,15 @@ class PurchaseVariantManager extends StatelessWidget {
                         message: 'All variants cleared from the list.',
                       );
                     },
-                    icon: const Icon(Icons.clear_all, size: 16,color: TColors.error,),
-                    label: const Text('Clear All',style: TextStyle(color: TColors.error),),
+                    icon: const Icon(
+                      Icons.clear_all,
+                      size: 16,
+                      color: TColors.error,
+                    ),
+                    label: const Text(
+                      'Clear All',
+                      style: TextStyle(color: TColors.error),
+                    ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: TColors.error,
                       side: const BorderSide(color: TColors.error),
@@ -622,7 +629,11 @@ class PurchaseVariantManager extends StatelessWidget {
                         )
                       : const Padding(
                           padding: EdgeInsets.all(8.0),
-                          child: Icon(Icons.add_shopping_cart, size: 16,color: TColors.white,),
+                          child: Icon(
+                            Icons.add_shopping_cart,
+                            size: 16,
+                            color: TColors.white,
+                          ),
                         ),
                   label: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4.0),

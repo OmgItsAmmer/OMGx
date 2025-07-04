@@ -1,12 +1,12 @@
-import 'package:admin_dashboard_v3/controllers/brands/brand_controller.dart';
-import 'package:admin_dashboard_v3/controllers/category/category_controller.dart';
-import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
-import 'package:admin_dashboard_v3/controllers/installments/installments_controller.dart';
-import 'package:admin_dashboard_v3/controllers/media/media_controller.dart';
-import 'package:admin_dashboard_v3/controllers/orders/orders_controller.dart';
-import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
-import 'package:admin_dashboard_v3/controllers/sales/sales_controller.dart';
-import 'package:admin_dashboard_v3/controllers/salesman/salesman_controller.dart';
+import 'package:ecommerce_dashboard/controllers/brands/brand_controller.dart';
+import 'package:ecommerce_dashboard/controllers/category/category_controller.dart';
+import 'package:ecommerce_dashboard/controllers/customer/customer_controller.dart';
+import 'package:ecommerce_dashboard/controllers/installments/installments_controller.dart';
+import 'package:ecommerce_dashboard/controllers/media/media_controller.dart';
+import 'package:ecommerce_dashboard/controllers/orders/orders_controller.dart';
+import 'package:ecommerce_dashboard/controllers/product/product_controller.dart';
+import 'package:ecommerce_dashboard/controllers/sales/sales_controller.dart';
+import 'package:ecommerce_dashboard/controllers/salesman/salesman_controller.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../utils/constants/enums.dart';
@@ -24,8 +24,7 @@ class TRouteMiddleware extends GetMiddleware {
     }
     mediaController.selectedImages.clear();
     mediaController.allImages.clear();
-  
-  
+
     mediaController.selectedPath.value = MediaCategory.folders;
 
     // Run function when navigating to ProfileScreen

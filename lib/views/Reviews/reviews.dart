@@ -1,5 +1,4 @@
-
-import 'package:admin_dashboard_v3/views/products/add_product_form.dart';
+import 'package:ecommerce_dashboard/views/products/add_product_form.dart';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -46,7 +45,7 @@ class ReviewScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-           //new table here
+            //new table here
           ],
         ),
       ),

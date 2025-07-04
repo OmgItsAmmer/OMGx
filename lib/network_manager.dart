@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:admin_dashboard_v3/routes/routes.dart';
+import 'package:ecommerce_dashboard/routes/routes.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -17,7 +17,8 @@ class NetworkManager extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _connectivitySubscription = _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
+    _connectivitySubscription =
+        _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
     _checkInitialConnection();
   }
 

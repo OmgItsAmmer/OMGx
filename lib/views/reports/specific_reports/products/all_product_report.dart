@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 import 'dart:io';
-import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
-import 'package:admin_dashboard_v3/views/reports/common/report_footer.dart';
+import 'package:ecommerce_dashboard/common/widgets/loaders/tloaders.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/views/reports/common/report_footer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pdf/pdf.dart';

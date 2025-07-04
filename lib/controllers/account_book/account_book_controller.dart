@@ -1,7 +1,7 @@
-import 'package:admin_dashboard_v3/Models/account_book/account_book_model.dart';
-import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
-import 'package:admin_dashboard_v3/Models/entity/entity_model.dart';
-import 'package:admin_dashboard_v3/repositories/account_book/account_book_repository.dart';
+import 'package:ecommerce_dashboard/Models/account_book/account_book_model.dart';
+import 'package:ecommerce_dashboard/Models/customer/customer_model.dart';
+import 'package:ecommerce_dashboard/Models/entity/entity_model.dart';
+import 'package:ecommerce_dashboard/repositories/account_book/account_book_repository.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';

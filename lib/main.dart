@@ -1,6 +1,6 @@
-import 'package:admin_dashboard_v3/utils/security/secure_keys.dart';
-import 'package:admin_dashboard_v3/supabase_strings.dart';
-import 'package:admin_dashboard_v3/utils/network/supabase_network_manager.dart';
+import 'package:ecommerce_dashboard/utils/security/secure_keys.dart';
+import 'package:ecommerce_dashboard/supabase_strings.dart';
+import 'package:ecommerce_dashboard/utils/network/supabase_network_manager.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

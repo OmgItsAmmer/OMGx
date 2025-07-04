@@ -1,8 +1,8 @@
 import 'dart:io';
-import 'package:admin_dashboard_v3/Models/image/image_entity_model.dart';
-import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
-import 'package:admin_dashboard_v3/utils/constants/enums.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/Models/image/image_entity_model.dart';
+import 'package:ecommerce_dashboard/common/widgets/loaders/tloaders.dart';
+import 'package:ecommerce_dashboard/utils/constants/enums.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

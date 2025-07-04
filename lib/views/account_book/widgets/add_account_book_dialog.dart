@@ -1,10 +1,10 @@
-import 'package:admin_dashboard_v3/Models/entity/entity_model.dart';
-import 'package:admin_dashboard_v3/controllers/account_book/account_book_controller.dart';
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/utils/constants/enums.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
-import 'package:admin_dashboard_v3/utils/validators/validation.dart';
-import 'package:admin_dashboard_v3/common/widgets/dropdown_search/enhanced_autocomplete.dart';
+import 'package:ecommerce_dashboard/Models/entity/entity_model.dart';
+import 'package:ecommerce_dashboard/controllers/account_book/account_book_controller.dart';
+import 'package:ecommerce_dashboard/utils/constants/colors.dart';
+import 'package:ecommerce_dashboard/utils/constants/enums.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/utils/validators/validation.dart';
+import 'package:ecommerce_dashboard/common/widgets/dropdown_search/enhanced_autocomplete.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
@@ -157,8 +157,8 @@ class AddAccountBookDialog extends StatelessWidget {
                                       const SizedBox(width: 12),
                                       Text(
                                         'Loading ${controller.selectedEntityType.value.toString().split('.').last.toLowerCase()}s...',
-                                        style:
-                                            const TextStyle(color: TColors.darkGrey),
+                                        style: const TextStyle(
+                                            color: TColors.darkGrey),
                                       ),
                                     ],
                                   ),
@@ -215,7 +215,8 @@ class AddAccountBookDialog extends StatelessWidget {
                                           String display = entity.name;
                                           if (entity.phoneNumber != null &&
                                               entity.phoneNumber!.isNotEmpty) {
-                                            display += ' - ${entity.phoneNumber}';
+                                            display +=
+                                                ' - ${entity.phoneNumber}';
                                           }
                                           return display.toLowerCase() ==
                                               value.toLowerCase();

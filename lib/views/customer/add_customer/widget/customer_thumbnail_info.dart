@@ -1,11 +1,11 @@
-import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
-import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
-import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
-import 'package:admin_dashboard_v3/common/widgets/shimmers/shimmer.dart';
-import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
+import 'package:ecommerce_dashboard/common/widgets/images/t_rounded_image.dart';
+import 'package:ecommerce_dashboard/common/widgets/loaders/tloaders.dart';
+import 'package:ecommerce_dashboard/common/widgets/shimmers/shimmer.dart';
+import 'package:ecommerce_dashboard/controllers/customer/customer_controller.dart';
+import 'package:ecommerce_dashboard/utils/constants/colors.dart';
+import 'package:ecommerce_dashboard/utils/constants/image_strings.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
@@ -20,9 +20,9 @@ class CustomerThumbnailInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     final MediaController mediaController = Get.find<MediaController>();
-    final CustomerController customerController = Get.find<CustomerController>();
+    final CustomerController customerController =
+        Get.find<CustomerController>();
 
     return Row(
       children: [
@@ -36,42 +36,51 @@ class CustomerThumbnailInfo extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Obx(
-                        () {
-                          final image = mediaController.displayImage.value;
+                    () {
+                      final image = mediaController.displayImage.value;
 
-                          if (image != null) {
-                            //print(image.filename);
-                            return FutureBuilder<String?>(
-                              future: mediaController.getImageFromBucket(
-                                MediaCategory.customers.toString().split('.').last,
-                                image.filename ?? '',
-                              ),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState == ConnectionState.waiting) {
-                                  return const TShimmerEffect(width: 150, height: 150);
-                                } else if (snapshot.hasError || snapshot.data == null) {
-                                  return const Icon(Icons.error);
-                                } else {
-                                  return TRoundedImage(
-                                    isNetworkImage: true,
-                                    width: 150,
-                                    height: 150,
-                                    imageurl: snapshot.data!,
-                                  );
-                                }
-                              },
-                            );
-                          }
+                      if (image != null) {
+                        //print(image.filename);
+                        return FutureBuilder<String?>(
+                          future: mediaController.getImageFromBucket(
+                            MediaCategory.customers.toString().split('.').last,
+                            image.filename ?? '',
+                          ),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const TShimmerEffect(
+                                  width: 150, height: 150);
+                            } else if (snapshot.hasError ||
+                                snapshot.data == null) {
+                              return const Icon(Icons.error);
+                            } else {
+                              return TRoundedImage(
+                                isNetworkImage: true,
+                                width: 150,
+                                height: 150,
+                                imageurl: snapshot.data!,
+                              );
+                            }
+                          },
+                        );
+                      }
                       // Check if selectedImages is empty
                       return FutureBuilder<String?>(
-                        future: mediaController.fetchMainImage(customerController.customerId, MediaCategory.customers.toString().split('.').last),
-
+                        future: mediaController.fetchMainImage(
+                            customerController.customerId,
+                            MediaCategory.customers.toString().split('.').last),
                         builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const TShimmerEffect(width: 150, height: 150); // Show shimmer while loading
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const TShimmerEffect(
+                                width: 150,
+                                height: 150); // Show shimmer while loading
                           } else if (snapshot.hasError) {
-                            return const Text('Error loading image'); // Handle error case
-                          } else if (snapshot.hasData && snapshot.data != null) {
+                            return const Text(
+                                'Error loading image'); // Handle error case
+                          } else if (snapshot.hasData &&
+                              snapshot.data != null) {
                             return TRoundedImage(
                               isNetworkImage: true,
                               width: 150,
@@ -79,18 +88,25 @@ class CustomerThumbnailInfo extends StatelessWidget {
                               imageurl: snapshot.data!,
                             );
                           } else {
-                            return const TCircularIcon(icon: Iconsax.image,width: 150,height: 150,backgroundColor: TColors.primaryBackground,); // Handle case where no image is available
+                            return const TCircularIcon(
+                              icon: Iconsax.image,
+                              width: 150,
+                              height: 150,
+                              backgroundColor: TColors.primaryBackground,
+                            ); // Handle case where no image is available
 // Handle case where no image is available
                           }
                         },
                       );
                     },
                   ),
-                  const SizedBox(height: TSizes.spaceBtwItems,),
+                  const SizedBox(
+                    height: TSizes.spaceBtwItems,
+                  ),
                   OutlinedButton(
                     onPressed: () {
                       // Trigger the selection of a thumbnail image
-                     mediaController.selectImagesFromMedia();
+                      mediaController.selectImagesFromMedia();
                     },
                     child: Text(
                       'Add Thumbnail',

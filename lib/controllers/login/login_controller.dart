@@ -1,4 +1,4 @@
-import 'package:admin_dashboard_v3/routes/routes.dart';
+import 'package:ecommerce_dashboard/routes/routes.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';

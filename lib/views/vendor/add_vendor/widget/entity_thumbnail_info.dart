@@ -1,8 +1,8 @@
-import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
-import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
-import 'package:admin_dashboard_v3/common/widgets/shimmers/shimmer.dart';
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
+import 'package:ecommerce_dashboard/common/widgets/images/t_rounded_image.dart';
+import 'package:ecommerce_dashboard/common/widgets/shimmers/shimmer.dart';
+import 'package:ecommerce_dashboard/utils/constants/colors.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
@@ -122,7 +122,7 @@ class EntityThumbnailInfo<T> extends StatelessWidget {
         return MediaCategory.shop;
       case EntityType.user:
         return MediaCategory.users;
-        }
+    }
   }
 
   int _getEntityId(dynamic controller) {

@@ -1,7 +1,7 @@
-import 'package:admin_dashboard_v3/common/layouts/templates/site_template.dart';
-import 'package:admin_dashboard_v3/views/category/all_categories/responsive_screens/category_desktop.dart';
-import 'package:admin_dashboard_v3/views/category/all_categories/responsive_screens/category_tablet.dart';
-import 'package:admin_dashboard_v3/views/category/all_categories/responsive_screens/category_mobile.dart';
+import 'package:ecommerce_dashboard/common/layouts/templates/site_template.dart';
+import 'package:ecommerce_dashboard/views/category/all_categories/responsive_screens/category_desktop.dart';
+import 'package:ecommerce_dashboard/views/category/all_categories/responsive_screens/category_tablet.dart';
+import 'package:ecommerce_dashboard/views/category/all_categories/responsive_screens/category_mobile.dart';
 import 'package:flutter/material.dart';
 
 class AllCategoryScreen extends StatelessWidget {

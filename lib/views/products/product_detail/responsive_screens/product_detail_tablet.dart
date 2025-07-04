@@ -1,5 +1,5 @@
-import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/controllers/product/product_controller.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -43,14 +43,14 @@ class ProductDetailTablet extends StatelessWidget {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: TSizes.spaceBtwSections),
-              
+
               // Brand & Category & visibility
               const ProductBrandcCategory(),
-              
+
               const SizedBox(height: TSizes.spaceBtwSections),
-              
+
               // Serial Variants - Only show for products with serial numbers
               Obx(() {
                 final showVariants = controller.hasSerialNumbers.value;
@@ -96,4 +96,4 @@ class ProductDetailTablet extends StatelessWidget {
       controller.fetchProductVariants(controller.productId.value);
     }
   }
-} 
+}

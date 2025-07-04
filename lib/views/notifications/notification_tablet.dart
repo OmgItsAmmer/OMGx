@@ -1,10 +1,10 @@
-import 'package:admin_dashboard_v3/common/widgets/loaders/animation_loader.dart';
-import 'package:admin_dashboard_v3/controllers/notification/notification_controller.dart';
-import 'package:admin_dashboard_v3/utils/constants/enums.dart';
-import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/views/notifications/card/notification_card.dart';
+import 'package:ecommerce_dashboard/common/widgets/loaders/animation_loader.dart';
+import 'package:ecommerce_dashboard/controllers/notification/notification_controller.dart';
+import 'package:ecommerce_dashboard/utils/constants/enums.dart';
+import 'package:ecommerce_dashboard/utils/constants/image_strings.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/utils/constants/colors.dart';
+import 'package:ecommerce_dashboard/views/notifications/card/notification_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';

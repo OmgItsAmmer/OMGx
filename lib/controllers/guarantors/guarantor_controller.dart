@@ -1,8 +1,8 @@
-import 'package:admin_dashboard_v3/Models/guarantors/guarantors_model.dart';
-import 'package:admin_dashboard_v3/Models/image/image_model.dart';
-import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
-import 'package:admin_dashboard_v3/repositories/guarantors/guarantor_repository.dart';
-import 'package:admin_dashboard_v3/repositories/installment/installment_repository.dart';
+import 'package:ecommerce_dashboard/Models/guarantors/guarantors_model.dart';
+import 'package:ecommerce_dashboard/Models/image/image_model.dart';
+import 'package:ecommerce_dashboard/common/widgets/loaders/tloaders.dart';
+import 'package:ecommerce_dashboard/repositories/guarantors/guarantor_repository.dart';
+import 'package:ecommerce_dashboard/repositories/installment/installment_repository.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';

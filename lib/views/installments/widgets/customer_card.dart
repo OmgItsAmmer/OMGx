@@ -1,5 +1,5 @@
-import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,7 +12,6 @@ class CustomerCard extends StatelessWidget {
 
   final cardTitle;
 
-
   final userNameTextController;
   final addressTextController;
   final cnicTextController;
@@ -24,7 +23,6 @@ class CustomerCard extends StatelessWidget {
       required this.cardTitle,
       required this.hintText,
       required this.readOnly,
-
       required this.userNameTextController,
       required this.cnicTextController,
       required this.phoneNoTextController,
@@ -59,8 +57,7 @@ class CustomerCard extends StatelessWidget {
                       TValidator.validateEmptyText('Customer Name', value),
                   readOnly: true,
                   style: Theme.of(context).textTheme.bodyMedium,
-                  decoration:
-                      const InputDecoration(labelText: 'Customer Name'),
+                  decoration: const InputDecoration(labelText: 'Customer Name'),
                 ),
               ),
               const SizedBox(
@@ -74,14 +71,13 @@ class CustomerCard extends StatelessWidget {
                   readOnly: readOnly,
                   validator: (value) =>
                       TValidator.validateEmptyText('Phone Number', value),
-                  keyboardType: TextInputType
-                      .number, // Ensure numeric keyboard is shown
+                  keyboardType:
+                      TextInputType.number, // Ensure numeric keyboard is shown
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly
                   ], // Allow only digits
                   style: Theme.of(context).textTheme.bodyMedium,
-                  decoration:
-                      const InputDecoration(labelText: 'Phone Number'),
+                  decoration: const InputDecoration(labelText: 'Phone Number'),
                 ),
               ),
               const SizedBox(
@@ -95,7 +91,6 @@ class CustomerCard extends StatelessWidget {
                   controller: addressTextController,
                   validator: (value) =>
                       TValidator.validateEmptyText('Address', value),
-
                   readOnly: readOnly,
                   maxLines: 3,
                   style: Theme.of(context).textTheme.bodyMedium,
@@ -111,12 +106,10 @@ class CustomerCard extends StatelessWidget {
                 child: TextFormField(
                   controller: cnicTextController,
                   readOnly: readOnly,
-
                   validator: (value) =>
                       TValidator.validateEmptyText('CNIC', value),
                   style: Theme.of(context).textTheme.bodyMedium,
                   decoration: const InputDecoration(labelText: 'CNIC'),
-
                 ),
               ),
             ],

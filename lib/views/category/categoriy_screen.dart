@@ -1,4 +1,4 @@
-// import 'package:admin_dashboard_v3/utils/constants/colors.dart';
+// import 'package:ecommerce_dashboard/utils/constants/colors.dart';
 // import 'package:flutter/material.dart';
 // import '../../common/widgets/appbar/appbar.dart';
 //

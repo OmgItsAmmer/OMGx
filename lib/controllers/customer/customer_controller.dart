@@ -1,7 +1,7 @@
-import 'package:admin_dashboard_v3/Models/address/address_model.dart';
-import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
-import 'package:admin_dashboard_v3/controllers/media/media_controller.dart';
-import 'package:admin_dashboard_v3/repositories/customer/customer_repository.dart';
+import 'package:ecommerce_dashboard/Models/address/address_model.dart';
+import 'package:ecommerce_dashboard/controllers/address/address_controller.dart';
+import 'package:ecommerce_dashboard/controllers/media/media_controller.dart';
+import 'package:ecommerce_dashboard/repositories/customer/customer_repository.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -110,7 +110,8 @@ class CustomerController extends GetxController {
       await mediaController.imageAssigner(
           customerId, MediaCategory.customers.toString().split('.').last, true);
 
-      await AddressController.instance.saveAddress(customerId, EntityType.customer);
+      await AddressController.instance
+          .saveAddress(customerId, EntityType.customer);
 
       customerModel.customerId = customerId;
 
@@ -161,7 +162,8 @@ class CustomerController extends GetxController {
       await mediaController.imageAssigner(
           customerId, MediaCategory.customers.toString().split('.').last, true);
 
-      await AddressController.instance.saveAddress(customerId, EntityType.customer);
+      await AddressController.instance
+          .saveAddress(customerId, EntityType.customer);
       //locally adding in table
       allCustomers.add(customerModel);
       if (kDebugMode) {

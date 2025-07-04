@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
-import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
-import 'package:admin_dashboard_v3/common/widgets/shimmers/shimmer.dart';
-import 'package:admin_dashboard_v3/controllers/shop/shop_controller.dart';
-import 'package:admin_dashboard_v3/controllers/user/user_controller.dart';
+import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
+import 'package:ecommerce_dashboard/common/widgets/loaders/tloaders.dart';
+import 'package:ecommerce_dashboard/common/widgets/shimmers/shimmer.dart';
+import 'package:ecommerce_dashboard/controllers/shop/shop_controller.dart';
+import 'package:ecommerce_dashboard/controllers/user/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';

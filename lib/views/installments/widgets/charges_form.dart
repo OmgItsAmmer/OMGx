@@ -1,7 +1,7 @@
-import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
-import 'package:admin_dashboard_v3/controllers/installments/installments_controller.dart';
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
+import 'package:ecommerce_dashboard/controllers/installments/installments_controller.dart';
+import 'package:ecommerce_dashboard/utils/constants/colors.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -13,11 +13,13 @@ class ChargesForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final InstallmentController installmentController = Get.find<InstallmentController>();
+    final InstallmentController installmentController =
+        Get.find<InstallmentController>();
 
     return TRoundedContainer(
       backgroundColor: TColors.primaryBackground,
-      padding: const EdgeInsets.all(TSizes.defaultSpace), // Added const for optimization
+      padding: const EdgeInsets.all(
+          TSizes.defaultSpace), // Added const for optimization
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -1,5 +1,5 @@
-import 'package:admin_dashboard_v3/Models/category/category_model.dart';
-import 'package:admin_dashboard_v3/repositories/category/category_repository.dart';
+import 'package:ecommerce_dashboard/Models/category/category_model.dart';
+import 'package:ecommerce_dashboard/repositories/category/category_repository.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';

@@ -1,13 +1,13 @@
-import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
-import 'package:admin_dashboard_v3/controllers/installments/installments_controller.dart';
-import 'package:admin_dashboard_v3/controllers/orders/orders_controller.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
-import 'package:admin_dashboard_v3/views/installments/refund/installment_refund_report.dart';
-import 'package:admin_dashboard_v3/views/installments/table/installment_table.dart';
-import 'package:admin_dashboard_v3/views/orders/order_details/widgets/customer_info.dart';
-import 'package:admin_dashboard_v3/views/orders/order_details/widgets/oorder_transaction.dart';
-import 'package:admin_dashboard_v3/views/orders/order_details/widgets/order_info.dart';
-import 'package:admin_dashboard_v3/views/orders/order_details/widgets/order_items.dart';
+import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
+import 'package:ecommerce_dashboard/controllers/installments/installments_controller.dart';
+import 'package:ecommerce_dashboard/controllers/orders/orders_controller.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/views/installments/refund/installment_refund_report.dart';
+import 'package:ecommerce_dashboard/views/installments/table/installment_table.dart';
+import 'package:ecommerce_dashboard/views/orders/order_details/widgets/customer_info.dart';
+import 'package:ecommerce_dashboard/views/orders/order_details/widgets/oorder_transaction.dart';
+import 'package:ecommerce_dashboard/views/orders/order_details/widgets/order_info.dart';
+import 'package:ecommerce_dashboard/views/orders/order_details/widgets/order_items.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

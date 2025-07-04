@@ -1,6 +1,6 @@
-import 'package:admin_dashboard_v3/common/layouts/templates/site_template.dart';
-import 'package:admin_dashboard_v3/views/vendor/add_vendor/resposive_screens/add_vendor_desktop.dart';
-import 'package:admin_dashboard_v3/views/vendor/add_vendor/resposive_screens/add_vendor_mobile.dart';
+import 'package:ecommerce_dashboard/common/layouts/templates/site_template.dart';
+import 'package:ecommerce_dashboard/views/vendor/add_vendor/resposive_screens/add_vendor_desktop.dart';
+import 'package:ecommerce_dashboard/views/vendor/add_vendor/resposive_screens/add_vendor_mobile.dart';
 import 'package:flutter/material.dart';
 
 import 'resposive_screens/add_vendor_tablet.dart';
@@ -15,7 +15,7 @@ class AddVendorScreen extends StatelessWidget {
       useLayout: false,
       desktop: AddVendorDesktop(),
       tablet: AddVendorTablet(),
-      mobile:  AddVendorMobile(),
+      mobile: AddVendorMobile(),
     );
   }
 }

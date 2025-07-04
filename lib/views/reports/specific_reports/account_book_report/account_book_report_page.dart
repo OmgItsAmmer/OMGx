@@ -1,11 +1,11 @@
 import 'dart:typed_data';
 import 'dart:io';
-import 'package:admin_dashboard_v3/controllers/shop/shop_controller.dart';
-import 'package:admin_dashboard_v3/controllers/user/user_controller.dart';
-import 'package:admin_dashboard_v3/Models/account_book/account_book_model.dart';
-import 'package:admin_dashboard_v3/Models/entity/entity_model.dart';
-import 'package:admin_dashboard_v3/utils/constants/enums.dart';
-import 'package:admin_dashboard_v3/views/reports/common/report_footer.dart';
+import 'package:ecommerce_dashboard/controllers/shop/shop_controller.dart';
+import 'package:ecommerce_dashboard/controllers/user/user_controller.dart';
+import 'package:ecommerce_dashboard/Models/account_book/account_book_model.dart';
+import 'package:ecommerce_dashboard/Models/entity/entity_model.dart';
+import 'package:ecommerce_dashboard/utils/constants/enums.dart';
+import 'package:ecommerce_dashboard/views/reports/common/report_footer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pdf/pdf.dart';

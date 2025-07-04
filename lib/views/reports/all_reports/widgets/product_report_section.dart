@@ -1,6 +1,6 @@
-import 'package:admin_dashboard_v3/controllers/orders/orders_controller.dart';
-import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
-import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
+import 'package:ecommerce_dashboard/controllers/orders/orders_controller.dart';
+import 'package:ecommerce_dashboard/controllers/product/product_controller.dart';
+import 'package:ecommerce_dashboard/utils/constants/image_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Models/installments/installment_table_model/installment_table_model.dart';
@@ -18,7 +18,7 @@ class ProductReportSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ReportController reportController = Get.find<ReportController>();
-  
+
     return TRoundedContainer(
       padding: const EdgeInsets.all(TSizes.defaultSpace),
       child: Column(
@@ -32,7 +32,7 @@ class ProductReportSection extends StatelessWidget {
             height: TSizes.spaceBtwSections,
           ),
           Wrap(
-             clipBehavior: Clip.none,
+            clipBehavior: Clip.none,
             spacing: TSizes.spaceBtwItems, // Horizontal space between items
             runSpacing: TSizes.spaceBtwItems, // Vertical space between rows
             children: [
@@ -41,11 +41,8 @@ class ProductReportSection extends StatelessWidget {
                 animation: TImages.docerAnimation,
                 onPressed: () {
                   reportController.getStockSummaryReport();
-
                 },
               ),
-            
-             
             ],
           ),
         ],

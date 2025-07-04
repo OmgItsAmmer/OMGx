@@ -1,6 +1,6 @@
-import 'package:admin_dashboard_v3/controllers/purchase_sales/purchase_sales_controller.dart';
-import 'package:admin_dashboard_v3/utils/constants/enums.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/controllers/purchase_sales/purchase_sales_controller.dart';
+import 'package:ecommerce_dashboard/utils/constants/enums.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -18,7 +18,8 @@ class PurchaseUnitTotalPrice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final PurchaseSalesController purchaseSalesController = Get.find<PurchaseSalesController>();
+    final PurchaseSalesController purchaseSalesController =
+        Get.find<PurchaseSalesController>();
 
     return Form(
       key: purchaseSalesController.addUnitTotalKey,
@@ -35,29 +36,31 @@ class PurchaseUnitTotalPrice extends StatelessWidget {
                           // Standard units dropdown
                           DropdownButtonHideUnderline(
                             child: DropdownButton<UnitType>(
-                              onChanged: purchaseSalesController  
+                              onChanged: purchaseSalesController
                                       .isSerializedProduct.value
                                   ? null
                                   : (value) {
                                       if (value != null) {
-                                        purchaseSalesController.selectedUnit.value =
-                                            value;
-                                        purchaseSalesController.calculateTotalPrice();
+                                        purchaseSalesController
+                                            .selectedUnit.value = value;
+                                        purchaseSalesController
+                                            .calculateTotalPrice();
                                       }
                                     },
                               padding: EdgeInsets.zero,
                               value: purchaseSalesController.selectedUnit.value,
                               isExpanded: true,
                               isDense: true,
-                              items:
-                                  _buildDropdownItems(purchaseSalesController, context),
+                              items: _buildDropdownItems(
+                                  purchaseSalesController, context),
                             ),
                           ),
 
                           // Custom unit label (visible when custom unit is selected)
                           if (purchaseSalesController.selectedUnit.value ==
                                   UnitType.custom &&
-                              purchaseSalesController.customUnitName.value.isNotEmpty)
+                              purchaseSalesController
+                                  .customUnitName.value.isNotEmpty)
                             Padding(
                               padding: const EdgeInsets.only(top: 4),
                               child: Text(
@@ -93,7 +96,6 @@ class PurchaseUnitTotalPrice extends StatelessWidget {
                       RegExp(
                           r'^\d*\.?\d{0,2}'), // Allows numbers with up to 2 decimal places
                     ),
-                  
                   ],
                   enabled: !purchaseSalesController.isSerializedProduct.value,
                 ),
@@ -107,7 +109,7 @@ class PurchaseUnitTotalPrice extends StatelessWidget {
 
   // Extract the dropdown items building into a separate method
   List<DropdownMenuItem<UnitType>> _buildDropdownItems(
-        PurchaseSalesController purchaseSalesController, BuildContext context) {
+      PurchaseSalesController purchaseSalesController, BuildContext context) {
     // Standard unit types (excluding 'custom' to prevent duplicates)
     final standardItems = UnitType.values
         .where((unit) =>
@@ -268,7 +270,8 @@ class PurchaseUnitTotalPrice extends StatelessWidget {
                 final factor = double.tryParse(factorController.text) ?? 1.0;
 
                 if (name.isNotEmpty) {
-                  purchaseSalesController.addCustomUnit(name, conversionFactor: factor);
+                  purchaseSalesController.addCustomUnit(name,
+                      conversionFactor: factor);
                   Navigator.of(context).pop();
                   // Recalculate price after changing unit
                   purchaseSalesController.calculateTotalPrice();

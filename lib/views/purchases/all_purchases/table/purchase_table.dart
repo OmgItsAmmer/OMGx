@@ -1,8 +1,8 @@
-import 'package:admin_dashboard_v3/Models/purchase/purchase_model.dart';
-import 'package:admin_dashboard_v3/controllers/purchase/purchase_controller.dart';
-import 'package:admin_dashboard_v3/controllers/table/table_search_controller.dart';
-import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
-import 'package:admin_dashboard_v3/views/purchases/all_purchases/table/table_source.dart';
+import 'package:ecommerce_dashboard/Models/purchase/purchase_model.dart';
+import 'package:ecommerce_dashboard/controllers/purchase/purchase_controller.dart';
+import 'package:ecommerce_dashboard/controllers/table/table_search_controller.dart';
+import 'package:ecommerce_dashboard/utils/device/device_utility.dart';
+import 'package:ecommerce_dashboard/views/purchases/all_purchases/table/table_source.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -14,7 +14,8 @@ class PurchaseTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final PurchaseController purchaseController = Get.find<PurchaseController>();
+    final PurchaseController purchaseController =
+        Get.find<PurchaseController>();
 
     // Use a unique instance of TableSearchController for purchases
     if (!Get.isRegistered<TableSearchController>(tag: 'purchases')) {
@@ -28,11 +29,16 @@ class PurchaseTable extends StatelessWidget {
       String searchTerm = tableSearchController.searchTerm.value.toLowerCase();
 
       // Create a filtered purchases list based on search term
-      var filteredPurchases = [...purchaseController.allPurchases]; // Create a copy
+      var filteredPurchases = [
+        ...purchaseController.allPurchases
+      ]; // Create a copy
       if (searchTerm.isNotEmpty) {
         filteredPurchases = purchaseController.allPurchases.where((purchase) {
           // Add search criteria based on PurchaseModel properties
-          return purchase.purchaseId.toString().toLowerCase().contains(searchTerm) ||
+          return purchase.purchaseId
+                  .toString()
+                  .toLowerCase()
+                  .contains(searchTerm) ||
               purchase.purchaseDate.toLowerCase().contains(searchTerm) ||
               purchase.status.toLowerCase().contains(searchTerm) ||
               purchase.subTotal.toString().toLowerCase().contains(searchTerm);
@@ -104,4 +110,4 @@ class PurchaseTable extends StatelessWidget {
       );
     });
   }
-} 
+}

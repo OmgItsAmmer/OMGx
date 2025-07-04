@@ -1,4 +1,4 @@
-import 'package:admin_dashboard_v3/controllers/expenses/expense_controller.dart';
+import 'package:ecommerce_dashboard/controllers/expenses/expense_controller.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

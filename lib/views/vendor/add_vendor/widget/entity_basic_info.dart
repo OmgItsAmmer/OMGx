@@ -1,7 +1,7 @@
-import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
-import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
-import 'package:admin_dashboard_v3/utils/constants/enums.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
+import 'package:ecommerce_dashboard/controllers/address/address_controller.dart';
+import 'package:ecommerce_dashboard/utils/constants/enums.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../utils/validators/validation.dart';
@@ -225,7 +225,7 @@ class EntityBasicInfo<T> extends StatelessWidget {
         return controller.phoneNumber;
       case EntityType.user:
         return controller.phoneNumber;
-      }
+    }
   }
 
   // TextEditingController _getAddressController(dynamic controller) {

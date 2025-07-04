@@ -1,6 +1,6 @@
-import 'package:admin_dashboard_v3/controllers/user/user_controller.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
-import 'package:admin_dashboard_v3/views/Navigation/widgets/side_menu_item.dart';
+import 'package:ecommerce_dashboard/controllers/user/user_controller.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/views/Navigation/widgets/side_menu_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
@@ -86,21 +86,24 @@ class NavigationScreen extends StatelessWidget {
                               onTap: () => controller.selectScreen(6),
                               isSelected: controller.selectedIndex.value == 6,
                             ),
-
-                            const SizedBox(height: TSizes.spaceBtwInputFields,),
-
+                            const SizedBox(
+                              height: TSizes.spaceBtwInputFields,
+                            ),
                             const Column(
                               children: [
-                                Divider(height: 2,thickness: 2,),
-                                 SizedBox(height: TSizes.spaceBtwInputFields,),
+                                Divider(
+                                  height: 2,
+                                  thickness: 2,
+                                ),
+                                SizedBox(
+                                  height: TSizes.spaceBtwInputFields,
+                                ),
                                 Text('Version 0.1'),
-
                               ],
                             ),
-                            const SizedBox(height: TSizes.spaceBtwInputFields,),
-                            
-
-
+                            const SizedBox(
+                              height: TSizes.spaceBtwInputFields,
+                            ),
                           ],
                         ),
                       ),

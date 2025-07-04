@@ -1,20 +1,21 @@
-import 'package:admin_dashboard_v3/common/widgets/images/t_circular_image.dart';
-import 'package:admin_dashboard_v3/common/widgets/search/search_overlay.dart';
-import 'package:admin_dashboard_v3/common/widgets/shimmers/shimmer.dart';
-import 'package:admin_dashboard_v3/controllers/fullscreen/fullscreen_controller.dart';
-import 'package:admin_dashboard_v3/controllers/notification/notification_controller.dart';
-import 'package:admin_dashboard_v3/controllers/search/search_controller.dart';
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
-import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
+import '../../../../controllers/fullscreen/fullscreen_controller.dart';
 import '../../../../controllers/media/media_controller.dart';
+import '../../../../controllers/notification/notification_controller.dart';
+import '../../../../controllers/search/search_controller.dart';
 import '../../../../controllers/user/user_controller.dart';
+import '../../../../utils/constants/colors.dart';
 import '../../../../utils/constants/enums.dart';
+import '../../../../utils/constants/sizes.dart';
+import '../../../../utils/device/device_utility.dart';
+import '../../images/t_circular_image.dart';
 import '../../images/t_rounded_image.dart';
+import '../../search/search_overlay.dart';
+import '../../shimmers/shimmer.dart';
 
 class THeader extends StatelessWidget implements PreferredSizeWidget {
   const THeader({super.key, this.scaffoldKey});

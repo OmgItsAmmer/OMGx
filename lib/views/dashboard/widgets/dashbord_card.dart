@@ -1,5 +1,5 @@
-import 'package:admin_dashboard_v3/common/widgets/icons/t_circular_icon.dart';
-import 'package:admin_dashboard_v3/controllers/dashboard/dashboard_controoler.dart';
+import 'package:ecommerce_dashboard/common/widgets/icons/t_circular_icon.dart';
+import 'package:ecommerce_dashboard/controllers/dashboard/dashboard_controoler.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';

@@ -1,4 +1,4 @@
-import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
+import 'package:ecommerce_dashboard/common/widgets/loaders/tloaders.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

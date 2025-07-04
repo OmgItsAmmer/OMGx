@@ -1,11 +1,11 @@
-import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
-import 'package:admin_dashboard_v3/common/widgets/icons/t_circular_icon.dart';
-import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
-import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
-import 'package:admin_dashboard_v3/views/sales/widgets/sale_action_buttons.dart';
-import 'package:admin_dashboard_v3/views/sales/widgets/serial_variant_selector.dart';
+import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
+import 'package:ecommerce_dashboard/common/widgets/icons/t_circular_icon.dart';
+import 'package:ecommerce_dashboard/controllers/address/address_controller.dart';
+import 'package:ecommerce_dashboard/controllers/customer/customer_controller.dart';
+import 'package:ecommerce_dashboard/utils/constants/colors.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/views/sales/widgets/sale_action_buttons.dart';
+import 'package:ecommerce_dashboard/views/sales/widgets/serial_variant_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
@@ -87,13 +87,10 @@ class SalesDesktop extends GetView<SalesController> {
                                 hintText: 'Customer Name',
                                 userNameTextController:
                                     controller.customerNameController,
-
                                 onSelectedName: (val) async {
                                   await controller.handleCustomerSelection(val);
                                 },
-
-                               
-                            )),
+                              )),
 
                           const SizedBox(
                             width: TSizes.spaceBtwSections,

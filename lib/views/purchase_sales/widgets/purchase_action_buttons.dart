@@ -1,7 +1,7 @@
-import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
-import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
+import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
+import 'package:ecommerce_dashboard/utils/constants/colors.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/utils/device/device_utility.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -307,8 +307,12 @@ class PurchaseActionButtons extends StatelessWidget {
                                           color: TColors.white,
                                         )
                                       : Container(
-                                          width: TDeviceUtils.isMobileScreen(context) ? 120 : 160,
-                                          padding: const EdgeInsets.symmetric(vertical: 12),
+                                          width: TDeviceUtils.isMobileScreen(
+                                                  context)
+                                              ? 120
+                                              : 160,
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 12),
                                           child: Center(
                                             child: Text(
                                               'Confirm Purchase',

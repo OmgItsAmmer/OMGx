@@ -1,7 +1,6 @@
-
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
-import 'package:admin_dashboard_v3/views/variants/widgets/variant_dropdown_menu.dart';
+import 'package:ecommerce_dashboard/utils/constants/colors.dart';
+import 'package:ecommerce_dashboard/utils/device/device_utility.dart';
+import 'package:ecommerce_dashboard/views/variants/widgets/variant_dropdown_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 
@@ -31,20 +30,16 @@ class VariationFormScreen extends StatelessWidget {
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
                     children: [
                       Expanded(
-                        flex: 1,
-                         child: ODropDownMenu(
-                           hintText: 'Size',
-                           chosenValue: selectedItem,
-                           itemsList: items,
-                           validator: (value){},
-                           onChanged: (value){},
-
-                         )
-
-                      ),
+                          flex: 1,
+                          child: ODropDownMenu(
+                            hintText: 'Size',
+                            chosenValue: selectedItem,
+                            itemsList: items,
+                            validator: (value) {},
+                            onChanged: (value) {},
+                          )),
                       const SizedBox(
                         width: TSizes.spaceBtwInputFields,
                       ),
@@ -52,7 +47,8 @@ class VariationFormScreen extends StatelessWidget {
                         flex: 3,
                         child: TextFormField(
                           decoration: const InputDecoration(
-                              prefixIcon: Icon(Iconsax.user), labelText: 'Description'),
+                              prefixIcon: Icon(Iconsax.user),
+                              labelText: 'Description'),
                         ),
                       ),
                     ],
@@ -66,7 +62,8 @@ class VariationFormScreen extends StatelessWidget {
                       Expanded(
                         child: TextFormField(
                           decoration: const InputDecoration(
-                              prefixIcon: Icon(Iconsax.user), labelText: 'Stock'),
+                              prefixIcon: Icon(Iconsax.user),
+                              labelText: 'Stock'),
                         ),
                       ),
                       const SizedBox(
@@ -75,7 +72,8 @@ class VariationFormScreen extends StatelessWidget {
                       Expanded(
                         child: TextFormField(
                           decoration: const InputDecoration(
-                              prefixIcon: Icon(Iconsax.user), labelText: 'Price'),
+                              prefixIcon: Icon(Iconsax.user),
+                              labelText: 'Price'),
                         ),
                       ),
                     ],
@@ -83,7 +81,6 @@ class VariationFormScreen extends StatelessWidget {
                   const SizedBox(
                     height: TSizes.spaceBtwInputFields,
                   ),
-
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -93,9 +90,11 @@ class VariationFormScreen extends StatelessWidget {
                           ElevatedButton(
                             onPressed: () {},
                             style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15), // Adjust padding
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 15), // Adjust padding
                               textStyle: const TextStyle(fontSize: 18),
-                              backgroundColor: Colors.red,// Increase font size
+                              backgroundColor: Colors.red, // Increase font size
                             ),
                             child: const Text('Delete'),
                           ),
@@ -107,16 +106,20 @@ class VariationFormScreen extends StatelessWidget {
                           OutlinedButton(
                             onPressed: () {},
                             style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 15),
                               textStyle: const TextStyle(fontSize: 18),
                             ),
                             child: const Text('Cancel'),
                           ),
-                          const SizedBox(width: 16), // Replace `TSizes.spaceBtwItems` with a fixed or calculated value
+                          const SizedBox(
+                              width:
+                                  16), // Replace `TSizes.spaceBtwItems` with a fixed or calculated value
                           ElevatedButton(
                             onPressed: () {},
                             style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 15),
                               textStyle: const TextStyle(fontSize: 18),
                             ),
                             child: const Text('Save'),
@@ -125,8 +128,6 @@ class VariationFormScreen extends StatelessWidget {
                       ),
                     ],
                   )
-
-
                 ],
               ),
             ),

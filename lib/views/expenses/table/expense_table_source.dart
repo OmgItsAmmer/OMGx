@@ -1,5 +1,5 @@
-import 'package:admin_dashboard_v3/controllers/expenses/expense_controller.dart';
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
+import 'package:ecommerce_dashboard/controllers/expenses/expense_controller.dart';
+import 'package:ecommerce_dashboard/utils/constants/colors.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -37,12 +37,8 @@ class ExpenseRow extends DataTableSource {
             view: false,
             edit: false,
             delete: true,
-
-
             onDeletePressed: () async {
-              await expenseController
-                  .deleteExpense(expense.expenseId);
-
+              await expenseController.deleteExpense(expense.expenseId);
             },
           ))
         ]);

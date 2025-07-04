@@ -1,7 +1,7 @@
-import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
-import 'package:admin_dashboard_v3/controllers/guarantors/guarantor_controller.dart';
-import 'package:admin_dashboard_v3/controllers/guarantors/guarantor_image_controller.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
+import 'package:ecommerce_dashboard/controllers/guarantors/guarantor_controller.dart';
+import 'package:ecommerce_dashboard/controllers/guarantors/guarantor_image_controller.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -108,9 +108,7 @@ class GuarrantorCard extends StatelessWidget {
                   //     height: 80,
                   child: TextFormField(
                     controller: cnicTextController,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly
-                    ],
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     validator: (value) =>
                         TValidator.validateEmptyText('CNIC', value),
                     style: Theme.of(context).textTheme.bodyMedium,
@@ -140,9 +138,7 @@ class GuarrantorCard extends StatelessWidget {
                   //    height: 80,
                   child: TextFormField(
                     controller: phoneNoTextController,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly
-                    ],
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     validator: (value) =>
                         TValidator.validateEmptyText('Phone Number', value),
                     style: Theme.of(context).textTheme.bodyMedium,

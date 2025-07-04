@@ -1,7 +1,6 @@
-
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
-import 'package:admin_dashboard_v3/views/products/widgets/variation_item.dart';
-import 'package:admin_dashboard_v3/views/variants/widgets/variant_dropdown_menu.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/views/products/widgets/variation_item.dart';
+import 'package:ecommerce_dashboard/views/variants/widgets/variant_dropdown_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:iconsax/iconsax.dart';
@@ -42,19 +41,20 @@ class AddProductForm extends StatelessWidget {
             children: [
               SizedBox(
                   width: 200,
-                  child: OutlinedButton(onPressed: (){}, child: Text('Discard'))),
-              const SizedBox(width: TSizes.spaceBtwItems,),
+                  child:
+                      OutlinedButton(onPressed: () {}, child: Text('Discard'))),
+              const SizedBox(
+                width: TSizes.spaceBtwItems,
+              ),
               SizedBox(
                   width: 200,
                   child: ElevatedButton(onPressed: () {}, child: Text('Save'))),
-              const SizedBox(width: TSizes.spaceBtwItems,),
-      
+              const SizedBox(
+                width: TSizes.spaceBtwItems,
+              ),
             ],
           ),
         ),
-      
-      
-      
         appBar: const TAppBar(
           title: Text("Add Product:"),
         ),
@@ -100,7 +100,6 @@ class AddProductForm extends StatelessWidget {
                               ),
                               TextFormField(
                                 decoration: const InputDecoration(
-
                                     labelText: 'Description'),
                                 maxLines: 12,
                               ),
@@ -386,26 +385,31 @@ class AddProductForm extends StatelessWidget {
                                 height: TSizes.spaceBtwSections,
                               ),
                               Row(
-                                crossAxisAlignment: CrossAxisAlignment.center, // Ensure proper alignment
+                                crossAxisAlignment: CrossAxisAlignment
+                                    .center, // Ensure proper alignment
                                 children: [
                                   Expanded(
                                     flex: 4,
                                     child: SizedBox(
                                       height: 70,
                                       child: ListView.separated(
-                                        separatorBuilder: (_, __) => const SizedBox(
-                                          width: TSizes.spaceBtwInputFields/3,
+                                        separatorBuilder: (_, __) =>
+                                            const SizedBox(
+                                          width: TSizes.spaceBtwInputFields / 3,
                                         ),
                                         scrollDirection: Axis.horizontal,
-                                        itemCount: 6  ,
-                                        physics: const BouncingScrollPhysics(), // Enable scrolling physics
+                                        itemCount: 6,
+                                        physics:
+                                            const BouncingScrollPhysics(), // Enable scrolling physics
                                         itemBuilder: (_, index) {
                                           return const add_more_product_item();
                                         },
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: TSizes.spaceBtwInputFields), // Maintain spacing
+                                  const SizedBox(
+                                      width: TSizes
+                                          .spaceBtwInputFields), // Maintain spacing
                                   Expanded(
                                     flex: 1,
                                     child: Container(
@@ -416,7 +420,8 @@ class AddProductForm extends StatelessWidget {
                                         shape: BoxShape.circle,
                                       ),
                                       child: IconButton(
-                                        icon: const Icon(Icons.add, color: Colors.white),
+                                        icon: const Icon(Icons.add,
+                                            color: Colors.white),
                                         onPressed: () {
                                           // Add your onPressed logic here
                                         },
@@ -425,17 +430,13 @@ class AddProductForm extends StatelessWidget {
                                   ),
                                 ],
                               ),
-      
-      
-      
-      
-      
                             ],
                           ),
                         ),
                       ),
-      
-                      const SizedBox(height: TSizes.spaceBtwInputFields,),
+                      const SizedBox(
+                        height: TSizes.spaceBtwInputFields,
+                      ),
                       Container(
                         decoration: BoxDecoration(
                           color: TColors.pureBlack,
@@ -443,7 +444,7 @@ class AddProductForm extends StatelessWidget {
                           boxShadow: [
                             BoxShadow(
                               color:
-                              Colors.white.withOpacity(0.2), // Shadow color
+                                  Colors.white.withOpacity(0.2), // Shadow color
                               spreadRadius: 5, // Spread of the shadow
                               blurRadius: 10, // Blur intensity
                               offset: const Offset(0, 5), // Offset for shadow
@@ -455,19 +456,21 @@ class AddProductForm extends StatelessWidget {
                             child: Column(
                               children: [
                                 const Text('Category'),
-                                const SizedBox(height: TSizes.spaceBtwInputFields,),
+                                const SizedBox(
+                                  height: TSizes.spaceBtwInputFields,
+                                ),
                                 ODropDownMenu(
                                   itemsList: items,
                                   chosenValue: selectedItem,
-                                  onChanged: (value){},
+                                  onChanged: (value) {},
                                   hintText: 'Text',
                                 ),
                               ],
-                            )
-                        ),
+                            )),
                       ),
-      
-                      const SizedBox(height: TSizes.spaceBtwInputFields,),
+                      const SizedBox(
+                        height: TSizes.spaceBtwInputFields,
+                      ),
                       Container(
                         decoration: BoxDecoration(
                           color: TColors.pureBlack,
@@ -475,7 +478,7 @@ class AddProductForm extends StatelessWidget {
                           boxShadow: [
                             BoxShadow(
                               color:
-                              Colors.white.withOpacity(0.2), // Shadow color
+                                  Colors.white.withOpacity(0.2), // Shadow color
                               spreadRadius: 5, // Spread of the shadow
                               blurRadius: 10, // Blur intensity
                               offset: const Offset(0, 5), // Offset for shadow
@@ -487,16 +490,17 @@ class AddProductForm extends StatelessWidget {
                             child: Column(
                               children: [
                                 const Text('Brands'),
-                                const SizedBox(height: TSizes.spaceBtwInputFields,),
+                                const SizedBox(
+                                  height: TSizes.spaceBtwInputFields,
+                                ),
                                 ODropDownMenu(
                                   itemsList: items,
                                   chosenValue: selectedItem,
-                                  onChanged: (value){},
+                                  onChanged: (value) {},
                                   hintText: 'Text',
                                 ),
                               ],
-                            )
-                        ),
+                            )),
                       ),
                     ],
                   ),
@@ -555,7 +559,6 @@ class add_more_product_item extends StatelessWidget {
         ),
       ],
     );
-
   }
 }
 

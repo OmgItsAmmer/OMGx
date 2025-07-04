@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 import 'dart:io';
-import 'package:admin_dashboard_v3/Models/reports/recovey_salesman_report_model.dart';
-import 'package:admin_dashboard_v3/views/reports/common/report_footer.dart';
+import 'package:ecommerce_dashboard/Models/reports/recovey_salesman_report_model.dart';
+import 'package:ecommerce_dashboard/views/reports/common/report_footer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';

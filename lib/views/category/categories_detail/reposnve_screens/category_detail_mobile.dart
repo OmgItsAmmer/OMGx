@@ -1,5 +1,5 @@
-import 'package:admin_dashboard_v3/Models/category/category_model.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/Models/category/category_model.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../common/widgets/containers/rounded_container.dart';

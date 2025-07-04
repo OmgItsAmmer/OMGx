@@ -1,4 +1,4 @@
-import 'package:admin_dashboard_v3/utils/constants/enums.dart';
+import 'package:ecommerce_dashboard/utils/constants/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../controllers/vendor/vendor_controller.dart';
@@ -27,17 +27,14 @@ class AddVendorDesktop extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-               
                 Expanded(
                   flex: 2,
                   child: EntityBasicInfo(
                       controller: vendorController,
                       entityType: EntityType.vendor),
                 ),
-
                 const SizedBox(width: 20),
-
-                 Expanded(
+                Expanded(
                   flex: 1,
                   child: EntityThumbnailInfo(
                       controller: vendorController,

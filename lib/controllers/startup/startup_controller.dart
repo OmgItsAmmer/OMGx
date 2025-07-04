@@ -1,6 +1,6 @@
-// import 'package:admin_dashboard_v3/Models/user/user_model.dart';
-// import 'package:admin_dashboard_v3/controllers/sales/sales_controller.dart';
-// import 'package:admin_dashboard_v3/controllers/user/user_controller.dart';
+// import 'package:ecommerce_dashboard/Models/user/user_model.dart';
+// import 'package:ecommerce_dashboard/controllers/sales/sales_controller.dart';
+// import 'package:ecommerce_dashboard/controllers/user/user_controller.dart';
 // import 'package:flutter/foundation.dart';
 // import 'package:get/get.dart';
 //

@@ -1,4 +1,4 @@
-import 'package:admin_dashboard_v3/common/layouts/templates/site_template.dart';
+import 'package:ecommerce_dashboard/common/layouts/templates/site_template.dart';
 import 'package:flutter/material.dart';
 
 import 'responsive_screens/account_book_desktop.dart';

@@ -2,7 +2,7 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <application
-        android:label="OMG POS : NEXUS"
+        android:label="ecommerce_dashboard"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

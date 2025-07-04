@@ -1,4 +1,4 @@
-import 'package:admin_dashboard_v3/Models/address/address_model.dart';
+import 'package:ecommerce_dashboard/Models/address/address_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -42,7 +42,7 @@ class AddressController extends GetxController {
       allCustomerAddresses.clear();
       allCustomerAddressesLocation.clear();
 
-   //   final entityName = entityType.toString().split('.').last;
+      //   final entityName = entityType.toString().split('.').last;
 
       switch (entityType) {
         case EntityType.customer:
@@ -90,7 +90,7 @@ class AddressController extends GetxController {
 
   Future<void> saveAddress(int entityId, EntityType entityType) async {
     try {
-   //   final entityName = entityType.toString().split('.').last;
+      //   final entityName = entityType.toString().split('.').last;
       AddressModel addressModel = AddressModel.empty();
 
       switch (entityType) {

@@ -1,6 +1,6 @@
-import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
-import 'package:admin_dashboard_v3/routes/routes.dart';
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
+import 'package:ecommerce_dashboard/common/widgets/loaders/tloaders.dart';
+import 'package:ecommerce_dashboard/routes/routes.dart';
+import 'package:ecommerce_dashboard/utils/constants/colors.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -63,7 +63,8 @@ class InstallmentRow extends DataTableSource {
             installmentItem.paidDate == 'null' ||
                     installmentItem.paidDate == null
                 ? '--'
-                : dateFormat.format(DateTime.parse(installmentItem.paidDate ?? '--')),
+                : dateFormat
+                    .format(DateTime.parse(installmentItem.paidDate ?? '--')),
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!

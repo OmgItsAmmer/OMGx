@@ -1,4 +1,4 @@
-import 'package:admin_dashboard_v3/Models/address/address_model.dart';
+import 'package:ecommerce_dashboard/Models/address/address_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';

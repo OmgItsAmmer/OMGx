@@ -1,5 +1,4 @@
-
-import 'package:admin_dashboard_v3/Models/installments/installment_table_model/installment_table_model.dart';
+import 'package:ecommerce_dashboard/Models/installments/installment_table_model/installment_table_model.dart';
 
 class InstallmentPayment {
   int sequenceNo;
@@ -62,23 +61,23 @@ class InstallmentPayment {
     return json;
   }
 
-
   // Static function to create an empty installment model
   static InstallmentPayment empty() => InstallmentPayment(
-    sequenceNo: 0,
-    installmentPlanId: 0,
-    dueDate: DateTime.now().toIso8601String(),
-    amountDue: "0.00",
-    isPaid: false,
-    createdAt: DateTime.now(),
-  );
+        sequenceNo: 0,
+        installmentPlanId: 0,
+        dueDate: DateTime.now().toIso8601String(),
+        amountDue: "0.00",
+        isPaid: false,
+        createdAt: DateTime.now(),
+      );
 
   // Convert a list of JSON objects to a list of InstallmentPayment
   static List<InstallmentPayment> fromJsonList(List<dynamic> jsonList) {
     return jsonList.map((json) => InstallmentPayment.fromJson(json)).toList();
   }
 
- static  List<InstallmentPayment> getInstallmentPaymentsFromTable(List<InstallmentTableModel> installmentTableList) {
+  static List<InstallmentPayment> getInstallmentPaymentsFromTable(
+      List<InstallmentTableModel> installmentTableList) {
     return installmentTableList.map((installment) {
       return InstallmentPayment(
         sequenceNo: installment.sequenceNo,
@@ -88,11 +87,10 @@ class InstallmentPayment {
         paidDate: installment.paidDate,
         paidAmount: installment.paidAmount,
         status: installment.status,
-        isPaid: installment.paidDate != null, // If paidDate is not null, isPaid = true
+        isPaid: installment.paidDate !=
+            null, // If paidDate is not null, isPaid = true
         createdAt: DateTime.now(), // Replace with actual date if available
       );
     }).toList();
   }
-
-
 }

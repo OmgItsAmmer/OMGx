@@ -1,10 +1,10 @@
-import 'package:admin_dashboard_v3/common/widgets/loaders/animation_loader.dart';
-import 'package:admin_dashboard_v3/controllers/notification/notification_controller.dart';
-import 'package:admin_dashboard_v3/utils/constants/enums.dart';
-import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/views/notifications/card/notification_card.dart';
+import 'package:ecommerce_dashboard/common/widgets/loaders/animation_loader.dart';
+import 'package:ecommerce_dashboard/controllers/notification/notification_controller.dart';
+import 'package:ecommerce_dashboard/utils/constants/enums.dart';
+import 'package:ecommerce_dashboard/utils/constants/image_strings.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/utils/constants/colors.dart';
+import 'package:ecommerce_dashboard/views/notifications/card/notification_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
@@ -124,10 +124,10 @@ class NotificationDesktop extends StatelessWidget {
 
             // Notification list with staggered animation
             ListView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
               itemCount: notifications.length,
-        itemBuilder: (_, index) {
+              itemBuilder: (_, index) {
                 final notification = notifications[index];
 
                 return AnimatedSlide(
@@ -142,48 +142,48 @@ class NotificationDesktop extends StatelessWidget {
                       padding:
                           const EdgeInsets.only(bottom: TSizes.spaceBtwItems),
                       child: NotificationCard(
-            notificationId: notification.notificationId.toString(),
-                onTapDelete: () {
+                        notificationId: notification.notificationId.toString(),
+                        onTapDelete: () {
                           notificationController.deleteNotification(
                               context, notification.notificationId);
-                },
-            onTapView: () {
+                        },
+                        onTapView: () {
                           NotificationType type =
                               (notification.notificationType ?? '')
                                   .toNotificationType();
 
-              switch (type) {
-                case NotificationType.installment:
+                          switch (type) {
+                            case NotificationType.installment:
                               notificationController
                                   .openOrder(notification.orderId ?? -1);
-                  break;
+                              break;
 
-                case NotificationType.alertStock:
+                            case NotificationType.alertStock:
                               notificationController
                                   .openProduct(notification.productId ?? -1);
-                  break;
+                              break;
 
-                default:
-                  print('Unknown notification type');
-                  break;
-              }
-            },
-            toggleRead: () async {
+                            default:
+                              print('Unknown notification type');
+                              break;
+                          }
+                        },
+                        toggleRead: () async {
                           await notificationController.toggleRead(
                               notification, index);
-              },
-              markAsRead: notification.isRead.value,
+                        },
+                        markAsRead: notification.isRead.value,
                         description:
                             notification.description ?? 'No Description',
                         notificationType: notification.notificationType ??
                             NotificationType.company.toString(),
-              date: notification.createdAt,
+                        date: notification.createdAt,
                       ),
                     ),
                   ),
-            );
-        },
-      ),
+                );
+              },
+            ),
           ],
         );
       },

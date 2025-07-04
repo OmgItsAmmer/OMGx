@@ -1,8 +1,8 @@
-import 'package:admin_dashboard_v3/common/layouts/templates/site_template.dart';
-import 'package:admin_dashboard_v3/views/customer/all_customer/responsive_screens/customer_desktop.dart';
-import 'package:admin_dashboard_v3/views/media/responsive_screens/media_desktop.dart';
-import 'package:admin_dashboard_v3/views/media/responsive_screens/media_mobile.dart';
-import 'package:admin_dashboard_v3/views/media/responsive_screens/media_tablet.dart';
+import 'package:ecommerce_dashboard/common/layouts/templates/site_template.dart';
+import 'package:ecommerce_dashboard/views/customer/all_customer/responsive_screens/customer_desktop.dart';
+import 'package:ecommerce_dashboard/views/media/responsive_screens/media_desktop.dart';
+import 'package:ecommerce_dashboard/views/media/responsive_screens/media_mobile.dart';
+import 'package:ecommerce_dashboard/views/media/responsive_screens/media_tablet.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

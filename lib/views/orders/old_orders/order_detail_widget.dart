@@ -1,6 +1,6 @@
-import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
-import 'package:admin_dashboard_v3/views/variants/widgets/variant_dropdown_menu.dart';
+import 'package:ecommerce_dashboard/utils/constants/image_strings.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/views/variants/widgets/variant_dropdown_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

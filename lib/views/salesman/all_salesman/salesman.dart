@@ -1,7 +1,7 @@
-import 'package:admin_dashboard_v3/common/layouts/templates/site_template.dart';
-import 'package:admin_dashboard_v3/views/salesman/all_salesman/responsive_screens/salesman_desktop.dart';
-import 'package:admin_dashboard_v3/views/salesman/all_salesman/responsive_screens/salesman_mobile.dart';
-import 'package:admin_dashboard_v3/views/salesman/all_salesman/responsive_screens/salesman_tablet.dart';
+import 'package:ecommerce_dashboard/common/layouts/templates/site_template.dart';
+import 'package:ecommerce_dashboard/views/salesman/all_salesman/responsive_screens/salesman_desktop.dart';
+import 'package:ecommerce_dashboard/views/salesman/all_salesman/responsive_screens/salesman_mobile.dart';
+import 'package:ecommerce_dashboard/views/salesman/all_salesman/responsive_screens/salesman_tablet.dart';
 import 'package:flutter/material.dart';
 
 class SalesmanScreen extends StatelessWidget {

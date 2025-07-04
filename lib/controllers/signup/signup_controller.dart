@@ -1,5 +1,5 @@
-import 'package:admin_dashboard_v3/repositories/signup/signup_repository.dart';
-import 'package:admin_dashboard_v3/routes/routes.dart';
+import 'package:ecommerce_dashboard/repositories/signup/signup_repository.dart';
+import 'package:ecommerce_dashboard/routes/routes.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

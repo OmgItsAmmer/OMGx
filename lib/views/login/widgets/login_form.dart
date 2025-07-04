@@ -1,4 +1,4 @@
-import 'package:admin_dashboard_v3/repositories/authentication/authicatioon_repository.dart';
+import 'package:ecommerce_dashboard/repositories/authentication/authicatioon_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
@@ -38,7 +38,8 @@ class TLoginForm extends StatelessWidget {
               ),
               Obx(
                 () => TextFormField(
-                  validator: (value) => TValidator.validateEmptyText(value, 'Password'),
+                  validator: (value) =>
+                      TValidator.validateEmptyText(value, 'Password'),
                   obscureText: controller.hidePassword.value,
                   controller: controller.password,
                   expands: false,

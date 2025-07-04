@@ -1,9 +1,9 @@
-import 'package:admin_dashboard_v3/controllers/dashboard/dashboard_controoler.dart';
-import 'package:admin_dashboard_v3/controllers/orders/orders_controller.dart';
-import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
-import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
-import 'package:admin_dashboard_v3/network_manager.dart';
-import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
+import 'package:ecommerce_dashboard/controllers/dashboard/dashboard_controoler.dart';
+import 'package:ecommerce_dashboard/controllers/orders/orders_controller.dart';
+import 'package:ecommerce_dashboard/controllers/product/product_controller.dart';
+import 'package:ecommerce_dashboard/controllers/customer/customer_controller.dart';
+import 'package:ecommerce_dashboard/network_manager.dart';
+import 'package:ecommerce_dashboard/utils/constants/image_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; // Import Supabase
@@ -77,7 +77,6 @@ class _SplashScreenState extends State<SplashScreen>
           _isDataLoaded = true;
           // If animation has completed already, navigate now
           if (_controller.status == AnimationStatus.completed) {
-            
             Get.offAllNamed(TRoutes.login);
           }
         });

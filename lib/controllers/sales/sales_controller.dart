@@ -1,19 +1,19 @@
-import 'package:admin_dashboard_v3/Models/address/address_model.dart';
-import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
-import 'package:admin_dashboard_v3/Models/products/product_variant_model.dart';
-import 'package:admin_dashboard_v3/Models/sales/sale_model.dart';
-import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
-import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
-import 'package:admin_dashboard_v3/controllers/orders/orders_controller.dart';
-import 'package:admin_dashboard_v3/utils/popups/loaders.dart';
-import 'package:admin_dashboard_v3/controllers/media/media_controller.dart';
-import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
-import 'package:admin_dashboard_v3/controllers/salesman/salesman_controller.dart';
-import 'package:admin_dashboard_v3/controllers/user/user_controller.dart';
-import 'package:admin_dashboard_v3/repositories/products/product_variants_repository.dart';
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/utils/constants/enums.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/Models/address/address_model.dart';
+import 'package:ecommerce_dashboard/Models/customer/customer_model.dart';
+import 'package:ecommerce_dashboard/Models/products/product_variant_model.dart';
+import 'package:ecommerce_dashboard/Models/sales/sale_model.dart';
+import 'package:ecommerce_dashboard/common/widgets/loaders/tloaders.dart';
+import 'package:ecommerce_dashboard/controllers/address/address_controller.dart';
+import 'package:ecommerce_dashboard/controllers/orders/orders_controller.dart';
+import 'package:ecommerce_dashboard/utils/popups/loaders.dart';
+import 'package:ecommerce_dashboard/controllers/media/media_controller.dart';
+import 'package:ecommerce_dashboard/controllers/product/product_controller.dart';
+import 'package:ecommerce_dashboard/controllers/salesman/salesman_controller.dart';
+import 'package:ecommerce_dashboard/controllers/user/user_controller.dart';
+import 'package:ecommerce_dashboard/repositories/products/product_variants_repository.dart';
+import 'package:ecommerce_dashboard/utils/constants/colors.dart';
+import 'package:ecommerce_dashboard/utils/constants/enums.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -226,8 +226,6 @@ class SalesController extends GetxController {
     try {
       cashierNameController.value.text =
           userController.currentUser.value.firstName;
-
-          
     } catch (e) {
       if (kDebugMode) {
         TLoaders.errorSnackBar(title: e.toString());
@@ -1544,7 +1542,8 @@ class SalesController extends GetxController {
         .firstWhere((user) => user.fullName == val);
 
     await addressController.fetchEntityAddresses(
-        customerController.selectedCustomer.value.customerId!, EntityType.customer);
+        customerController.selectedCustomer.value.customerId!,
+        EntityType.customer);
 
     entityId.value = customerController.selectedCustomer.value.customerId!;
 

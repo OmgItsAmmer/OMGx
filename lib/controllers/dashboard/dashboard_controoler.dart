@@ -1,6 +1,6 @@
-import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
-import 'package:admin_dashboard_v3/Models/expense/expense_model.dart';
-import 'package:admin_dashboard_v3/controllers/customer/customer_controller.dart';
+import 'package:ecommerce_dashboard/Models/customer/customer_model.dart';
+import 'package:ecommerce_dashboard/Models/expense/expense_model.dart';
+import 'package:ecommerce_dashboard/controllers/customer/customer_controller.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';

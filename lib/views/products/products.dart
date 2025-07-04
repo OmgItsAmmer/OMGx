@@ -1,6 +1,5 @@
-
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/views/products/add_product_form.dart';
+import 'package:ecommerce_dashboard/utils/constants/colors.dart';
+import 'package:ecommerce_dashboard/views/products/add_product_form.dart';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -35,79 +34,92 @@ class ProductScreen extends StatelessWidget {
         'Customer Name': 'Jane Smith',
         'Status': 'Pending',
         'Cost': '\$200',
-      }, {
+      },
+      {
         'Order No': '002',
         'Order ID': 'B456',
         'Customer Name': 'Jane Smith',
         'Status': 'Pending',
         'Cost': '\$200',
-      }, {
+      },
+      {
         'Order No': '002',
         'Order ID': 'B456',
         'Customer Name': 'Jane Smith',
         'Status': 'Pending',
         'Cost': '\$200',
-      }, {
+      },
+      {
         'Order No': '002',
         'Order ID': 'B456',
         'Customer Name': 'Jane Smith',
         'Status': 'Pending',
         'Cost': '\$200',
-      }, {
+      },
+      {
         'Order No': '002',
         'Order ID': 'B456',
         'Customer Name': 'Jane Smith',
         'Status': 'Pending',
         'Cost': '\$200',
-      }, {
+      },
+      {
         'Order No': '002',
         'Order ID': 'B456',
         'Customer Name': 'Jane Smith',
         'Status': 'Pending',
         'Cost': '\$200',
-      }, {
+      },
+      {
         'Order No': '002',
         'Order ID': 'B456',
         'Customer Name': 'Jane Smith',
         'Status': 'Pending',
         'Cost': '\$200',
-      }, {
+      },
+      {
         'Order No': '002',
         'Order ID': 'B456',
         'Customer Name': 'Jane Smith',
         'Status': 'Pending',
         'Cost': '\$200',
-      }, {
+      },
+      {
         'Order No': '002',
         'Order ID': 'B456',
         'Customer Name': 'Jane Smith',
         'Status': 'Pending',
         'Cost': '\$200',
-      }, {
+      },
+      {
         'Order No': '002',
         'Order ID': 'B456',
         'Customer Name': 'Jane Smith',
         'Status': 'Pending',
         'Cost': '\$200',
-      }, {
+      },
+      {
         'Order No': '002',
         'Order ID': 'B456',
         'Customer Name': 'Jane Smith',
         'Status': 'Pending',
         'Cost': '\$200',
-      }, {
+      },
+      {
         'Order No': '002',
         'Order ID': 'B456',
         'Customer Name': 'Jane Smith',
         'Status': 'Pending',
         'Cost': '\$200',
-      }, {
+      },
+      {
         'Order No': '002',
         'Order ID': 'B456',
         'Customer Name': 'Jane Smith',
         'Status': 'Pending',
         'Cost': '\$200',
-      }, {
+      },
+      {
         'Order No': '002',
         'Order ID': 'B456',
         'Customer Name': 'Jane Smith',
@@ -126,15 +138,15 @@ class ProductScreen extends StatelessWidget {
       },
     ];
     return Scaffold(
-        appBar: const TAppBar(
-          title: Text(
-            'Products',
-            style: TextStyle(
-              fontSize: 25, // Set the desired font size
-            ),
+      appBar: const TAppBar(
+        title: Text(
+          'Products',
+          style: TextStyle(
+            fontSize: 25, // Set the desired font size
           ),
-          showBackArrow: false,
         ),
+        showBackArrow: false,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(30.0),
         child: Material(
@@ -148,17 +160,18 @@ class ProductScreen extends StatelessWidget {
                 BoxShadow(
                   color: Colors.white.withOpacity(0.2), // Shadow color
                   spreadRadius: 5, // Spread of the shadow
-                  blurRadius: 10,  // Blur intensity
-                  offset: Offset(0, 5), // Offset for horizontal and vertical shadow
+                  blurRadius: 10, // Blur intensity
+                  offset:
+                      Offset(0, 5), // Offset for horizontal and vertical shadow
                 ),
               ],
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-              //  const SizedBox(height: TSizes.spaceBtwInputFields,),
+                //  const SizedBox(height: TSizes.spaceBtwInputFields,),
                 Padding(
-                  padding: const EdgeInsets.only(top: 20.0,right: 20.0),
+                  padding: const EdgeInsets.only(top: 20.0, right: 20.0),
                   child: Align(
                     alignment: Alignment.bottomRight,
                     child: SizedBox(
@@ -181,7 +194,6 @@ class ProductScreen extends StatelessWidget {
             ),
           ),
         ),
-
       ),
     );
   }

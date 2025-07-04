@@ -1,7 +1,7 @@
-import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
-import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
+import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
+import 'package:ecommerce_dashboard/utils/constants/colors.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/utils/device/device_utility.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -104,7 +104,7 @@ class PurchaseSummary extends StatelessWidget {
         const SizedBox(height: TSizes.spaceBtwItems),
 
         // Payment tracking section
-   //     _buildPaymentTracking(context, purchaseSalesController),
+        //     _buildPaymentTracking(context, purchaseSalesController),
       ],
     );
   }
@@ -177,7 +177,7 @@ class PurchaseSummary extends StatelessWidget {
         ),
         const SizedBox(height: TSizes.spaceBtwItems),
         // Payment tracking section
-      //  _buildPaymentTracking(context, purchaseSalesController),
+        //  _buildPaymentTracking(context, purchaseSalesController),
       ],
     );
   }

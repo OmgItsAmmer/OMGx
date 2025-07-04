@@ -1,6 +1,6 @@
-import 'package:admin_dashboard_v3/Models/brand/brand_model.dart';
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
+import 'package:ecommerce_dashboard/Models/brand/brand_model.dart';
+import 'package:ecommerce_dashboard/utils/constants/colors.dart';
+import 'package:ecommerce_dashboard/utils/device/device_utility.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';

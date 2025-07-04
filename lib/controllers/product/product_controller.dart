@@ -1,12 +1,12 @@
-import 'package:admin_dashboard_v3/Models/orders/order_item_model.dart';
-import 'package:admin_dashboard_v3/Models/products/product_model.dart';
-import 'package:admin_dashboard_v3/Models/products/product_variant_model.dart';
-import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
-import 'package:admin_dashboard_v3/controllers/brands/brand_controller.dart';
-import 'package:admin_dashboard_v3/controllers/category/category_controller.dart';
-import 'package:admin_dashboard_v3/controllers/product/product_images_controller.dart';
-import 'package:admin_dashboard_v3/repositories/products/product_repository.dart';
-import 'package:admin_dashboard_v3/repositories/products/product_variants_repository.dart';
+import 'package:ecommerce_dashboard/Models/orders/order_item_model.dart';
+import 'package:ecommerce_dashboard/Models/products/product_model.dart';
+import 'package:ecommerce_dashboard/Models/products/product_variant_model.dart';
+import 'package:ecommerce_dashboard/common/widgets/loaders/tloaders.dart';
+import 'package:ecommerce_dashboard/controllers/brands/brand_controller.dart';
+import 'package:ecommerce_dashboard/controllers/category/category_controller.dart';
+import 'package:ecommerce_dashboard/controllers/product/product_images_controller.dart';
+import 'package:ecommerce_dashboard/repositories/products/product_repository.dart';
+import 'package:ecommerce_dashboard/repositories/products/product_variants_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/foundation.dart';
@@ -1080,17 +1080,17 @@ class ProductController extends GetxController {
   Future<void> handleSave() async {
     try {
       if (isUpdating.value) return;
-    isUpdating.value = true;
-    try {
-      if (productId.value == -1) {
-        await insertProduct();
-      } else {
-        await updateProduct();
+      isUpdating.value = true;
+      try {
+        if (productId.value == -1) {
+          await insertProduct();
+        } else {
+          await updateProduct();
+        }
+      } finally {
+        isUpdating.value = false;
+        Navigator.of(Get.context!).pop();
       }
-    } finally {
-      isUpdating.value = false;
-      Navigator.of(Get.context!).pop();
-    }
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Error', message: e.toString());
     }

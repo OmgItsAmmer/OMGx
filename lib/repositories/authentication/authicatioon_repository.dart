@@ -1,5 +1,5 @@
-import 'package:admin_dashboard_v3/common/layouts/templates/site_template.dart';
-import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
+import 'package:ecommerce_dashboard/common/layouts/templates/site_template.dart';
+import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 

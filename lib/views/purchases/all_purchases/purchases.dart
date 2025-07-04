@@ -1,7 +1,7 @@
-import 'package:admin_dashboard_v3/common/layouts/templates/site_template.dart';
-import 'package:admin_dashboard_v3/views/purchases/all_purchases/responsive_screens/purchase_desktop.dart';
-import 'package:admin_dashboard_v3/views/purchases/all_purchases/responsive_screens/purchase_mobile.dart';
-import 'package:admin_dashboard_v3/views/purchases/all_purchases/responsive_screens/purchase_tablet.dart';
+import 'package:ecommerce_dashboard/common/layouts/templates/site_template.dart';
+import 'package:ecommerce_dashboard/views/purchases/all_purchases/responsive_screens/purchase_desktop.dart';
+import 'package:ecommerce_dashboard/views/purchases/all_purchases/responsive_screens/purchase_mobile.dart';
+import 'package:ecommerce_dashboard/views/purchases/all_purchases/responsive_screens/purchase_tablet.dart';
 import 'package:flutter/material.dart';
 
 class TPurchaseScreen extends StatelessWidget {

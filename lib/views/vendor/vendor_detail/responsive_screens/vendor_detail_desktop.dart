@@ -1,8 +1,8 @@
-import 'package:admin_dashboard_v3/Models/vendor/vendor_model.dart';
-import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
-import 'package:admin_dashboard_v3/controllers/purchase/purchase_controller.dart';
-import 'package:admin_dashboard_v3/utils/constants/enums.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/Models/vendor/vendor_model.dart';
+import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
+import 'package:ecommerce_dashboard/controllers/purchase/purchase_controller.dart';
+import 'package:ecommerce_dashboard/utils/constants/enums.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../table/vendor_order_table.dart';
@@ -16,7 +16,7 @@ class VendorDetailDesktop extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Initialize the order controller and fetch orders for this vendor
- 
+
     final PurchaseController purchaseController =
         Get.find<PurchaseController>();
 

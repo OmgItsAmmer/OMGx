@@ -1,8 +1,8 @@
-import 'package:admin_dashboard_v3/Models/purchase/purchase_model.dart';
-import 'package:admin_dashboard_v3/controllers/purchase/purchase_controller.dart';
-import 'package:admin_dashboard_v3/controllers/vendor/vendor_controller.dart';
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/Models/purchase/purchase_model.dart';
+import 'package:ecommerce_dashboard/controllers/purchase/purchase_controller.dart';
+import 'package:ecommerce_dashboard/controllers/vendor/vendor_controller.dart';
+import 'package:ecommerce_dashboard/utils/constants/colors.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';

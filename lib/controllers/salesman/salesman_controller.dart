@@ -1,5 +1,5 @@
-import 'package:admin_dashboard_v3/repositories/salesman/salesman_repository.dart';
-import 'package:admin_dashboard_v3/utils/constants/enums.dart';
+import 'package:ecommerce_dashboard/repositories/salesman/salesman_repository.dart';
+import 'package:ecommerce_dashboard/utils/constants/enums.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -265,7 +265,8 @@ class SalesmanController extends GetxController {
       );
 
       // Save address for the salesman
-      await AddressController.instance.saveAddress(salesmanId, EntityType.salesman);
+      await AddressController.instance
+          .saveAddress(salesmanId, EntityType.salesman);
 
       // Add to local lists if needed
       allSalesman.add(salesmanModel);
@@ -330,7 +331,8 @@ class SalesmanController extends GetxController {
       );
 
       // Address update
-      await AddressController.instance.saveAddress(salesmanId, EntityType.salesman);
+      await AddressController.instance
+          .saveAddress(salesmanId, EntityType.salesman);
 
       // ✅ Update locally in observable list
       int index = allSalesman.indexWhere((s) => s.salesmanId == salesmanId);

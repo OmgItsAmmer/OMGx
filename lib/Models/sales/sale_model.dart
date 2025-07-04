@@ -1,4 +1,4 @@
-import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
+import 'package:ecommerce_dashboard/utils/constants/image_strings.dart';
 import 'package:flutter/material.dart';
 
 class SaleModel {

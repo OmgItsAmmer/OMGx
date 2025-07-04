@@ -1,5 +1,4 @@
-    
-import 'package:admin_dashboard_v3/views/vendor/add_vendor/widget/entity_thumbnail_info.dart';
+import 'package:ecommerce_dashboard/views/vendor/add_vendor/widget/entity_thumbnail_info.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../controllers/vendor/vendor_controller.dart';
@@ -27,11 +26,14 @@ class AddVendorMobile extends StatelessWidget {
           key: vendorController.addVendorKey,
           child: Column(
             children: [
-              EntityThumbnailInfo(controller: vendorController, entityType: EntityType.vendor),
+              EntityThumbnailInfo(
+                  controller: vendorController, entityType: EntityType.vendor),
               const SizedBox(height: 20),
-              EntityBasicInfo(controller: vendorController, entityType: EntityType.vendor),
+              EntityBasicInfo(
+                  controller: vendorController, entityType: EntityType.vendor),
               const SizedBox(height: 20),
-              EntityAddressInfo(controller: addressController, entityType: EntityType.vendor),
+              EntityAddressInfo(
+                  controller: addressController, entityType: EntityType.vendor),
             ],
           ),
         ),

@@ -1,9 +1,9 @@
-import 'package:admin_dashboard_v3/routes/app_routes.dart';
-import 'package:admin_dashboard_v3/routes/route_observer.dart';
-import 'package:admin_dashboard_v3/routes/routes.dart';
-import 'package:admin_dashboard_v3/routes/routes_MIDDLEWARE.dart';
-import 'package:admin_dashboard_v3/utils/theme/theme.dart';
-import 'package:admin_dashboard_v3/views/unkown_route.dart';
+import 'package:ecommerce_dashboard/routes/app_routes.dart';
+import 'package:ecommerce_dashboard/routes/route_observer.dart';
+import 'package:ecommerce_dashboard/routes/routes.dart';
+import 'package:ecommerce_dashboard/routes/routes_MIDDLEWARE.dart';
+import 'package:ecommerce_dashboard/utils/theme/theme.dart';
+import 'package:ecommerce_dashboard/views/unkown_route.dart';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

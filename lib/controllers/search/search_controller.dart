@@ -1,9 +1,9 @@
-import 'package:admin_dashboard_v3/Models/brand/brand_model.dart';
-import 'package:admin_dashboard_v3/Models/category/category_model.dart';
-import 'package:admin_dashboard_v3/Models/customer/customer_model.dart';
-import 'package:admin_dashboard_v3/Models/orders/order_item_model.dart';
-import 'package:admin_dashboard_v3/Models/products/product_model.dart';
-import 'package:admin_dashboard_v3/routes/routes.dart';
+import 'package:ecommerce_dashboard/Models/brand/brand_model.dart';
+import 'package:ecommerce_dashboard/Models/category/category_model.dart';
+import 'package:ecommerce_dashboard/Models/customer/customer_model.dart';
+import 'package:ecommerce_dashboard/Models/orders/order_item_model.dart';
+import 'package:ecommerce_dashboard/Models/products/product_model.dart';
+import 'package:ecommerce_dashboard/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -63,7 +63,7 @@ class TSearchController extends GetxController {
 
       // Orders
       SearchItem(title: 'Orders', route: TRoutes.orders),
-     // SearchItem(title: 'Order Details', route: TRoutes.orderDetails, arguments: OrderModel.empty()),
+      // SearchItem(title: 'Order Details', route: TRoutes.orderDetails, arguments: OrderModel.empty()),
 
       // Products
       SearchItem(title: 'Products', route: TRoutes.products),
@@ -77,24 +77,24 @@ class TSearchController extends GetxController {
 
       // Customers
       SearchItem(title: 'Customers', route: TRoutes.customer),
-     // SearchItem(title: 'Customer Details', route: TRoutes.customerDetails, ),
-  //    SearchItem(title: 'Add Customer', route: TRoutes.addCustomer,arguments: CustomerModel.empty()),
+      // SearchItem(title: 'Customer Details', route: TRoutes.customerDetails, ),
+      //    SearchItem(title: 'Add Customer', route: TRoutes.addCustomer,arguments: CustomerModel.empty()),
 
       // Salesmen
       SearchItem(title: 'Salesmen', route: TRoutes.salesman),
-   //   SearchItem(title: 'Salesman Details', route: TRoutes.salesmanDetails),
-    //  SearchItem(title: 'Add Salesman', route: TRoutes.addSalesman),
+      //   SearchItem(title: 'Salesman Details', route: TRoutes.salesmanDetails),
+      //  SearchItem(title: 'Add Salesman', route: TRoutes.addSalesman),
 
       // Installments
-    //  SearchItem(title: 'Installments', route: TRoutes.installment),
+      //  SearchItem(title: 'Installments', route: TRoutes.installment),
 
       // Brands
       SearchItem(title: 'Brands', route: TRoutes.brand),
-     // SearchItem(title: 'Add Brand', route: TRoutes.brandDetails, arguments: BrandModel.empty()),
+      // SearchItem(title: 'Add Brand', route: TRoutes.brandDetails, arguments: BrandModel.empty()),
 
       // Categories
       SearchItem(title: 'Categories', route: TRoutes.category),
-     // SearchItem(title: 'Add Category', route: TRoutes.categoryDetails, arguments: CategoryModel.empty()),
+      // SearchItem(title: 'Add Category', route: TRoutes.categoryDetails, arguments: CategoryModel.empty()),
 
       // Other
       SearchItem(title: 'Profile', route: TRoutes.profileScreen),

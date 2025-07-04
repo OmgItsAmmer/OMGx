@@ -1,8 +1,8 @@
-import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
-import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
+import 'package:ecommerce_dashboard/common/widgets/images/t_rounded_image.dart';
+import 'package:ecommerce_dashboard/utils/constants/colors.dart';
+import 'package:ecommerce_dashboard/utils/constants/image_strings.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 
 class ExtraImages extends StatelessWidget {
@@ -16,9 +16,7 @@ class ExtraImages extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const TRoundedImage(
-              width: 350,
-              height: 170,
-              imageurl: TImages.productImage1),
+              width: 350, height: 170, imageurl: TImages.productImage1),
           const SizedBox(height: TSizes.spaceBtwSections),
           Row(
             children: [
@@ -27,7 +25,8 @@ class ExtraImages extends StatelessWidget {
                   height: 80, // Set an appropriate height for the ListView
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
-                    separatorBuilder: (_, __) => const SizedBox(width: TSizes.spaceBtwInputFields/2),
+                    separatorBuilder: (_, __) =>
+                        const SizedBox(width: TSizes.spaceBtwInputFields / 2),
                     itemCount: 10, // Ensure this has enough items to scroll
                     itemBuilder: (_, index) {
                       return const TRoundedContainer(
@@ -41,9 +40,7 @@ class ExtraImages extends StatelessWidget {
               ),
               const SizedBox(width: TSizes.spaceBtwSections),
               const TRoundedImage(
-                  width: 50,
-                  height: 50,
-                  imageurl: TImages.productImage1),
+                  width: 50, height: 50, imageurl: TImages.productImage1),
             ],
           ),
         ],

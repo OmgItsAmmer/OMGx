@@ -1,13 +1,13 @@
-import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
+import 'package:ecommerce_dashboard/utils/constants/colors.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../controllers/address/address_controller.dart';
 
 class AddressInfo extends StatelessWidget {
-  const   AddressInfo({super.key});
+  const AddressInfo({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,9 +21,6 @@ class AddressInfo extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-
-
               // // Dropdown for Variation Type
               // Expanded(
               //   child: DropdownButton<VariationType>(
@@ -95,55 +92,55 @@ class AddressInfo extends StatelessWidget {
         ),
         // const SizedBox(height: TSizes.spaceBtwSections,),
 
-
-
         TRoundedContainer(
           padding: const EdgeInsets.all(TSizes.defaultSpace),
-          child: Obx(
-                  () { 
-                    
-                    if(addressController.currentAddresses.isEmpty){
-                      return Text('a');
-                    }
-                return ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                separatorBuilder: (_, __) =>
-                const SizedBox(height: TSizes.spaceBtwInputFields,),
-                itemCount: addressController.currentAddresses.length,
-                itemBuilder: (_, index) {
-                  return TRoundedContainer(
-                      backgroundColor: TColors.primaryBackground,
-                      padding: const EdgeInsets.all(TSizes.defaultSpace),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+          child: Obx(() {
+            if (addressController.currentAddresses.isEmpty) {
+              return Text('a');
+            }
+            return ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              separatorBuilder: (_, __) => const SizedBox(
+                height: TSizes.spaceBtwInputFields,
+              ),
+              itemCount: addressController.currentAddresses.length,
+              itemBuilder: (_, index) {
+                return TRoundedContainer(
+                    backgroundColor: TColors.primaryBackground,
+                    padding: const EdgeInsets.all(TSizes.defaultSpace),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                            child: Text(
+                          'Address#$index',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        )),
+                        const SizedBox(
+                          width: TSizes.spaceBtwInputFields,
+                        ),
 
-                          Expanded(child: Text('Address#$index', style: Theme
-                              .of(context)
-                              .textTheme
-                              .bodyMedium,)),
-                          const SizedBox(width: TSizes.spaceBtwInputFields,),
+                        Expanded(
+                            child: Text(
+                          addressController.currentAddresses[index].location ??
+                              '',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        )),
+                        const SizedBox(
+                          width: TSizes.spaceBtwInputFields,
+                        ),
 
-                          Expanded(child: Text(addressController
-                              .currentAddresses[index].location ?? '', style: Theme
-                              .of(context)
-                              .textTheme
-                              .bodyMedium,)),
-                          const SizedBox(width: TSizes.spaceBtwInputFields,),
-
-                          // Expanded(child: Text('90',style: Theme.of(context).textTheme.bodyMedium,)),
-                          // const SizedBox(width: TSizes.spaceBtwInputFields,),
-                          //
-                          // Expanded(child: Text('98(stock)',style: Theme.of(context).textTheme.bodyMedium,)),
-                        ],
-                      )
-                  );
-                },);
-              }
-          ),
+                        // Expanded(child: Text('90',style: Theme.of(context).textTheme.bodyMedium,)),
+                        // const SizedBox(width: TSizes.spaceBtwInputFields,),
+                        //
+                        // Expanded(child: Text('98(stock)',style: Theme.of(context).textTheme.bodyMedium,)),
+                      ],
+                    ));
+              },
+            );
+          }),
         )
-
       ],
     );
   }

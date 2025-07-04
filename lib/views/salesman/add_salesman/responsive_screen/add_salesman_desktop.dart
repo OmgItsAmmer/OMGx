@@ -1,5 +1,5 @@
-import 'package:admin_dashboard_v3/Models/salesman/salesman_model.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/Models/salesman/salesman_model.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../widgets/add_salesman_bottom_bar.dart';

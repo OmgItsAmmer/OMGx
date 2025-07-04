@@ -1,6 +1,6 @@
-import 'package:admin_dashboard_v3/Models/shop/shop_model.dart';
-import 'package:admin_dashboard_v3/repositories/shop/shop_repository.dart';
-import 'package:admin_dashboard_v3/utils/constants/enums.dart';
+import 'package:ecommerce_dashboard/Models/shop/shop_model.dart';
+import 'package:ecommerce_dashboard/repositories/shop/shop_repository.dart';
+import 'package:ecommerce_dashboard/utils/constants/enums.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';

@@ -1,5 +1,5 @@
-import 'package:admin_dashboard_v3/Models/products/product_model.dart';
-import 'package:admin_dashboard_v3/common/widgets/loaders/tloaders.dart';
+import 'package:ecommerce_dashboard/Models/products/product_model.dart';
+import 'package:ecommerce_dashboard/common/widgets/loaders/tloaders.dart';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../main.dart';

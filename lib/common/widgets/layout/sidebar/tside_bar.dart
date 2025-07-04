@@ -1,11 +1,11 @@
-import 'package:admin_dashboard_v3/common/widgets/images/t_circular_image.dart';
-import 'package:admin_dashboard_v3/common/widgets/loaders/strip_loader.dart';
-import 'package:admin_dashboard_v3/common/widgets/shimmers/shimmer.dart';
-import 'package:admin_dashboard_v3/routes/routes.dart';
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
+import 'package:ecommerce_dashboard/common/widgets/images/t_circular_image.dart';
+import 'package:ecommerce_dashboard/common/widgets/loaders/strip_loader.dart';
+import 'package:ecommerce_dashboard/common/widgets/shimmers/shimmer.dart';
+import 'package:ecommerce_dashboard/routes/routes.dart';
+import 'package:ecommerce_dashboard/utils/constants/colors.dart';
 // ignore: unused_import
-import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/utils/constants/image_strings.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';

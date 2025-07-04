@@ -1,6 +1,6 @@
-import 'package:admin_dashboard_v3/common/widgets/layout/headers/header.dart';
-import 'package:admin_dashboard_v3/common/widgets/layout/sidebar/tside_bar.dart';
-import 'package:admin_dashboard_v3/common/widgets/responsive/content_wrapper.dart';
+import 'package:ecommerce_dashboard/common/widgets/layout/headers/header.dart';
+import 'package:ecommerce_dashboard/common/widgets/layout/sidebar/tside_bar.dart';
+import 'package:ecommerce_dashboard/common/widgets/responsive/content_wrapper.dart';
 import 'package:flutter/material.dart';
 
 class TabletLayout extends StatelessWidget {

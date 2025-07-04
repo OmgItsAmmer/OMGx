@@ -1,8 +1,8 @@
-import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
+import 'package:ecommerce_dashboard/utils/device/device_utility.dart';
 import 'package:get/get.dart';
 
 class SideBarController extends GetxController {
-  final activeItem =' '.obs;
+  final activeItem = ' '.obs;
   final hoverItem = ''.obs;
 
   void changeActiveItem(String route) => activeItem.value = route;
@@ -25,7 +25,6 @@ class SideBarController extends GetxController {
     }
 
     Get.toNamed(route);
-
 
     //logout feature
   }

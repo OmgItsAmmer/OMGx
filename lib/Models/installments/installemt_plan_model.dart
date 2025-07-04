@@ -1,4 +1,4 @@
-import 'package:admin_dashboard_v3/Models/installments/installment_payment_model.dart';
+import 'package:ecommerce_dashboard/Models/installments/installment_payment_model.dart';
 
 import 'installment_table_model/installment_table_model.dart';
 

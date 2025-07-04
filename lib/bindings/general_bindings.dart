@@ -1,28 +1,29 @@
-import 'package:admin_dashboard_v3/controllers/account_book/account_book_controller.dart';
-import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
-import 'package:admin_dashboard_v3/controllers/brands/brand_controller.dart';
-import 'package:admin_dashboard_v3/controllers/dashboard/dashboard_controoler.dart';
-import 'package:admin_dashboard_v3/controllers/expenses/expense_controller.dart';
-import 'package:admin_dashboard_v3/controllers/installments/installments_controller.dart';
-import 'package:admin_dashboard_v3/controllers/notification/notification_controller.dart';
-import 'package:admin_dashboard_v3/controllers/product/product_controller.dart';
-import 'package:admin_dashboard_v3/controllers/sales/sales_controller.dart';
-import 'package:admin_dashboard_v3/controllers/salesman/salesman_controller.dart';
-import 'package:admin_dashboard_v3/controllers/search/search_controller.dart';
-import 'package:admin_dashboard_v3/controllers/shop/shop_controller.dart';
-import 'package:admin_dashboard_v3/controllers/user/user_controller.dart';
-import 'package:admin_dashboard_v3/controllers/vendor/vendor_controller.dart';
-import 'package:admin_dashboard_v3/utils/network/supabase_network_manager.dart';
+
 import 'package:get/get.dart';
 
+import '../controllers/account_book/account_book_controller.dart';
+import '../controllers/address/address_controller.dart';
+import '../controllers/brands/brand_controller.dart';
 import '../controllers/category/category_controller.dart';
 import '../controllers/customer/customer_controller.dart';
+import '../controllers/dashboard/dashboard_controoler.dart';
+import '../controllers/expenses/expense_controller.dart';
 import '../controllers/guarantors/guarantor_image_controller.dart';
+import '../controllers/installments/installments_controller.dart';
 import '../controllers/media/media_controller.dart';
+import '../controllers/notification/notification_controller.dart';
 import '../controllers/orders/orders_controller.dart';
+import '../controllers/product/product_controller.dart';
 import '../controllers/purchase/purchase_controller.dart';
 import '../controllers/purchase_sales/purchase_sales_controller.dart';
+import '../controllers/sales/sales_controller.dart';
+import '../controllers/salesman/salesman_controller.dart';
+import '../controllers/search/search_controller.dart';
+import '../controllers/shop/shop_controller.dart';
+import '../controllers/user/user_controller.dart';
+import '../controllers/vendor/vendor_controller.dart';
 import '../network_manager.dart';
+import '../utils/network/supabase_network_manager.dart';
 
 class GeneralBindings extends Bindings {
   @override

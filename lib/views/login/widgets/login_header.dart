@@ -1,4 +1,4 @@
-import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
+import 'package:ecommerce_dashboard/common/widgets/images/t_rounded_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../utils/constants/image_strings.dart';

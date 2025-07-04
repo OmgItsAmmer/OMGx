@@ -1,7 +1,7 @@
-// import 'package:admin_dashboard_v3/common/widgets/chips/choice_chip.dart';
-// import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-// import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
-// import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
+// import 'package:ecommerce_dashboard/common/widgets/chips/choice_chip.dart';
+// import 'package:ecommerce_dashboard/utils/constants/colors.dart';
+// import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
+// import 'package:ecommerce_dashboard/utils/device/device_utility.dart';
 // import 'package:flutter/material.dart';
 // import 'package:iconsax/iconsax.dart';
 // import 'package:vtable/vtable.dart';

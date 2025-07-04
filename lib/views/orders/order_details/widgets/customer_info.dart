@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
-import 'package:admin_dashboard_v3/common/widgets/images/t_rounded_image.dart';
-import 'package:admin_dashboard_v3/common/widgets/shimmers/shimmer.dart';
-import 'package:admin_dashboard_v3/utils/constants/image_strings.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
-import 'package:admin_dashboard_v3/controllers/address/address_controller.dart';
+import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
+import 'package:ecommerce_dashboard/common/widgets/images/t_rounded_image.dart';
+import 'package:ecommerce_dashboard/common/widgets/shimmers/shimmer.dart';
+import 'package:ecommerce_dashboard/utils/constants/image_strings.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/controllers/address/address_controller.dart';
 import 'package:iconsax/iconsax.dart';
 import '../../../../common/widgets/icons/t_circular_icon.dart';
 import '../../../../controllers/customer/customer_controller.dart';
@@ -39,10 +39,9 @@ class UserInfo extends StatelessWidget {
     final AddressController addressController = Get.find<AddressController>();
     final MediaController mediaController = Get.find<MediaController>();
     final CustomerController customerController =
-    Get.find<CustomerController>();
+        Get.find<CustomerController>();
     final SalesmanController salesmanController =
-    Get.find<SalesmanController>();
-
+        Get.find<SalesmanController>();
 
     return TRoundedContainer(
       padding: const EdgeInsets.all(TSizes.defaultSpace),
@@ -56,64 +55,87 @@ class UserInfo extends StatelessWidget {
           const SizedBox(height: TSizes.spaceBtwSections),
           Row(
             children: [
-              (mediaCategory == MediaCategory.customers) ?
-              Obx(
-                    () {
-
-
-                  // Fetch main image from the bucket and show it
-                  return FutureBuilder<String?>(
-                    future: mediaController.fetchMainImage(
-                      customerController.selectedCustomer.value.customerId ?? -1,
-                      MediaCategory.customers.toString().split('.').last,
-                    ),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const TShimmerEffect(width: 100, height: 100); // Show shimmer while loading
-                      } else if (snapshot.hasError) {
-                        return const Text('Error loading image'); // Handle error case
-                      } else if (snapshot.hasData && snapshot.data != null) {
-                        return TRoundedImage(
-                          isNetworkImage: true,
-                          width: 100,
-                          height: 100,
-                          imageurl: snapshot.data!,
+              (mediaCategory == MediaCategory.customers)
+                  ? Obx(
+                      () {
+                        // Fetch main image from the bucket and show it
+                        return FutureBuilder<String?>(
+                          future: mediaController.fetchMainImage(
+                            customerController
+                                    .selectedCustomer.value.customerId ??
+                                -1,
+                            MediaCategory.customers.toString().split('.').last,
+                          ),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const TShimmerEffect(
+                                  width: 100,
+                                  height: 100); // Show shimmer while loading
+                            } else if (snapshot.hasError) {
+                              return const Text(
+                                  'Error loading image'); // Handle error case
+                            } else if (snapshot.hasData &&
+                                snapshot.data != null) {
+                              return TRoundedImage(
+                                isNetworkImage: true,
+                                width: 100,
+                                height: 100,
+                                imageurl: snapshot.data!,
+                              );
+                            } else {
+                              return const TCircularIcon(
+                                icon: Iconsax.image,
+                                width: 100,
+                                height: 100,
+                                backgroundColor: TColors.primaryBackground,
+                              ); // Handle case where no image is available
+                              // Handle case where no image is available
+                            }
+                          },
                         );
-                      } else {
-                        return const TCircularIcon(icon: Iconsax.image,width: 100,height: 100,backgroundColor: TColors.primaryBackground,); // Handle case where no image is available
-                        // Handle case where no image is available
-                      }
-                    },
-                  );
-                },
-              ) : Obx(
-                    () {
-                      // Fetch main image from the bucket and show it
-                  return FutureBuilder<String?>(
-                    future: mediaController.fetchMainImage(
-                      salesmanController.selectedSalesman?.value.salesmanId ?? -1,
-                      MediaCategory.salesman.toString().split('.').last,
-                    ),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const TShimmerEffect(width: 80, height: 80); // Show shimmer while loading
-                      } else if (snapshot.hasError) {
-                        return const Text('Error loading image'); // Handle error case
-                      } else if (snapshot.hasData && snapshot.data != null) {
-                        return TRoundedImage(
-                          isNetworkImage: true,
-                          width: 100,
-                          height: 100,
-                          imageurl: snapshot.data!,
+                      },
+                    )
+                  : Obx(
+                      () {
+                        // Fetch main image from the bucket and show it
+                        return FutureBuilder<String?>(
+                          future: mediaController.fetchMainImage(
+                            salesmanController
+                                    .selectedSalesman?.value.salesmanId ??
+                                -1,
+                            MediaCategory.salesman.toString().split('.').last,
+                          ),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const TShimmerEffect(
+                                  width: 80,
+                                  height: 80); // Show shimmer while loading
+                            } else if (snapshot.hasError) {
+                              return const Text(
+                                  'Error loading image'); // Handle error case
+                            } else if (snapshot.hasData &&
+                                snapshot.data != null) {
+                              return TRoundedImage(
+                                isNetworkImage: true,
+                                width: 100,
+                                height: 100,
+                                imageurl: snapshot.data!,
+                              );
+                            } else {
+                              return const TCircularIcon(
+                                icon: Iconsax.image,
+                                width: 100,
+                                height: 100,
+                                backgroundColor: TColors.primaryBackground,
+                              ); // Handle case where no image is available
+                              // Handle case where no image is available
+                            }
+                          },
                         );
-                      } else {
-                        return const TCircularIcon(icon: Iconsax.image,width: 100,height: 100,backgroundColor: TColors.primaryBackground,); // Handle case where no image is available
-                        // Handle case where no image is available
-                      }
-                    },
-                  );
-                },
-              )  ,
+                      },
+                    ),
               const SizedBox(width: TSizes.spaceBtwItems),
               Expanded(
                 child: Column(
@@ -148,7 +170,9 @@ class UserInfo extends StatelessWidget {
 
                         return Text(
                           addressController.allCustomerAddresses.isNotEmpty
-                              ? addressController.allCustomerAddresses[0].location ?? 'No Address Found'
+                              ? addressController
+                                      .allCustomerAddresses[0].location ??
+                                  'No Address Found'
                               : 'No Address Found',
                           style: Theme.of(context).textTheme.titleSmall,
                         );

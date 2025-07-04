@@ -1,8 +1,8 @@
-import 'package:admin_dashboard_v3/Models/orders/order_item_model.dart';
-import 'package:admin_dashboard_v3/controllers/orders/orders_controller.dart';
-import 'package:admin_dashboard_v3/controllers/table/table_search_controller.dart';
-import 'package:admin_dashboard_v3/utils/device/device_utility.dart';
-import 'package:admin_dashboard_v3/views/orders/all_orders/table/table_source.dart';
+import 'package:ecommerce_dashboard/Models/orders/order_item_model.dart';
+import 'package:ecommerce_dashboard/controllers/orders/orders_controller.dart';
+import 'package:ecommerce_dashboard/controllers/table/table_search_controller.dart';
+import 'package:ecommerce_dashboard/utils/device/device_utility.dart';
+import 'package:ecommerce_dashboard/views/orders/all_orders/table/table_source.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

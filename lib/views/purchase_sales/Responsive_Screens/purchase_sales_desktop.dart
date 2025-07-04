@@ -1,10 +1,10 @@
-import 'package:admin_dashboard_v3/common/widgets/containers/rounded_container.dart';
-import 'package:admin_dashboard_v3/common/widgets/icons/t_circular_icon.dart';
-import 'package:admin_dashboard_v3/controllers/vendor/vendor_controller.dart';
-import 'package:admin_dashboard_v3/utils/constants/colors.dart';
-import 'package:admin_dashboard_v3/utils/constants/sizes.dart';
-import 'package:admin_dashboard_v3/views/sales/widgets/unit_price_quantity.dart';
-import 'package:admin_dashboard_v3/views/sales/widgets/unit_total_price.dart';
+import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
+import 'package:ecommerce_dashboard/common/widgets/icons/t_circular_icon.dart';
+import 'package:ecommerce_dashboard/controllers/vendor/vendor_controller.dart';
+import 'package:ecommerce_dashboard/utils/constants/colors.dart';
+import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/views/sales/widgets/unit_price_quantity.dart';
+import 'package:ecommerce_dashboard/views/sales/widgets/unit_total_price.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
@@ -339,7 +339,7 @@ class PurchaseSalesDesktop extends GetView<PurchaseSalesController> {
                       children: [
                         Expanded(child: PurchaseActionButtons()),
                         Expanded(flex: 2, child: PurchaseSummary()),
-                      ],  
+                      ],
                     ),
                   ),
                 ],
