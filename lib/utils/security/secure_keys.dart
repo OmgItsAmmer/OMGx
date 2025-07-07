@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/foundation.dart';
+import '../../supabase_strings.dart';
 
 /// A utility class for securely storing and retrieving sensitive API keys.
 /// This implementation avoids hardcoding keys directly in the source code.
@@ -20,37 +21,81 @@ class SecureKeys {
   static const String _supabaseUrlKey = 'supabase_url';
   static const String _supabaseAnonKey = 'supabase_anon_key';
   static const String _supabaseServiceKey = 'supabase_service_key';
+  static const String _databaseVersionKey = 'database_version';
 
-  // Supabase project URL
+  // Supabase project URL - now using SupabaseStrings as source of truth
   String get supabaseUrl => const String.fromEnvironment(
         'SUPABASE_URL',
-        defaultValue: 'https://fzaeqvrtuijizjncedgk.supabase.co',
+        defaultValue: SupabaseStrings.projectUrl,
       );
 
   // Supabase anon key - For client-side usage
   String get supabaseAnonKey => const String.fromEnvironment(
         'SUPABASE_ANON_KEY',
-        defaultValue:
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ6YWVxdnJ0dWlqaXpqbmNlZGdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkzODU0MDYsImV4cCI6MjA1NDk2MTQwNn0.GXsF0Xt4x5RvnoLIqOIB52E_5q6XYs87ZkWEMp6U0C4',
+        defaultValue: SupabaseStrings.anonKey,
       );
 
   // Service role key - For admin operations, should NEVER be exposed to client
   String get supabaseServiceKey => const String.fromEnvironment(
         'SUPABASE_SERVICE_KEY',
-        defaultValue:
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ6YWVxdnJ0dWlqaXpqbmNlZGdrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczOTM4NTQwNiwiZXhwIjoyMDU0OTYxNDA2fQ.PSTNwSF7woXBzniC9RlTX1shleVbjm3l1acHig0hbik',
+        defaultValue: SupabaseStrings.servieRoleKey,
       );
+
+  // Method to clear all stored credentials (useful when switching databases)
+  Future<void> clearStoredCredentials() async {
+    try {
+      await _storage.delete(key: _supabaseUrlKey);
+      await _storage.delete(key: _supabaseAnonKey);
+      await _storage.delete(key: _supabaseServiceKey);
+      await _storage.delete(key: _databaseVersionKey);
+
+      if (kDebugMode) {
+        print('Cleared all stored Supabase credentials');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error clearing stored credentials: $e');
+      }
+    }
+  }
+
+  // Check if we need to update stored credentials (database switch detection)
+  Future<bool> _needsCredentialUpdate() async {
+    try {
+      final storedUrl = await _storage.read(key: _supabaseUrlKey);
+      return storedUrl != null && storedUrl != supabaseUrl;
+    } catch (e) {
+      return true; // If we can't read, assume we need to update
+    }
+  }
 
   // Initialize keys - should be called early in app startup
   Future<void> initialize() async {
     try {
-      // Store keys securely if they haven't been stored yet
+      // Check if we're switching to a different database
+      final needsUpdate = await _needsCredentialUpdate();
+      if (needsUpdate) {
+        if (kDebugMode) {
+          print('Database credentials changed, clearing old stored values');
+        }
+        await clearStoredCredentials();
+      }
+
+      // Store keys securely if they haven't been stored yet or were cleared
       await _storeIfEmpty(_supabaseUrlKey, supabaseUrl);
       await _storeIfEmpty(_supabaseAnonKey, supabaseAnonKey);
 
       // Only store service key in debug mode
       if (kDebugMode) {
         await _storeIfEmpty(_supabaseServiceKey, supabaseServiceKey);
+      }
+
+      // Store a version marker to track database changes
+      await _storage.write(key: _databaseVersionKey, value: supabaseUrl);
+
+      if (kDebugMode) {
+        print('Supabase credentials initialized successfully');
+        print('Using URL: $supabaseUrl');
       }
     } catch (e) {
       if (kDebugMode) {
@@ -96,5 +141,27 @@ class SecureKeys {
       return null; // Don't expose in release mode
     }
     return await getSupabaseServiceKey();
+  }
+
+  // Method to test database connection with current credentials
+  Future<bool> testDatabaseConnection() async {
+    try {
+      // This would require importing supabase_flutter, so keeping it simple
+      final url = await getSupabaseUrl();
+      final key = await getSupabaseAnonKey();
+
+      if (kDebugMode) {
+        print('Testing connection to: $url');
+        print('Using anon key: ${key?.substring(0, 20)}...');
+      }
+
+      // Return true if we have valid credentials
+      return url != null && key != null && url.isNotEmpty && key.isNotEmpty;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error testing database connection: $e');
+      }
+      return false;
+    }
   }
 }

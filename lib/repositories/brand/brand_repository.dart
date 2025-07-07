@@ -17,7 +17,7 @@ class BrandRepository {
 
       TLoaders.successSnackBar(
           title: 'Brand Updated',
-          message: '${json['bname']} has been updated.');
+          message: '${json['brandname']} has been updated.');
     } on PostgrestException catch (e) {
       TLoaders.errorSnackBar(title: 'Brand Repo Error', message: e.message);
       rethrow;
@@ -87,7 +87,7 @@ class BrandRepository {
       final response = await Supabase.instance.client
           .from('brands')
           .select('brandID')
-          .eq('bname', brandName)
+          .eq('brandname', brandName)
           .single();
 
       // Check if the response contains the brandID

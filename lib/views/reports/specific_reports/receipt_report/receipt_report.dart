@@ -122,25 +122,25 @@ class _ReceiptReportPageState extends State<ReceiptReportPage> {
           // Get serial number if it's a serialized product
           if (item.variantId != null) {
             try {
-              final variants =
-                  await productController.getAvailableVariants(item.productId);
-              final allVariants = [...variants];
+              // final variants =
+              //     await productController.getAvailableVariants(item.productId);
+              // final allVariants = [...variants];
 
-              // Also check sold variants if needed
-              final soldVariants = await productController
-                  .productVariantsRepository
-                  .fetchProductVariants(item.productId, limit: 100);
-              allVariants.addAll(soldVariants.where((v) => v.isSold));
+              // // Also check sold variants if needed
+              // final soldVariants = await productController
+              //     .productVariantsRepository
+              //     .fetchProductVariants(item.productId, limit: 100);
+              // allVariants.addAll(soldVariants.where((v) => v.isSold));
 
-              final variant = allVariants.firstWhere(
-                (v) => v.variantId == item.variantId,
-                orElse: () => ProductVariantModel.empty(),
-              );
+              // final variant = allVariants.firstWhere(
+              //   (v) => v.variantId == item.variantId,
+              //   orElse: () => ProductVariantModel.empty(),
+              // );
 
-              if (variant.variantId != null &&
-                  variant.serialNumber.isNotEmpty) {
-                variantSerialNumbers[item.variantId!] = variant.serialNumber;
-              }
+              // if (variant.variantId != null &&
+              //     variant.serialNumber.isNotEmpty) {
+              //   variantSerialNumbers[item.variantId!] = variant.serialNumber;
+              // }
             } catch (e) {
               if (kDebugMode) {
                 print('Error getting variant for ${item.variantId}: $e');
@@ -455,10 +455,10 @@ class _ReceiptReportPageState extends State<ReceiptReportPage> {
                         'Phone: ${customer.phoneNumber}',
                         style: const pw.TextStyle(fontSize: 12),
                       ),
-                    if (address.location != null &&
-                        address.location!.isNotEmpty)
+                    if (address.shippingAddress != null &&
+                        address.shippingAddress!.isNotEmpty)
                       pw.Text(
-                        'Address: ${address.location}',
+                        'Address: ${address.shippingAddress}',
                         style: const pw.TextStyle(fontSize: 12),
                       ),
                     if (salesmanName.isNotEmpty)

@@ -218,7 +218,7 @@ class SalesMobile extends GetView<SalesController> {
                   const SizedBox(height: TSizes.spaceBtwItems),
 
                   // Serial Numbers Selector - collapsible if any exist
-                  Obx(() => controller.hasSerialNumbers.value
+                  Obx(() => controller.isVariantBasedProduct.value
                       ? ExpansionTile(
                           childrenPadding: EdgeInsets.zero,
                           tilePadding:
@@ -232,9 +232,9 @@ class SalesMobile extends GetView<SalesController> {
                                   fontWeight: FontWeight.bold,
                                 ),
                           ),
-                          initiallyExpanded: controller.isSerialExpanded.value,
+                          initiallyExpanded: controller.isVariantExpanded.value,
                           onExpansionChanged: (value) {
-                            controller.isSerialExpanded.value = value;
+                            controller.isVariantExpanded.value = value;
                           },
                           children: [
                             Padding(

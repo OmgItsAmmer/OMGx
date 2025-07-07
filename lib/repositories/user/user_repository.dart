@@ -18,7 +18,7 @@ class UserRespository extends GetxController {
   Future<List<UserModel>> fetchUserDetials(String? email) async {
     try {
       if (email == null) throw 'Email cannot be null';
-      final data = await Supabase.instance.client
+      final data = await supabase
           .from('users')
           .select()
           .eq('email', email);

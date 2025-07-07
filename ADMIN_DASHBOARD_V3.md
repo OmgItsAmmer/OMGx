@@ -36,6 +36,9 @@ The application now uses secure storage for sensitive API keys:
 - Created `SecureKeys` class that manages all sensitive keys
 - Implemented environment variable fallback support
 - Service key is only available in debug mode
+- **Database Switching Support**: Automatic detection and handling of database credential changes
+- **Centralized Configuration**: All credentials sourced from `SupabaseStrings` class for consistency
+- **Automatic Cleanup**: Old stored credentials are cleared when switching databases
 
 ### Android Release Mode Configuration
 
@@ -59,6 +62,75 @@ The application now uses secure storage for sensitive API keys:
 2. Admin operations that require service key will fail gracefully in release builds with appropriate messages
 3. All sensitive operations use proper error handling
 4. Network status is monitored and displayed to users when relevant
+
+### Database Configuration
+
+The application supports easy database switching through centralized configuration:
+
+#### Configuration Files:
+- `lib/supabase_strings.dart`: Contains all Supabase database credentials
+- `lib/utils/security/secure_keys.dart`: Manages secure storage and retrieval of credentials
+
+#### Switching Databases:
+1. Update credentials in `supabase_strings.dart`
+2. Restart the application
+3. The system automatically detects changes and clears old stored credentials
+4. New credentials are securely stored and used for all database operations
+
+#### Features:
+- **Automatic Detection**: System detects when database URL changes
+- **Secure Storage**: Credentials are encrypted and stored securely on device
+- **Environment Support**: Supports environment variables for different deployment environments
+- **Debug Logging**: Comprehensive logging in debug mode for troubleshooting
+- **Connection Testing**: Built-in methods to verify database connectivity
+
+## Database Schema
+
+### Product Variant System Tables
+
+#### Product Variants Table
+```sql
+CREATE TABLE product_variants (
+    variant_id BIGSERIAL PRIMARY KEY,
+    product_id BIGINT NOT NULL REFERENCES products(product_id),
+    variant_name VARCHAR(255) NOT NULL,
+    sku VARCHAR(100),
+    is_visible BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+#### Variant Batches Table
+```sql
+CREATE TABLE variant_batches (
+    id BIGSERIAL PRIMARY KEY,
+    variant_id BIGINT NOT NULL REFERENCES product_variants(variant_id),
+    batch_id VARCHAR(255) NOT NULL UNIQUE,
+    quantity INTEGER NOT NULL,
+    available_quantity INTEGER NOT NULL,
+    buy_price DECIMAL(15, 2) NOT NULL,
+    sell_price DECIMAL(15, 2) NOT NULL,
+    vendor VARCHAR(255),
+    purchase_date TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+#### Updated Products Table
+The products table maintains overall stock quantities calculated from variant batches:
+```sql
+-- Products table now has stock_quantity auto-calculated from variant_batches
+-- has_serial_numbers field is deprecated (kept for compatibility)
+```
+
+### Key Features:
+- **Batch Tracking**: Each purchase creates new batches with specific buy/sell prices
+- **FIFO/LIFO Support**: Configurable inventory management strategies
+- **Vendor Tracking**: Each batch tracks the supplier information
+- **Price History**: Historical buy/sell prices maintained per batch
+- **Automatic Stock Updates**: Product stock quantities calculated from available batches
 
 ## Platform Compatibility
 
@@ -177,27 +249,35 @@ The application includes a comprehensive purchase management system that handles
 - **Payment Tracking**: Partial payment support with remaining balance calculation
 - **Status Management**: Purchase status tracking (pending, received, cancelled)
 
-#### Serialized Product Workflow:
-1. **Product Selection**: When a serialized product is selected from the product search bar
-2. **Popup Display**: An animated popup appears showing all available serial numbers
-3. **Variant Selection**: User selects a specific serial number with purchase and selling prices displayed
-4. **Price Population**: Unit price and total price are automatically populated from the selected variant
-5. **Quantity Locked**: Quantity is automatically set to 1 for serialized products
-6. **Visual Indicator**: A visual indicator shows the selected serialized product with variant details
-7. **Stock Integration**: Selected variants are properly tracked and removed from available inventory
+#### Product Variant System:
+The application now uses a comprehensive variant system instead of serial numbers:
 
-#### Purchase Components:
-- **PurchaseSalesController**: Main controller handling purchase logic and serialized product popup
-- **PurchaseProductSearchBar**: Enhanced product search with serialized product detection
-- **Serialized Product Popup**: Animated dialog for variant selection with visual feedback
-- **Purchase Table**: Displays purchase items with support for both regular and serialized products
-- **Visual Indicators**: Clear indicators when serialized products are selected
-- **Stock Management**: Automatic inventory updates for serialized products
+1. **Product Variants**: Products can have multiple variants (e.g., Pepsi 1L, 1.5L, 2.25L)
+2. **Variant Batches**: Each variant can have multiple batches with different purchase/selling prices
+3. **Stock Management**: Stock is managed through variant batches created during purchases
+4. **Batch Tracking**: Each batch tracks buy price, sell price, vendor, purchase date, and available quantity
 
-#### Backend Integration:
-- **Variant Repository**: Handles marking variants as available/sold
-- **Purchase Repository**: Manages purchase creation and stock updates
-- **Product Controller**: Integrates with variant management for stock tracking
+#### Variant Management Workflow:
+1. **Create Product**: Standard product creation with basic information
+2. **Add Variants**: Add different variants (sizes, colors, configurations) to the product
+3. **Purchase Integration**: When purchases are received, variant batches are automatically created
+4. **Stock Tracking**: Available quantities are tracked per batch with FIFO/LIFO options
+5. **Sales Integration**: Sales reduce available quantities from specific batches
+6. **Inventory Reports**: Real-time inventory tracking across all variants and batches
+
+#### Purchase Integration:
+- **Automatic Batch Creation**: When purchases are marked as "received", variant batches are created
+- **Price Tracking**: Each batch maintains separate buy and sell prices
+- **Vendor Information**: Batches track which vendor supplied the stock
+- **Quantity Management**: Available quantities are updated based on sales
+- **Stock Synchronization**: Product stock quantities are automatically calculated from variant batches
+
+#### Components:
+- **ProductController**: Enhanced with variant and batch management
+- **VariantBatchesRepository**: New repository for managing variant batches
+- **ProductVariantsWidget**: UI for managing product variants
+- **Purchase Integration**: Automatic variant batch creation during purchase processing
+- **Stock Management**: Real-time stock updates based on variant batch availability
 - **Animation Support**: Smooth animations for popup dialogs and state transitions
 
 #### Database Schema Updates:

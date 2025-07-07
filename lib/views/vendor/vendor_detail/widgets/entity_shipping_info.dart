@@ -87,15 +87,15 @@ class EntityShippingInfo<T> extends StatelessWidget {
     switch (entityType) {
       case EntityType.customer:
         return controller.allCustomerAddresses.isNotEmpty
-            ? controller.allCustomerAddresses[0].location ?? ''
+            ? controller.allCustomerAddresses[0].shippingAddress ?? ''
             : 'No address';
       case EntityType.salesman:
         return controller.allSalesmanAddresses.isNotEmpty
-            ? controller.allSalesmanAddresses[0].location ?? ''
+            ? controller.allSalesmanAddresses[0].shippingAddress ?? ''
             : 'No address';
       case EntityType.vendor:
         return controller.allVendorAddresses.isNotEmpty
-            ? controller.allVendorAddresses[0].location ?? ''
+            ? controller.allVendorAddresses[0].shippingAddress ?? ''
             : 'No address';
       case EntityType.user:
         return 'No address';

@@ -10,9 +10,9 @@ import 'package:ecommerce_dashboard/utils/constants/colors.dart';
 import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconsax/iconsax.dart';
+
 import '../../../../common/widgets/dropdown_search/enhanced_autocomplete.dart';
-import '../../../../utils/constants/enums.dart';
+
 
 class ProductBrandcCategory extends StatefulWidget {
   const ProductBrandcCategory({super.key});
@@ -181,7 +181,7 @@ class _ProductBrandcCategoryState extends State<ProductBrandcCategory> {
                     labelText: 'Select Brand',
                     hintText: 'Choose a brand',
                     options: brandController.allBrands
-                        .map((e) => e.bname)
+                        .map((e) => e.brandname)
                         .whereType<String>()
                         .toList(),
                     externalController:

@@ -91,7 +91,11 @@ class VendorController extends GetxController {
       await vendorRepository.updateVendor(json);
       await mediaController.imageAssigner(
           id, MediaCategory.shop.toString().split('.').last, true);
-      await AddressController.instance.saveAddress(id, EntityType.vendor);
+
+
+      final addressModel = AddressModel(shippingAddress: address.text, vendorId: vendorId , postalCode: cnic.text , city: address.text , country: address.text , fullName: '${firstName.text} ${lastName.text}' , phoneNumber: phoneNumber.text , userId: null , salesmanId: null , customerId: null );
+
+      await AddressController.instance.saveAddress(addressModel, EntityType.vendor);
       cleanVendorDetails();
       TLoaders.successSnackBar(
         title: 'Vendor Updated!',
@@ -126,7 +130,8 @@ class VendorController extends GetxController {
       final newId = await vendorRepository.insertVendorInTable(json);
       await mediaController.imageAssigner(
           newId, MediaCategory.shop.toString().split('.').last, true);
-      await AddressController.instance.saveAddress(newId, EntityType.vendor);
+      final addressModel = AddressModel(shippingAddress: address.text, vendorId: newId , postalCode: cnic.text , city: address.text , country: address.text , fullName: '${firstName.text} ${lastName.text}' , phoneNumber: phoneNumber.text , userId: null , salesmanId: null , customerId: null );
+      await AddressController.instance.saveAddress(addressModel, EntityType.vendor);
 
       // Locally adding to table
       allVendors.add(vendor);
@@ -175,7 +180,7 @@ class VendorController extends GetxController {
       );
 
       // Set the address text if a match is found
-      AddressController.instance.address.text = matchingAddress.location ??
+      AddressController.instance.address.text = matchingAddress.shippingAddress ??
           ''; // Assuming `location` is the property holding the address as a String
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());

@@ -231,10 +231,10 @@ class PurchaseItems extends StatelessWidget {
   // Helper method to get the product display name with serial number if available
   Future<String> _getProductDisplayName(ProductModel product,
       PurchaseItemModel item, ProductVariantsRepository repository) async {
-    String displayName = product.name ?? 'Not Found';
+    String displayName = product.name;
 
     // Check if this is a serialized product and has a variant ID
-    if (product.hasSerialNumbers && item.variantId != null) {
+    if ( item.variantId != null) {
       try {
         // Fetch the variant information
         final variants =
@@ -242,9 +242,9 @@ class PurchaseItems extends StatelessWidget {
         final variant =
             variants.firstWhereOrNull((v) => v.variantId == item.variantId);
 
-        if (variant != null && variant.serialNumber.isNotEmpty) {
+        if (variant != null && variant.variantName.isNotEmpty) {
           // Append the serial number to the product name
-          displayName = '$displayName (${variant.serialNumber})';
+          displayName = '$displayName (${variant.variantName})';
         }
       } catch (e) {
         if (kDebugMode) {

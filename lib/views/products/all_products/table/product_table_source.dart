@@ -73,7 +73,7 @@ class ProductRow extends DataTableSource {
             brandController.allBrands
                     .firstWhereOrNull(
                         (element) => element.brandID == product.brandID)
-                    ?.bname
+                    ?.brandname
                     ?.toString() ??
                 '',
             style: Theme.of(Get.context!)

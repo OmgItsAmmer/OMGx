@@ -51,7 +51,7 @@ class AddressController extends GetxController {
           allCustomerAddresses.assignAll(customerAddress);
 
           final locations = allCustomerAddresses
-              .map((address) => address.location)
+              .map((address) => address.shippingAddress)
               .whereType<String>()
               .toList();
           allCustomerAddressesLocation.assignAll(locations);
@@ -69,7 +69,7 @@ class AddressController extends GetxController {
           allVendorAddresses.assignAll(vendorAddress);
 
           final locations = allVendorAddresses
-              .map((address) => address.location)
+              .map((address) => address.shippingAddress)
               .whereType<String>()
               .toList();
           allVendorAddressesLocation.assignAll(locations);
@@ -88,32 +88,32 @@ class AddressController extends GetxController {
     }
   }
 
-  Future<void> saveAddress(int entityId, EntityType entityType) async {
+  Future<void> saveAddress(AddressModel addressModel, EntityType entityType ) async {
     try {
-      //   final entityName = entityType.toString().split('.').last;
-      AddressModel addressModel = AddressModel.empty();
+    
+    
 
       switch (entityType) {
         case EntityType.customer:
           addressModel =
-              AddressModel(location: address.text, customerId: entityId);
+              AddressModel(shippingAddress: address.text, customerId: addressModel.customerId , postalCode: addressModel.postalCode , city: addressModel.city , country: addressModel.country , fullName: addressModel.fullName , phoneNumber: addressModel.phoneNumber , userId: addressModel.userId , vendorId: addressModel.vendorId , salesmanId: addressModel.salesmanId );
           break;
 
         case EntityType.salesman:
           addressModel =
-              AddressModel(location: address.text, salesmanId: entityId);
+              AddressModel(shippingAddress: address.text, salesmanId: addressModel.salesmanId , postalCode: addressModel.postalCode , city: addressModel.city , country: addressModel.country , fullName: addressModel.fullName , phoneNumber: addressModel.phoneNumber , userId: addressModel.userId , vendorId: addressModel.vendorId , customerId: addressModel.customerId );
           break;
 
         case EntityType.vendor:
           addressModel =
-              AddressModel(location: address.text, vendorId: entityId);
+              AddressModel(shippingAddress: address.text, vendorId: addressModel.vendorId , postalCode: addressModel.postalCode , city: addressModel.city , country: addressModel.country , fullName: addressModel.fullName , phoneNumber: addressModel.phoneNumber , userId: addressModel.userId , salesmanId: addressModel.salesmanId , customerId: addressModel.customerId );
           break;
 
         case EntityType.user:
           break;
       }
 
-      final json = addressModel.toJson(isUpdate: true);
+      final json = addressModel.toJson(isInsert: true);
       await addressRepository.updateAddressTable(json);
     } catch (e) {
       if (kDebugMode) {

@@ -3,55 +3,37 @@ import 'package:flutter/foundation.dart';
 class ProductVariantModel {
   final int? variantId;
   final int productId;
-  final String serialNumber;
-  final double purchasePrice;
-  final double sellingPrice;
-  final bool isSold;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
+  final String variantName;
+  final bool isVisible;
+  final String? sku;
 
   ProductVariantModel({
     this.variantId,
     required this.productId,
-    required this.serialNumber,
-    required this.purchasePrice,
-    required this.sellingPrice,
-    this.isSold = false,
-    this.createdAt,
-    this.updatedAt,
+    this.variantName = '',
+    this.isVisible = false,
+    this.sku,
   });
 
   factory ProductVariantModel.fromJson(Map<String, dynamic> json) {
     return ProductVariantModel(
       variantId: json['variant_id'],
       productId: json['product_id'],
-      serialNumber: json['serial_number'] ?? '',
-      purchasePrice: (json['purchase_price'] is String)
-          ? double.tryParse(json['purchase_price']) ?? 0.0
-          : (json['purchase_price'] as num?)?.toDouble() ?? 0.0,
-      sellingPrice: (json['selling_price'] is String)
-          ? double.tryParse(json['selling_price']) ?? 0.0
-          : (json['selling_price'] as num?)?.toDouble() ?? 0.0,
-      isSold: json['is_sold'] ?? false,
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'])
-          : null,
-      updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'])
-          : null,
+      variantName: json['variant_name'] ?? '',
+      isVisible: json['isVisible'] ?? false,
+      sku: json['sku'],
     );
   }
 
-  Map<String, dynamic> toJson({bool isUpdate = false}) {
+  Map<String, dynamic> toJson({bool isInsert = false}) {
     final Map<String, dynamic> data = {
       'product_id': productId,
-      'serial_number': serialNumber,
-      'purchase_price': purchasePrice,
-      'selling_price': sellingPrice,
-      'is_sold': isSold,
+      'variant_name': variantName,
+      'isVisible': isVisible,
+      'sku': sku,
     };
 
-    if (variantId != null && isUpdate) {
+    if (!isInsert) {
       data['variant_id'] = variantId;
     }
 
@@ -61,22 +43,16 @@ class ProductVariantModel {
   ProductVariantModel copyWith({
     int? variantId,
     int? productId,
-    String? serialNumber,
-    double? purchasePrice,
-    double? sellingPrice,
-    bool? isSold,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    String? variantName,
+    bool? isVisible,
+    String? sku,
   }) {
     return ProductVariantModel(
       variantId: variantId ?? this.variantId,
       productId: productId ?? this.productId,
-      serialNumber: serialNumber ?? this.serialNumber,
-      purchasePrice: purchasePrice ?? this.purchasePrice,
-      sellingPrice: sellingPrice ?? this.sellingPrice,
-      isSold: isSold ?? this.isSold,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
+      variantName: variantName ?? this.variantName,
+      isVisible: isVisible ?? this.isVisible,
+      sku: sku ?? this.sku,
     );
   }
 
@@ -84,15 +60,14 @@ class ProductVariantModel {
     return ProductVariantModel(
       variantId: null,
       productId: -1,
-      serialNumber: '',
-      purchasePrice: 0.0,
-      sellingPrice: 0.0,
-      isSold: false,
+      variantName: '',
+      isVisible: false,
+      sku: null,
     );
   }
 
   @override
   String toString() {
-    return 'ProductVariantModel(variantId: $variantId, productId: $productId, serialNumber: $serialNumber, purchasePrice: $purchasePrice, sellingPrice: $sellingPrice, isSold: $isSold)';
+    return 'ProductVariantModel(variantId: $variantId, productId: $productId, variantName: $variantName, isVisible: $isVisible, sku: $sku)';
   }
 }

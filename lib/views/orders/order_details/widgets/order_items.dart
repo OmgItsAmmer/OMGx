@@ -1,4 +1,5 @@
 import 'package:ecommerce_dashboard/controllers/product/product_controller.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:ecommerce_dashboard/common/widgets/images/t_rounded_image.dart';
@@ -315,10 +316,10 @@ class OrderItems extends StatelessWidget {
   // Helper method to get the product display name with serial number if available
   Future<String> _getProductDisplayName(ProductModel product,
       OrderItemModel item, ProductVariantsRepository repository) async {
-    String displayName = product.name ?? 'Not Found';
+    String displayName = product.name;
 
     // Check if this is a serialized product and has a variant ID
-    if (product.hasSerialNumbers && item.variantId != null) {
+    if ( item.variantId != null) {
       try {
         // Fetch the variant information
         final variants =
@@ -326,12 +327,14 @@ class OrderItems extends StatelessWidget {
         final variant =
             variants.firstWhereOrNull((v) => v.variantId == item.variantId);
 
-        if (variant != null && variant.serialNumber.isNotEmpty) {
+        if (variant != null && variant.variantName.isNotEmpty) {
           // Append the serial number to the product name
-          displayName = '$displayName (${variant.serialNumber})';
+          displayName = '$displayName (${variant.variantName})';
         }
       } catch (e) {
-        print('Error fetching variant: $e');
+        if (kDebugMode) {
+          print('Error fetching variant: $e');
+        }
       }
     }
 

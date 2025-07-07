@@ -110,7 +110,7 @@ class AllBrandsMobileScreen extends StatelessWidget {
               ]; // Create a copy
               if (searchTerm.isNotEmpty) {
                 filteredBrands = brandController.allBrands.where((brand) {
-                  final brandName = brand.bname?.toLowerCase() ?? '';
+                  final brandName = brand.brandname?.toLowerCase() ?? '';
                   return brandName.contains(searchTerm);
                 }).toList();
               }
@@ -147,7 +147,7 @@ class AllBrandsMobileScreen extends StatelessWidget {
                         builder: (context) => AlertDialog(
                           title: const Text('Confirm Delete'),
                           content: Text(
-                              'Are you sure you want to delete ${brand.bname}?'),
+                              'Are you sure you want to delete ${brand.brandname}?'),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.of(context).pop(false),
@@ -226,7 +226,7 @@ class BrandCard extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: Text(
-                                  brand.bname ?? 'Unnamed Brand',
+                                  brand.brandname ?? 'Unnamed Brand',
                                   style:
                                       Theme.of(context).textTheme.titleMedium,
                                   maxLines: 1,
@@ -252,7 +252,7 @@ class BrandCard extends StatelessWidget {
                           ),
                           const SizedBox(height: TSizes.xs),
                           Text(
-                            '${brand.productsCount ?? 0} Products',
+                            '${brand.productCount} Products',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ],

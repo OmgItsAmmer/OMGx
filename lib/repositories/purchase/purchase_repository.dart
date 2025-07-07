@@ -140,16 +140,15 @@ class PurchaseRepository {
 
   Future<void> addStockQuantity(PurchaseItemModel item) async {
     try {
-      final productController = Get.find<ProductController>();
-      final product = productController.allProducts.firstWhere(
-          (p) => p.productId == item.productId,
-          orElse: () => ProductModel.empty());
-
-      if (product.hasSerialNumbers && item.variantId != null) {
+      // Check if this is a variant-based item (new system)
+      if (item.variantId != null) {
+        // For variant-based products, update the variant batch availability
         final variantsRepository = Get.find<ProductVariantsRepository>();
         await variantsRepository.markVariantAsAvailable(item.variantId!);
 
+        // Update the product's overall stock quantity
         try {
+          final productController = Get.find<ProductController>();
           final productIndex = productController.allProducts
               .indexWhere((p) => p.productId == item.productId);
           if (productIndex != -1) {
@@ -166,7 +165,7 @@ class PurchaseRepository {
           if (kDebugMode) print('Local update error: $e');
         }
       } else {
-        // For regular products
+        // For regular products (non-variant)
         final response = await supabase
             .from('products')
             .select('stock_quantity')
@@ -186,6 +185,7 @@ class PurchaseRepository {
 
         // Update local product list
         try {
+          final productController = Get.find<ProductController>();
           final productIndex = productController.allProducts
               .indexWhere((p) => p.productId == item.productId);
           if (productIndex != -1) {
@@ -209,19 +209,15 @@ class PurchaseRepository {
 
   Future<void> subtractStockQuantity(PurchaseItemModel item) async {
     try {
-      // Fetch the product to determine if it has serial numbers
-      final productController = Get.find<ProductController>();
-      final product = productController.allProducts.firstWhere(
-          (p) => p.productId == item.productId,
-          orElse: () => ProductModel.empty());
-
-      if (product.hasSerialNumbers && item.variantId != null) {
-        // For serialized products, update the variant's sold status
+      // Check if this is a variant-based item (new system)
+      if (item.variantId != null) {
+        // For variant-based products, update the variant batch as sold
         final variantsRepository = Get.find<ProductVariantsRepository>();
         await variantsRepository.markVariantAsSold(item.variantId!);
 
         // Update local product list in ProductController
         try {
+          final productController = Get.find<ProductController>();
           final productIndex = productController.allProducts
               .indexWhere((p) => p.productId == item.productId);
           if (productIndex != -1) {
@@ -241,7 +237,7 @@ class PurchaseRepository {
           }
         }
       } else {
-        // For regular products, update the quantity in the database
+        // For regular products (non-variant), update the quantity in the database
         // Step 1: Fetch the current stock quantity
         final response = await supabase
             .from('products')
@@ -264,6 +260,7 @@ class PurchaseRepository {
         } else {
           // Update local product list in ProductController
           try {
+            final productController = Get.find<ProductController>();
             final productIndex = productController.allProducts
                 .indexWhere((p) => p.productId == item.productId);
             if (productIndex != -1) {
@@ -338,7 +335,32 @@ class PurchaseRepository {
           return false;
         }
 
-        if (!product.hasSerialNumbers) {
+        // Check if this is a variant-based item
+        if (item.variantId != null) {
+          // For variant-based products, check if the specific variant is available (not sold)
+          final response = await supabase
+              .from('product_variants')
+              .select('is_sold')
+              .eq('variant_id', item.variantId!)
+              .maybeSingle();
+
+          if (response == null) {
+            if (kDebugMode) {
+              print('Variant ${item.variantId} not found');
+            }
+            return false;
+          }
+
+          final bool isSold = response['is_sold'] as bool? ?? true;
+
+          if (isSold) {
+            if (kDebugMode) {
+              print(
+                  'Variant ${item.variantId} is already sold and cannot be cancelled');
+            }
+            return false;
+          }
+        } else {
           // For regular products, check if there's enough quantity to subtract
           final response = await supabase
               .from('products')

@@ -56,10 +56,10 @@ class SalesController extends GetxController {
 
   // UI expansion states
   var isProductEntryExpanded = true.obs;
-  var isSerialExpanded = true.obs;
+  var isVariantExpanded = true.obs;
 
-  // Indicator for whether there are serial numbers to display
-  RxBool hasSerialNumbers = false.obs;
+  // Indicator for whether there are variants to display
+  RxBool hasVariants = false.obs;
 
   // Loading state for fetching products
   final isLoading = false.obs;
@@ -87,8 +87,8 @@ class SalesController extends GetxController {
   // Toggle for merging products with same ID and unit
   RxBool mergeIdenticalProducts = true.obs;
 
-  // Toggle for serialized product
-  RxBool isSerialziedProduct = false.obs;
+  // Toggle for variant-based product
+  RxBool isVariantBasedProduct = false.obs;
 
   // Unit conversion factors (relative to base unit)
   final Map<UnitType, double> unitConversionFactors = {
@@ -273,13 +273,13 @@ class SalesController extends GetxController {
         return;
       }
 
-      // For serialized products handling
-      if (product.hasSerialNumbers) {
-        // VALIDATION CHECK 4: Serial number selected
+      // For variant-based products handling
+      if (availableVariants.isNotEmpty) {
+        // VALIDATION CHECK 4: Variant selected
         if (selectedVariantId.value == -1) {
           TLoaders.errorSnackBar(
-            title: "Select Serial Number",
-            message: 'Please select a specific serial number for this product',
+            title: "Select Variant",
+            message: 'Please select a specific variant for this product',
           );
           return;
         }
@@ -298,25 +298,31 @@ class SalesController extends GetxController {
           return;
         }
 
-        // VALIDATION CHECK 6: Valid price
+        // VALIDATION CHECK 6: Valid price - Get pricing from variant batches
+        final productController = Get.find<ProductController>();
+        final batches = await productController
+            .getAvailableVariantBatches(selectedProductId.value);
+        final variantBatch = batches
+            .where((batch) => batch.variantId == variant.variantId)
+            .firstOrNull;
 
-        if (variant.sellingPrice <= 0) {
+        if (variantBatch == null || variantBatch.sellPrice <= 0) {
           TLoaders.errorSnackBar(
             title: "Invalid Price",
-            message: 'The selected product has an invalid selling price',
+            message: 'The selected variant has no valid pricing information',
           );
           return;
         }
 
-        // For serialized products, create a sale with quantity = 1
+        // For variant-based products, create a sale with quantity = 1
         final sale = SaleModel(
           productId: selectedProductId.value,
           name: dropdownController.text.trim(),
           salePrice: unitPrice.value.text.trim(),
           unit: selectedUnit.toString().trim(),
-          quantity: "1", // Always 1 for serialized products
+          quantity: "1", // Always 1 for variant-based products
           totalPrice: totalPrice.value.text.trim(),
-          buyPrice: variant.purchasePrice,
+          buyPrice: variantBatch.buyPrice,
           variantId: variant.variantId,
         );
         // Update sub total (product prices only)
@@ -324,7 +330,7 @@ class SalesController extends GetxController {
             double.tryParse(totalPrice.value.text.trim()) ?? 0.0;
         subTotal.value += newTotalPrice;
         originalSubTotal.value += newTotalPrice;
-        buyingPriceTotal += variant.purchasePrice;
+        buyingPriceTotal += variantBatch.buyPrice;
 
         // Calculate net total including fees
         calculateNetTotal();
@@ -343,7 +349,7 @@ class SalesController extends GetxController {
         // Show success feedback
         TLoaders.successSnackBar(
           title: "Product Added",
-          message: "Serial number ${variant.serialNumber} added to sale",
+          message: "Variant ${variant.variantName} added to sale",
         );
       } else {
         // For regular products
@@ -630,7 +636,7 @@ class SalesController extends GetxController {
     unit.clear();
     quantity.text = '';
     totalPrice.value.clear();
-    isSerialziedProduct.value = false;
+    isVariantBasedProduct.value = false;
   }
 
   Future<int> checkOut() async {
@@ -1009,7 +1015,7 @@ class SalesController extends GetxController {
   // Reset form fields only - used internally
   void resetFields() {
     try {
-      isSerialziedProduct.value = false;
+      isVariantBasedProduct.value = false;
 
       // Clear form controllers - ensure direct text assignment
       unitPrice.value.text = '';
@@ -1378,12 +1384,39 @@ class SalesController extends GetxController {
   void selectVariant(ProductVariantModel variant) {
     selectedVariantId.value = variant.variantId ?? -1;
 
-    // Update the unit price and total price fields with the variant's selling price
+    // For the new system, we need to get pricing from variant batches
     if (variant.variantId != null) {
-      unitPrice.value.text = variant.sellingPrice.toString();
-      quantity.text = "1"; // For serialized products, quantity is always 1
-      totalPrice.value.text = variant.sellingPrice.toString();
-      buyingPriceIndividual = variant.purchasePrice;
+      // Set basic info from variant
+      unitPrice.value.text = "0.00"; // Will be updated when we get batch info
+      quantity.text = "1"; // For variants, quantity is always 1
+      totalPrice.value.text = "0.00"; // Will be updated when we get batch info
+
+      // Get batch information for pricing
+      _loadVariantBatchInfo(variant.variantId!);
+    }
+  }
+
+  // Helper method to load batch info for pricing
+  Future<void> _loadVariantBatchInfo(int variantId) async {
+    try {
+      final productController = Get.find<ProductController>();
+      final batches = await productController
+          .getAvailableVariantBatches(selectedProductId.value);
+
+      // Find the batch for this variant
+      final variantBatch =
+          batches.where((batch) => batch.variantId == variantId).firstOrNull;
+
+      if (variantBatch != null) {
+        // Use sell price for selling and buy price for internal calculations
+        unitPrice.value.text = variantBatch.sellPrice.toString();
+        totalPrice.value.text = variantBatch.sellPrice.toString();
+        buyingPriceIndividual = variantBatch.buyPrice;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error loading variant batch info: $e');
+      }
     }
   }
 
@@ -1405,17 +1438,17 @@ class SalesController extends GetxController {
         orElse: () => ProductModel.empty(),
       );
 
-      // Only load variants for serialized products
-      if (!product.hasSerialNumbers) return;
+      // Load variants using the correct method
+      await productController.fetchProductVariants(productId);
 
-      // Load available variants
-      final variants = await productController.getAvailableVariants(productId);
+      // Get variants from the controller
+      final variants = productController.productVariants;
       availableVariants.assignAll(variants);
 
       // If variants are available, update the UI
       if (variants.isNotEmpty) {
         unitPrice.value.text = "";
-        quantity.text = "1"; // For serialized products, quantity is always 1
+        quantity.text = "1"; // For variants, quantity is always 1
         totalPrice.value.text = "";
       }
     } catch (e) {
@@ -1562,7 +1595,7 @@ class SalesController extends GetxController {
       // Select the first address in the address controller
       addressController.selectedCustomerAddress.value = addressController
           .allCustomerAddresses
-          .firstWhere((address) => address.location == firstAddress);
+          .firstWhere((address) => address.shippingAddress == firstAddress);
       selectedAddressId =
           addressController.selectedCustomerAddress.value.addressId;
     }

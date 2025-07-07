@@ -51,7 +51,7 @@ class CustomerShippingInfo extends StatelessWidget {
           ),
           TProfilemenu(
             title: "Address",
-            value: addressController.allCustomerAddresses[0].location ?? '',
+            value: addressController.allCustomerAddresses[0].shippingAddress ?? '',
             onPressed: () {},
             isTap: false,
           ),

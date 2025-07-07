@@ -123,7 +123,7 @@ class AddressInfo extends StatelessWidget {
 
                         Expanded(
                             child: Text(
-                          addressController.currentAddresses[index].location ??
+                          addressController.currentAddresses[index].shippingAddress ??
                               '',
                           style: Theme.of(context).textTheme.bodyMedium,
                         )),

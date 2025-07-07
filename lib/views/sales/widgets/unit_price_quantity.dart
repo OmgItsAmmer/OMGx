@@ -66,7 +66,7 @@ class UnitPriceQuantity extends StatelessWidget {
                   onChanged: (value) {
                     salesController.calculateTotalPrice();
                   },
-                  readOnly: salesController.isSerialziedProduct.value,
+            //      readOnly: salesController.isSerialziedProduct.value,
                   validator: (value) =>
                       TValidator.validateEmptyText('quantity ', value),
                   controller: salesController.quantity,

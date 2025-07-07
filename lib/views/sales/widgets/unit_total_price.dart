@@ -34,10 +34,7 @@ class UnitTotalPrice extends StatelessWidget {
                           // Standard units dropdown
                           DropdownButtonHideUnderline(
                             child: DropdownButton<UnitType>(
-                              onChanged: salesController
-                                      .isSerialziedProduct.value
-                                  ? null
-                                  : (value) {
+                              onChanged:(value) {
                                       if (value != null) {
                                         salesController.selectedUnit.value =
                                             value;

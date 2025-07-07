@@ -287,7 +287,7 @@ class PurchaseSalesDesktop extends GetView<PurchaseSalesController> {
                                             .firstOrNull;
                                         return Text(
                                           selectedVariant != null
-                                              ? 'Serial: ${selectedVariant.serialNumber} | Price: Rs ${selectedVariant.purchasePrice.toStringAsFixed(2)}'
+                                              ? 'Variant: ${selectedVariant.variantName} | SKU: ${selectedVariant.sku ?? "N/A"}'
                                               : 'Variant information loading...',
                                           style: const TextStyle(
                                             color: TColors.darkGrey,

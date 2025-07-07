@@ -42,12 +42,15 @@ class PurchaseProductSearchBar extends StatelessWidget {
               .clearPurchaseVariants(); // Clear purchase variants
         },
         onSelected: (ProductModel selectedProduct) async {
-          final isSerializedProduct = selectedProduct.hasSerialNumbers;
-          purchaseSalesController.isSerializedProduct.value =
-              isSerializedProduct;
+          // Check if this product has variants by loading them
+          await productController
+              .fetchProductVariants(selectedProduct.productId ?? -1);
+          final hasVariants = productController.productVariants.isNotEmpty;
 
-          if (isSerializedProduct) {
-            // For serialized products - clear any existing variants and prepare for variant manager
+          purchaseSalesController.isSerializedProduct.value = hasVariants;
+
+          if (hasVariants) {
+            // For variant-based products - clear any existing variants and prepare for variant manager
             purchaseSalesController.clearPurchaseVariants();
             purchaseSalesController.availableVariants.clear();
             purchaseSalesController.selectedVariantId.value = -1;
@@ -63,7 +66,7 @@ class PurchaseProductSearchBar extends StatelessWidget {
             purchaseSalesController.quantity.text = '';
             purchaseSalesController.totalPrice.value.clear();
           } else {
-            // For non-serialized products - use base price for purchases (cost price)
+            // For non-variant products - use base price for purchases (cost price)
             purchaseSalesController.unitPrice.value.text =
                 selectedProduct.basePrice ?? "0";
 

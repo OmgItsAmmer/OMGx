@@ -1,3 +1,4 @@
+import 'package:ecommerce_dashboard/Models/address/address_model.dart';
 import 'package:ecommerce_dashboard/repositories/salesman/salesman_repository.dart';
 import 'package:ecommerce_dashboard/utils/constants/enums.dart';
 import 'package:flutter/cupertino.dart';
@@ -265,8 +266,8 @@ class SalesmanController extends GetxController {
       );
 
       // Save address for the salesman
-      await AddressController.instance
-          .saveAddress(salesmanId, EntityType.salesman);
+      final addressModel = AddressModel(shippingAddress: area.text, salesmanId: salesmanId , postalCode: cnic.text , city: city.text , country: null , fullName: '${firstName.text} ${lastName.text}' , phoneNumber: phoneNumber.text , userId: null , vendorId: null , customerId: null );
+      await AddressController.instance.saveAddress(addressModel, EntityType.salesman);
 
       // Add to local lists if needed
       allSalesman.add(salesmanModel);
@@ -331,8 +332,8 @@ class SalesmanController extends GetxController {
       );
 
       // Address update
-      await AddressController.instance
-          .saveAddress(salesmanId, EntityType.salesman);
+      final addressModel = AddressModel(shippingAddress: area.text, salesmanId: salesmanId , postalCode: cnic.text , city: city.text , country: null , fullName: '${firstName.text} ${lastName.text}' , phoneNumber: phoneNumber.text , userId: null , vendorId: null , customerId: null );
+      await AddressController.instance.saveAddress(addressModel, EntityType.salesman);
 
       // ✅ Update locally in observable list
       int index = allSalesman.indexWhere((s) => s.salesmanId == salesmanId);

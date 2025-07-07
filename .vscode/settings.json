@@ -6,7 +6,7 @@
     "workbench.tree.indent": 10,
 "workbench.iconTheme": "vs-minimal", // or pick a minimal icon theme
 "terminal.integrated.fontSize": 11,
-"window.zoomLevel": -1,
+"window.zoomLevel": 0,
 
 
 

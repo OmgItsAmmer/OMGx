@@ -87,9 +87,10 @@ class UserController extends GetxController {
       //Setting UserDetails in App
       //   startUpController.setupUserDetails(currentUser.value);
     } catch (e) {
-      // TLoaders.errorSnackBar(
-      //     title: "User Details Not Found!",
-      //     message: "Restart the app to fetch user details");
+      TLoaders.errorSnackBar(
+          title: "User Details Not Found!",
+          message: "Restart the app to fetch user details");
+      print(e);
     } finally {
       profileLoading.value = false;
     }

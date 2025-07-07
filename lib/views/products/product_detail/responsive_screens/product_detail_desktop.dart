@@ -16,13 +16,10 @@ class ProductDetailDesktop extends StatelessWidget {
   Widget build(BuildContext context) {
     final ProductController controller = Get.find<ProductController>();
 
-    // Use a separate method to initialize variants to make it cleaner
-    _initializeVariantsIfNeeded(controller);
-
-    return Scaffold(
+    return const Scaffold(
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(TSizes.defaultSpace),
+          padding: EdgeInsets.all(TSizes.defaultSpace),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -32,23 +29,16 @@ class ProductDetailDesktop extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Basic Info
-                    const BasicInfo(),
-                    const SizedBox(height: TSizes.spaceBtwSections),
+                    BasicInfo(),
+                    SizedBox(height: TSizes.spaceBtwSections),
 
                     // Serial Variants - Only show for products with serial numbers
-                    GetBuilder<ProductController>(
-                      builder: (controller) {
-                        final showVariants = controller.hasSerialNumbers.value;
-                        return showVariants
-                            ? const ProductSerialVariants()
-                            : const SizedBox.shrink();
-                      },
-                    ),
+                    ProductVariantsWidget(),
                   ],
                 ),
               ),
-              const SizedBox(width: TSizes.spaceBtwSections),
-              const Expanded(
+              SizedBox(width: TSizes.spaceBtwSections),
+              Expanded(
                 flex: 1,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,21 +55,7 @@ class ProductDetailDesktop extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: const ProductDetailBottomBar(),
+      bottomNavigationBar: ProductDetailBottomBar(),
     );
-  }
-
-  void _initializeVariantsIfNeeded(ProductController controller) {
-    // Initialize variants only at the start - don't react to state changes
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Only fetch variants once when the view is first built
-      if (controller.productId.value > 0 &&
-          controller.hasSerialNumbers.value &&
-          !controller.isAddingVariants.value) {
-        // Check if we're not already loading
-        debugPrint('Initial fetch of variants');
-        controller.fetchProductVariants(controller.productId.value);
-      }
-    });
   }
 }

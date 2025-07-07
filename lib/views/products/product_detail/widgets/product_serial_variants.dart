@@ -1,7 +1,6 @@
 import 'package:ecommerce_dashboard/Models/products/product_variant_model.dart';
 import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
 import 'package:ecommerce_dashboard/common/widgets/texts/section_heading.dart';
-import 'package:ecommerce_dashboard/common/widgets/chips/rounded_choice_chips.dart';
 import 'package:ecommerce_dashboard/common/widgets/shimmers/shimmer.dart';
 import 'package:ecommerce_dashboard/controllers/product/product_controller.dart';
 import 'package:ecommerce_dashboard/utils/constants/colors.dart';
@@ -9,46 +8,107 @@ import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class ProductSerialVariants extends StatelessWidget {
-  const ProductSerialVariants({super.key});
+class ProductVariantsWidget extends StatelessWidget {
+  const ProductVariantsWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<ProductController>();
-    debugPrint('ProductSerialVariants.build called');
+    debugPrint('ProductVariantsWidget.build called');
 
     return Column(
-      key: const ValueKey('product_serial_variants'),
+      key: const ValueKey('product_variants_widget'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const TSectionHeading(
-          title: 'Product Variants with Serial Numbers (Read Only)',
+          title: 'Product Variants',
         ),
         const SizedBox(height: TSizes.spaceBtwItems),
-        _buildSerialVariantsSection(context, controller),
+        _buildAddVariantForm(context, controller),
+        const SizedBox(height: TSizes.spaceBtwItems),
+        _buildVariantsListSection(context, controller),
       ],
     );
   }
 
-  Widget _buildEmptyVariantsView(ProductController controller) {
-    return const Padding(
-      padding: EdgeInsets.all(TSizes.md),
-      child: Center(
+  Widget _buildAddVariantForm(
+      BuildContext context, ProductController controller) {
+    return TRoundedContainer(
+      padding: const EdgeInsets.all(TSizes.defaultSpace),
+      child: Form(
+        key: controller.variantForm,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.inventory_2_outlined, size: 40, color: Colors.grey),
-            SizedBox(height: TSizes.sm),
-            Text(
-              'No variants found for this product',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Add Product Variant',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                if (controller.isLoadingAddProductVariant.value)
+                  TextButton.icon(
+                    icon: const Icon(Icons.refresh, size: 16),
+                    label: const Text('Reset'),
+                    onPressed: () {
+                      controller.isLoadingAddProductVariant.value = false;
+                    },
+                  ),
+              ],
             ),
-            SizedBox(height: TSizes.xs),
-            Text(
-              'Variants are managed through the Purchase system',
-              style: TextStyle(color: Colors.grey),
+            const SizedBox(height: TSizes.spaceBtwItems),
+            Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: TextFormField(
+                    controller: controller.variantNameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Variant Name',
+                      hintText: 'e.g., 1L, 1.5L, Red, Blue',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Variant name is required';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+                const SizedBox(width: TSizes.spaceBtwInputFields),
+                Expanded(
+                  flex: 1,
+                  child: TextFormField(
+                    controller: controller.variantSkuController,
+                    decoration: const InputDecoration(
+                      labelText: 'SKU (Optional)',
+                      hintText: 'e.g., PEP-1L',
+                    ),
+                  ),
+                ),
+                const SizedBox(width: TSizes.spaceBtwInputFields),
+                Obx(() => SizedBox(
+                      width: 120,
+                      child: ElevatedButton(
+                        onPressed: controller.isLoadingAddProductVariant.value
+                            ? null
+                            : () => controller.addProductVariant(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: TColors.primary,
+                          foregroundColor: TColors.white,
+                        ),
+                        child: controller.isLoadingAddProductVariant.value
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text('Add'),
+                      ),
+                    )),
+              ],
             ),
           ],
         ),
@@ -56,52 +116,9 @@ class ProductSerialVariants extends StatelessWidget {
     );
   }
 
-  Widget _buildShimmerEffect() {
-    return Padding(
-      padding: const EdgeInsets.all(TSizes.sm),
-      child: Column(
-        children: List.generate(
-            3,
-            (index) => const Padding(
-                  padding: EdgeInsets.only(bottom: TSizes.sm),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child:
-                            TShimmerEffect(width: double.infinity, height: 16),
-                      ),
-                      SizedBox(width: TSizes.sm),
-                      Expanded(
-                        flex: 2,
-                        child:
-                            TShimmerEffect(width: double.infinity, height: 16),
-                      ),
-                      SizedBox(width: TSizes.sm),
-                      Expanded(
-                        flex: 2,
-                        child:
-                            TShimmerEffect(width: double.infinity, height: 16),
-                      ),
-                      SizedBox(width: TSizes.sm),
-                      Expanded(
-                        flex: 2,
-                        child:
-                            TShimmerEffect(width: 60, height: 20, radius: 10),
-                      ),
-                    ],
-                  ),
-                )),
-      ),
-    );
-  }
-
-  Widget _buildSerialVariantsSection(
+  Widget _buildVariantsListSection(
       BuildContext context, ProductController controller) {
-    debugPrint('Building variants section');
-
     return TRoundedContainer(
-      key: const ValueKey('variants_section'),
       padding: const EdgeInsets.all(TSizes.md),
       backgroundColor: TColors.light,
       child: Column(
@@ -111,44 +128,28 @@ class ProductSerialVariants extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'Serial Number Variants',
+                'Product Variants',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              Row(
-                children: [
-                  // Chip toggle for showing sold variants
-                  Obx(() => TChoiceChip(
-                        text: 'Show Sold',
-                        selected: controller.showSoldVariants.value,
-                        onSelected: (value) =>
-                            controller.toggleSoldVariants(value),
-                      )),
-                  const SizedBox(width: TSizes.sm),
-                  // Simple refresh button
-                  IconButton(
-                    icon: const Icon(Icons.refresh, size: 20),
-                    onPressed: () {
-                      debugPrint('Refresh button pressed');
-                      if (controller.productId.value > 0) {
-                        controller
-                            .fetchProductVariants(controller.productId.value);
-                      }
-                    },
-                    tooltip: 'Refresh variants',
-                  ),
-                ],
+              IconButton(
+                icon: const Icon(Icons.refresh, size: 20),
+                onPressed: () {
+                  debugPrint('Refresh variants button pressed');
+                  if (controller.productId.value > 0) {
+                    controller.fetchProductVariants(controller.productId.value);
+                  }
+                },
+                tooltip: 'Refresh variants',
               ),
             ],
           ),
           const SizedBox(height: TSizes.sm),
-
-          // Use Obx for reactive updates to the variants list
           Obx(() {
             debugPrint(
-                'Rebuilding variants list with Obx, count=${controller.currentProductVariants.length}');
+                'Rebuilding variants list, count=${controller.productVariants.length}');
 
             // Show loading state
-            if (controller.isAddingVariants.value) {
+            if (controller.isLoadingVariants.value) {
               return const Padding(
                 padding: EdgeInsets.all(TSizes.md),
                 child: Center(
@@ -163,11 +164,9 @@ class ProductSerialVariants extends StatelessWidget {
               );
             }
 
-            // Show empty state or variants list
-            final variantsLength = controller.currentProductVariants.length;
-            if (variantsLength == 0 &&
-                !controller.isLoadingSoldVariants.value) {
-              return _buildEmptyVariantsView(controller);
+            // Show empty state
+            if (controller.productVariants.isEmpty) {
+              return _buildEmptyVariantsView();
             }
 
             // Show variants list
@@ -176,40 +175,53 @@ class ProductSerialVariants extends StatelessWidget {
                 // Header row
                 _buildHeaderRow(),
                 const Divider(),
-                // Show shimmer effect when loading sold variants
-                if (controller.isLoadingSoldVariants.value)
-                  _buildShimmerEffect()
-                else
-                  // Variant rows with optimized ListView (read-only)
-                  SizedBox(
-                    height: variantsLength > 5
-                        ? 300
-                        : null, // Scrollable height when many items
-                    child: ListView.builder(
-                      shrinkWrap: variantsLength <= 5,
-                      physics: variantsLength > 5
-                          ? const AlwaysScrollableScrollPhysics()
-                          : const NeverScrollableScrollPhysics(),
-                      itemCount: variantsLength,
-                      itemBuilder: (context, index) {
-                        final variant =
-                            controller.currentProductVariants[index];
-                        return Column(
-                          key: ValueKey(
-                              'variant_${variant.variantId ?? index}_${variant.serialNumber}'),
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            _buildVariantRow(variant),
-                            if (index < variantsLength - 1) const Divider(),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
+                // Variants list
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: controller.productVariants.length,
+                  itemBuilder: (context, index) {
+                    final variant = controller.productVariants[index];
+                    return Column(
+                      key: ValueKey('variant_${variant.variantId}'),
+                      children: [
+                        _buildVariantRow(variant, controller),
+                        if (index < controller.productVariants.length - 1)
+                          const Divider(),
+                      ],
+                    );
+                  },
+                ),
               ],
             );
           }),
         ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyVariantsView() {
+    return const Padding(
+      padding: EdgeInsets.all(TSizes.md),
+      child: Center(
+        child: Column(
+          children: [
+            Icon(Icons.category_outlined, size: 40, color: Colors.grey),
+            SizedBox(height: TSizes.sm),
+            Text(
+              'No variants found for this product',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: TSizes.xs),
+            Text(
+              'Add variants like different sizes, colors, or configurations',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -222,21 +234,14 @@ class ProductSerialVariants extends StatelessWidget {
           Expanded(
             flex: 3,
             child: Text(
-              'Serial Number',
+              'Variant Name',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
           Expanded(
             flex: 2,
             child: Text(
-              'Purchase Price',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Text(
-              'Selling Price',
+              'SKU',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
@@ -247,46 +252,80 @@ class ProductSerialVariants extends StatelessWidget {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
+          Expanded(
+            flex: 1,
+            child: Text(
+              'Actions',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildVariantRow(ProductVariantModel variant) {
-    return Row(
-      children: [
-        Expanded(
-          flex: 3,
-          child: Text(variant.serialNumber),
-        ),
-        Expanded(
-          flex: 2,
-          child: Text('Rs ${variant.purchasePrice.toStringAsFixed(2)}'),
-        ),
-        Expanded(
-          flex: 2,
-          child: Text('Rs ${variant.sellingPrice.toStringAsFixed(2)}'),
-        ),
-        Expanded(
-          flex: 2,
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-                horizontal: TSizes.sm, vertical: TSizes.xs),
-            decoration: BoxDecoration(
-              color: variant.isSold ? TColors.warning : TColors.success,
-              borderRadius: BorderRadius.circular(TSizes.sm),
-            ),
+  Widget _buildVariantRow(
+      ProductVariantModel variant, ProductController controller) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: TSizes.xs),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 3,
             child: Text(
-              variant.isSold ? 'Sold' : 'Available',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
+              variant.variantName,
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(variant.sku ?? '-'),
+          ),
+          Expanded(
+            flex: 2,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: TSizes.sm, vertical: TSizes.xs),
+              decoration: BoxDecoration(
+                color: variant.isVisible ? TColors.success : TColors.warning,
+                borderRadius: BorderRadius.circular(TSizes.sm),
+              ),
+              child: Text(
+                variant.isVisible ? 'Visible' : 'Hidden',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                ),
               ),
             ),
           ),
-        ),
-      ],
+          Expanded(
+            flex: 1,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.edit, size: 16),
+                  onPressed: () {
+                    // TODO: Implement edit functionality
+                    debugPrint('Edit variant ${variant.variantId}');
+                  },
+                  tooltip: 'Edit variant',
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete, size: 16, color: Colors.red),
+                  onPressed: () {
+                    // TODO: Implement delete functionality
+                    debugPrint('Delete variant ${variant.variantId}');
+                  },
+                  tooltip: 'Delete variant',
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

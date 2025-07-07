@@ -247,14 +247,7 @@ class PurchaseSalesController extends GetxController {
       }
 
       // For serialized products - prevent adding directly, use variant manager instead
-      if (product.hasSerialNumbers) {
-        TLoaders.warningSnackBar(
-          title: "Use Variant Manager",
-          message:
-              'For serialized products, please add variants using the variant manager below and then click "Finalize" to add them to the cart.',
-        );
-        return;
-      }
+   
 
       // For regular (non-serialized) products - continue with existing logic
 
@@ -518,16 +511,15 @@ class PurchaseSalesController extends GetxController {
       for (var cartItem in allPurchases) {
         int? finalVariantId = cartItem.variantId;
 
-        // If it's a new serialized product (variantId is null, but name indicates SN)
-        if (cartItem.variantId == null && cartItem.name.contains('(SN:')) {
+        // If it's a new variant product (variantId is null, but name indicates variant)
+        if (cartItem.variantId == null && cartItem.name.contains('(Variant:')) {
           try {
-            final serialNumber = cartItem.name.split('(SN: ')[1].split(')')[0];
+            final variantName =
+                cartItem.name.split('(Variant: ')[1].split(')')[0];
             final newVariant = ProductVariantModel(
               productId: cartItem.productId,
-              serialNumber: serialNumber,
-              purchasePrice: double.tryParse(cartItem.purchasePrice) ?? 0.0,
-              sellingPrice: double.tryParse(cartItem.sellingPrice) ?? 0.0,
-              isSold: false,
+              variantName: variantName,
+              isVisible: true,
             );
             // Insert the new variant and get its ID
             finalVariantId =
@@ -535,18 +527,18 @@ class PurchaseSalesController extends GetxController {
             if (finalVariantId! > 0) {
               if (kDebugMode) {
                 print(
-                    '✓ Created new variant: ${newVariant.serialNumber} with ID: $finalVariantId');
+                    '✓ Created new variant: ${newVariant.variantName} with ID: $finalVariantId');
               }
             } else {
               if (kDebugMode) {
-                print('✗ Failed to create variant: ${newVariant.serialNumber}');
+                print('✗ Failed to create variant: ${newVariant.variantName}');
               }
               // Handle error, maybe skip this item or throw an exception
               continue;
             }
           } catch (e) {
             if (kDebugMode) {
-              print('Error processing new serialized product: $e');
+              print('Error processing new variant product: $e');
             }
             TLoaders.errorSnackBar(
                 title: 'Variant Creation Error',
@@ -960,11 +952,13 @@ class PurchaseSalesController extends GetxController {
     selectedVariantId.value = variant.variantId ?? -1;
 
     if (variant.variantId != null) {
-      unitPrice.value.text = variant.purchasePrice.toString();
-      quantity.text = "1"; // Always 1 for serialized products
-      totalPrice.value.text = variant.purchasePrice.toString();
+      // For new variants in purchase, we set initial pricing from form
+      // The actual prices will come from the form inputs
+      unitPrice.value.text = "";
+      quantity.text = "1"; // Always 1 for variant products
+      totalPrice.value.text = "";
 
-      // For serialized products, total price equals unit price since quantity is always 1
+      // For purchase, total price equals unit price since quantity is always 1
       calculateTotalPrice();
     }
   }
@@ -983,9 +977,11 @@ class PurchaseSalesController extends GetxController {
         orElse: () => ProductModel.empty(),
       );
 
-      if (!product.hasSerialNumbers) return;
+      // Load variants using fetchProductVariants
+      await productController.fetchProductVariants(productId);
 
-      final variants = await productController.getAvailableVariants(productId);
+      // Get variants from controller
+      final variants = productController.productVariants;
       availableVariants.assignAll(variants);
 
       if (variants.isNotEmpty) {
@@ -1096,7 +1092,7 @@ class PurchaseSalesController extends GetxController {
 
       addressController.selectedVendorAddress.value = addressController
           .allVendorAddresses
-          .firstWhere((address) => address.location == firstAddress);
+          .firstWhere((address) => address.shippingAddress == firstAddress);
       selectedAddressId =
           addressController.selectedVendorAddress.value.addressId;
     }
@@ -1284,7 +1280,7 @@ class PurchaseSalesController extends GetxController {
                                               ),
                                             ),
                                             title: Text(
-                                              'Serial: ${variant.serialNumber}',
+                                              'Variant: ${variant.variantName}',
                                               style: TextStyle(
                                                 fontWeight:
                                                     selectedVariantId.value ==
@@ -1294,8 +1290,8 @@ class PurchaseSalesController extends GetxController {
                                               ),
                                             ),
                                             subtitle: Text(
-                                              'Purchase Price: Rs ${variant.purchasePrice.toStringAsFixed(2)}\n'
-                                              'Selling Price: Rs ${variant.sellingPrice.toStringAsFixed(2)}',
+                                              'SKU: ${variant.sku ?? "N/A"}\n'
+                                              'Status: ${variant.isVisible ? "Visible" : "Hidden"}',
                                             ),
                                             trailing: selectedVariantId.value ==
                                                     variant.variantId
@@ -1384,7 +1380,7 @@ class PurchaseSalesController extends GetxController {
         TLoaders.successSnackBar(
           title: 'Variant Removed',
           message:
-              'Serial number ${removedVariant.serialNumber} removed from purchase.',
+              'Variant ${removedVariant.variantName} removed from purchase.',
         );
       }
     } catch (e) {
@@ -1401,19 +1397,42 @@ class PurchaseSalesController extends GetxController {
       isLoadingPurchaseVariants.value = true;
 
       // Get values from controllers
-      final serialNumber = purchaseVariantSerialNumber.text.trim();
+      final variantName = purchaseVariantSerialNumber.text.trim();
       final purchasePrice =
           double.tryParse(purchaseVariantPurchasePrice.text.trim()) ?? 0.0;
       final sellingPrice =
           double.tryParse(purchaseVariantSellingPrice.text.trim()) ?? 0.0;
 
-      // Create the variant
+      // Validate inputs
+      if (variantName.isEmpty) {
+        TLoaders.errorSnackBar(
+          title: 'Error',
+          message: 'Variant name is required',
+        );
+        return;
+      }
+
+      if (purchasePrice <= 0) {
+        TLoaders.errorSnackBar(
+          title: 'Error',
+          message: 'Purchase price must be greater than 0',
+        );
+        return;
+      }
+
+      if (sellingPrice <= 0) {
+        TLoaders.errorSnackBar(
+          title: 'Error',
+          message: 'Selling price must be greater than 0',
+        );
+        return;
+      }
+
+      // Create the variant (only basic info)
       final variant = ProductVariantModel(
         productId: selectedProductId.value,
-        serialNumber: serialNumber,
-        purchasePrice: purchasePrice,
-        sellingPrice: sellingPrice,
-        isSold: false, // New variants for purchase are available
+        variantName: variantName,
+        isVisible: true,
       );
 
       // Add to the purchase variants list
@@ -1426,7 +1445,7 @@ class PurchaseSalesController extends GetxController {
 
       TLoaders.successSnackBar(
         title: 'Variant Added',
-        message: 'Serial number $serialNumber added to purchase.',
+        message: 'Variant $variantName added to purchase.',
       );
     } catch (e) {
       TLoaders.errorSnackBar(
@@ -1471,35 +1490,34 @@ class PurchaseSalesController extends GetxController {
           TLoaders.errorSnackBar(
             title: 'Invalid CSV Format',
             message:
-                'Line ${i + 1} has invalid format. Expected: SerialNumber,PurchasePrice,SellingPrice',
+                'Line ${i + 1} has invalid format. Expected: VariantName,PurchasePrice,SellingPrice',
           );
           bulkPurchaseVariants.clear();
           return;
         }
 
         // Parse the data
-        final serialNumber = parts[0].trim();
+        final variantName = parts[0].trim();
         final purchasePrice = double.tryParse(parts[1].trim()) ?? 0.0;
         final sellingPrice = double.tryParse(parts[2].trim()) ?? 0.0;
 
         // Check for duplicates in existing purchase variants
-        if (purchaseVariants.any((v) => v.serialNumber == serialNumber)) {
+        if (purchaseVariants.any(
+            (v) => v.variantName.toLowerCase() == variantName.toLowerCase())) {
           TLoaders.errorSnackBar(
-            title: 'Duplicate Serial Number',
+            title: 'Duplicate Variant Name',
             message:
-                'Serial number "$serialNumber" already exists in the purchase list',
+                'Variant name "$variantName" already exists in the purchase list',
           );
           bulkPurchaseVariants.clear();
           return;
         }
 
-        // Create a variant
+        // Create a variant (only basic info)
         final variant = ProductVariantModel(
           productId: selectedProductId.value,
-          serialNumber: serialNumber,
-          purchasePrice: purchasePrice,
-          sellingPrice: sellingPrice,
-          isSold: false,
+          variantName: variantName,
+          isVisible: true,
         );
 
         bulkPurchaseVariants.add(variant);
@@ -1622,20 +1640,27 @@ class PurchaseSalesController extends GetxController {
       // Add each variant as a separate cart item
       for (final variant in purchaseVariants) {
         try {
+          // For purchase variants, we need to get pricing from the form
+          // or set default values
+          final purchasePrice =
+              double.tryParse(purchaseVariantPurchasePrice.text) ?? 0.0;
+          final sellingPrice =
+              double.tryParse(purchaseVariantSellingPrice.text) ?? 0.0;
+
           // Create a purchase cart item for each variant
           final purchaseItem = PurchaseCartItem(
             productId: variant.productId,
-            name: '${product.name} (SN: ${variant.serialNumber})',
-            purchasePrice: variant.purchasePrice.toString(),
-            sellingPrice: variant.sellingPrice.toString(),
+            name: '${product.name} (Variant: ${variant.variantName})',
+            purchasePrice: purchasePrice.toString(),
+            sellingPrice: sellingPrice.toString(),
             unit: selectedUnit.toString().split('.').last.trim(),
-            quantity: "1", // Always 1 for serialized products
-            totalPrice: variant.purchasePrice.toString(),
+            quantity: "1", // Always 1 for variant products
+            totalPrice: purchasePrice.toString(),
             variantId: variant.variantId, // Will be null for new variants
           );
 
           // Update sub total
-          double variantPrice = variant.purchasePrice;
+          double variantPrice = purchasePrice;
           subTotal.value += variantPrice;
           originalSubTotal.value += variantPrice;
 
@@ -1644,7 +1669,7 @@ class PurchaseSalesController extends GetxController {
           addedCount++;
         } catch (e) {
           if (kDebugMode) {
-            print('Error adding variant ${variant.serialNumber} to cart: $e');
+            print('Error adding variant ${variant.variantName} to cart: $e');
           }
           // Continue with other variants
         }

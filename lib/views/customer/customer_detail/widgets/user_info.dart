@@ -123,7 +123,7 @@ class UserInfo extends StatelessWidget {
                     height: TSizes.spaceBtwItems / 2,
                   ),
                   Text(
-                    customerModel.email,
+                      customerModel.email,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],

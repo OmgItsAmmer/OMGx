@@ -44,15 +44,21 @@ Future<void> main() async {
   //Get Local Storage
   await GetStorage.init();
 
-  // Initialize SecureKeys instance
+  // Initialize SecureKeys instance and handle database switching
   final secureKeys = SecureKeys.instance;
   await secureKeys.initialize();
 
-  // Get Supabase credentials securely
+  // Get Supabase credentials - now properly sourced from SupabaseStrings
   final supabaseUrl =
       await secureKeys.getSupabaseUrl() ?? SupabaseStrings.projectUrl;
   final supabaseAnonKey =
       await secureKeys.getSupabaseAnonKey() ?? SupabaseStrings.anonKey;
+
+  if (kDebugMode) {
+    print('Connecting to Supabase database...');
+    print('URL: $supabaseUrl');
+    print('Using credentials from SupabaseStrings');
+  }
 
   // Initialize SupabaseNetworkManager first for better connection handling
   final networkManager = SupabaseNetworkManager.instance;
@@ -75,22 +81,29 @@ Future<void> main() async {
     }
 
     if (kDebugMode) {
-      print('Supabase initialized successfully');
+      print('✅ Supabase initialized successfully');
+      print('✅ Connected to database: $supabaseUrl');
     }
   } catch (e) {
     if (kDebugMode) {
-      print('Error initializing Supabase: $e');
+      print('❌ Error initializing Supabase: $e');
     }
     // Add fallback initialization with increased timeout for release mode
     if (!kDebugMode) {
       try {
+        if (kDebugMode) {
+          print('Retrying Supabase initialization...');
+        }
         await Supabase.initialize(
           url: supabaseUrl,
           anonKey: supabaseAnonKey,
         );
+        if (kDebugMode) {
+          print('✅ Supabase initialized successfully on retry');
+        }
       } catch (retryError) {
         if (kDebugMode) {
-          print('Error on retry: $retryError');
+          print('❌ Error on retry: $retryError');
         }
       }
     }

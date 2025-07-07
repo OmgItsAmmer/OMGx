@@ -110,8 +110,8 @@ class CustomerController extends GetxController {
       await mediaController.imageAssigner(
           customerId, MediaCategory.customers.toString().split('.').last, true);
 
-      await AddressController.instance
-          .saveAddress(customerId, EntityType.customer);
+      final addressModel = AddressModel(shippingAddress: AddressController.instance.address.text, customerId: customerId , postalCode: cnic.text , city: AddressController.instance.address.text , country: null , fullName: '${firstName.text} ${lastName.text}' , phoneNumber: phoneNumber.text , userId: null , vendorId: null , salesmanId: null );
+      await AddressController.instance.saveAddress(addressModel, EntityType.customer);
 
       customerModel.customerId = customerId;
 
@@ -162,8 +162,9 @@ class CustomerController extends GetxController {
       await mediaController.imageAssigner(
           customerId, MediaCategory.customers.toString().split('.').last, true);
 
-      await AddressController.instance
-          .saveAddress(customerId, EntityType.customer);
+      final addressModel = AddressModel(shippingAddress: AddressController.instance.address.text, customerId: customerId , postalCode: cnic.text , city: AddressController.instance.address.text , country: null , fullName: '${firstName.text} ${lastName.text}' , phoneNumber: phoneNumber.text , userId: null , vendorId: null , salesmanId: null );
+      await AddressController.instance.saveAddress(addressModel, EntityType.customer);
+
       //locally adding in table
       allCustomers.add(customerModel);
       if (kDebugMode) {
@@ -219,7 +220,7 @@ class CustomerController extends GetxController {
       );
 
       // Set the address text if a match is found
-      AddressController.instance.address.text = matchingAddress.location ??
+      AddressController.instance.address.text = matchingAddress.shippingAddress ??
           ''; // Assuming `addressText` is the property holding the address as a String
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());

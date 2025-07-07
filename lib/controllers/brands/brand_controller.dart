@@ -62,7 +62,7 @@ class BrandController extends GetxController {
       }
 
       // Compare names case insensitive after trimming
-      final existingName = brand.bname?.trim().toLowerCase() ?? '';
+      final existingName = brand.brandname?.trim().toLowerCase() ?? '';
       return existingName == trimmedName;
     });
   }
@@ -92,9 +92,9 @@ class BrandController extends GetxController {
 
       // Build the brand model
       final brandModel = BrandModel(
-        brandID: null,
-        bname: brandNameText,
-        productsCount: 0, // Initialize with zero products
+        brandID: -1,
+        brandname: brandNameText,
+        productCount: 0, // Initialize with zero products
         // Add other fields if your BrandModel has more
       );
 
@@ -161,13 +161,13 @@ class BrandController extends GetxController {
         orElse: () => BrandModel.empty(),
       );
 
-      final existingProductCount = existingBrand.productsCount ?? 0;
+      final existingProductCount = existingBrand.productCount ?? 0;
 
       // Create brand model with preserved counts
       final brandModel = BrandModel(
         brandID: brandId,
-        bname: brandNameText,
-        productsCount: existingProductCount,
+        brandname: brandNameText,
+        productCount: existingProductCount,
         isVerified: existingBrand.isVerified,
         isFeatured: existingBrand.isFeatured,
       );
@@ -226,7 +226,7 @@ class BrandController extends GetxController {
       }
 
       // Store name for success message
-      final brandName = brandToRemove.bname;
+      final brandName = brandToRemove.brandname;
 
       // Call the repository function to delete from the database
       await brandRepository.deleteBrandFromTable(brandId);
@@ -252,8 +252,8 @@ class BrandController extends GetxController {
   void setBrandDetail(BrandModel brand) {
     try {
       selectedBrand.value = brand;
-      brandName.text = brand.bname ?? ' ';
-      productCount.text = brand.productsCount.toString();
+      brandName.text = brand.brandname ?? ' ';
+      productCount.text = brand.productCount.toString();
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
@@ -279,7 +279,8 @@ class BrandController extends GetxController {
 
       //Brand names
       final names = allBrands
-          .map((brand) => brand.bname ?? '') // Replace null with empty string
+          .map((brand) =>
+              brand.brandname ?? '') // Replace null with empty string
           .toList();
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
@@ -292,7 +293,16 @@ class BrandController extends GetxController {
 
   Future<int> fetchBrandId(String brandName) async {
     try {
-      final brandId = await brandRepository.getBrandId(brandName);
+      //find it locally first
+      int brandId = allBrands.firstWhere(
+        (brand) => brand.brandname == brandName,
+        orElse: () => BrandModel.empty(),
+      ).brandID;
+      if (brandId != -1) {
+        return brandId;
+      }
+      //if not found, fetch it from the database
+      brandId = await brandRepository.getBrandId(brandName);
       return brandId;
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
@@ -312,16 +322,16 @@ class BrandController extends GetxController {
       if (index != -1) {
         // Update the local model
         final brand = allBrands[index];
-        final currentCount = brand.productsCount ?? 0;
+        final currentCount = brand.productCount ?? 0;
         final newCount = currentCount + 1;
 
         // Create a new brand model with updated count
         final updatedBrand = BrandModel(
           brandID: brand.brandID,
-          bname: brand.bname,
+          brandname: brand.brandname,
           isVerified: brand.isVerified,
           isFeatured: brand.isFeatured,
-          productsCount: newCount,
+          productCount: newCount,
         );
 
         // Update in local list
@@ -347,7 +357,7 @@ class BrandController extends GetxController {
       if (index != -1) {
         // Update the local model
         final brand = allBrands[index];
-        final currentCount = brand.productsCount ?? 0;
+        final currentCount = brand.productCount ?? 0;
         if (currentCount <= 0) return; // Prevent negative counts
 
         final newCount = currentCount - 1;
@@ -355,10 +365,10 @@ class BrandController extends GetxController {
         // Create a new brand model with updated count
         final updatedBrand = BrandModel(
           brandID: brand.brandID,
-          bname: brand.bname,
+          brandname: brand.brandname,
           isVerified: brand.isVerified,
           isFeatured: brand.isFeatured,
-          productsCount: newCount,
+          productCount: newCount,
         );
 
         // Update in local list

@@ -1,5 +1,6 @@
 import 'package:ecommerce_dashboard/Models/products/product_model.dart';
 import 'package:ecommerce_dashboard/Models/products/product_variant_model.dart';
+import 'package:ecommerce_dashboard/Models/products/varaint_batches_model.dart';
 import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
 import 'package:ecommerce_dashboard/controllers/product/product_controller.dart';
 import 'package:ecommerce_dashboard/controllers/sales/sales_controller.dart';
@@ -17,7 +18,7 @@ class SerialVariantSelector extends StatelessWidget {
     final ProductController productController = Get.find<ProductController>();
 
     return Obx(() {
-      // Only show for products with serial numbers that have been selected
+      // Only show for products with variants that have been selected
       if (salesController.selectedProductId.value == -1 ||
           salesController.isManualTextEntry.value) {
         return const SizedBox.shrink();
@@ -28,7 +29,8 @@ class SerialVariantSelector extends StatelessWidget {
         orElse: () => ProductModel.empty(),
       );
 
-      if (!product.hasSerialNumbers) {
+      // This widget is now used for variant selection, not just serial numbers
+      if (product.productId == null) {
         return const SizedBox.shrink();
       }
 
@@ -38,7 +40,7 @@ class SerialVariantSelector extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Select Serial Number',
+              'Select Product Variant',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: TSizes.sm),
@@ -55,7 +57,7 @@ class SerialVariantSelector extends StatelessWidget {
               if (salesController.availableVariants.isEmpty) {
                 return const Padding(
                   padding: EdgeInsets.all(TSizes.sm),
-                  child: Text('No serial numbers available for this product'),
+                  child: Text('No variants available for this product'),
                 );
               }
 
@@ -70,14 +72,14 @@ class SerialVariantSelector extends StatelessWidget {
                         const Expanded(
                           flex: 3,
                           child: Text(
-                            'Serial Number',
+                            'Variant Name',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
                         const Expanded(
                           flex: 2,
                           child: Text(
-                            'Price',
+                            'SKU',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
@@ -131,11 +133,11 @@ class SerialVariantSelector extends StatelessWidget {
         children: [
           Expanded(
             flex: 3,
-            child: Text(variant.serialNumber),
+            child: Text(variant.variantName),
           ),
           Expanded(
             flex: 2,
-            child: Text('Rs ${variant.sellingPrice.toStringAsFixed(2)}'),
+            child: Text(variant.sku ?? '-'),
           ),
           Expanded(
             flex: 1,

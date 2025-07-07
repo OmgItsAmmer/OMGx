@@ -1,9 +1,11 @@
 import 'package:ecommerce_dashboard/Models/products/product_variant_model.dart';
+import 'package:ecommerce_dashboard/Models/products/varaint_batches_model.dart';
 import 'package:ecommerce_dashboard/Models/purchase/purchase_model.dart';
 import 'package:ecommerce_dashboard/common/widgets/loaders/tloaders.dart';
 import 'package:ecommerce_dashboard/controllers/dashboard/dashboard_controoler.dart';
 import 'package:ecommerce_dashboard/controllers/product/product_controller.dart';
 import 'package:ecommerce_dashboard/repositories/purchase/purchase_repository.dart';
+import 'package:ecommerce_dashboard/repositories/products/variant_batches_repository.dart';
 import 'package:ecommerce_dashboard/utils/constants/enums.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -17,6 +19,8 @@ import '../vendor/vendor_controller.dart';
 class PurchaseController extends GetxController {
   static PurchaseController get instance => Get.find();
   final PurchaseRepository purchaseRepository = Get.put(PurchaseRepository());
+  final VariantBatchesRepository variantBatchesRepository =
+      Get.put(VariantBatchesRepository());
 
   RxList<PurchaseModel> allPurchases = <PurchaseModel>[].obs;
 
@@ -323,7 +327,29 @@ class PurchaseController extends GetxController {
         if (item == null) continue;
 
         try {
-          await purchaseRepository.addStockQuantity(item);
+          // Get product information to determine if it has variants
+          final productController = Get.find<ProductController>();
+          final product = productController.allProducts.firstWhere(
+            (p) => p.productId == item.productId,
+            orElse: () => ProductModel.empty(),
+          );
+
+          if (product.productId != null && product.productId! > 0) {
+            // Check if product has variants
+            final variants = await productController.productVariantsRepository
+                .fetchProductVariants(product.productId!);
+
+            if (variants.isNotEmpty) {
+              // Product has variants - create variant batches
+              await _createVariantBatchesForPurchase(item, variants);
+            } else {
+              // Product has no variants - use traditional stock management
+              await purchaseRepository.addStockQuantity(item);
+            }
+          } else {
+            // Fallback to traditional stock management
+            await purchaseRepository.addStockQuantity(item);
+          }
         } catch (e) {
           if (kDebugMode) {
             print('Error adding stock quantity for item: $e');
@@ -352,6 +378,51 @@ class PurchaseController extends GetxController {
       TLoaders.errorSnackBar(
           title: 'Add Stock Error',
           message: 'Failed to add product quantities to stock');
+    }
+  }
+
+  // Create variant batches for purchased items with variants
+  Future<void> _createVariantBatchesForPurchase(
+      PurchaseItemModel item, List<ProductVariantModel> variants) async {
+    try {
+      // For products with variants, we need to distribute the purchased quantity
+      // across the variants or create a default variant batch
+
+      // For now, we'll create a batch for the first variant or a default one
+      // TODO: In a real implementation, you might want to specify which variant
+      // this purchase is for during the purchase process
+
+      final variantId = variants.isNotEmpty ? variants.first.variantId : null;
+
+      if (variantId != null) {
+        // Generate a unique batch ID (you can customize this logic)
+        final batchId =
+            'BATCH_${DateTime.now().millisecondsSinceEpoch}_${item.productId}';
+
+        final variantBatch = VariantBatchesModel(
+          variantId: variantId,
+          quantity: item.quantity,
+          availableQuantity: item.quantity,
+          buyPrice: item.price,
+          sellPrice:
+              item.price * 1.2, // Example markup - you can customize this
+          vendor: 'Purchase Vendor', // You can get this from the purchase
+          purchaseDate: DateTime.now(),
+          batchId: batchId,
+        );
+
+        await variantBatchesRepository.insertVariantBatch(variantBatch);
+
+        // Update product stock quantity from batches
+        await variantBatchesRepository
+            .updateProductStockFromBatches(item.productId);
+
+        debugPrint(
+            'Created variant batch for product ${item.productId}, variant $variantId');
+      }
+    } catch (e) {
+      debugPrint('Error creating variant batches: $e');
+      rethrow;
     }
   }
 
@@ -468,10 +539,12 @@ class PurchaseController extends GetxController {
         orElse: () => ProductModel.empty(),
       );
 
-      if (!product.hasSerialNumbers) return;
+     // if (!product.hasSerialNumbers) return;
 
-      final variants = await productController.getAvailableVariants(productId);
-      availableVariants.assignAll(variants);
+      final variants =
+          await productController.getAvailableVariantBatches(productId);
+      // Note: availableVariants now contains VariantBatchesModel instead of ProductVariantModel
+      // TODO: Update availableVariants type or convert the data structure
 
       if (variants.isNotEmpty) {
         unitPrice.value.text = "";

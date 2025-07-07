@@ -195,7 +195,7 @@ class VendorInfo extends StatelessWidget {
                                 final address =
                                     addressController.allVendorAddresses.first;
                                 return Text(
-                                  address.location ?? 'No location specified',
+                                  address.shippingAddress ?? 'No location specified',
                                   style: Theme.of(context).textTheme.bodyMedium,
                                 );
                               }

@@ -121,7 +121,9 @@ class OrderRepository {
       return orderItemList;
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Order Item Fetch', message: e.toString());
-      print(e.toString());
+      if (kDebugMode) {
+        print(e.toString());
+      }
       return [];
     }
   }
@@ -137,16 +139,15 @@ class OrderRepository {
 
   Future<void> restoreQuantity(OrderItemModel item) async {
     try {
-      final productController = Get.find<ProductController>();
-      final product = productController.allProducts.firstWhere(
-          (p) => p.productId == item.productId,
-          orElse: () => ProductModel.empty());
-
-      if (product.hasSerialNumbers && item.variantId != null) {
+      // Check if this is a variant-based item (new system)
+      if (item.variantId != null) {
+        // For variant-based products, mark the variant as available
         final variantsRepository = Get.find<ProductVariantsRepository>();
         await variantsRepository.markVariantAsAvailable(item.variantId!);
 
+        // Update the product's overall stock quantity
         try {
+          final productController = Get.find<ProductController>();
           final productIndex = productController.allProducts
               .indexWhere((p) => p.productId == item.productId);
           if (productIndex != -1) {
@@ -163,7 +164,7 @@ class OrderRepository {
           if (kDebugMode) print('Local update error: $e');
         }
       } else {
-        // For regular products
+        // For regular products (non-variant)
         final response = await supabase
             .from('products')
             .select('stock_quantity')
@@ -183,6 +184,7 @@ class OrderRepository {
 
         // Update local product list
         try {
+          final productController = Get.find<ProductController>();
           final productIndex = productController.allProducts
               .indexWhere((p) => p.productId == item.productId);
           if (productIndex != -1) {
@@ -206,19 +208,15 @@ class OrderRepository {
 
   Future<void> subtractQuantity(OrderItemModel item) async {
     try {
-      // Fetch the product to determine if it has serial numbers
-      final productController = Get.find<ProductController>();
-      final product = productController.allProducts.firstWhere(
-          (p) => p.productId == item.productId,
-          orElse: () => ProductModel.empty());
-
-      if (product.hasSerialNumbers && item.variantId != null) {
-        // For serialized products, update the variant's sold status
+      // Check if this is a variant-based item (new system)
+      if (item.variantId != null) {
+        // For variant-based products, update the variant's sold status
         final variantsRepository = Get.find<ProductVariantsRepository>();
         await variantsRepository.markVariantAsSold(item.variantId!);
 
         // Update local product list in ProductController
         try {
+          final productController = Get.find<ProductController>();
           final productIndex = productController.allProducts
               .indexWhere((p) => p.productId == item.productId);
           if (productIndex != -1) {
@@ -238,7 +236,7 @@ class OrderRepository {
           }
         }
       } else {
-        // For regular products, update the quantity in the database
+        // For regular products (non-variant), update the quantity in the database
         // Step 1: Fetch the current stock quantity
         final response = await supabase
             .from('products')
@@ -261,6 +259,7 @@ class OrderRepository {
         } else {
           // Update local product list in ProductController
           try {
+            final productController = Get.find<ProductController>();
             final productIndex = productController.allProducts
                 .indexWhere((p) => p.productId == item.productId);
             if (productIndex != -1) {
@@ -334,19 +333,27 @@ class OrderRepository {
           return false;
         }
 
-        if (product.hasSerialNumbers && item.variantId != null) {
-          // For serialized products, check if the specific variant is available
+        // Check if this is a variant-based item
+        if (item.variantId != null) {
+          // For variant-based products, check if the specific variant is available (not sold)
           final response = await supabase
               .from('product_variants')
               .select('is_sold')
               .eq('variant_id', item.variantId!)
-              .single();
+              .maybeSingle();
 
-          final bool isSold = response['is_sold'] as bool;
+          if (response == null) {
+            if (kDebugMode) {
+              print('Variant ${item.variantId} not found');
+            }
+            return false;
+          }
+
+          final bool isSold = response['is_sold'] as bool? ?? true;
 
           if (isSold) {
             if (kDebugMode) {
-              print('Serial product variant ${item.variantId} is already sold');
+              print('Variant ${item.variantId} is already sold');
             }
             return false;
           }

@@ -1,38 +1,37 @@
-
 class BrandModel {
-  final String? bname;
+  final String? brandname;
   final bool isVerified;
   final bool? isFeatured;
-   int? brandID; // 👈 Made nullable
-  final int? productsCount;
+   int brandID; // 👈 Now non-nullable
+  final int productCount; // 👈 Renamed and non-nullable
 
   BrandModel({
-    this.bname,
+    this.brandname,
     this.isVerified = false,
     this.isFeatured,
-    this.brandID, // 👈 Removed required
-    this.productsCount,
+    required this.brandID, // 👈 Required
+    this.productCount = 0, // 👈 Default value
   });
 
   // Static function to create an empty brand model
   static BrandModel empty() => BrandModel(
-    brandID: null,
-    bname: null,
-    isVerified: false,
-    isFeatured: null,
-    productsCount: null,
-  );
+        brandID: -1, // 👈 Default value for empty
+        brandname: null,
+        isVerified: false,
+        isFeatured: null,
+        productCount: 0,
+      );
 
   // Convert model to JSON for database insertion
   Map<String, dynamic> toJson({bool isUpdate = false}) {
     final Map<String, dynamic> data = {
-      'bname': bname,
+      'brandname': brandname,
       'isVerified': isVerified,
       'isFeatured': isFeatured,
-      'products_count': productsCount,
+      'product_count': productCount,
     };
 
-    if (!isUpdate && brandID != null) {
+    if (!isUpdate) {
       data['brandID'] = brandID;
     }
 
@@ -42,11 +41,11 @@ class BrandModel {
   // Factory method to create a BrandModel from Supabase response
   factory BrandModel.fromJson(Map<String, dynamic> json) {
     return BrandModel(
-      bname: json['bname'] as String?,
+      brandname: json['brandname'] as String?,
       isVerified: json['isVerified'] as bool? ?? false,
       isFeatured: json['isFeatured'] as bool?,
-      brandID: json['brandID'] as int?, // 👈 Made nullable
-      productsCount: json['products_count'] as int?,
+      brandID: json['brandID'] as int, // 👈 Non-nullable
+      productCount: json['product_count'] as int? ?? 0, // 👈 Default value
     );
   }
 }

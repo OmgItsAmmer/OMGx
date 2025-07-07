@@ -56,7 +56,7 @@ class ProductVariantsRepository {
     try {
       final response = await supabase
           .from('product_variants')
-          .insert(variant.toJson())
+          .insert(variant.toJson(isInsert: true))
           .select('variant_id')
           .single();
 
@@ -80,8 +80,8 @@ class ProductVariantsRepository {
       }
 
       await supabase
-          .from('product_variants')
-          .update(variant.toJson(isUpdate: true))
+          .from('product_variants') 
+          .update(variant.toJson(isInsert: false))
           .eq('variant_id', variantId);
     } on PostgrestException catch (e) {
       TLoaders.errorSnackBar(title: 'Variant Repo', message: e.message);

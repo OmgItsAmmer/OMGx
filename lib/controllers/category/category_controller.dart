@@ -320,8 +320,18 @@ class CategoryController extends GetxController {
 
   Future<int> fetchCategoryId(String categoryName) async {
     try {
-      print(categoryName);
+      //find it locally first
+      final categoryId = allCategories.firstWhere(
+        (category) => category.categoryName == categoryName,
+        orElse: () => CategoryModel.empty(),
+      ).categoryId;
+      if (categoryId != null) {
+        return categoryId;
+      }
+      //if not found, fetch it from the database
       final categoryidId = await categoryRepository.getCategoryId(categoryName);
+
+  
       return categoryidId;
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());

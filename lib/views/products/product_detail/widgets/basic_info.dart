@@ -70,41 +70,26 @@ class BasicInfo extends StatelessWidget {
                   ),
                   const SizedBox(height: TSizes.spaceBtwInputFields),
 
-                  // Serial Numbers Toggle - Now properly focusable
-                  Obx(() {
-                    final isExistingProduct =
-                        productController.productId.value > 0;
-                    return FocusableActionDetector(
-                      focusNode: productController.serialNumbersFocusNode,
-                      descendantsAreFocusable: false,
-                      onFocusChange: (hasFocus) {
-                        if (hasFocus) {
-                          // Ensure the SwitchListTile is highlighted when focused
-                          productController.serialNumbersFocusNode
-                              .requestFocus();
-                        }
-                      },
-                      child: Tooltip(
-                        message: isExistingProduct
-                            ? 'Product type cannot be changed for existing products'
-                            : 'Enable for products with unique serial numbers like electronics',
-                        child: SwitchListTile(
-                          title: const Text('Has Serial Numbers'),
-                          subtitle: const Text(
-                              'Enable for products with unique serial numbers like electronics'),
-                          value: productController.hasSerialNumbers.value,
-                          onChanged: isExistingProduct
-                              ? null
-                              : (value) {
-                                  productController
-                                      .toggleHasSerialNumbers(value);
-                                  productController.basePriceFocusNode
-                                      .requestFocus();
-                                },
+                  // Note: Serial numbers feature has been replaced with variants
+                  Container(
+                    padding: const EdgeInsets.all(TSizes.sm),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(TSizes.sm),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.info_outline, color: Colors.grey),
+                        SizedBox(width: TSizes.sm),
+                        Expanded(
+                          child: Text(
+                            'Use Product Variants section below to add different variations like sizes, colors, etc.',
+                            style: TextStyle(color: Colors.grey),
                         ),
                       ),
-                    );
-                  }),
+                      ],
+                    ),
+                  ),
                   const SizedBox(height: TSizes.spaceBtwInputFields),
 
                   // Pricing & Stock Row
