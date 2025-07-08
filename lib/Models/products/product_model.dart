@@ -11,7 +11,6 @@ class ProductModel {
   DateTime? createdAt;
   int? brandID;
   int? alertStock;
-  bool hasSerialNumbers;
 
   ProductModel({
     this.productId,
@@ -24,7 +23,6 @@ class ProductModel {
     this.createdAt,
     this.brandID,
     this.alertStock,
-    this.hasSerialNumbers = false,
   });
 
   // Static function to create an empty product model
@@ -39,21 +37,19 @@ class ProductModel {
         createdAt: null,
         brandID: null,
         alertStock: null,
-        hasSerialNumbers: false,
       );
 
   // Convert model to JSON for database insertion
-  Map<String, dynamic> toJson({bool isUpdate = false, bool isSerial = false}) {
+  Map<String, dynamic> toJson({bool isUpdate = false}) {
     final Map<String, dynamic> data = {
       'name': name,
       'description': description ?? "",
       'base_price': basePrice ?? "",
       'sale_price': salePrice ?? "",
       'category_id': categoryId,
-      if (!isSerial) 'stock_quantity': stockQuantity,
+      'stock_quantity': stockQuantity,
       'brandID': brandID,
       'alert_stock': alertStock,
-      'has_serial_numbers': hasSerialNumbers,
     };
 
     if (isUpdate && productId != null) {
@@ -78,7 +74,6 @@ class ProductModel {
           : null,
       brandID: json['brandID'] as int?,
       alertStock: json['alert_stock'] as int?,
-      hasSerialNumbers: json['has_serial_numbers'] as bool? ?? false,
     );
   }
 
@@ -94,7 +89,6 @@ class ProductModel {
     DateTime? createdAt,
     int? brandID,
     int? alertStock,
-    bool? hasSerialNumbers,
   }) {
     return ProductModel(
       productId: productId ?? this.productId,
@@ -107,7 +101,6 @@ class ProductModel {
       createdAt: createdAt ?? this.createdAt,
       brandID: brandID ?? this.brandID,
       alertStock: alertStock ?? this.alertStock,
-      hasSerialNumbers: hasSerialNumbers ?? this.hasSerialNumbers,
     );
   }
 }

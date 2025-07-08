@@ -25,7 +25,6 @@ class ProductController extends GetxController {
   // Focus nodes for tab order
   final FocusNode nameFocusNode = FocusNode();
   final FocusNode descriptionFocusNode = FocusNode();
-  final FocusNode serialNumbersFocusNode = FocusNode();
   final FocusNode basePriceFocusNode = FocusNode();
   final FocusNode salePriceFocusNode = FocusNode();
   final FocusNode stockFocusNode = FocusNode();
@@ -35,10 +34,8 @@ class ProductController extends GetxController {
   RxList<ProductModel> allProducts = <ProductModel>[].obs;
   RxList<ProductVariantModel> currentProductVariants =
       <ProductVariantModel>[].obs;
-  RxList<ProductVariantModel> availableVariants =
-      <ProductVariantModel>[].obs; // Store available variants only
-  RxList<ProductVariantModel> soldVariants =
-      <ProductVariantModel>[].obs; // Store sold variants separately
+  RxList<ProductVariantModel> unsavedProductVariants =
+      <ProductVariantModel>[].obs;
 
   // Store selected Rows
   RxList<bool> selectedRows = <bool>[].obs;
@@ -46,21 +43,7 @@ class ProductController extends GetxController {
   // Variables
   Rx<String> selectedProduct = ''.obs;
   RxBool isUpdating = false.obs;
-
-  // New variables for serial-numbered products
-  RxBool hasSerialNumbers = false.obs;
   RxBool isAddingVariants = false.obs;
-  RxBool showSoldVariants = false.obs; // Toggle for showing sold variants
-  RxBool isLoadingSoldVariants = false.obs; // Loading state for sold variants
-  RxBool soldVariantsFetched =
-      false.obs; // Track if sold variants have been fetched
-  final serialNumber = TextEditingController();
-  final purchasePrice = TextEditingController();
-  final variantSellingPrice = TextEditingController();
-
-  // For bulk import
-  RxList<ProductVariantModel> bulkImportVariants = <ProductVariantModel>[].obs;
-  final csvData = TextEditingController();
 
   // Product Detail Controllers
   RxInt productId = (-1).obs;
@@ -87,22 +70,8 @@ class ProductController extends GetxController {
 
   RxInt entityId = (-1).obs; // Form key for form validation
 
-  RxList<ProductVariantModel> unsavedProductVariants =
-      <ProductVariantModel>[].obs;
-
   // Track if we're in the middle of a variant fetch to prevent loops
   bool _isInVariantFetch = false;
-
-  // Computed property to get filtered variants based on toggle
-  List<ProductVariantModel> get filteredVariants {
-    if (showSoldVariants.value) {
-      // Show all variants (available + sold + unsaved)
-      return [...availableVariants, ...soldVariants, ...unsavedProductVariants];
-    } else {
-      // Show only available and unsaved variants
-      return [...availableVariants, ...unsavedProductVariants];
-    }
-  }
 
   @override
   void onInit() {
@@ -122,15 +91,10 @@ class ProductController extends GetxController {
     selectedBrandNameController.dispose();
     selectedCategoryNameController.dispose();
     salePrice.dispose();
-    serialNumber.dispose();
-    purchasePrice.dispose();
-    variantSellingPrice.dispose();
-    csvData.dispose();
 
     // Dispose focus nodes
     nameFocusNode.dispose();
     descriptionFocusNode.dispose();
-    serialNumbersFocusNode.dispose();
     basePriceFocusNode.dispose();
     salePriceFocusNode.dispose();
     stockFocusNode.dispose();
@@ -138,21 +102,15 @@ class ProductController extends GetxController {
 
     // Clear any cached data to prevent stale state
     currentProductVariants.clear();
-    bulkImportVariants.clear();
+    unsavedProductVariants.clear();
 
     super.onClose();
   }
 
   // Reset UI state when navigating away
   void resetState() {
-    // Don't clear product details if we're still seeing the same product
-    // to avoid re-fetching variants unnecessarily
-    final currentProductId = productId.value;
     cleanProductDetail();
-
-    // Reset main variables
     productId.value = -1;
-    hasSerialNumbers.value = false;
     isUpdating.value = false;
     isAddingVariants.value = false;
   }
@@ -174,36 +132,15 @@ class ProductController extends GetxController {
       originalCategoryId = -1;
       selectedCategoryNameController.clear();
       selectedBrandNameController.clear();
-      hasSerialNumbers.value = false;
 
-      // Use clear method instead of clearing directly to reduce rebuilds
+      // Clear variants
       if (currentProductVariants.isNotEmpty) {
         currentProductVariants.clear();
       }
-
-      if (availableVariants.isNotEmpty) {
-        availableVariants.clear();
+      if (unsavedProductVariants.isNotEmpty) {
+        unsavedProductVariants.clear();
       }
 
-      if (soldVariants.isNotEmpty) {
-        soldVariants.clear();
-      }
-
-      // Reset sold variants state
-      isLoadingSoldVariants.value = false;
-      soldVariantsFetched.value = false;
-
-      if (bulkImportVariants.isNotEmpty) {
-        bulkImportVariants.clear();
-      }
-
-      // Reset the sold variants toggle
-      showSoldVariants.value = false;
-
-      csvData.clear();
-      serialNumber.clear();
-      purchasePrice.clear();
-      variantSellingPrice.clear();
       update(); // Force UI update
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
@@ -236,26 +173,34 @@ class ProductController extends GetxController {
         return -1;
       }
 
-      // Create the product model
+      // Ensure at least one variant exists
+      if (currentProductVariants.isEmpty && unsavedProductVariants.isEmpty) {
+        TLoaders.errorSnackBar(
+          title: "No Variants",
+          message: 'Please add at least one variant to the product.',
+        );
+        return -1;
+      }
+
+      // Create the product model with calculated stock from variants
+      final totalStock = _calculateTotalStock();
+
       final productModel = ProductModel(
         productId: null,
         name: productName.text.trim(),
         description: productDescription.text.trim(),
         basePrice: basePrice.text.trim(),
         salePrice: salePrice.text.trim(),
-        stockQuantity:
-            hasSerialNumbers.value ? 0 : (int.tryParse(stock.text.trim()) ?? 0),
+        stockQuantity: totalStock,
         alertStock: int.tryParse(alertStock.text.trim()) ?? 0,
         brandID: selectedBrandId,
         categoryId: selectedCategoryId,
-        hasSerialNumbers: hasSerialNumbers.value,
       );
 
       // Insert the product into the database
       final json = productModel.toJson(isUpdate: true);
       debugPrint('Inserting product with data: $json');
 
-      // Using a Future.delayed to prevent UI freeze
       await Future.delayed(Duration.zero);
       final newProductId = await productRepository.insertProductInTable(json);
       debugPrint('Product inserted with ID: $newProductId');
@@ -267,10 +212,12 @@ class ProductController extends GetxController {
             "Failed to insert product. Invalid product ID returned.");
       }
 
-      // Assign the product ID to the model
+      // Assign the product ID to the model and controller
       productModel.productId = newProductId;
       productId.value = newProductId;
-      debugPrint('Product ID set in controller: ${productId.value}');
+
+      // Save variants to database
+      await saveUnsavedVariants();
 
       // Increment product count in brand and category
       final BrandController brandController = Get.find<BrandController>();
@@ -280,28 +227,25 @@ class ProductController extends GetxController {
       brandController.incrementProductCount(selectedBrandId);
       categoryController.incrementProductCount(selectedCategoryId);
 
-      // Save the original values for potential future updates
+      // Store original values for potential future updates
       originalBrandId = selectedBrandId;
       originalCategoryId = selectedCategoryId;
 
-      // Save the image (wrapped in try-catch to continue even if image upload fails)
+      // Save the image
       try {
         await mediaController.imageAssigner(newProductId,
             MediaCategory.products.toString().split('.').last, true);
         debugPrint('Product image uploaded successfully');
       } catch (e) {
         debugPrint('Error uploading image: $e');
-        // Continue with product creation even if image upload fails
       }
 
       // Add to local list
       allProducts.add(productModel);
       debugPrint('Product added to local list');
 
-      // For products without serial numbers, check for low stock
-      if (!hasSerialNumbers.value) {
-        await checkLowStock([newProductId]);
-      }
+      // Check for low stock
+      await checkLowStock([newProductId]);
 
       // Show success message
       TLoaders.successSnackBar(
@@ -309,7 +253,6 @@ class ProductController extends GetxController {
         message: 'Product added successfully!',
       );
 
-      // Return the new product ID
       return newProductId;
     } catch (e) {
       debugPrint('Error inserting product: $e');
@@ -341,26 +284,38 @@ class ProductController extends GetxController {
         return false;
       }
 
+      // Ensure at least one variant exists
+      if (currentProductVariants.isEmpty && unsavedProductVariants.isEmpty) {
+        TLoaders.errorSnackBar(
+          title: "No Variants",
+          message: 'Please add at least one variant to the product.',
+        );
+        return false;
+      }
+
+      // Calculate total stock from variants
+      final totalStock = _calculateTotalStock();
+
       final productModel = ProductModel(
         productId: productId.value,
         name: productName.text.trim(),
         description: productDescription.text.trim(),
         basePrice: basePrice.text.trim(),
         salePrice: salePrice.text.trim(),
-        stockQuantity: (int.tryParse(stock.text.trim()) ??
-            0), //not added if serial number is true
+        stockQuantity: totalStock,
         alertStock: int.tryParse(alertStock.text.trim()) ?? 0,
         brandID: selectedBrandId,
         categoryId: selectedCategoryId,
-        hasSerialNumbers: hasSerialNumbers.value,
       );
 
-      final json =
-          productModel.toJson(isUpdate: true, isSerial: hasSerialNumbers.value);
+      final json = productModel.toJson(isUpdate: true);
       debugPrint('Updating product with data: $json');
 
       await productRepository.updateProduct(json);
       debugPrint('Product update database call completed');
+
+      // Save any unsaved variants
+      await saveUnsavedVariants();
 
       // Handle brand and category count updates if they changed
       final BrandController brandController = Get.find<BrandController>();
@@ -369,17 +324,13 @@ class ProductController extends GetxController {
 
       // Update brand count if brand changed
       if (selectedBrandId != originalBrandId && originalBrandId > 0) {
-        // Decrement old brand count
         brandController.decrementProductCount(originalBrandId);
-        // Increment new brand count
         brandController.incrementProductCount(selectedBrandId);
       }
 
       // Update category count if category changed
       if (selectedCategoryId != originalCategoryId && originalCategoryId > 0) {
-        // Decrement old category count
         categoryController.decrementProductCount(originalCategoryId);
-        // Increment new category count
         categoryController.incrementProductCount(selectedCategoryId);
       }
 
@@ -394,7 +345,6 @@ class ProductController extends GetxController {
         debugPrint('Product image updated successfully');
       } catch (e) {
         debugPrint('Error updating product image: $e');
-        // Continue even if image update fails
       }
 
       // Update local list
@@ -408,10 +358,8 @@ class ProductController extends GetxController {
         allProducts.add(productModel);
       }
 
-      // For products without serial numbers, check for low stock
-      if (!hasSerialNumbers.value) {
-        await checkLowStock([productId.value]);
-      }
+      // Check for low stock
+      await checkLowStock([productId.value]);
 
       // Show success message
       TLoaders.successSnackBar(
@@ -455,17 +403,14 @@ class ProductController extends GetxController {
 
       selectedBrandNameController.text = brandController.allBrands
               .firstWhere((brand) => brand.brandID == product.brandID)
-              .bname ??
+              .brandName ??
           '';
       selectedCategoryNameController.text = categoryController.allCategories
           .firstWhere((category) => category.categoryId == product.categoryId)
           .categoryName;
 
-      // Set the hasSerialNumbers flag
-      hasSerialNumbers.value = product.hasSerialNumbers;
-
-      // Fetch product variants if it's a serialized product
-      if (product.hasSerialNumbers && product.productId != null) {
+      // Fetch product variants
+      if (product.productId != null) {
         fetchProductVariants(product.productId!);
       }
     } catch (e) {
@@ -490,10 +435,6 @@ class ProductController extends GetxController {
       if (kDebugMode) {
         print('Product list refreshed from database');
       }
-      // TLoaders.successSnackBar(
-      //   title: 'Refreshed!',
-      //   message: 'Product list has been updated.',
-      // );
     } catch (e) {
       if (kDebugMode) {
         print('Error refreshing products: $e');
@@ -503,15 +444,6 @@ class ProductController extends GetxController {
 
   // Fetch variants for a specific product
   Future<void> fetchProductVariants(int productId) async {
-    // Print stack trace to identify caller
-    debugPrint('CALL STACK: fetchProductVariants called from:');
-    try {
-      throw Exception('Stack trace check');
-    } catch (e, stackTrace) {
-      debugPrint(stackTrace.toString().split('\n').take(10).join('\n'));
-    }
-
-    // Prevent infinite recursive calls
     if (_isInVariantFetch) {
       debugPrint('Already in fetchProductVariants - preventing loop');
       return;
@@ -521,151 +453,56 @@ class ProductController extends GetxController {
       _isInVariantFetch = true;
       isAddingVariants.value = true;
 
-      // Use update to notify UI of loading state
-      update(['variants_list']);
-
       // Clear variants lists before fetching
       currentProductVariants.clear();
-      availableVariants.clear();
 
-      // Fetch only available variants initially
-      debugPrint('Starting available variant fetch for product $productId');
+      debugPrint('Starting variant fetch for product $productId');
       final variants =
-          await productVariantsRepository.fetchAvailableVariants(productId);
-      debugPrint(
-          'Fetch completed, found ${variants.length} available variants');
+          await productVariantsRepository.fetchProductVariants(productId);
+      debugPrint('Fetch completed, found ${variants.length} variants');
 
-      // Store available variants
-      availableVariants.assignAll(variants);
+      // Store variants
+      currentProductVariants.assignAll(variants);
 
-      // Update currentProductVariants based on filter
-      updateFilteredVariantsList();
-      debugPrint(
-          'Assigned ${currentProductVariants.length} filtered variants to UI list');
-
-      // Update the product stock count if needed
-      debugPrint('About to update product stock from variants');
+      // Update the product stock display
       updateProductStockFromVariants();
-      debugPrint('Stock updated');
 
-      // Use GetBuilder update to refresh the UI with new data
       update(['variants_list']);
     } catch (e) {
       debugPrint('Error fetching variants: $e');
-      // Don't show error to user, just log it
     } finally {
-      // Always reset loading state
       isAddingVariants.value = false;
       _isInVariantFetch = false;
-
-      // Final update to ensure UI is refreshed with correct loading state
       update(['variants_list']);
-
       debugPrint('Exiting fetchProductVariants');
     }
   }
 
-  // Add a variant to a product
-  Future<void> addVariant() async {
-    try {
-      debugPrint('AddVariant called - starting process');
-      // Prevent multiple simultaneous add operations
-      if (isAddingVariants.value) {
-        debugPrint('Already adding variant - skipping');
-        return;
-      }
-
-      // Validate the form field values
-      final serialNum = serialNumber.text.trim();
-      final buyPrice = purchasePrice.text.trim();
-      final sellPrice = variantSellingPrice.text.trim();
-
-      debugPrint('Serial: $serialNum, Buy: $buyPrice, Sell: $sellPrice');
-
-      if (serialNum.isEmpty || buyPrice.isEmpty || sellPrice.isEmpty) {
-        debugPrint('Fields empty - returning early');
-        TLoaders.errorSnackBar(
-          title: "Empty Fields",
-          message: 'Please fill all variant details',
-        );
-        return;
-      }
-
-      if (double.tryParse(buyPrice) == null) {
-        TLoaders.errorSnackBar(
-          title: "Invalid Price",
-          message: 'Buy price must be a valid number',
-        );
-        return;
-      }
-
-      if (double.tryParse(sellPrice) == null) {
-        TLoaders.errorSnackBar(
-          title: "Invalid Price",
-          message: 'Sell price must be a valid number',
-        );
-        return;
-      }
-
-      // Check if serial number already exists in current list
-      if (currentProductVariants.any((v) => v.serialNumber == serialNum)) {
-        TLoaders.errorSnackBar(
-          title: "Duplicate Serial",
-          message: 'This serial number already exists in the list',
-        );
-        return;
-      }
-
-      // Set loading state briefly to show feedback
-      isAddingVariants.value = true;
-      update(['variants_list']);
-
-      // Small delay for visual feedback
-      await Future.delayed(const Duration(milliseconds: 300));
-
-      // Create the variant
-      final variant = ProductVariantModel(
-        productId: productId.value,
-        serialNumber: serialNum,
-        purchasePrice: double.tryParse(buyPrice) ?? 0.0,
-        sellingPrice: double.tryParse(sellPrice) ?? 0.0,
-      );
-
-      // Add to unsaved list instead of database
-      addVariantToUnsaved(variant);
-
-      // Show success message
-      TLoaders.successSnackBar(
-        title: "Variant Added",
-        message: 'Remember to save changes to store in database',
-      );
-    } catch (e) {
-      TLoaders.errorSnackBar(
-        title: "Error Adding Variant",
-        message: e.toString(),
-      );
-    } finally {
-      // Reset loading state
-      isAddingVariants.value = false;
-      update(['variants_list']);
-    }
-  }
-
-  // Add this method to handle temporary variant storage
+  // Add variant to unsaved list
   void addVariantToUnsaved(ProductVariantModel variant) {
-    // Add new variant to unsaved list
-    unsavedProductVariants.add(variant);
+    // Check if variant already exists (for editing)
+    if (variant.variantId != null) {
+      // For existing variants, update in currentProductVariants
+      final index = currentProductVariants
+          .indexWhere((v) => v.variantId == variant.variantId);
+      if (index != -1) {
+        currentProductVariants[index] = variant;
+      }
+    } else {
+      // For new variants, add to unsaved list
+      unsavedProductVariants.add(variant);
+    }
 
-    // Update the filtered variants list
-    updateFilteredVariantsList();
+    // Update total stock display
+    updateProductStockFromVariants();
 
-    // Clear the form fields after adding
-    serialNumber.clear();
-    purchasePrice.clear();
-    variantSellingPrice.clear();
+    TLoaders.successSnackBar(
+      title: "Variant Added",
+      message: 'Variant added successfully. Remember to save changes.',
+    );
   }
 
-  // Add this method to save unsaved variants to database
+  // Save unsaved variants to database
   Future<void> saveUnsavedVariants() async {
     if (unsavedProductVariants.isEmpty) return;
 
@@ -673,33 +510,32 @@ class ProductController extends GetxController {
     try {
       debugPrint('Starting to save ${unsavedProductVariants.length} variants');
 
-      // Keep track of the count to show in the success message
       final int variantCount = unsavedProductVariants.length;
 
       for (final variant in unsavedProductVariants) {
-        // Add to database - use the current productId
         debugPrint(
-            'Saving variant with serial: ${variant.serialNumber} for product: ${productId.value}');
+            'Saving variant: ${variant.variantName} for product: ${productId.value}');
 
         final result = await productVariantsRepository
             .insertVariant(variant.copyWith(productId: productId.value));
 
         if (result > 0) {
           debugPrint(
-              '✓ Saved variant with ID: $result and serial: ${variant.serialNumber}');
+              '✓ Saved variant with ID: $result and name: ${variant.variantName}');
+          // Add to current variants with the new ID
+          currentProductVariants.add(
+              variant.copyWith(variantId: result, productId: productId.value));
         } else {
-          debugPrint(
-              '✗ Failed to save variant with serial: ${variant.serialNumber}');
+          debugPrint('✗ Failed to save variant: ${variant.variantName}');
         }
       }
 
       // Clear the unsaved list after successful save
       unsavedProductVariants.clear();
 
-      // Refresh variants from database to get proper IDs
-      await fetchProductVariants(productId.value);
+      // Update stock display
+      updateProductStockFromVariants();
 
-      // Show a more accurate success message
       TLoaders.successSnackBar(
         title: "Variants Saved",
         message: "$variantCount variants saved to database",
@@ -716,154 +552,15 @@ class ProductController extends GetxController {
     }
   }
 
-  // Parse CSV data for bulk import
-  void parseCsvData() {
-    try {
-      bulkImportVariants.clear();
-
-      if (productId.value == -1) {
-        TLoaders.errorSnackBar(
-          title: "Error",
-          message: 'Please save the product first before adding variants',
-        );
-        return;
-      }
-
-      final lines = csvData.text.trim().split('\n');
-
-      if (lines.isEmpty) {
-        TLoaders.errorSnackBar(
-          title: "Empty CSV",
-          message: 'No data found in the CSV input',
-        );
-        return;
-      }
-
-      // Process each line
-      for (int i = 0; i < lines.length; i++) {
-        final line = lines[i].trim();
-        if (line.isEmpty) continue;
-
-        final parts = line.split(',');
-        if (parts.length < 3) {
-          TLoaders.errorSnackBar(
-            title: "Invalid CSV Format",
-            message:
-                'Line ${i + 1} has invalid format. Expected: SerialNumber,PurchasePrice,SellingPrice',
-          );
-          bulkImportVariants.clear();
-          return;
-        }
-
-        // Parse the data
-        final serialNumber = parts[0].trim();
-        final purchasePrice = double.tryParse(parts[1].trim()) ?? 0.0;
-        final sellingPrice = double.tryParse(parts[2].trim()) ?? 0.0;
-
-        // Create a variant
-        final variant = ProductVariantModel(
-          productId: productId.value,
-          serialNumber: serialNumber,
-          purchasePrice: purchasePrice,
-          sellingPrice: sellingPrice,
-        );
-
-        bulkImportVariants.add(variant);
-      }
-
-      if (bulkImportVariants.isEmpty) {
-        TLoaders.errorSnackBar(
-          title: "No Valid Data",
-          message: 'No valid variant data found in the CSV input',
-        );
-        return;
-      }
-
-      TLoaders.successSnackBar(
-        title: "CSV Parsed",
-        message: '${bulkImportVariants.length} variants ready for import',
-      );
-    } catch (e) {
-      TLoaders.errorSnackBar(
-        title: "CSV Parse Error",
-        message: e.toString(),
-      );
-      bulkImportVariants.clear();
-    }
-  }
-
-  // Bulk import variants
-  Future<void> bulkImportVariantsToProduct() async {
-    try {
-      isAddingVariants.value = true;
-      update(['variants_list']);
-
-      if (bulkImportVariants.isEmpty) {
-        TLoaders.errorSnackBar(
-          title: "No Variants",
-          message: 'No variants to import. Parse CSV data first.',
-        );
-        return;
-      }
-
-      // Use a brief delay for UI feedback
-      await Future.delayed(const Duration(milliseconds: 300));
-
-      // Check for duplicate serial numbers in existing list
-      for (final importVariant in bulkImportVariants) {
-        if (currentProductVariants
-            .any((v) => v.serialNumber == importVariant.serialNumber)) {
-          TLoaders.errorSnackBar(
-            title: "Duplicate Serial Number",
-            message:
-                'Serial number "${importVariant.serialNumber}" already exists in the list',
-          );
-          return;
-        }
-      }
-
-      // Add all variants to the unsaved list
-      for (final importVariant in bulkImportVariants) {
-        addVariantToUnsaved(importVariant);
-        // Brief delay between additions to allow UI to update
-        await Future.delayed(const Duration(milliseconds: 50));
-      }
-
-      final importCount = bulkImportVariants.length;
-
-      // Clear the CSV data and import list
-      csvData.clear();
-      bulkImportVariants.clear();
-
-      TLoaders.successSnackBar(
-        title: "Success",
-        message:
-            '$importCount variants added to list. Remember to save changes.',
-      );
-    } catch (e) {
-      TLoaders.errorSnackBar(
-        title: "Import Error",
-        message: e.toString(),
-      );
-    } finally {
-      isAddingVariants.value = false;
-      update(['variants_list']);
-    }
-  }
-
   // Delete a variant
   Future<void> deleteVariant(int variantId) async {
     try {
       await productVariantsRepository.deleteVariant(variantId);
 
-      // Remove from both the availableVariants and soldVariants lists
-      availableVariants.removeWhere((v) => v.variantId == variantId);
-      soldVariants.removeWhere((v) => v.variantId == variantId);
+      // Remove from current variants list
+      currentProductVariants.removeWhere((v) => v.variantId == variantId);
 
-      // Update the filtered variants list
-      updateFilteredVariantsList();
-
-      // Update the in-memory product stock count for UI display
+      // Update stock display
       updateProductStockFromVariants();
 
       TLoaders.successSnackBar(
@@ -878,33 +575,39 @@ class ProductController extends GetxController {
     }
   }
 
-  // Update the product's stock count based on available variants
+  // Delete unsaved variant
+  void deleteUnsavedVariant(String variantName) {
+    unsavedProductVariants.removeWhere((v) => v.variantName == variantName);
+    updateProductStockFromVariants();
+  }
+
+  // Update the product's stock count based on variants
   void updateProductStockFromVariants() {
-    debugPrint(
-        'STOCK UPDATE: hasSerialNumbers=${hasSerialNumbers.value}, productId=${productId.value}');
-    if (!hasSerialNumbers.value || productId.value == -1) return;
+    if (productId.value == -1) return;
 
-    final availableVariants =
-        currentProductVariants.where((v) => !v.isSold).length;
-    debugPrint('Available variants count: $availableVariants');
+    final totalStock = _calculateTotalStock();
 
-    // Find the product in the allProducts list
+    // Update the stock field in the UI
+    stock.text = totalStock.toString();
+
+    // Update in allProducts list if product exists
     final index = allProducts.indexWhere((p) => p.productId == productId.value);
     if (index != -1) {
-      // Update the stock quantity
-      final updatedProduct = allProducts[index].copyWith(
-        stockQuantity: availableVariants,
-      );
-
-      // Replace the product in the list
+      final updatedProduct =
+          allProducts[index].copyWith(stockQuantity: totalStock);
       allProducts[index] = updatedProduct;
-
-      // Update the stock field in the UI
-      stock.text = availableVariants.toString();
-      debugPrint('Updated stock UI to: $availableVariants');
-    } else {
-      debugPrint('Product not found in allProducts list');
     }
+
+    debugPrint('Updated stock to: $totalStock');
+  }
+
+  // Calculate total stock from all variants
+  int _calculateTotalStock() {
+    final currentStock = currentProductVariants.fold<int>(
+        0, (sum, variant) => sum + variant.stock);
+    final unsavedStock = unsavedProductVariants.fold<int>(
+        0, (sum, variant) => sum + variant.stock);
+    return currentStock + unsavedStock;
   }
 
   int? findProductIdByName(String productName) {
@@ -917,24 +620,22 @@ class ProductController extends GetxController {
     }
   }
 
-  // Method to update stock quantity for non-serialized products
+  // Method to update stock quantity for products
   Future<void> updateStockQuantities(List<OrderItemModel>? orderItems) async {
     if (orderItems == null || orderItems.isEmpty) return;
 
     for (var item in orderItems) {
-      // Check if this is a serialized product
-      final product = allProducts.firstWhere(
-        (p) => p.productId == item.productId,
-        orElse: () => ProductModel.empty(),
-      );
-
-      if (product.hasSerialNumbers) {
-        // For serialized products, mark variants as sold
-        if (item.variantId != null) {
-          await productVariantsRepository.markVariantAsSold(item.variantId!);
+      if (item.variantId != null) {
+        // For variant-based orders, update the specific variant stock
+        final variant = currentProductVariants
+            .firstWhereOrNull((v) => v.variantId == item.variantId);
+        if (variant != null) {
+          final newStock = variant.stock - item.quantity;
+          await productVariantsRepository.updateVariantStock(
+              item.variantId!, newStock.clamp(0, 999999));
         }
       } else {
-        // For non-serialized products, update stock quantity
+        // For non-variant orders, update overall product stock
         await productRepository.updateStockQuantity(
           productId: item.productId,
           quantitySold: item.quantity,
@@ -945,24 +646,49 @@ class ProductController extends GetxController {
       final productIndex =
           allProducts.indexWhere((p) => p.productId == item.productId);
       if (productIndex != -1) {
-        if (product.hasSerialNumbers) {
-          // For serialized products, we'll fetch the exact count from variants
-          final availableCount = await productVariantsRepository
-              .countAvailableVariants(item.productId);
-          final updatedProduct = allProducts[productIndex].copyWith(
-            stockQuantity: availableCount,
-          );
-          allProducts[productIndex] = updatedProduct;
-        } else {
-          // For non-serialized products, just decrement the count
-          final updatedProduct = allProducts[productIndex].copyWith(
-            stockQuantity:
-                allProducts[productIndex].stockQuantity! - item.quantity,
-          );
-          allProducts[productIndex] = updatedProduct;
-        }
+        // Recalculate stock from variants
+        final totalStock = await productVariantsRepository
+            .calculateProductStock(item.productId);
+        final updatedProduct =
+            allProducts[productIndex].copyWith(stockQuantity: totalStock);
+        allProducts[productIndex] = updatedProduct;
         update();
       }
+    }
+  }
+
+  // Method to add stock quantity for product variants
+  Future<void> addVariantStock(int variantId, int quantityToAdd) async {
+    try {
+      if (currentProductVariants.isEmpty) {
+        print('currentProductVariants is empty');
+      }
+      final variant = currentProductVariants
+          .firstWhereOrNull((v) => v.variantId == variantId);
+
+      if (variant != null) {
+        final newStock = variant.stock + quantityToAdd;
+        await productVariantsRepository.updateVariantStock(variantId, newStock);
+
+        // Update local list
+        final index =
+            currentProductVariants.indexWhere((v) => v.variantId == variantId);
+        if (index != -1) {
+          currentProductVariants[index] = variant.copyWith(stock: newStock);
+          update(); // Update UI if necessary
+        }
+        // Also update the overall product stock display
+        updateProductStockFromVariants();
+      } else {
+        // Handle case where variant is not found locally (e.g., fetch from repo if needed)
+        // For now, just log a warning or error
+        if (kDebugMode) {
+          print('Warning: Variant $variantId not found in local list.');
+        }
+      }
+    } catch (e) {
+      TLoaders.errorSnackBar(
+          title: 'Stock Update Error', message: e.toString());
     }
   }
 
@@ -973,8 +699,6 @@ class ProductController extends GetxController {
       if (kDebugMode) {
         print('Low Stock Check Error: $e');
       }
-      // Don't show error to user since this is just a notification feature
-      // and shouldn't block regular operations
     }
   }
 
@@ -983,98 +707,15 @@ class ProductController extends GetxController {
     Get.toNamed(TRoutes.productsDetail, arguments: product);
   }
 
-  /// Toggles the has serial numbers flag and updates the UI
-  void toggleHasSerialNumbers(bool value) {
-    hasSerialNumbers.value = value;
-
-    if (value) {
-      // Clear the stock field since it will be auto-calculated
-      stock.text = '0';
-      basePrice.text = '0';
-      salePrice.text = '0';
-
-      // Force immediate UI update
-      update();
-
-      // Schedule another update to ensure form visibility after state changes
-      Future.delayed(Duration.zero, () {
-        currentProductVariants.refresh();
-        update();
-      });
-    } else {
-      // Clear variants if serial numbers are disabled
-      currentProductVariants.clear();
-      csvData.clear();
-      update();
-    }
-  }
-
-  /// Toggles the visibility of sold variants
-  void toggleSoldVariants(bool value) {
-    showSoldVariants.value = value;
-
-    // If enabling and sold variants haven't been fetched yet, fetch them
-    if (value && !soldVariantsFetched.value && productId.value > 0) {
-      fetchSoldVariants(productId.value);
-    } else {
-      // Update the current variants list based on the filter
-      updateFilteredVariantsList();
-    }
-  }
-
-  /// Fetches sold variants from the database
-  Future<void> fetchSoldVariants(int productId) async {
+  // Get visible variants for a product
+  Future<List<ProductVariantModel>> getVisibleVariants(int productId) async {
     try {
-      isLoadingSoldVariants.value = true;
-
-      debugPrint('Fetching sold variants for product $productId');
-
-      // Fetch all variants then filter for sold ones
-      final allVariants = await productVariantsRepository
-          .fetchProductVariants(productId, limit: 100);
-
-      final soldVariantsList = allVariants.where((v) => v.isSold).toList();
-      debugPrint('Found ${soldVariantsList.length} sold variants');
-
-      // Store sold variants
-      soldVariants.assignAll(soldVariantsList);
-      soldVariantsFetched.value = true;
-
-      // Update the filtered variants list
-      updateFilteredVariantsList();
-    } catch (e) {
-      debugPrint('Error fetching sold variants: $e');
-      TLoaders.errorSnackBar(
-          title: "Error", message: "Failed to load sold variants: $e");
-    } finally {
-      isLoadingSoldVariants.value = false;
-    }
-  }
-
-  /// Updates the currentProductVariants list based on the filter
-  void updateFilteredVariantsList() {
-    currentProductVariants.assignAll(filteredVariants);
-    update(['variants_list']);
-  }
-
-  // Get available (unsold) variants for a product
-  Future<List<ProductVariantModel>> getAvailableVariants(int productId) async {
-    try {
-      return await productVariantsRepository.fetchAvailableVariants(productId);
+      return await productVariantsRepository.fetchVisibleVariants(productId);
     } catch (e) {
       TLoaders.errorSnackBar(
           title: 'Fetch Variants Error', message: e.toString());
       return [];
     }
-  }
-
-  // Add a method to delete unsaved variants
-  void deleteUnsavedVariant(String serialNumber) {
-    // Remove from unsaved list
-    unsavedProductVariants.removeWhere((v) => v.serialNumber == serialNumber);
-
-    // Update the filtered variants list
-    updateFilteredVariantsList();
   }
 
   Future<void> handleSave() async {

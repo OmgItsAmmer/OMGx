@@ -29,7 +29,7 @@ class BrandTable extends StatelessWidget {
       var filteredBrands = [...brandController.allBrands]; // Create a copy
       if (searchTerm.isNotEmpty) {
         filteredBrands = brandController.allBrands.where((brand) {
-          return (brand.bname?.toLowerCase() ?? '').contains(searchTerm);
+          return (brand.brandName?.toLowerCase() ?? '').contains(searchTerm);
         }).toList();
       }
 

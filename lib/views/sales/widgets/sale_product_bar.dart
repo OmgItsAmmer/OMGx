@@ -36,35 +36,19 @@ class ProductSearchBar extends StatelessWidget {
           salesController.selectedVariantId.value = -1;
         },
         onSelected: (ProductModel selectedProduct) async {
-          final isSerializedProduct = selectedProduct.hasSerialNumbers;
-          salesController.isSerialziedProduct.value = isSerializedProduct;
+          // For all products, load their variants since every product has variants now
+          await salesController
+              .loadAvailableVariants(selectedProduct.productId ?? -1);
 
-          // Load variants for serialized products
-          if (isSerializedProduct) {
-            await salesController
-                .loadAvailableVariants(selectedProduct.productId ?? -1);
+          // Set default unit price from product base price
+          salesController.unitPrice.value.text =
+              selectedProduct.salePrice ?? "0";
 
-            // For serialized products, quantity is always 1
-            salesController.quantity.text = "1";
-            salesController.unitPrice.value
-                .clear(); // Will be set when variant is selected
-            salesController.totalPrice.value
-                .clear(); // Will be set when variant is selected
-          } else {
-            // For non-serialized products
-            salesController.unitPrice.value.text =
-                selectedProduct.salePrice ?? "0";
-
-            // Calculate buying price for profit calculation
-            salesController.buyingPriceIndividual = double.tryParse(
-                  selectedProduct.basePrice ?? "0",
-                ) ??
-                0.0;
-
-            // Clear any previously loaded variants
-            salesController.availableVariants.clear();
-            salesController.selectedVariantId.value = -1;
-          }
+          // Calculate buying price for profit calculation
+          salesController.buyingPriceIndividual = double.tryParse(
+                selectedProduct.basePrice ?? "0",
+              ) ??
+              0.0;
 
           // Request focus on the unit price field after selection logic is complete
           salesController.unitPriceFocus.requestFocus();

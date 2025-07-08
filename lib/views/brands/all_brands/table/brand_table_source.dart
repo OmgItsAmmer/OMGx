@@ -33,7 +33,7 @@ class BrandRow extends DataTableSource {
         },
         cells: [
           DataCell(Text(
-            brand.bname.toString(),
+            brand.brandName.toString(),
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
@@ -56,12 +56,12 @@ class BrandRow extends DataTableSource {
               brandController.setBrandDetail(brand);
 
               Get.toNamed(TRoutes.brandDetails, arguments: brand);
-            }, // TODO use get argument to send data in order detail screen
+            }, // TODO use get argument to send data in order detail screen 
             onDeletePressed: () {
               Get.defaultDialog(
                 title: "Confirm Delete",
                 middleText:
-                    "Are you sure you want to delete the brand ${brand.bname}?",
+                    "Are you sure you want to delete the brand ${brand.brandName}?",
                 textConfirm: "Delete",
                 textCancel: "Cancel",
                 confirmTextColor: Colors.white,

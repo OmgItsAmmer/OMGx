@@ -35,45 +35,68 @@ class PurchaseProductSearchBar extends StatelessWidget {
         getItemId: (ProductModel product) => product.productId,
         onManualTextEntry: (String text) {
           // Clear variants and product id if the user is typing manually
-          purchaseSalesController.availableVariants.clear();
-          purchaseSalesController.selectedVariantId.value = -1;
-          purchaseSalesController.isSerializedProduct.value = false;
-          purchaseSalesController
-              .clearPurchaseVariants(); // Clear purchase variants
+          purchaseSalesController.clearVariantSelection();
         },
         onSelected: (ProductModel selectedProduct) async {
-          final isSerializedProduct = selectedProduct.hasSerialNumbers;
-          purchaseSalesController.isSerializedProduct.value =
-              isSerializedProduct;
+          try {
+            // Clear any previous variant data
+            purchaseSalesController.clearVariantSelection();
 
-          if (isSerializedProduct) {
-            // For serialized products - clear any existing variants and prepare for variant manager
-            purchaseSalesController.clearPurchaseVariants();
-            purchaseSalesController.availableVariants.clear();
-            purchaseSalesController.selectedVariantId.value = -1;
-
-            // Set base price from product for new variants
+            // Set base price from product for purchases (cost price)
             purchaseSalesController.purchaseVariantPurchasePrice.text =
                 selectedProduct.basePrice ?? "0";
             purchaseSalesController.purchaseVariantSellingPrice.text =
                 selectedProduct.salePrice ?? "0";
 
-            // Clear the unit price and quantity fields since we'll use variant manager
-            purchaseSalesController.unitPrice.value.clear();
-            purchaseSalesController.quantity.text = '';
-            purchaseSalesController.totalPrice.value.clear();
-          } else {
-            // For non-serialized products - use base price for purchases (cost price)
+            // Load all available variants for this product
+            await purchaseSalesController
+                .loadAvailableVariants(selectedProduct.productId!);
+
+            // Check if product has variants
+            if (purchaseSalesController.availableVariants.isNotEmpty) {
+              // Product has variants - show them for selection
+              purchaseSalesController.showVariantSelectionMode.value = true;
+
+              // Clear unit price fields to encourage variant selection
+              purchaseSalesController.unitPrice.value.clear();
+              purchaseSalesController.quantity.text = "";
+              purchaseSalesController.totalPrice.value.clear();
+
+              // Show message to user
+              Get.snackbar(
+                'Product Variants Available',
+                'This product has ${purchaseSalesController.availableVariants.length} variants. Please select variants below or use the variant manager to add new ones.',
+                snackPosition: SnackPosition.TOP,
+                backgroundColor: Colors.blue.withOpacity(0.8),
+                colorText: Colors.white,
+                duration: const Duration(seconds: 3),
+              );
+            } else {
+              // No variants - treat as regular product
+              purchaseSalesController.showVariantSelectionMode.value = false;
+
+              // For regular purchase entry, use base price as unit price
+              purchaseSalesController.unitPrice.value.text =
+                  selectedProduct.basePrice ?? "0";
+
+              // Focus on quantity for regular products
+              purchaseSalesController.quantityFocus.requestFocus();
+            }
+          } catch (e) {
+            print('Error loading product variants: $e');
+            Get.snackbar(
+              'Error',
+              'Failed to load product variants. You can still add this product manually.',
+              snackPosition: SnackPosition.TOP,
+              backgroundColor: Colors.red.withOpacity(0.8),
+              colorText: Colors.white,
+            );
+
+            // Fallback to regular product mode
+            purchaseSalesController.showVariantSelectionMode.value = false;
             purchaseSalesController.unitPrice.value.text =
                 selectedProduct.basePrice ?? "0";
-
-            // Clear any previously loaded variants
-            purchaseSalesController.availableVariants.clear();
-            purchaseSalesController.selectedVariantId.value = -1;
-            purchaseSalesController.clearPurchaseVariants();
-
-            // Request focus on the unit price field after selection logic is complete
-            purchaseSalesController.unitPriceFocus.requestFocus();
+            purchaseSalesController.quantityFocus.requestFocus();
           }
         },
         validator: (value) =>

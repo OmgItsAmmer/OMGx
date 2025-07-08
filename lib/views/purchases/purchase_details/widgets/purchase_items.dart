@@ -234,7 +234,7 @@ class PurchaseItems extends StatelessWidget {
     String displayName = product.name ?? 'Not Found';
 
     // Check if this is a serialized product and has a variant ID
-    if (product.hasSerialNumbers && item.variantId != null) {
+    if ( item.variantId != null) {
       try {
         // Fetch the variant information
         final variants =
@@ -242,9 +242,9 @@ class PurchaseItems extends StatelessWidget {
         final variant =
             variants.firstWhereOrNull((v) => v.variantId == item.variantId);
 
-        if (variant != null && variant.serialNumber.isNotEmpty) {
+        if (variant != null) {
           // Append the serial number to the product name
-          displayName = '$displayName (${variant.serialNumber})';
+          displayName = '$displayName (${variant.variantId})';
         }
       } catch (e) {
         if (kDebugMode) {

@@ -17,7 +17,7 @@ class BrandRepository {
 
       TLoaders.successSnackBar(
           title: 'Brand Updated',
-          message: '${json['bname']} has been updated.');
+          message: '${json['brandname']} has been updated.');
     } on PostgrestException catch (e) {
       TLoaders.errorSnackBar(title: 'Brand Repo Error', message: e.message);
       rethrow;
@@ -30,10 +30,10 @@ class BrandRepository {
   // New method to update product count
   Future<void> updateBrandProductCount(int brandId, int count) async {
     try {
-      // Update just the products_count field
+      // Update just the product_count field
       await supabase
           .from('brands')
-          .update({'products_count': count}).eq('brandID', brandId);
+          .update({'product_count': count}).eq('brandID', brandId);
 
       if (kDebugMode) {
         print('Updated brand $brandId product count to $count');
@@ -87,7 +87,7 @@ class BrandRepository {
       final response = await Supabase.instance.client
           .from('brands')
           .select('brandID')
-          .eq('bname', brandName)
+          .eq('brandname', brandName)
           .single();
 
       // Check if the response contains the brandID

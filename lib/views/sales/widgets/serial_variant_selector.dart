@@ -28,9 +28,9 @@ class SerialVariantSelector extends StatelessWidget {
         orElse: () => ProductModel.empty(),
       );
 
-      if (!product.hasSerialNumbers) {
-        return const SizedBox.shrink();
-      }
+      // if (!product.hasSerialNumbers) {
+      //   return const SizedBox.shrink();
+      // }
 
       return TRoundedContainer(
         padding: const EdgeInsets.all(TSizes.md),
@@ -131,11 +131,11 @@ class SerialVariantSelector extends StatelessWidget {
         children: [
           Expanded(
             flex: 3,
-            child: Text(variant.serialNumber),
+            child: Text(variant.variantId.toString()),
           ),
           Expanded(
             flex: 2,
-            child: Text('Rs ${variant.sellingPrice.toStringAsFixed(2)}'),
+            child: Text('Rs ${variant.sellPrice.toStringAsFixed(2)}'),
           ),
           Expanded(
             flex: 1,

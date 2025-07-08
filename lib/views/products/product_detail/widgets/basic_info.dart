@@ -57,7 +57,7 @@ class BasicInfo extends StatelessWidget {
                     textInputAction: TextInputAction.next,
                     onFieldSubmitted: (_) {
                       // Force focus to the serial numbers toggle
-                      productController.serialNumbersFocusNode.requestFocus();
+                     // productController.serialNumbersFocusNode.requestFocus();
                     },
                     validator: (value) => TValidator.validateEmptyText(
                         'Product description', value),
@@ -71,51 +71,49 @@ class BasicInfo extends StatelessWidget {
                   const SizedBox(height: TSizes.spaceBtwInputFields),
 
                   // Serial Numbers Toggle - Now properly focusable
-                  Obx(() {
-                    final isExistingProduct =
-                        productController.productId.value > 0;
-                    return FocusableActionDetector(
-                      focusNode: productController.serialNumbersFocusNode,
-                      descendantsAreFocusable: false,
-                      onFocusChange: (hasFocus) {
-                        if (hasFocus) {
-                          // Ensure the SwitchListTile is highlighted when focused
-                          productController.serialNumbersFocusNode
-                              .requestFocus();
-                        }
-                      },
-                      child: Tooltip(
-                        message: isExistingProduct
-                            ? 'Product type cannot be changed for existing products'
-                            : 'Enable for products with unique serial numbers like electronics',
-                        child: SwitchListTile(
-                          title: const Text('Has Serial Numbers'),
-                          subtitle: const Text(
-                              'Enable for products with unique serial numbers like electronics'),
-                          value: productController.hasSerialNumbers.value,
-                          onChanged: isExistingProduct
-                              ? null
-                              : (value) {
-                                  productController
-                                      .toggleHasSerialNumbers(value);
-                                  productController.basePriceFocusNode
-                                      .requestFocus();
-                                },
-                        ),
-                      ),
-                    );
-                  }),
+                  // Obx(() {
+                  //   final isExistingProduct =
+                  //       productController.productId.value > 0;
+                  //   return FocusableActionDetector(
+                  //  //   focusNode: productController.serialNumbersFocusNode,
+                  //     descendantsAreFocusable: false,
+                  //     onFocusChange: (hasFocus) {
+                  //       if (hasFocus) {
+                  //         // Ensure the SwitchListTile is highlighted when focused
+                  //     //    productController.serialNumbersFocusNode
+                  //             .requestFocus();
+                  //       }
+                  //     },
+                  //     child: Tooltip(
+                  //       message: isExistingProduct
+                  //           ? 'Product type cannot be changed for existing products'
+                  //           : 'Enable for products with unique serial numbers like electronics',
+                  //       child: SwitchListTile(
+                  //         title: const Text('Has Serial Numbers'),
+                  //         subtitle: const Text(
+                  //             'Enable for products with unique serial numbers like electronics'),
+                  //         value: productController.hasSerialNumbers.value,
+                  //         onChanged: isExistingProduct
+                  //             ? null
+                  //             : (value) {
+                  //                 productController
+                  //                     .toggleHasSerialNumbers(value);
+                  //                 productController.basePriceFocusNode
+                  //                     .requestFocus();
+                  //               },
+                  //       ),
+                  //     ),
+                  //   );
+                  // }),
                   const SizedBox(height: TSizes.spaceBtwInputFields),
 
                   // Pricing & Stock Row
                   Row(
                     children: [
                       // Base Price Field
-                      Obx(() => Expanded(
+                      Expanded(
                             child: AnimatedOpacity(
-                              opacity: productController.hasSerialNumbers.value
-                                  ? 0.5
-                                  : 1.0,
+                              opacity:  1.0,
                               duration: const Duration(milliseconds: 300),
                               child: TextFormField(
                                 controller: productController.basePrice,
@@ -134,18 +132,15 @@ class BasicInfo extends StatelessWidget {
                                   labelText: 'Base Price',
                                   hintText: 'Basic price of product',
                                 ),
-                                readOnly:
-                                    productController.hasSerialNumbers.value,
+                              
                               ),
                             ),
-                          )),
+                          ),
                       const SizedBox(width: TSizes.spaceBtwInputFields),
                       // Sale Price Field
-                      Obx(() => Expanded(
+                     Expanded(
                             child: AnimatedOpacity(
-                              opacity: productController.hasSerialNumbers.value
-                                  ? 0.5
-                                  : 1.0,
+                              opacity: 1.0,
                               duration: const Duration(milliseconds: 300),
                               child: TextFormField(
                                 controller: productController.salePrice,
@@ -164,72 +159,69 @@ class BasicInfo extends StatelessWidget {
                                   labelText: 'Sale Price',
                                   hintText: 'Selling price of product',
                                 ),
-                                readOnly:
-                                    productController.hasSerialNumbers.value,
+                               
                               ),
                             ),
-                          )),
+                          )
                     ],
                   ),
                   const SizedBox(height: TSizes.spaceBtwInputFields),
 
-                  Row(
-                    children: [
-                      // Stock Field
-                      Obx(() => Expanded(
-                            child: AnimatedOpacity(
-                              opacity: productController.hasSerialNumbers.value
-                                  ? 0.5
-                                  : 1.0,
-                              duration: const Duration(milliseconds: 300),
-                              child: TextFormField(
-                                controller: productController.stock,
-                                focusNode: productController.stockFocusNode,
-                                textInputAction: TextInputAction.next,
-                                onFieldSubmitted: (_) => productController
-                                    .alertStockFocusNode
-                                    .requestFocus(),
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly
-                                ],
-                                enabled:
-                                    !productController.hasSerialNumbers.value,
-                                validator: (value) =>
-                                    !productController.hasSerialNumbers.value
-                                        ? TValidator.validateEmptyText(
-                                            'Stock', value)
-                                        : null,
-                                decoration: InputDecoration(
-                                  labelText: 'Stock',
-                                  hintText: 'Available stock',
-                                  helperText: productController
-                                          .hasSerialNumbers.value
-                                      ? 'Auto-managed for serialized products'
-                                      : null,
-                                ),
-                                readOnly: true,
-                              ),
-                            ),
-                          )),
-                      const SizedBox(width: TSizes.spaceBtwInputFields),
-                      // Alert Stock Field
-                      Expanded(
-                        child: TextFormField(
-                          controller: productController.alertStock,
-                          focusNode: productController.alertStockFocusNode,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly
-                          ],
-                          validator: (value) => TValidator.validateEmptyText(
-                              'Alert on stock', value),
-                          decoration: const InputDecoration(
-                            labelText: 'Alert Stock',
-                            hintText: 'Alert on stock below',
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  // Row(
+                  //   children: [
+                  //     // // Stock Field
+                  //     // Obx(() => Expanded(
+                  //     //       child: AnimatedOpacity(
+                  //     //         opacity:    1.0,
+                  //     //         duration: const Duration(milliseconds: 300),
+                  //     //         child: TextFormField(
+                  //     //           controller: productController.stock,
+                  //     //           focusNode: productController.stockFocusNode,
+                  //     //           textInputAction: TextInputAction.next,
+                  //     //           onFieldSubmitted: (_) => productController
+                  //     //               .alertStockFocusNode
+                  //     //               .requestFocus(),
+                  //     //           inputFormatters: [
+                  //     //             FilteringTextInputFormatter.digitsOnly
+                  //     //           ],
+                  //     //           enabled:
+                  //     //               !productController.hasSerialNumbers.value,
+                  //     //           validator: (value) =>
+                  //     //               !productController.hasSerialNumbers.value
+                  //     //                   ? TValidator.validateEmptyText(
+                  //     //                       'Stock', value)
+                  //     //                   : null,
+                  //     //           decoration: InputDecoration(
+                  //     //             labelText: 'Stock',
+                  //     //             hintText: 'Available stock',
+                  //     //             helperText: productController
+                  //     //                     .hasSerialNumbers.value
+                  //     //                 ? 'Auto-managed for serialized products'
+                  //     //                 : null,
+                  //     //           ),
+                  //     //           readOnly: true,
+                  //     //         ),
+                  //     //       ),
+                  //     //     )),
+                  //     const SizedBox(width: TSizes.spaceBtwInputFields),
+                  //     // Alert Stock Field
+                  //     Expanded(
+                  //       child: TextFormField(
+                  //         controller: productController.alertStock,
+                  //         focusNode: productController.alertStockFocusNode,
+                  //         inputFormatters: [
+                  //           FilteringTextInputFormatter.digitsOnly
+                  //         ],
+                  //         validator: (value) => TValidator.validateEmptyText(
+                  //             'Alert on stock', value),
+                  //         decoration: const InputDecoration(
+                  //           labelText: 'Alert Stock',
+                  //           hintText: 'Alert on stock below',
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
                   const SizedBox(height: TSizes.spaceBtwSections),
                 ],
               ),

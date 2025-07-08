@@ -124,7 +124,9 @@ class PurchaseRepository {
     } catch (e) {
       TLoaders.errorSnackBar(
           title: 'Purchase Item Fetch', message: e.toString());
-      print(e.toString());
+      if (kDebugMode) {
+        print(e.toString());
+      }
       return [];
     }
   }
@@ -140,24 +142,30 @@ class PurchaseRepository {
 
   Future<void> addStockQuantity(PurchaseItemModel item) async {
     try {
-      final productController = Get.find<ProductController>();
-      final product = productController.allProducts.firstWhere(
-          (p) => p.productId == item.productId,
-          orElse: () => ProductModel.empty());
-
-      if (product.hasSerialNumbers && item.variantId != null) {
+      if (item.variantId != null) {
+        // For purchases with variants, add to variant stock
         final variantsRepository = Get.find<ProductVariantsRepository>();
-        await variantsRepository.markVariantAsAvailable(item.variantId!);
 
+        // Get current variant stock and add the purchased quantity
+        final variants =
+            await variantsRepository.fetchProductVariants(item.productId);
+        final variant =
+            variants.firstWhere((v) => v.variantId == item.variantId);
+        final newStock = variant.stock + item.quantity;
+
+        await variantsRepository.updateVariantStock(item.variantId!, newStock);
+
+        // Update local product list with calculated total stock
         try {
+          final productController = Get.find<ProductController>();
           final productIndex = productController.allProducts
               .indexWhere((p) => p.productId == item.productId);
           if (productIndex != -1) {
-            final availableCount =
-                await variantsRepository.countAvailableVariants(item.productId);
+            final totalStock =
+                await variantsRepository.calculateProductStock(item.productId);
             final updatedProduct =
                 productController.allProducts[productIndex].copyWith(
-              stockQuantity: availableCount,
+              stockQuantity: totalStock,
             );
             productController.allProducts[productIndex] = updatedProduct;
             productController.update();
@@ -166,7 +174,7 @@ class PurchaseRepository {
           if (kDebugMode) print('Local update error: $e');
         }
       } else {
-        // For regular products
+        // For regular products without variants
         final response = await supabase
             .from('products')
             .select('stock_quantity')
@@ -186,6 +194,7 @@ class PurchaseRepository {
 
         // Update local product list
         try {
+          final productController = Get.find<ProductController>();
           final productIndex = productController.allProducts
               .indexWhere((p) => p.productId == item.productId);
           if (productIndex != -1) {
@@ -209,28 +218,30 @@ class PurchaseRepository {
 
   Future<void> subtractStockQuantity(PurchaseItemModel item) async {
     try {
-      // Fetch the product to determine if it has serial numbers
-      final productController = Get.find<ProductController>();
-      final product = productController.allProducts.firstWhere(
-          (p) => p.productId == item.productId,
-          orElse: () => ProductModel.empty());
-
-      if (product.hasSerialNumbers && item.variantId != null) {
-        // For serialized products, update the variant's sold status
+      if (item.variantId != null) {
+        // For purchases with variants, subtract from variant stock
         final variantsRepository = Get.find<ProductVariantsRepository>();
-        await variantsRepository.markVariantAsSold(item.variantId!);
 
-        // Update local product list in ProductController
+        // Get current variant stock and subtract the quantity
+        final variants =
+            await variantsRepository.fetchProductVariants(item.productId);
+        final variant =
+            variants.firstWhere((v) => v.variantId == item.variantId);
+        final newStock = variant.stock - item.quantity;
+
+        await variantsRepository.updateVariantStock(item.variantId!, newStock);
+
+        // Update local product list with calculated total stock
         try {
+          final productController = Get.find<ProductController>();
           final productIndex = productController.allProducts
               .indexWhere((p) => p.productId == item.productId);
           if (productIndex != -1) {
-            // Get updated count of available variants
-            final availableCount =
-                await variantsRepository.countAvailableVariants(item.productId);
+            final totalStock =
+                await variantsRepository.calculateProductStock(item.productId);
             final updatedProduct =
                 productController.allProducts[productIndex].copyWith(
-              stockQuantity: availableCount,
+              stockQuantity: totalStock,
             );
             productController.allProducts[productIndex] = updatedProduct;
             productController.update();
@@ -241,7 +252,7 @@ class PurchaseRepository {
           }
         }
       } else {
-        // For regular products, update the quantity in the database
+        // For regular products without variants, update the quantity in the database
         // Step 1: Fetch the current stock quantity
         final response = await supabase
             .from('products')
@@ -264,6 +275,7 @@ class PurchaseRepository {
         } else {
           // Update local product list in ProductController
           try {
+            final productController = Get.find<ProductController>();
             final productIndex = productController.allProducts
                 .indexWhere((p) => p.productId == item.productId);
             if (productIndex != -1) {
@@ -320,26 +332,29 @@ class PurchaseRepository {
   Future<bool> checkStockAvailabilityForCancellation(
       List<PurchaseItemModel> purchaseItems) async {
     try {
-      final productController = Get.find<ProductController>();
-
       for (var item in purchaseItems) {
         // Skip null items
         if (item == null) continue;
 
-        // Find the product
-        final product = productController.allProducts.firstWhere(
-            (p) => p.productId == item.productId,
-            orElse: () => ProductModel.empty());
+        if (item.variantId != null) {
+          // For items with variants, check variant stock for cancellation
+          final variantsRepository = Get.find<ProductVariantsRepository>();
+          final variants =
+              await variantsRepository.fetchProductVariants(item.productId);
+          final variant = variants.firstWhere(
+            (v) => v.variantId == item.variantId,
+            orElse: () => throw Exception('Variant not found'),
+          );
 
-        if (product.productId == -1) {
-          if (kDebugMode) {
-            print('Product not found with ID: ${item.productId}');
+          if (variant.stock < item.quantity) {
+            if (kDebugMode) {
+              print(
+                  'Not enough variant stock to cancel purchase for variant ${item.variantId}. Required: ${item.quantity}, Available: ${variant.stock}');
+            }
+            return false;
           }
-          return false;
-        }
-
-        if (!product.hasSerialNumbers) {
-          // For regular products, check if there's enough quantity to subtract
+        } else {
+          // For regular products without variants, check if there's enough quantity to subtract
           final response = await supabase
               .from('products')
               .select('stock_quantity')

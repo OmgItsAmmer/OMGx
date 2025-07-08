@@ -18,6 +18,7 @@ import '../widgets/purchase_summary.dart';
 import '../widgets/purchase_action_buttons.dart';
 import '../widgets/purchase_user_info.dart';
 import '../widgets/purchase_variant_manager.dart';
+import '../widgets/variant_selection_widget.dart';
 
 class PurchaseSalesMobile extends GetView<PurchaseSalesController> {
   const PurchaseSalesMobile({super.key});
@@ -265,6 +266,9 @@ class PurchaseSalesMobile extends GetView<PurchaseSalesController> {
 
                   const SizedBox(height: TSizes.spaceBtwItems),
 
+                  // Variant Selection Widget (shows when product has variants)
+                  const VariantSelectionWidget(),
+
                   // Serialized Product Indicator (shows when a serialized product with variant is selected)
                   Obx(() => controller.isSerializedProduct.value &&
                           controller.selectedVariantId.value != -1
@@ -328,7 +332,7 @@ class PurchaseSalesMobile extends GetView<PurchaseSalesController> {
                                                 .firstOrNull;
                                             return Text(
                                               selectedVariant != null
-                                                  ? 'Serial: ${selectedVariant.serialNumber} | Price: Rs ${selectedVariant.purchasePrice.toStringAsFixed(2)}'
+                                                  ? 'Serial: ${selectedVariant.variantId} | Price: Rs ${selectedVariant.sellPrice.toStringAsFixed(2)}'
                                                   : 'Variant information loading...',
                                               style: const TextStyle(
                                                 color: TColors.darkGrey,

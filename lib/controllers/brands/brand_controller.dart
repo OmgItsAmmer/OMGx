@@ -62,7 +62,7 @@ class BrandController extends GetxController {
       }
 
       // Compare names case insensitive after trimming
-      final existingName = brand.bname?.trim().toLowerCase() ?? '';
+      final existingName = brand.brandName?.trim().toLowerCase() ?? '';
       return existingName == trimmedName;
     });
   }
@@ -93,7 +93,7 @@ class BrandController extends GetxController {
       // Build the brand model
       final brandModel = BrandModel(
         brandID: null,
-        bname: brandNameText,
+        brandName: brandNameText,
         productsCount: 0, // Initialize with zero products
         // Add other fields if your BrandModel has more
       );
@@ -166,7 +166,7 @@ class BrandController extends GetxController {
       // Create brand model with preserved counts
       final brandModel = BrandModel(
         brandID: brandId,
-        bname: brandNameText,
+        brandName: brandNameText,
         productsCount: existingProductCount,
         isVerified: existingBrand.isVerified,
         isFeatured: existingBrand.isFeatured,
@@ -226,7 +226,7 @@ class BrandController extends GetxController {
       }
 
       // Store name for success message
-      final brandName = brandToRemove.bname;
+      final brandName = brandToRemove.brandName;
 
       // Call the repository function to delete from the database
       await brandRepository.deleteBrandFromTable(brandId);
@@ -252,7 +252,7 @@ class BrandController extends GetxController {
   void setBrandDetail(BrandModel brand) {
     try {
       selectedBrand.value = brand;
-      brandName.text = brand.bname ?? ' ';
+      brandName.text = brand.brandName ?? ' ';
       productCount.text = brand.productsCount.toString();
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
@@ -279,7 +279,8 @@ class BrandController extends GetxController {
 
       //Brand names
       final names = allBrands
-          .map((brand) => brand.bname ?? '') // Replace null with empty string
+          .map((brand) =>
+              brand.brandName ?? '') // Replace null with empty string
           .toList();
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
@@ -318,7 +319,7 @@ class BrandController extends GetxController {
         // Create a new brand model with updated count
         final updatedBrand = BrandModel(
           brandID: brand.brandID,
-          bname: brand.bname,
+          brandName: brand.brandName,
           isVerified: brand.isVerified,
           isFeatured: brand.isFeatured,
           productsCount: newCount,
@@ -355,7 +356,7 @@ class BrandController extends GetxController {
         // Create a new brand model with updated count
         final updatedBrand = BrandModel(
           brandID: brand.brandID,
-          bname: brand.bname,
+          brandName: brand.brandName,
           isVerified: brand.isVerified,
           isFeatured: brand.isFeatured,
           productsCount: newCount,

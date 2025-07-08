@@ -181,7 +181,7 @@ class _ProductBrandcCategoryState extends State<ProductBrandcCategory> {
                     labelText: 'Select Brand',
                     hintText: 'Choose a brand',
                     options: brandController.allBrands
-                        .map((e) => e.bname)
+                        .map((e) => e.brandName)
                         .whereType<String>()
                         .toList(),
                     externalController:

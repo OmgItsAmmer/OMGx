@@ -9,12 +9,18 @@ class ProductVariantsRepository {
   Future<List<ProductVariantModel>> fetchProductVariants(
     int productId, {
     int limit = 0, // Default 0 means no limit
+    bool visibleOnly = false, // Option to fetch only visible variants
   }) async {
     try {
-      final query = supabase
+      var query = supabase
           .from('product_variants')
           .select()
           .eq('product_id', productId);
+
+      // Filter by visibility if requested
+      if (visibleOnly) {
+        query = query.eq('is_visible', true);
+      }
 
       // Apply limit if specified
       final data = limit > 0 ? await query.limit(limit) : await query;
@@ -30,25 +36,9 @@ class ProductVariantsRepository {
     }
   }
 
-  // Fetch available (unsold) variants for a specific product
-  Future<List<ProductVariantModel>> fetchAvailableVariants(
-      int productId) async {
-    try {
-      final data = await supabase
-          .from('product_variants')
-          .select()
-          .eq('product_id', productId)
-          .eq('is_sold', false);
-
-      final variantList = data.map((item) {
-        return ProductVariantModel.fromJson(item);
-      }).toList();
-
-      return variantList;
-    } catch (e) {
-      TLoaders.errorSnackBar(title: 'Variant Repo', message: e.toString());
-      return [];
-    }
+  // Fetch visible variants for a specific product
+  Future<List<ProductVariantModel>> fetchVisibleVariants(int productId) async {
+    return fetchProductVariants(productId, visibleOnly: true);
   }
 
   // Insert a new variant
@@ -92,24 +82,24 @@ class ProductVariantsRepository {
     }
   }
 
-  // Mark a variant as sold
-  Future<void> markVariantAsSold(int variantId) async {
+  // Update variant stock
+  Future<void> updateVariantStock(int variantId, int newStock) async {
     try {
       await supabase
           .from('product_variants')
-          .update({'is_sold': true}).eq('variant_id', variantId);
+          .update({'stock': newStock}).eq('variant_id', variantId);
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Variant Repo', message: e.toString());
       rethrow;
     }
   }
 
-  // Mark a variant as available (not sold)
-  Future<void> markVariantAsAvailable(int variantId) async {
+  // Toggle variant visibility
+  Future<void> toggleVariantVisibility(int variantId, bool isVisible) async {
     try {
       await supabase
           .from('product_variants')
-          .update({'is_sold': false}).eq('variant_id', variantId);
+          .update({'is_visible': isVisible}).eq('variant_id', variantId);
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Variant Repo', message: e.toString());
       rethrow;
@@ -152,14 +142,13 @@ class ProductVariantsRepository {
     }
   }
 
-  // Get variant by serial number
-  Future<ProductVariantModel?> getVariantBySerialNumber(
-      String serialNumber) async {
+  // Get variant by SKU
+  Future<ProductVariantModel?> getVariantBySku(String sku) async {
     try {
       final response = await supabase
           .from('product_variants')
           .select()
-          .eq('serial_number', serialNumber)
+          .eq('sku', sku)
           .maybeSingle();
 
       if (response == null) {
@@ -173,19 +162,72 @@ class ProductVariantsRepository {
     }
   }
 
-  // Count available variants for a product
-  Future<int> countAvailableVariants(int productId) async {
+  // Check if SKU exists for a product (excluding specific variant ID for updates)
+  Future<bool> isSkuExists(String sku, int productId,
+      {int? excludeVariantId}) async {
+    try {
+      var query = supabase
+          .from('product_variants')
+          .select('variant_id')
+          .eq('sku', sku)
+          .eq('product_id', productId);
+
+      if (excludeVariantId != null) {
+        query = query.neq('variant_id', excludeVariantId);
+      }
+
+      final response = await query.maybeSingle();
+      return response != null;
+    } catch (e) {
+      TLoaders.errorSnackBar(title: 'Variant Repo', message: e.toString());
+      return false;
+    }
+  }
+
+  // Count total variants for a product
+  Future<int> countProductVariants(int productId) async {
     try {
       final data = await supabase
           .from('product_variants')
           .select()
-          .eq('product_id', productId)
-          .eq('is_sold', false);
+          .eq('product_id', productId);
 
       return data.length;
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Variant Repo', message: e.toString());
       return 0;
+    }
+  }
+
+  // Calculate total stock for a product (sum of all variant stocks)
+  Future<int> calculateProductStock(int productId) async {
+    try {
+      final variants = await fetchProductVariants(productId);
+      return variants.fold<int>(0, (sum, variant) => sum + variant.stock);
+    } catch (e) {
+      TLoaders.errorSnackBar(title: 'Variant Repo', message: e.toString());
+      return 0;
+    }
+  }
+
+  // Get variants with low stock
+  Future<List<ProductVariantModel>> getLowStockVariants(
+      int productId, int threshold) async {
+    try {
+      final data = await supabase
+          .from('product_variants')
+          .select()
+          .eq('product_id', productId)
+          .lte('stock', threshold);
+
+      final variantList = data.map((item) {
+        return ProductVariantModel.fromJson(item);
+      }).toList();
+
+      return variantList;
+    } catch (e) {
+      TLoaders.errorSnackBar(title: 'Variant Repo', message: e.toString());
+      return [];
     }
   }
 }

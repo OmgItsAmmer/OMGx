@@ -183,7 +183,7 @@ class PurchaseVariantManager extends StatelessWidget {
                       final variant = controller.purchaseVariants[index];
                       return Column(
                         key: ValueKey(
-                            'purchase_variant_${index}_${variant.serialNumber}'),
+                            'purchase_variant_${index}_${variant.variantName}'),
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           _buildVariantRow(variant, controller, index),
@@ -246,17 +246,17 @@ class PurchaseVariantManager extends StatelessWidget {
         Expanded(
           flex: 3,
           child: Text(
-            variant.serialNumber,
+            variant.variantId.toString(),
             style: const TextStyle(fontWeight: FontWeight.w500),
           ),
         ),
         Expanded(
           flex: 2,
-          child: Text('Rs ${variant.purchasePrice.toStringAsFixed(2)}'),
+          child: Text('Rs ${variant.buyPrice.toStringAsFixed(2)}'),
         ),
         Expanded(
           flex: 2,
-          child: Text('Rs ${variant.sellingPrice.toStringAsFixed(2)}'),
+          child: Text('Rs ${variant.sellPrice.toStringAsFixed(2)}'),
         ),
         Expanded(
           flex: 1,
@@ -348,7 +348,7 @@ class PurchaseVariantManager extends StatelessWidget {
                         }
                         // Check for duplicates in current purchase variants
                         final exists = controller.purchaseVariants.any((v) =>
-                            v.serialNumber.toLowerCase() ==
+                            v.variantName.toLowerCase() ==
                             value.toLowerCase());
                         if (exists) {
                           return 'Serial number already exists';

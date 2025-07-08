@@ -468,9 +468,9 @@ class PurchaseController extends GetxController {
         orElse: () => ProductModel.empty(),
       );
 
-      if (!product.hasSerialNumbers) return;
+      // if (!product.hasSerialNumbers) return;
 
-      final variants = await productController.getAvailableVariants(productId);
+      final variants = await productController.getVisibleVariants(productId);
       availableVariants.assignAll(variants);
 
       if (variants.isNotEmpty) {

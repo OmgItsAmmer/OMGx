@@ -123,23 +123,22 @@ class _ReceiptReportPageState extends State<ReceiptReportPage> {
           if (item.variantId != null) {
             try {
               final variants =
-                  await productController.getAvailableVariants(item.productId);
+                  await productController.getVisibleVariants(item.productId);
               final allVariants = [...variants];
 
               // Also check sold variants if needed
               final soldVariants = await productController
                   .productVariantsRepository
                   .fetchProductVariants(item.productId, limit: 100);
-              allVariants.addAll(soldVariants.where((v) => v.isSold));
+                allVariants.addAll(soldVariants.where((v) => v.isVisible));
 
               final variant = allVariants.firstWhere(
                 (v) => v.variantId == item.variantId,
                 orElse: () => ProductVariantModel.empty(),
               );
 
-              if (variant.variantId != null &&
-                  variant.serialNumber.isNotEmpty) {
-                variantSerialNumbers[item.variantId!] = variant.serialNumber;
+              if (variant.variantId != null) {
+                variantSerialNumbers[item.variantId!] = variant.variantId.toString();
               }
             } catch (e) {
               if (kDebugMode) {

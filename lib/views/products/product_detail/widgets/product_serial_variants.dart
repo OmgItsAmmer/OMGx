@@ -114,32 +114,32 @@ class ProductSerialVariants extends StatelessWidget {
                 'Serial Number Variants',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              Row(
-                children: [
-                  // Chip toggle for showing sold variants
-                  Obx(() => TChoiceChip(
-                        text: 'Show Sold',
-                        selected: controller.showSoldVariants.value,
-                        onSelected: (value) =>
-                            controller.toggleSoldVariants(value),
-                      )),
-                  const SizedBox(width: TSizes.sm),
-                  // Simple refresh button
-                  IconButton(
-                    icon: const Icon(Icons.refresh, size: 20),
-                    onPressed: () {
-                      debugPrint('Refresh button pressed');
-                      if (controller.productId.value > 0) {
-                        controller
-                            .fetchProductVariants(controller.productId.value);
-                      }
-                    },
-                    tooltip: 'Refresh variants',
-                  ),
-                ],
-              ),
-            ],
-          ),
+          //     Row(
+          //       children: [
+          //         // Chip toggle for showing sold variants
+          //         Obx(() => TChoiceChip(
+          //               text: 'Show Sold',
+          //               selected: controller.showSoldVariants.value,
+          //               onSelected: (value) =>
+          //                   controller.toggleSoldVariants(value),
+          //             )),
+          //         const SizedBox(width: TSizes.sm),
+          //         // Simple refresh button
+          //         IconButton(
+          //           icon: const Icon(Icons.refresh, size: 20),
+          //           onPressed: () {
+          //             debugPrint('Refresh button pressed');
+          //             if (controller.productId.value > 0) {
+          //               controller
+          //                   .fetchProductVariants(controller.productId.value);
+          //             }
+          //           },
+          //           tooltip: 'Refresh variants',
+          //         ),
+          //       ],
+          //     ),
+          //   ],
+          // ),
           const SizedBox(height: TSizes.sm),
 
           // Use Obx for reactive updates to the variants list
@@ -165,8 +165,7 @@ class ProductSerialVariants extends StatelessWidget {
 
             // Show empty state or variants list
             final variantsLength = controller.currentProductVariants.length;
-            if (variantsLength == 0 &&
-                !controller.isLoadingSoldVariants.value) {
+            if (variantsLength == 0 ) {
               return _buildEmptyVariantsView(controller);
             }
 
@@ -176,10 +175,7 @@ class ProductSerialVariants extends StatelessWidget {
                 // Header row
                 _buildHeaderRow(),
                 const Divider(),
-                // Show shimmer effect when loading sold variants
-                if (controller.isLoadingSoldVariants.value)
-                  _buildShimmerEffect()
-                else
+               
                   // Variant rows with optimized ListView (read-only)
                   SizedBox(
                     height: variantsLength > 5
@@ -196,7 +192,7 @@ class ProductSerialVariants extends StatelessWidget {
                             controller.currentProductVariants[index];
                         return Column(
                           key: ValueKey(
-                              'variant_${variant.variantId ?? index}_${variant.serialNumber}'),
+                              'variant_${variant.variantId ?? index}_${variant.variantId}'),
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             _buildVariantRow(variant),
@@ -211,7 +207,7 @@ class ProductSerialVariants extends StatelessWidget {
           }),
         ],
       ),
-    );
+    ]));
   }
 
   Widget _buildHeaderRow() {
@@ -257,35 +253,35 @@ class ProductSerialVariants extends StatelessWidget {
       children: [
         Expanded(
           flex: 3,
-          child: Text(variant.serialNumber),
+          child: Text(variant.variantId.toString()),
         ),
         Expanded(
           flex: 2,
-          child: Text('Rs ${variant.purchasePrice.toStringAsFixed(2)}'),
+          child: Text('Rs ${variant.buyPrice  .toStringAsFixed(2)}'),
         ),
         Expanded(
           flex: 2,
-          child: Text('Rs ${variant.sellingPrice.toStringAsFixed(2)}'),
+          child: Text('Rs ${variant.sellPrice.toStringAsFixed(2)}'),
         ),
-        Expanded(
-          flex: 2,
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-                horizontal: TSizes.sm, vertical: TSizes.xs),
-            decoration: BoxDecoration(
-              color: variant.isSold ? TColors.warning : TColors.success,
-              borderRadius: BorderRadius.circular(TSizes.sm),
-            ),
-            child: Text(
-              variant.isSold ? 'Sold' : 'Available',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-              ),
-            ),
-          ),
-        ),
+        // Expanded(
+        //   flex: 2,
+        //   child: Container(
+        //     padding: const EdgeInsets.symmetric(
+        //         horizontal: TSizes.sm, vertical: TSizes.xs),
+        //     decoration: BoxDecoration(
+        //       color: variant.isSold ? TColors.warning : TColors.success,
+        //       borderRadius: BorderRadius.circular(TSizes.sm),
+        //     ),
+        //     child: Text(
+        //       variant.isSold ? 'Sold' : 'Available',
+        //       textAlign: TextAlign.center,
+        //       style: const TextStyle(
+        //         color: Colors.white,
+        //         fontSize: 12,
+        //       ),
+        //     ),
+        //   ),
+        // ),
       ],
     );
   }

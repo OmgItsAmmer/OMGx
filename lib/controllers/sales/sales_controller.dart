@@ -274,7 +274,7 @@ class SalesController extends GetxController {
       }
 
       // For serialized products handling
-      if (product.hasSerialNumbers) {
+      if (availableVariants.isNotEmpty || selectedVariantId.value != -1) {
         // VALIDATION CHECK 4: Serial number selected
         if (selectedVariantId.value == -1) {
           TLoaders.errorSnackBar(
@@ -300,7 +300,7 @@ class SalesController extends GetxController {
 
         // VALIDATION CHECK 6: Valid price
 
-        if (variant.sellingPrice <= 0) {
+        if (variant.sellPrice <= 0) {
           TLoaders.errorSnackBar(
             title: "Invalid Price",
             message: 'The selected product has an invalid selling price',
@@ -316,7 +316,7 @@ class SalesController extends GetxController {
           unit: selectedUnit.toString().trim(),
           quantity: "1", // Always 1 for serialized products
           totalPrice: totalPrice.value.text.trim(),
-          buyPrice: variant.purchasePrice,
+          buyPrice: variant.buyPrice,
           variantId: variant.variantId,
         );
         // Update sub total (product prices only)
@@ -324,7 +324,7 @@ class SalesController extends GetxController {
             double.tryParse(totalPrice.value.text.trim()) ?? 0.0;
         subTotal.value += newTotalPrice;
         originalSubTotal.value += newTotalPrice;
-        buyingPriceTotal += variant.purchasePrice;
+        buyingPriceTotal += variant.buyPrice;
 
         // Calculate net total including fees
         calculateNetTotal();
@@ -343,7 +343,7 @@ class SalesController extends GetxController {
         // Show success feedback
         TLoaders.successSnackBar(
           title: "Product Added",
-          message: "Serial number ${variant.serialNumber} added to sale",
+          message: "Serial number ${variant.variantName} added to sale",
         );
       } else {
         // For regular products
@@ -797,7 +797,8 @@ class SalesController extends GetxController {
                 Get.find<ProductVariantsRepository>();
 
             for (var variantId in serializedVariantIds) {
-              await productVariantsRepository.markVariantAsSold(variantId);
+              await productVariantsRepository.toggleVariantVisibility(
+                  variantId, false);
               if (kDebugMode) {
                 print('Marked variant $variantId as sold');
               }
@@ -1380,10 +1381,10 @@ class SalesController extends GetxController {
 
     // Update the unit price and total price fields with the variant's selling price
     if (variant.variantId != null) {
-      unitPrice.value.text = variant.sellingPrice.toString();
+      unitPrice.value.text = variant.sellPrice.toString();
       quantity.text = "1"; // For serialized products, quantity is always 1
-      totalPrice.value.text = variant.sellingPrice.toString();
-      buyingPriceIndividual = variant.purchasePrice;
+      totalPrice.value.text = variant.sellPrice.toString();
+      buyingPriceIndividual = variant.buyPrice;
     }
   }
 
@@ -1405,11 +1406,11 @@ class SalesController extends GetxController {
         orElse: () => ProductModel.empty(),
       );
 
-      // Only load variants for serialized products
-      if (!product.hasSerialNumbers) return;
+      // // Only load variants for serialized products
+      // if (!product.hasSerialNumbers) return;
 
       // Load available variants
-      final variants = await productController.getAvailableVariants(productId);
+      final variants = await productController.getVisibleVariants(productId);
       availableVariants.assignAll(variants);
 
       // If variants are available, update the UI

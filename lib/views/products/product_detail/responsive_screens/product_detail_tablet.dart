@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../widgets/basic_info.dart';
+import '../widgets/extra_images.dart';
 import '../widgets/product_brand&category.dart';
 import '../widgets/product_detail_bottom_bar.dart';
-import '../widgets/product_serial_variants.dart';
+import '../widgets/product_variants_widget.dart';
 import '../widgets/thumbnail_info.dart';
 
 class ProductDetailTablet extends StatelessWidget {
@@ -51,21 +52,13 @@ class ProductDetailTablet extends StatelessWidget {
 
               const SizedBox(height: TSizes.spaceBtwSections),
 
-              // Serial Variants - Only show for products with serial numbers
-              Obx(() {
-                final showVariants = controller.hasSerialNumbers.value;
+              // Product Variants - All products now have variants
+              const ProductVariantsWidget(),
 
-                // When switching to variants mode, try to refresh variants
-                if (showVariants &&
-                    controller.currentProductVariants.isEmpty &&
-                    controller.productId.value > 0) {
-                  _loadVariants(controller);
-                }
+              const SizedBox(height: TSizes.spaceBtwSections),
 
-                return showVariants
-                    ? const ProductSerialVariants()
-                    : const SizedBox.shrink();
-              }),
+              // Extra Images
+              const ExtraImages(),
             ],
           ),
         ),
@@ -84,11 +77,9 @@ class ProductDetailTablet extends StatelessWidget {
   void _loadVariants(ProductController controller) {
     // Only load if:
     // 1. We have a valid product ID
-    // 2. The product has serial numbers
-    // 3. We don't already have the variants loaded
-    // 4. We're not already loading variants
+    // 2. We don't already have the variants loaded
+    // 3. We're not already loading variants
     if (controller.productId.value > 0 &&
-        controller.hasSerialNumbers.value &&
         controller.currentProductVariants.isEmpty &&
         !controller.isAddingVariants.value) {
       // Print debug information
