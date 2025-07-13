@@ -13,21 +13,21 @@ class CategoryModel {
 
   // Static function to create an empty category model
   static CategoryModel empty() => CategoryModel(
-    categoryId: null, // Null, as it's auto-generated in DB
-    categoryName: '',
-    isFeatured: false, // Default to false
-    productCount: null, // Default null
-  );
+        categoryId: null, // Null, as it's auto-generated in DB
+        categoryName: '',
+        isFeatured: false, // Default to false
+        productCount: null, // Default null
+      );
 
   // Convert model to JSON for database insertion
-  Map<String, dynamic> toJson({bool isUpdate = false}) {
+  Map<String, dynamic> toJson({bool isInsert = false}) {
     final Map<String, dynamic> data = {
       'category_name': categoryName,
       'isFeatured': isFeatured,
       'product_count': productCount,
     };
 
-    if (isUpdate && categoryId != null) {
+    if (!isInsert) {
       data['category_id'] = categoryId; // Include category_id for update
     }
 

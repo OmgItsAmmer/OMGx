@@ -73,6 +73,12 @@ class ProductController extends GetxController {
   // Track if we're in the middle of a variant fetch to prevent loops
   bool _isInVariantFetch = false;
 
+  Rx<ProductTag?> productTag = null.obs;
+
+  RxBool isPopular = false.obs;
+
+  RxBool isVisible = false.obs;
+
   @override
   void onInit() {
     fetchProducts();

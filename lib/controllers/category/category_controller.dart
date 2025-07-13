@@ -168,9 +168,10 @@ class CategoryController extends GetxController {
         categoryId: null,
         categoryName: categoryNameText,
         productCount: 0, // Initialize with zero products
+        isFeatured: false,
       );
 
-      final json = categoryModel.toJson(isUpdate: true);
+      final json = categoryModel.toJson(isInsert: true);
 
       // Insert and get new category ID
       final categoryId = await categoryRepository.insertCategoryInTable(json);

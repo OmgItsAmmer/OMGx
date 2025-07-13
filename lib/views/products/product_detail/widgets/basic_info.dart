@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+import '../../../../utils/constants/enums.dart';
+
 class BasicInfo extends StatelessWidget {
   const BasicInfo({
     super.key,
@@ -105,67 +107,123 @@ class BasicInfo extends StatelessWidget {
                   //     ),
                   //   );
                   // }),
+
+
+                //  const SizedBox(height: TSizes.spaceBtwInputFields),
+
+                  // // Pricing & Stock Row
+                  // Row(
+                  //   children: [
+                  //     // Base Price Field
+                  //     Expanded(
+                  //           child: AnimatedOpacity(
+                  //             opacity:  1.0,
+                  //             duration: const Duration(milliseconds: 300),
+                  //             child: TextFormField(
+                  //               controller: productController.basePrice,
+                  //               focusNode: productController.basePriceFocusNode,
+                  //               textInputAction: TextInputAction.next,
+                  //               onFieldSubmitted: (_) => productController
+                  //                   .salePriceFocusNode
+                  //                   .requestFocus(),
+                  //               inputFormatters: [
+                  //                 FilteringTextInputFormatter.digitsOnly
+                  //               ],
+                  //               validator: (value) =>
+                  //                   TValidator.validateEmptyText(
+                  //                       'Basic price', value),
+                  //               decoration: const InputDecoration(
+                  //                 labelText: 'Base Price',
+                  //                 hintText: 'Basic price of product',
+                  //               ),
+                              
+                  //             ),
+                  //           ),
+                  //         ),
+                  //     const SizedBox(width: TSizes.spaceBtwInputFields),
+                  //     // Sale Price Field
+                  //    Expanded(
+                  //           child: AnimatedOpacity(
+                  //             opacity: 1.0,
+                  //             duration: const Duration(milliseconds: 300),
+                  //             child: TextFormField(
+                  //               controller: productController.salePrice,
+                  //               focusNode: productController.salePriceFocusNode,
+                  //               textInputAction: TextInputAction.next,
+                  //               onFieldSubmitted: (_) => productController
+                  //                   .stockFocusNode
+                  //                   .requestFocus(),
+                  //               inputFormatters: [
+                  //                 FilteringTextInputFormatter.digitsOnly
+                  //               ],
+                  //               validator: (value) =>
+                  //                   TValidator.validateEmptyText(
+                  //                       'Sale price', value),
+                  //               decoration: const InputDecoration(
+                  //                 labelText: 'Sale Price',
+                  //                 hintText: 'Selling price of product',
+                  //               ),
+                               
+                  //             ),
+                  //           ),
+                  //         )
+                  //   ],
+                  // ),
                   const SizedBox(height: TSizes.spaceBtwInputFields),
 
-                  // Pricing & Stock Row
-                  Row(
-                    children: [
-                      // Base Price Field
-                      Expanded(
-                            child: AnimatedOpacity(
-                              opacity:  1.0,
-                              duration: const Duration(milliseconds: 300),
-                              child: TextFormField(
-                                controller: productController.basePrice,
-                                focusNode: productController.basePriceFocusNode,
-                                textInputAction: TextInputAction.next,
-                                onFieldSubmitted: (_) => productController
-                                    .salePriceFocusNode
-                                    .requestFocus(),
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly
-                                ],
-                                validator: (value) =>
-                                    TValidator.validateEmptyText(
-                                        'Basic price', value),
-                                decoration: const InputDecoration(
-                                  labelText: 'Base Price',
-                                  hintText: 'Basic price of product',
-                                ),
-                              
-                              ),
-                            ),
-                          ),
-                      const SizedBox(width: TSizes.spaceBtwInputFields),
-                      // Sale Price Field
-                     Expanded(
-                            child: AnimatedOpacity(
-                              opacity: 1.0,
-                              duration: const Duration(milliseconds: 300),
-                              child: TextFormField(
-                                controller: productController.salePrice,
-                                focusNode: productController.salePriceFocusNode,
-                                textInputAction: TextInputAction.next,
-                                onFieldSubmitted: (_) => productController
-                                    .stockFocusNode
-                                    .requestFocus(),
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly
-                                ],
-                                validator: (value) =>
-                                    TValidator.validateEmptyText(
-                                        'Sale price', value),
-                                decoration: const InputDecoration(
-                                  labelText: 'Sale Price',
-                                  hintText: 'Selling price of product',
-                                ),
-                               
-                              ),
-                            ),
-                          )
-                    ],
+
+                  //dropdown with enums
+                  DropdownButtonFormField<ProductTag>(
+                    value: productController.productTag.value,
+                    items: ProductTag.values.map((e) => DropdownMenuItem(value: e, child: Text(e.name))).toList(),
+                    onChanged: (value) {
+                      productController.productTag.value = value!;
+                    },
+                    decoration: const InputDecoration(
+                      labelText: 'Tag',
+                      hintText: 'Enter product tag',
+                    ),
                   ),
+
+
                   const SizedBox(height: TSizes.spaceBtwInputFields),
+                   Row(
+                    children: [
+                     //two enable/disable buttons isPopular and isVisible
+
+                     //isPopular
+                    // isPopular toggle button
+                    Expanded(
+                      child: Obx(
+                        () => SwitchListTile(
+                          title: const Text('Popular Product'),
+                          value: productController.isPopular.value,
+                          onChanged: (value) {
+                            productController.isPopular.value = value;
+                          },
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: TSizes.spaceBtwInputFields),
+                    // isVisible toggle button
+                    Expanded(
+                      child: Obx(
+                        () => SwitchListTile(
+                          title: const Text('Visible Product'),
+                          value: productController.isVisible.value,
+                          onChanged: (value) {
+                            productController.isVisible.value = value;
+                          },
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                    ),
+                     
+                  
+                    ],
+                  )
+                  
 
                   // Row(
                   //   children: [
@@ -222,7 +280,7 @@ class BasicInfo extends StatelessWidget {
                   //     ),
                   //   ],
                   // ),
-                  const SizedBox(height: TSizes.spaceBtwSections),
+                 // const SizedBox(height: TSizes.spaceBtwSections),
                 ],
               ),
             ),
