@@ -1,6 +1,7 @@
 import 'package:ecommerce_dashboard/Models/orders/order_item_model.dart';
 import 'package:ecommerce_dashboard/Models/products/product_model.dart';
 import 'package:ecommerce_dashboard/Models/products/product_variant_model.dart';
+import 'package:ecommerce_dashboard/Models/image/image_entity_model.dart';
 import 'package:ecommerce_dashboard/common/widgets/loaders/tloaders.dart';
 import 'package:ecommerce_dashboard/controllers/brands/brand_controller.dart';
 import 'package:ecommerce_dashboard/controllers/category/category_controller.dart';
@@ -15,6 +16,7 @@ import 'package:flutter/services.dart';
 import '../../routes/routes.dart';
 import '../../utils/constants/enums.dart';
 import '../media/media_controller.dart';
+import '../../main.dart';
 
 class ProductController extends GetxController {
   static ProductController get instance => Get.find();
@@ -36,6 +38,10 @@ class ProductController extends GetxController {
       <ProductVariantModel>[].obs;
   RxList<ProductVariantModel> unsavedProductVariants =
       <ProductVariantModel>[].obs;
+
+  // Product Images - Reactive list for current product images
+  RxList<ImageEntityModel> productImages = <ImageEntityModel>[].obs;
+  RxBool isLoadingImages = false.obs;
 
   // Store selected Rows
   RxList<bool> selectedRows = <bool>[].obs;
@@ -146,6 +152,12 @@ class ProductController extends GetxController {
       if (unsavedProductVariants.isNotEmpty) {
         unsavedProductVariants.clear();
       }
+      productTag.value = null;
+      isPopular.value = false;
+      isVisible.value = false;
+
+      // Clear product images
+      clearProductImages();
 
       update(); // Force UI update
     } catch (e) {
@@ -201,6 +213,9 @@ class ProductController extends GetxController {
         alertStock: int.tryParse(alertStock.text.trim()) ?? 0,
         brandID: selectedBrandId,
         categoryId: selectedCategoryId,
+        productTag: productTag.value,
+        isPopular: isPopular.value,
+        isVisible: isVisible.value,
       );
 
       // Insert the product into the database
@@ -258,7 +273,7 @@ class ProductController extends GetxController {
         title: "Success",
         message: 'Product added successfully!',
       );
-
+      Navigator.of(Get.context!).pop();
       return newProductId;
     } catch (e) {
       debugPrint('Error inserting product: $e');
@@ -312,6 +327,9 @@ class ProductController extends GetxController {
         alertStock: int.tryParse(alertStock.text.trim()) ?? 0,
         brandID: selectedBrandId,
         categoryId: selectedCategoryId,
+        productTag: productTag.value,
+        isPopular: isPopular.value,
+        isVisible: isVisible.value,
       );
 
       final json = productModel.toJson(isUpdate: true);
@@ -372,7 +390,7 @@ class ProductController extends GetxController {
         title: "Success",
         message: 'Product updated successfully!',
       );
-
+      Navigator.of(Get.context!).pop();
       return true;
     } catch (e) {
       debugPrint('Error updating product: $e');
@@ -392,9 +410,8 @@ class ProductController extends GetxController {
       final CategoryController categoryController =
           Get.find<CategoryController>();
 
-      print(product.productId);
       productId.value = product.productId ?? -1;
-      productName.text = product.name ?? ' ';
+      productName.text = product.name;
       productDescription.text = product.description ?? ' ';
       basePrice.text = product.basePrice ?? ' ';
       salePrice.text = product.salePrice ?? ' ';
@@ -415,10 +432,17 @@ class ProductController extends GetxController {
           .firstWhere((category) => category.categoryId == product.categoryId)
           .categoryName;
 
+      productTag.value = product.productTag;
+      isPopular.value = product.isPopular ?? false;
+      isVisible.value = product.isVisible ?? false;
+
       // Fetch product variants
       if (product.productId != null) {
         fetchProductVariants(product.productId!);
       }
+
+      // Fetch product images when product is selected
+      fetchProductImages();
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
@@ -736,7 +760,6 @@ class ProductController extends GetxController {
         }
       } finally {
         isUpdating.value = false;
-        Navigator.of(Get.context!).pop();
       }
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Error', message: e.toString());
@@ -747,5 +770,86 @@ class ProductController extends GetxController {
     if (isUpdating.value) return;
     cleanProductDetail();
     Get.back();
+  }
+
+  //==========================================================================
+  // PRODUCT IMAGES MANAGEMENT
+  //==========================================================================
+
+  /// Fetch all images for the current product
+  Future<void> fetchProductImages() async {
+    if (productId.value <= 0) {
+      productImages.clear();
+      return;
+    }
+
+    try {
+      isLoadingImages.value = true;
+      final response = await supabase
+          .from('image_entity')
+          .select('*')
+          .eq('entity_id', productId.value)
+          .eq('entity_category',
+              MediaCategory.products.toString().split('.').last);
+
+      final images = response
+          .map<ImageEntityModel>((json) => ImageEntityModel.fromJson(json))
+          .toList();
+
+      productImages.assignAll(images);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching product images: $e');
+      }
+    } finally {
+      isLoadingImages.value = false;
+    }
+  }
+
+  /// Add a new image to the product
+  void addProductImage(ImageEntityModel imageEntity) {
+    if (!productImages
+        .any((img) => img.imageEntityId == imageEntity.imageEntityId)) {
+      productImages.add(imageEntity);
+    }
+  }
+
+  /// Remove an image from the product
+  void removeProductImage(int imageEntityId) {
+    productImages.removeWhere((img) => img.imageEntityId == imageEntityId);
+  }
+
+  /// Update an existing image (e.g., set as featured)
+  void updateProductImage(ImageEntityModel updatedImage) {
+    final index = productImages
+        .indexWhere((img) => img.imageEntityId == updatedImage.imageEntityId);
+    if (index != -1) {
+      productImages[index] = updatedImage;
+    }
+  }
+
+  /// Set an image as featured and unset others
+  void setImageAsFeatured(int imageEntityId) {
+    for (int i = 0; i < productImages.length; i++) {
+      if (productImages[i].imageEntityId == imageEntityId) {
+        productImages[i] = productImages[i].copyWith(isFeatured: true);
+      } else if (productImages[i].isFeatured == true) {
+        productImages[i] = productImages[i].copyWith(isFeatured: false);
+      }
+    }
+  }
+
+  /// Get the featured image
+  ImageEntityModel? getFeaturedImage() {
+    try {
+      return productImages.firstWhere((img) => img.isFeatured == true);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Clear product images
+  void clearProductImages() {
+    productImages.clear();
   }
 }

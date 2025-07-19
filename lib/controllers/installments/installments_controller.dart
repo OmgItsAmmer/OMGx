@@ -849,9 +849,9 @@ class InstallmentController extends GetxController {
 
       // Calculate salesman commission amount - Based on subtotal after discount
       double commissionAmount = 0.0;
-      if (order.salesmanComission > 0) {
+      if (order.salesmanComission != null && order.salesmanComission! > 0) {
         final commissionBase = subTotal - order.discount;
-        commissionAmount = commissionBase * order.salesmanComission / 100;
+        commissionAmount = commissionBase * order.salesmanComission! / 100;
       }
       salesmanCommissionAmount.value = commissionAmount;
 

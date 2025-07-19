@@ -1,4 +1,5 @@
 import 'package:ecommerce_dashboard/Models/products/variant_model.dart';
+import '../../utils/constants/enums.dart'; // Assuming ProductTag is defined here
 
 class ProductModel {
   int? productId;
@@ -11,6 +12,9 @@ class ProductModel {
   DateTime? createdAt;
   int? brandID;
   int? alertStock;
+  ProductTag? productTag;
+  bool? isPopular;
+  bool? isVisible;
 
   ProductModel({
     this.productId,
@@ -23,6 +27,9 @@ class ProductModel {
     this.createdAt,
     this.brandID,
     this.alertStock,
+    this.productTag,
+    this.isPopular,
+    this.isVisible,
   });
 
   // Static function to create an empty product model
@@ -37,6 +44,9 @@ class ProductModel {
         createdAt: null,
         brandID: null,
         alertStock: null,
+        productTag: null,
+        isPopular: false,
+        isVisible: false,
       );
 
   // Convert model to JSON for database insertion
@@ -50,6 +60,9 @@ class ProductModel {
       'stock_quantity': stockQuantity,
       'brandID': brandID,
       'alert_stock': alertStock,
+      'tag': productTag?.toString().split('.').last, // Convert enum to string
+      'ispopular': isPopular,
+      'isVisible': isVisible,
     };
 
     if (isUpdate && productId != null) {
@@ -59,7 +72,7 @@ class ProductModel {
     return data;
   }
 
-  // Factory method to create a ProductModel from Supabase response
+  // Factory method to create a ProductModel from Supabase response 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
       productId: json['product_id'] as int?,
@@ -74,6 +87,14 @@ class ProductModel {
           : null,
       brandID: json['brandID'] as int?,
       alertStock: json['alert_stock'] as int?,
+      productTag: json['tag'] != null
+          ? ProductTag.values.firstWhere(
+              (e) => e.toString().split('.').last == json['tag'],
+              orElse: () => ProductTag.none, // Default or error handling
+            )
+          : null,
+      isPopular: json['ispopular'] as bool? ?? false,
+      isVisible: json['isVisible'] as bool? ?? false,
     );
   }
 
@@ -89,6 +110,9 @@ class ProductModel {
     DateTime? createdAt,
     int? brandID,
     int? alertStock,
+    ProductTag? productTag,
+    bool? isPopular,
+    bool? isVisible,
   }) {
     return ProductModel(
       productId: productId ?? this.productId,
@@ -101,6 +125,9 @@ class ProductModel {
       createdAt: createdAt ?? this.createdAt,
       brandID: brandID ?? this.brandID,
       alertStock: alertStock ?? this.alertStock,
+      productTag: productTag ?? this.productTag,
+      isPopular: isPopular ?? this.isPopular,
+      isVisible: isVisible ?? this.isVisible,
     );
   }
 }

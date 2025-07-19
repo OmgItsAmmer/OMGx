@@ -487,7 +487,7 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
     try {
       // Calculate base amounts
       double salesmanCommissionAmount =
-          (order.subTotal * order.salesmanComission) / 100;
+          (order.subTotal * (order.salesmanComission ?? 0)) / 100;
       double baseTotal = order.subTotal +
           order.tax +
           order.shippingFee +
@@ -537,7 +537,7 @@ class DashboardController extends GetxController with StateMixin<dynamic> {
       }
       // Fallback to base calculation
       double salesmanCommissionAmount =
-          (order.subTotal * order.salesmanComission) / 100;
+          (order.subTotal * (order.salesmanComission ?? 0)) / 100;
       return order.subTotal +
           order.tax +
           order.shippingFee +

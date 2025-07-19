@@ -37,7 +37,7 @@ class SignUpController extends GetxController {
       phoneNumber: phoneNumber.text.trim(),
       email: email.text.trim(),
       //  cnic: cnic.text.trim(),
-      pfp: null, // Optional field, can be added later
+     
     );
 
     // Convert the UserModel to JSON

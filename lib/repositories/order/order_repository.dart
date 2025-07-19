@@ -92,6 +92,8 @@ class OrderRepository {
         return OrderModel.fromJson(item);
       }).toList();
 
+      print(orderList.length);
+
       return orderList;
     } catch (e) {
       if (kDebugMode) {

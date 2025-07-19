@@ -48,13 +48,13 @@ class ProductDetailDesktop extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Thumbnail Upload
-                    ThumbnailInfo(),
+                  //  ThumbnailInfo(),
+                    ExtraImages(),
                     SizedBox(height: TSizes.spaceBtwSections),
                     // Brand & Category & visibility
                     ProductBrandcCategory(),
-                    SizedBox(height: TSizes.spaceBtwSections),
+                    //SizedBox(height: TSizes.spaceBtwSections),
                     // Extra Images
-                    ExtraImages(),
                   ],
                 ),
               ),

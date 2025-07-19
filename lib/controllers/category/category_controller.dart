@@ -29,6 +29,8 @@ class CategoryController extends GetxController {
   RxBool isUpdating = false.obs;
   RxBool isLoading = false.obs;
 
+  RxBool isFeatured = false.obs;
+
   // Method to discard changes and navigate back
   void discardChanges() {
     // Clear form fields
@@ -168,7 +170,7 @@ class CategoryController extends GetxController {
         categoryId: null,
         categoryName: categoryNameText,
         productCount: 0, // Initialize with zero products
-        isFeatured: false,
+        isFeatured: isFeatured.value,
       );
 
       final json = categoryModel.toJson(isInsert: true);
@@ -242,7 +244,7 @@ class CategoryController extends GetxController {
         categoryId: categoryId,
         categoryName: categoryNameText,
         productCount: existingProductCount,
-        isFeatured: existingCategory.isFeatured,
+        isFeatured: isFeatured.value,
       );
 
       // final json = categoryModel.toJson();
@@ -290,6 +292,7 @@ class CategoryController extends GetxController {
       categoryName.text = category.categoryName;
       productCount.text =
           category.productCount?.toString() ?? '0'; // Show product count in UI
+      isFeatured.value = category.isFeatured ?? false;
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
@@ -299,6 +302,7 @@ class CategoryController extends GetxController {
     try {
       categoryName.clear();
       productCount.clear();
+      isFeatured.value = false;
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }

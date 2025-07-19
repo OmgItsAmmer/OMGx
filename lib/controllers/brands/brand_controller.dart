@@ -30,6 +30,10 @@ class BrandController extends GetxController {
   final TextEditingController productCount = TextEditingController();
   GlobalKey<FormState> brandDetail = GlobalKey<FormState>();
 
+  RxBool isFeatured = false.obs;
+
+  RxBool isVerified = false.obs;
+
   @override
   void onInit() {
     fetchBrands();
@@ -95,6 +99,8 @@ class BrandController extends GetxController {
         brandID: null,
         brandName: brandNameText,
         productsCount: 0, // Initialize with zero products
+        isFeatured: isFeatured.value,
+        isVerified: isVerified.value,
         // Add other fields if your BrandModel has more
       );
 
@@ -168,8 +174,8 @@ class BrandController extends GetxController {
         brandID: brandId,
         brandName: brandNameText,
         productsCount: existingProductCount,
-        isVerified: existingBrand.isVerified,
-        isFeatured: existingBrand.isFeatured,
+        isVerified: isVerified.value,
+        isFeatured: isFeatured.value,
       );
 
       final json = brandModel.toJson(isUpdate: false); // keep ID for update
@@ -254,6 +260,8 @@ class BrandController extends GetxController {
       selectedBrand.value = brand;
       brandName.text = brand.brandName ?? ' ';
       productCount.text = brand.productsCount.toString();
+      isFeatured.value = brand.isFeatured ?? false;
+      isVerified.value = brand.isVerified;
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
@@ -264,6 +272,8 @@ class BrandController extends GetxController {
       brandName.text = '';
       productCount.text = '';
       selectedBrand.value = BrandModel.empty();
+      isFeatured.value = false;
+      isVerified.value = false;
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }

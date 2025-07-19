@@ -137,6 +137,40 @@ class BrandInfo extends StatelessWidget {
 
           const SizedBox(height: TSizes.spaceBtwSections),
 
+          //enable/disable button for isFeatured and  isVerified\
+
+          Obx(
+            () => Row(
+              children: [
+                //isFeatured
+                Expanded(
+                  child: SwitchListTile(
+                    title: const Text('Featured Brand'),
+                    value: brandController.isFeatured.value,
+                    onChanged: (value) {
+                      brandController.isFeatured.value = value;
+                    },
+                  ),
+                ),
+            
+                const SizedBox(width: TSizes.spaceBtwItems),
+            
+                //isVerified
+                Expanded(
+                  child: SwitchListTile(
+                    title: const Text('Verified Brand'),
+                    value: brandController.isVerified.value,
+                    onChanged: (value) {
+                      brandController.isVerified.value = value;
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: TSizes.spaceBtwSections),
+
           // Save button
           Row(
             children: [

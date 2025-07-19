@@ -139,6 +139,19 @@ class CategoryInfo extends StatelessWidget {
 
           const SizedBox(height: TSizes.spaceBtwSections),
 
+          //enable/disable button for isFeatured
+          Obx(
+            () => SwitchListTile(
+              title: const Text('Featured Category'),
+              value: categoryController.isFeatured.value,
+              onChanged: (value) {
+                categoryController.isFeatured.value = value;
+              },
+            ),
+          ),
+
+          const SizedBox(height: TSizes.spaceBtwSections),
+
           // Save button
           Row(
             children: [

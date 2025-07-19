@@ -100,75 +100,123 @@ class ExtraImages extends StatelessWidget {
                 ),
           ),
           const SizedBox(height: TSizes.sm),
-          // Featured Image Display
-          FutureBuilder<String?>(
-            future: mediaController.fetchMainImage(
-              productController.productId.value,
-              MediaCategory.products.toString().split('.').last,
-            ),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const TShimmerEffect(width: 200, height: 150);
-              } else if (snapshot.hasError || snapshot.data == null) {
-                return Container(
-                  width: 200,
-                  height: 150,
-                  decoration: BoxDecoration(
-                    color: TColors.light,
-                    borderRadius: BorderRadius.circular(TSizes.borderRadiusMd),
-                    border: Border.all(color: TColors.borderPrimary),
-                  ),
-                  child: const Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Iconsax.image, size: 48, color: TColors.darkGrey),
-                      SizedBox(height: TSizes.xs),
-                      Text('No Featured Image',
-                          style: TextStyle(color: TColors.darkGrey)),
-                    ],
-                  ),
-                );
-              } else {
-                return Stack(
-                  children: [
-                    TRoundedImage(
-                      isNetworkImage: true,
+          // Featured Image Display - Using Obx for reactive updates
+          Obx(() {
+            if (productController.isLoadingImages.value) {
+              return const TShimmerEffect(width: 200, height: 150);
+            }
+
+            final featuredImage = productController.getFeaturedImage();
+
+            if (featuredImage != null) {
+              return FutureBuilder<String?>(
+                future: _getFeaturedImageUrl(featuredImage, mediaController),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const TShimmerEffect(width: 200, height: 150);
+                  } else if (snapshot.hasError) {
+                    return Container(
                       width: 200,
                       height: 150,
-                      imageurl: snapshot.data!,
-                      fit: BoxFit.cover,
-                    ),
-                    // Featured Badge
-                    Positioned(
-                      top: TSizes.xs,
-                      left: TSizes.xs,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: TSizes.sm,
-                          vertical: TSizes.xs,
+                      decoration: BoxDecoration(
+                        color: TColors.error.withValues(alpha: 0.1),
+                        borderRadius:
+                            BorderRadius.circular(TSizes.borderRadiusMd),
+                        border: Border.all(color: TColors.error),
+                      ),
+                      child: const Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.error, size: 48, color: TColors.error),
+                          SizedBox(height: TSizes.xs),
+                          Text('Error loading image',
+                              style: TextStyle(color: TColors.error)),
+                        ],
+                      ),
+                    );
+                  } else if (snapshot.hasData && snapshot.data != null) {
+                    return Stack(
+                      children: [
+                        TRoundedImage(
+                          isNetworkImage: true,
+                          width: 200,
+                          height: 150,
+                          imageurl: snapshot.data!,
+                          fit: BoxFit.cover,
                         ),
-                        decoration: BoxDecoration(
-                          color: TColors.success,
-                          borderRadius: BorderRadius.circular(TSizes.sm),
-                        ),
-                        child: const Text(
-                          'FEATURED',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
+                        // Featured Badge
+                        Positioned(
+                          top: TSizes.xs,
+                          left: TSizes.xs,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: TSizes.sm,
+                              vertical: TSizes.xs,
+                            ),
+                            decoration: BoxDecoration(
+                              color: TColors.success,
+                              borderRadius: BorderRadius.circular(TSizes.sm),
+                            ),
+                            child: const Text(
+                              'FEATURED',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  ],
-                );
-              }
-            },
-          ),
+                      ],
+                    );
+                  } else {
+                    return _buildNoFeaturedImagePlaceholder();
+                  }
+                },
+              );
+            } else {
+              return _buildNoFeaturedImagePlaceholder();
+            }
+          }),
         ],
       ),
     );
+  }
+
+  Widget _buildNoFeaturedImagePlaceholder() {
+    return Container(
+      width: 200,
+      height: 150,
+      decoration: BoxDecoration(
+        color: TColors.light,
+        borderRadius: BorderRadius.circular(TSizes.borderRadiusMd),
+        border: Border.all(color: TColors.borderPrimary),
+      ),
+      child: const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Iconsax.image, size: 48, color: TColors.darkGrey),
+          SizedBox(height: TSizes.xs),
+          Text('No Featured Image', style: TextStyle(color: TColors.darkGrey)),
+          SizedBox(height: TSizes.xs),
+          Text('Add images to set featured',
+              style: TextStyle(color: TColors.darkGrey, fontSize: 12)),
+        ],
+      ),
+    );
+  }
+
+  Future<String?> _getFeaturedImageUrl(
+      ImageEntityModel featuredImage, MediaController mediaController) async {
+    final imageModel = await mediaController.mediaRepository
+        .fetchImageFromImageTable(featuredImage.imageId ?? -1);
+    if (imageModel.filename != null) {
+      return await mediaController.mediaRepository.fetchImageFromBucket(
+        imageModel.filename!,
+        MediaCategory.products.toString().split('.').last,
+      );
+    }
+    return null;
   }
 
   Widget _buildAllImagesSection(
@@ -189,28 +237,17 @@ class ExtraImages extends StatelessWidget {
                 ),
           ),
           const SizedBox(height: TSizes.sm),
-          // Images Grid
-          FutureBuilder<List<ImageEntityModel>>(
-            future: _fetchAllProductImages(
-              productController.productId.value,
-              MediaCategory.products.toString().split('.').last,
-              mediaRepository,
-            ),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return _buildImageGridShimmer();
-              } else if (snapshot.hasError) {
-                return Center(
-                  child: Text('Error loading images: ${snapshot.error}'),
-                );
-              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return _buildEmptyImagesState();
-              } else {
-                return _buildImagesGrid(context, snapshot.data!,
-                    mediaController, productController, mediaRepository);
-              }
-            },
-          ),
+          // Images Grid - Using Obx for reactive updates
+          Obx(() {
+            if (productController.isLoadingImages.value) {
+              return _buildImageGridShimmer();
+            } else if (productController.productImages.isEmpty) {
+              return _buildEmptyImagesState();
+            } else {
+              return _buildImagesGrid(context, productController.productImages,
+                  mediaController, productController, mediaRepository);
+            }
+          }),
         ],
       ),
     );
@@ -263,7 +300,7 @@ class ExtraImages extends StatelessWidget {
 
   Widget _buildImagesGrid(
       BuildContext context,
-      List<ImageEntityModel> imageEntities,
+      RxList<ImageEntityModel> imageEntities,
       MediaController mediaController,
       ProductController productController,
       MediaRepository mediaRepository) {
@@ -302,8 +339,22 @@ class ExtraImages extends StatelessWidget {
             decoration: BoxDecoration(
               color: TColors.error.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(TSizes.borderRadiusSm),
+              border: Border.all(color: TColors.error.withValues(alpha: 0.3)),
             ),
-            child: const Icon(Icons.error, color: TColors.error),
+            child: const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.broken_image, color: TColors.error, size: 24),
+                  SizedBox(height: TSizes.xs),
+                  Text(
+                    'Failed to load',
+                    style: TextStyle(color: TColors.error, fontSize: 10),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
           );
         }
 
@@ -321,8 +372,23 @@ class ExtraImages extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: TColors.error.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(TSizes.borderRadiusSm),
+                  border:
+                      Border.all(color: TColors.error.withValues(alpha: 0.3)),
                 ),
-                child: const Icon(Icons.error, color: TColors.error),
+                child: const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.cloud_off, color: TColors.error, size: 24),
+                      SizedBox(height: TSizes.xs),
+                      Text(
+                        'Image not found',
+                        style: TextStyle(color: TColors.error, fontSize: 10),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
               );
             }
 
@@ -409,26 +475,6 @@ class ExtraImages extends StatelessWidget {
     );
   }
 
-  Future<List<ImageEntityModel>> _fetchAllProductImages(
-      int productId, String entityType, MediaRepository mediaRepository) async {
-    try {
-      final response = await supabase
-          .from('image_entity')
-          .select('*')
-          .eq('entity_id', productId)
-          .eq('entity_category', entityType);
-
-      return response
-          .map<ImageEntityModel>((json) => ImageEntityModel.fromJson(json))
-          .toList();
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error fetching product images: $e');
-      }
-      return [];
-    }
-  }
-
   Future<void> _addMultipleImages(
       BuildContext context,
       MediaController mediaController,
@@ -440,21 +486,65 @@ class ExtraImages extends StatelessWidget {
       );
 
       if (mediaController.selectedImages.isNotEmpty) {
-        // Assign all selected images as non-featured
-        await mediaController.imageAssigner(
-          productController.productId.value,
-          MediaCategory.products.toString().split('.').last,
-          false, // Not featured
-        );
+        // Check if the product has any existing images
+        final hasImages = productController.productImages.isNotEmpty;
+
+        if (!hasImages && mediaController.selectedImages.isNotEmpty) {
+          // Product has no images, so mark the first selected image as featured
+          final firstImage = mediaController.selectedImages.first;
+          final imageEntityModel = ImageEntityModel(
+            imageEntityId: -1,
+            imageId: firstImage.imageId,
+            isFeatured: true,
+            entityId: productController.productId.value,
+            entityCategory: MediaCategory.products.toString().split('.').last,
+          );
+          await mediaController.mediaRepository
+              .assignNewImage(imageEntityModel.toJson(isUpdate: true));
+
+          // Add remaining images as non-featured
+          for (int i = 1; i < mediaController.selectedImages.length; i++) {
+            final imageEntityModel = ImageEntityModel(
+              imageEntityId: -1,
+              imageId: mediaController.selectedImages[i].imageId,
+              isFeatured: false,
+              entityId: productController.productId.value,
+              entityCategory: MediaCategory.products.toString().split('.').last,
+            );
+            await mediaController.mediaRepository
+                .assignNewImage(imageEntityModel.toJson(isUpdate: true));
+          }
+        } else {
+          // Product already has images, so add all selected images as non-featured
+          for (var selectedImage in mediaController.selectedImages) {
+            final imageEntityModel = ImageEntityModel(
+              imageEntityId: -1,
+              imageId: selectedImage.imageId,
+              isFeatured: false,
+              entityId: productController.productId.value,
+              entityCategory: MediaCategory.products.toString().split('.').last,
+            );
+            await mediaController.mediaRepository
+                .assignNewImage(imageEntityModel.toJson(isUpdate: true));
+          }
+        }
+
+        // Refresh the product images from database to get the correct IDs
+        await productController.fetchProductImages();
 
         TLoaders.successSnackBar(
           title: 'Success',
-          message:
-              '${mediaController.selectedImages.length} images added successfully!',
+          message: hasImages
+              ? '${mediaController.selectedImages.length} images added successfully!'
+              : 'Images added successfully! First image set as featured.',
         );
 
-        // Trigger refresh
-        productController.update();
+        // Clear selected images manually
+        for (var image in mediaController.allImages) {
+          image.isSelected.value = false;
+        }
+        mediaController.selectedImages.clear();
+        mediaController.displayImage.value = null;
       }
     } catch (e) {
       TLoaders.errorSnackBar(
@@ -483,13 +573,13 @@ class ExtraImages extends StatelessWidget {
       await supabase.from('image_entity').update({'isFeatured': true}).eq(
           'image_entity_id', imageEntity.imageEntityId);
 
+      // Update reactive state
+      productController.setImageAsFeatured(imageEntity.imageEntityId);
+
       TLoaders.successSnackBar(
         title: 'Success',
         message: 'Featured image updated successfully!',
       );
-
-      // Trigger refresh
-      productController.update();
     } catch (e) {
       TLoaders.errorSnackBar(
         title: 'Error',
@@ -536,13 +626,13 @@ class ExtraImages extends StatelessWidget {
             .delete()
             .eq('image_entity_id', imageEntity.imageEntityId);
 
+        // Remove from reactive state
+        productController.removeProductImage(imageEntity.imageEntityId);
+
         TLoaders.successSnackBar(
           title: 'Success',
           message: 'Image deleted successfully!',
         );
-
-        // Trigger refresh
-        productController.update();
       } catch (e) {
         TLoaders.errorSnackBar(
           title: 'Error',

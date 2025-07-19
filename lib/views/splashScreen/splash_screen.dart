@@ -69,9 +69,9 @@ class _SplashScreenState extends State<SplashScreen>
       // This will continue in the background even after navigation
       Future.wait([
         // dashboardController.initializeDashboard(),
-        orderController.fetchOrders(),
-        productController.fetchProducts(),
-        customerController.fetchAllCustomers(),
+        // orderController.fetchOrders(),
+        // productController.fetchProducts(),
+        // customerController.fetchAllCustomers(),
       ]).then((_) {
         setState(() {
           _isDataLoaded = true;

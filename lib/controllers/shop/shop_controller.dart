@@ -57,9 +57,9 @@ class ShopController extends GetxController {
       shippingFee.text = selectedShop?.value.shippingPrice.toString() ?? ' ';
       shippingThreshold.text =
           selectedShop?.value.thresholdFreeShipping.toString() ?? ' ';
-      profile1.text = selectedShop?.value.profile1.toString() ?? ' ';
-      profile2.text = selectedShop?.value.profile2.toString() ?? ' ';
-      profile3.text = selectedShop?.value.profile3.toString() ?? ' ';
+      profile1.text = '0';
+      profile2.text = '0';
+      profile3.text = '0';
       //  productImagesController.setDesiredImage(MediaCategory.shop);
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
@@ -79,12 +79,12 @@ class ShopController extends GetxController {
             double.tryParse(taxRate.text) ?? 0.0, // Convert String to double
         thresholdFreeShipping: double.tryParse(shippingThreshold.text) ??
             0.0, // Convert String to double
-        profile1:
-            double.tryParse(profile1.text) ?? 0.0, // Convert String to double
-        profile2:
-            double.tryParse(profile2.text) ?? 0.0, // Convert String to double
-        profile3:
-            double.tryParse(profile3.text) ?? 0.0, // Convert String to double
+        // profile1:
+        //     double.tryParse(profile1.text) ?? 0.0, // Convert String to double
+        // profile2:
+        //     double.tryParse(profile2.text) ?? 0.0, // Convert String to double
+        // profile3:
+        //     double.tryParse(profile3.text) ?? 0.0, // Convert String to double
       );
 
       final json = shopModel.toJson();

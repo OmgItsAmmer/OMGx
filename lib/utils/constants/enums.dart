@@ -14,6 +14,7 @@ enum EntityType {
   vendor,
   user,
 }
+
 enum ProductTag {
   choice,
   recommended,
@@ -22,7 +23,8 @@ enum ProductTag {
   flashSale,
   newArrival,
   authentic,
-  }
+  none,
+}
 
 enum ProductType { single, variable }
 

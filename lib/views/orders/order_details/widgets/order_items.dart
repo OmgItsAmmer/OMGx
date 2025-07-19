@@ -56,10 +56,10 @@ class OrderItems extends StatelessWidget {
 
           // Calculate commission amount - Based on subtotal after discount
           double commissionAmount = 0.0;
-          if (order.salesmanComission > 0) {
+          if (order.salesmanComission != null && order.salesmanComission! > 0) {
             // Base for commission is usually the net item value
             final commissionBase = subTotal - discountAmount;
-            commissionAmount = commissionBase * order.salesmanComission / 100;
+            commissionAmount = commissionBase * order.salesmanComission! / 100;
           }
 
           // Calculate the actual grand total including all components
@@ -248,7 +248,8 @@ class OrderItems extends StatelessWidget {
                           Text('Rs. ${order.tax.toStringAsFixed(2)}')),
 
                       // Salesman Commission (always shown)
-                      if (order.salesmanComission > 0)
+                      if (order.salesmanComission != null &&
+                          order.salesmanComission! > 0)
                         _buildSummaryRow(
                             context,
                             'Salesman Commission',

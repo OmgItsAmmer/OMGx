@@ -79,8 +79,8 @@ class LoginController extends GetxController {
           .loginWithEmailAndPassword(email.text.trim(), password.text.trim());
 
       // Fetch user data
-      await UserController.instance.fetchUserRecord();
-      UserController.instance.setupProfileDetails();
+      await userController.setUpApp();
+     
 
       // Clear profile image cache to ensure fresh image load
       if (Get.isRegistered<MediaController>()) {

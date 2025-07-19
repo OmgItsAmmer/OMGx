@@ -38,14 +38,15 @@ class OrderController extends GetxController {
   TextEditingController newPaidAmount = TextEditingController();
   RxDouble remainingAmount = (0.0).obs;
 
-  @override
-  void onInit() {
-    fetchOrders();
-    super.onInit();
-  }
+  // @override
+  // void onInit() {
+  //   fetchOrders();
+  //   super.onInit();
+  // }
 
   Future<void> fetchOrders() async {
     try {
+     
       isOrdersFetching.value = true;
       final orders = await orderRepository.fetchOrders();
 
@@ -68,7 +69,7 @@ class OrderController extends GetxController {
   void setRemainingAmount(OrderModel order) {
     // Convert salesman commission from percentage to amount
     double salesmanCommissionAmount =
-        (order.subTotal * (order.salesmanComission)) / 100;
+        (order.subTotal * (order.salesmanComission ?? 0)) / 100;
 
     // Calculate the total amount including subtotal, shipping tax, and salesman commission
     double totalAmount = order.subTotal +
@@ -310,7 +311,7 @@ class OrderController extends GetxController {
       // Update status in database
       await orderRepository.updateStatus(orderId, status);
 
-      // Update the status in allOrders list
+      // Update the status in allOrders list  
       allOrders[index] = allOrders[index].copyWith(status: status);
       allOrders.refresh(); // Notify UI about the update
 

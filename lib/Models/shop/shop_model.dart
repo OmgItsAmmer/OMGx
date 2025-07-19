@@ -4,12 +4,9 @@ class ShopModel {
   final double taxrate;
   final double shippingPrice;
   final double? thresholdFreeShipping; // Optional field
-  final double? profile1; // Optional field
-  final double? profile2; // Optional field
-  final double? profile3; // Optional field
-  final String? softwareCompanyName; // New field
-  final String? softwareWebsiteLink; // New field
-  final String? softwareContactNo; // New field
+  final String? softwareCompanyName; // Software company name
+  final String? softwareWebsiteLink; // Software website link
+  final String? softwareContactNo; // Software contact number
 
   ShopModel({
     required this.shopId,
@@ -17,9 +14,6 @@ class ShopModel {
     required this.taxrate,
     required this.shippingPrice,
     this.thresholdFreeShipping,
-    this.profile1,
-    this.profile2,
-    this.profile3,
     this.softwareCompanyName,
     this.softwareWebsiteLink,
     this.softwareContactNo,
@@ -32,9 +26,6 @@ class ShopModel {
         taxrate: 0.0,
         shippingPrice: 0.0,
         thresholdFreeShipping: null,
-        profile1: null,
-        profile2: null,
-        profile3: null,
         softwareCompanyName: null,
         softwareWebsiteLink: null,
         softwareContactNo: null,
@@ -48,9 +39,6 @@ class ShopModel {
       'taxrate': taxrate,
       'shipping_price': shippingPrice,
       'threshold_free_shipping': thresholdFreeShipping,
-      'profile1': profile1,
-      'profile2': profile2,
-      'profile3': profile3,
       'software_company_name': softwareCompanyName,
       'software_website_link': softwareWebsiteLink,
       'software_contact_no': softwareContactNo,
@@ -66,15 +54,6 @@ class ShopModel {
       shippingPrice: (json['shipping_price'] as num).toDouble(),
       thresholdFreeShipping: json['threshold_free_shipping'] != null
           ? (json['threshold_free_shipping'] as num).toDouble()
-          : null,
-      profile1: json['profile1'] != null
-          ? (json['profile1'] as num).toDouble()
-          : null,
-      profile2: json['profile2'] != null
-          ? (json['profile2'] as num).toDouble()
-          : null,
-      profile3: json['profile3'] != null
-          ? (json['profile3'] as num).toDouble()
           : null,
       softwareCompanyName: json['software_company_name'] as String?,
       softwareWebsiteLink: json['software_website_link'] as String?,

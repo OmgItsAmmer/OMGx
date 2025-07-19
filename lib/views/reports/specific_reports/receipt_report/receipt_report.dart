@@ -368,7 +368,7 @@ class _ReceiptReportPageState extends State<ReceiptReportPage> {
       // order.salesmanComission contains percentage (e.g., 3.0 for 3%)
       // Convert to absolute value: (percentage * subTotal) / 100
       double absoluteCommission =
-          (order.salesmanComission * order.subTotal) / 100;
+          (order.salesmanComission ?? 0 * order.subTotal) / 100;
 
       // Calculate receipt net total from subTotal plus fees
       double receiptNetTotal =
@@ -523,7 +523,7 @@ class _ReceiptReportPageState extends State<ReceiptReportPage> {
                           _totalRow('Shipping:',
                               order.shippingFee.toStringAsFixed(2)),
                           _totalRow('Salesman Commission:',
-                              '${absoluteCommission.toStringAsFixed(2)}(${order.salesmanComission.toStringAsFixed(1)}%)'),
+                              '${absoluteCommission.toStringAsFixed(2)}(${order.salesmanComission?.toStringAsFixed(1)}%)'),
                           pw.Divider(),
                           _totalRow(
                               'Total:', receiptNetTotal.toStringAsFixed(2),
