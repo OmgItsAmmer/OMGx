@@ -17,11 +17,11 @@ class ExpenseController extends GetxController {
 
   RxBool isExpenseFetching = false.obs;
 
-  @override
-  void onInit() {
-    fetchExpenses();
-    super.onInit();
-  }
+  // @override
+  // void onInit() {
+  //   fetchExpenses();
+  //   super.onInit();
+  // }
 
   @override
   void onClose() {

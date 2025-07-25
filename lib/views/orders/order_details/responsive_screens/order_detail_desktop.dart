@@ -16,6 +16,7 @@ import '../../../../controllers/customer/customer_controller.dart';
 import '../../../../controllers/guarantors/guarantor_controller.dart';
 import '../../../../controllers/salesman/salesman_controller.dart';
 import '../../../../utils/constants/enums.dart';
+import '../widgets/customer_info_2.dart';
 import '../widgets/guarrantor_card.dart';
 
 class OrderDetailDesktopScreen extends StatelessWidget {
@@ -80,7 +81,7 @@ class OrderDetailDesktopScreen extends StatelessWidget {
                 Expanded(
                   child: Column(
                     children: [
-                      UserInfo(
+                      CustomerInfo(
                         mediaCategory: MediaCategory.customers,
                         title: 'Customer',
                         showAddress: true,
@@ -91,7 +92,9 @@ class OrderDetailDesktopScreen extends StatelessWidget {
                             .selectedCustomer.value.phoneNumber,
                         isLoading: customerController.isLoading.value,
                       ),
+                      if(orderModel.salesmanId != null)
                       const SizedBox(height: TSizes.spaceBtwSections),
+                      if(orderModel.salesmanId != null)
                       UserInfo(
                         mediaCategory: MediaCategory.salesman,
                         title: 'Salesman',

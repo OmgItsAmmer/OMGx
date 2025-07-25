@@ -5,6 +5,7 @@ class ProductModel {
   int? productId;
   String name;
   String? description;
+  String? priceRange;
   String? basePrice;
   String? salePrice;
   int? categoryId;
@@ -20,6 +21,7 @@ class ProductModel {
     this.productId,
     required this.name,
     this.description,
+    this.priceRange,
     this.basePrice,
     this.salePrice,
     this.categoryId,
@@ -37,6 +39,7 @@ class ProductModel {
         productId: null,
         name: "",
         description: "",
+        priceRange: "",
         basePrice: "",
         salePrice: "",
         categoryId: null,
@@ -54,6 +57,7 @@ class ProductModel {
     final Map<String, dynamic> data = {
       'name': name,
       'description': description ?? "",
+      'price_range': priceRange ?? "",
       'base_price': basePrice ?? "",
       'sale_price': salePrice ?? "",
       'category_id': categoryId,
@@ -78,6 +82,7 @@ class ProductModel {
       productId: json['product_id'] as int?,
       name: json['name'] as String,
       description: json['description'] as String? ?? "",
+      priceRange: json['price_range'] as String? ?? "",
       basePrice: json['base_price'] as String? ?? "",
       salePrice: json['sale_price'] as String? ?? "",
       categoryId: json['category_id'] as int?,
@@ -103,6 +108,7 @@ class ProductModel {
     int? productId,
     String? name,
     String? description,
+    String? priceRange,
     String? basePrice,
     String? salePrice,
     int? categoryId,
@@ -118,6 +124,7 @@ class ProductModel {
       productId: productId ?? this.productId,
       name: name ?? this.name,
       description: description ?? this.description,
+      priceRange: priceRange ?? this.priceRange,
       basePrice: basePrice ?? this.basePrice,
       salePrice: salePrice ?? this.salePrice,
       categoryId: categoryId ?? this.categoryId,

@@ -96,4 +96,16 @@ class AddressRepository extends GetxController {
       }
     }
   }
+
+  Future<AddressModel> fetchOrderAddress(int addressId) async {
+    try {
+      print('addressId: $addressId');
+      final data = await supabase.from('order_addresses').select().eq('address_id', addressId);
+      print('data: $data');
+      return AddressModel.fromJson(data.first);
+    } catch (e) {
+      TLoaders.warningSnackBar(title: "Fetch Order Address", message: e.toString());
+      return AddressModel.empty();
+    }
+  }
 }

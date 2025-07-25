@@ -27,12 +27,12 @@ class ShopController extends GetxController {
   RxBool isUpdating = false.obs;
   RxBool isLoading = false.obs;
 
-  @override
-  void onInit() {
-    fetchShop();
+  // @override
+  // void onInit() {
+  //   fetchShop();
 
-    super.onInit();
-  }
+  //   super.onInit();
+  // }
 
   Future<void> fetchShop() async {
     try {

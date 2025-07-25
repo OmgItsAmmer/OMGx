@@ -34,11 +34,11 @@ class BrandController extends GetxController {
 
   RxBool isVerified = false.obs;
 
-  @override
-  void onInit() {
-    fetchBrands();
-    super.onInit();
-  }
+  // @override
+  // void onInit() {
+  //   fetchBrands();
+  //   super.onInit();
+  // }
 
   // Method to discard changes and navigate back
   void discardChanges() {

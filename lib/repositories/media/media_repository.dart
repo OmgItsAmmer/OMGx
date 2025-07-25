@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:ecommerce_dashboard/Models/image/image_entity_model.dart';
 import 'package:ecommerce_dashboard/common/widgets/loaders/tloaders.dart';
+import 'package:ecommerce_dashboard/utils/constants/enums.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
@@ -95,8 +96,12 @@ class MediaRepository extends GetxController {
   Future<String?> fetchImageFromBucket(
       String filePath, String bucketName) async {
     try {
-      // return await supabase.storage.from(bucketName).download(filePath);
-      return supabase.storage.from(bucketName).getPublicUrl(filePath);
+      
+      final response = await supabase.storage
+          .from(bucketName)
+          .createSignedUrl(filePath, 60); // expires in 60 seconds
+      return response;
+
       //return response; // response is of type Uint8List
     } catch (e) {
       if (kDebugMode) {

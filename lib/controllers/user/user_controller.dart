@@ -1,8 +1,11 @@
 import 'package:ecommerce_dashboard/Models/user/user_model.dart';
+import 'package:ecommerce_dashboard/controllers/account_book/account_book_controller.dart';
+import 'package:ecommerce_dashboard/controllers/expenses/expense_controller.dart';
 import 'package:ecommerce_dashboard/controllers/orders/orders_controller.dart';
 import 'package:ecommerce_dashboard/controllers/purchase_sales/purchase_sales_controller.dart';
 import 'package:ecommerce_dashboard/controllers/sales/sales_controller.dart';
 import 'package:ecommerce_dashboard/controllers/salesman/salesman_controller.dart';
+import 'package:ecommerce_dashboard/routes/routes.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +20,8 @@ import '../../utils/constants/image_strings.dart';
 import '../../utils/constants/sizes.dart';
 import '../../utils/popups/full_screen_loader.dart';
 import '../../views/login/login.dart';
+import '../brands/brand_controller.dart';
+import '../category/category_controller.dart';
 import '../customer/customer_controller.dart';
 import '../dashboard/dashboard_controoler.dart';
 import '../media/media_controller.dart';
@@ -91,9 +96,9 @@ class UserController extends GetxController {
 
       // setupProfileDetails();
 
-        //Setting UserDetails in App
-        //   startUpController.setupUserDetails(currentUser.value);
-        return true;
+      //Setting UserDetails in App
+      //   startUpController.setupUserDetails(currentUser.value);
+      return true;
     } catch (e) {
       // TLoaders.errorSnackBar(
       //     title: "User Details Not Found!",
@@ -295,15 +300,22 @@ class UserController extends GetxController {
       final isUserFetched = await fetchUserRecord();
       if (isUserFetched) {
         setupProfileDetails();
-        OrderController.instance.fetchOrders();
+        await OrderController.instance.fetchOrders();
         SalesController.instance.setupUserDetails();
         PurchaseSalesController.instance.setupUserDetails();
-     //   DashboardController.instance.fe();
-        CustomerController.instance.fetchAllCustomers();
-        ProductController.instance.fetchProducts();
-        SalesmanController.instance.fetchAllSalesman();
-        VendorController.instance.fetchAllVendors();
-        ShopController.instance.fetchShop();
+        await CustomerController.instance.fetchAllCustomers();
+        await ProductController.instance.fetchProducts();
+        await SalesmanController.instance.fetchAllSalesman();
+        await VendorController.instance.fetchAllVendors();
+        await ShopController.instance.fetchShop();
+
+        await BrandController.instance.fetchBrands();
+        await CategoryController.instance.fetchCategories();
+        await ExpenseController.instance.fetchExpenses();
+        await AccountBookController.instance.setUpAccountBook();
+      } else {
+        Get.offAllNamed(TRoutes.login);
+        TLoaders.errorSnackBar(title: "Oh Snap!", message: "User not found");
       }
     } catch (e) {
       TLoaders.errorSnackBar(title: "Oh Snap!", message: e.toString());

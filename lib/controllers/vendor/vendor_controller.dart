@@ -34,11 +34,11 @@ class VendorController extends GetxController {
   int? vendorId;
   final addVendorKey = GlobalKey<FormState>();
 
-  @override
-  void onInit() {
-    super.onInit();
-    fetchAllVendors();
-  }
+  // @override
+  // void onInit() {
+  //   super.onInit();
+  //   fetchAllVendors();
+  // }
 
   Future<void> fetchAllVendors() async {
     try {

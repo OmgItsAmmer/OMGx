@@ -136,11 +136,11 @@ class CategoryController extends GetxController {
     }
   }
 
-  @override
-  void onInit() {
-    fetchCategories();
-    super.onInit();
-  }
+  // @override
+  // void onInit() {
+  //   fetchCategories();
+  //   super.onInit();
+  // }
 
   Future<void> insertCategory() async {
     final MediaController mediaController = Get.find<MediaController>();

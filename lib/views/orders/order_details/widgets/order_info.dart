@@ -74,13 +74,12 @@ class OrderInfo extends StatelessWidget {
                         children: [
                           const Expanded(
                             flex: 2,
-                            child: Text('Date'),
+                            child: Text('Order Id #'),
                           ),
                           Expanded(
                             flex: 3,
                             child: Text(
-                              DateFormat('dd-MM-yyyy')
-                                  .format(DateTime.parse(orderModel.orderDate)),
+                              orderModel.orderId.toString(),
                               style: Theme.of(context).textTheme.bodyLarge,
                             ),
                           ),

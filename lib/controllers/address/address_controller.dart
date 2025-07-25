@@ -29,6 +29,8 @@ class AddressController extends GetxController {
   Rx<AddressModel> selectedVendorAddress = AddressModel.empty().obs;
   Rx<AddressModel>? currentSalesmanAddress;
 
+  Rx<AddressModel> selectedOrderAddress = AddressModel.empty().obs;
+
   RxMap<String, dynamic>? selectedAddress;
   RxInt selectedIndex = (-1).obs;
 
@@ -120,6 +122,23 @@ class AddressController extends GetxController {
         TLoaders.errorSnackBar(title: e.toString());
         print(e);
       }
+    }
+  }
+
+
+  //fetch order address using address id from order model
+  Future<void> fetchOrderAddress(int addressId) async {
+    try { 
+      isLoading.value = true;
+      final address = await addressRepository.fetchOrderAddress(addressId);
+      selectedOrderAddress.value = address;
+    } catch (e) {
+      if (kDebugMode) {
+        TLoaders.errorSnackBar(title: e.toString());
+        print(e);
+      }
+    } finally {
+      isLoading.value = false;
     }
   }
 }

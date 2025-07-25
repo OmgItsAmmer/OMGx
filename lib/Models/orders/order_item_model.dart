@@ -1,31 +1,26 @@
 class OrderItemModel {
-  final int orderItemId;
   final int productId;
   final double price;
   final int quantity;
   final int orderId;
   final String? unit;
-  final double totalBuyPrice;
+  final double? totalBuyPrice;
   final DateTime? createdAt;
-  final String? serialNumber;
   final int? variantId;
 
   OrderItemModel({
-    required this.orderItemId,
     required this.productId,
     required this.price,
     required this.quantity,
     required this.orderId,
     this.unit,
-    this.totalBuyPrice = 0.0,
+    this.totalBuyPrice,
     this.createdAt,
-    this.serialNumber,
     this.variantId,
   });
 
   // Static function to create an empty order item model
   static OrderItemModel empty() => OrderItemModel(
-        orderItemId: 0,
         productId: 0,
         price: 0.0,
         quantity: 0,
@@ -33,26 +28,23 @@ class OrderItemModel {
         unit: null,
         totalBuyPrice: 0.0,
         createdAt: DateTime.now(),
-        serialNumber: null,
         variantId: null,
       );
 
   // Convert model to JSON for database insertion
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {
-  
       'product_id': productId,
       'price': price,
       'quantity': quantity,
       'order_id': orderId,
       'unit': unit,
       'total_buy_price': totalBuyPrice,
-      'serial_number': serialNumber,
     };
 
     if (variantId != null) {
       data['variant_id'] = variantId;
-      }
+    }
 
     return data;
   }
@@ -60,7 +52,6 @@ class OrderItemModel {
   // Factory method to create an OrderItemModel from JSON response
   factory OrderItemModel.fromJson(Map<String, dynamic> json) {
     return OrderItemModel(
-      orderItemId: json['order_item_id'] as int,
       productId: json['product_id'] as int,
       price: (json['price'] is num)
           ? (json['price'] as num).toDouble()
@@ -72,11 +63,10 @@ class OrderItemModel {
           ? (json['total_buy_price'] is num)
               ? (json['total_buy_price'] as num).toDouble()
               : double.tryParse(json['total_buy_price'].toString()) ?? 0.0
-          : 0.0,
+          : null,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
-          : DateTime.now(),
-      serialNumber: json['serial_number'] as String?,
+          : null,
       variantId: json['variant_id'] as int?,
     );
   }
@@ -88,7 +78,6 @@ class OrderItemModel {
 
   // CopyWith method
   OrderItemModel copyWith({
-    int? orderItemId,
     int? productId,
     double? price,
     int? quantity,
@@ -96,11 +85,9 @@ class OrderItemModel {
     String? unit,
     double? totalBuyPrice,
     DateTime? createdAt,
-    String? serialNumber,
     int? variantId,
   }) {
     return OrderItemModel(
-      orderItemId: orderItemId ?? this.orderItemId,
       productId: productId ?? this.productId,
       price: price ?? this.price,
       quantity: quantity ?? this.quantity,
@@ -108,7 +95,6 @@ class OrderItemModel {
       unit: unit ?? this.unit,
       totalBuyPrice: totalBuyPrice ?? this.totalBuyPrice,
       createdAt: createdAt ?? this.createdAt,
-      serialNumber: serialNumber ?? this.serialNumber,
       variantId: variantId ?? this.variantId,
     );
   }
@@ -204,45 +190,44 @@ class OrderModel {
     return data;
   }
 
-factory OrderModel.fromJson(Map<String, dynamic> json) {
-  // Handle null or malformed date safely
-  String formattedDate = DateTime.now().toIso8601String();
-  if (json.containsKey('order_date') && json['order_date'] != null) {
-    try {
-      final parsedDate = DateTime.parse(json['order_date'].toString());
-      formattedDate =
-          "${parsedDate.year.toString().padLeft(4, '0')}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.day.toString().padLeft(2, '0')}";
-    } catch (_) {
-      // silently fallback
+  factory OrderModel.fromJson(Map<String, dynamic> json) {
+    // Handle null or malformed date safely
+    String formattedDate = DateTime.now().toIso8601String();
+    if (json.containsKey('order_date') && json['order_date'] != null) {
+      try {
+        final parsedDate = DateTime.parse(json['order_date'].toString());
+        formattedDate =
+            "${parsedDate.year.toString().padLeft(4, '0')}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.day.toString().padLeft(2, '0')}";
+      } catch (_) {
+        // silently fallback
+      }
     }
+
+    return OrderModel(
+      orderId: json['order_id'] as int? ?? 0,
+      orderDate: formattedDate,
+      subTotal: (json['sub_total'] as num?)?.toDouble() ?? 0.0,
+      status: json['status'] as String? ?? 'pending',
+      saletype: json['saletype'] as String?, // can be null
+      addressId: json['address_id'] as int?,
+      userId: json['user_id'] as int?, // nullable user_id
+      customerId: json['customer_id'] as int?,
+      paidAmount: (json['paid_amount'] as num?)?.toDouble(),
+      buyingPrice: (json['buying_price'] as num?)?.toDouble(),
+      discount: (json['discount'] as num?)?.toDouble() ?? 0.0,
+      tax: (json['tax'] as num?)?.toDouble() ?? 0.0,
+      shippingFee: (json['shipping_fee'] as num?)?.toDouble() ?? 0.0,
+      idempotencyKey: json['idempotency_key'] as String?,
+      paymentMethod: json['payment_method'] as String? ?? 'cod',
+      salesmanId: json['salesman_id'] as int?, // can be null
+      salesmanComission: json['salesman_comission'] != null
+          ? (json['salesman_comission'] as int)
+          : 0,
+      orderItems: json['order_items'] != null
+          ? OrderItemModel.fromJsonList(json['order_items'] as List)
+          : null,
+    );
   }
-
-  return OrderModel(
-    orderId: json['order_id'] as int? ?? 0,
-    orderDate: formattedDate,
-    subTotal: (json['sub_total'] as num?)?.toDouble() ?? 0.0,
-    status: json['status'] as String? ?? 'pending',
-    saletype: json['saletype'] as String?, // can be null
-    addressId: json['address_id'] as int?,
-    userId: json['user_id'] as int?, // nullable user_id
-    customerId: json['customer_id'] as int?,
-    paidAmount: (json['paid_amount'] as num?)?.toDouble(),
-    buyingPrice: (json['buying_price'] as num?)?.toDouble(),
-    discount: (json['discount'] as num?)?.toDouble() ?? 0.0,
-    tax: (json['tax'] as num?)?.toDouble() ?? 0.0,
-    shippingFee: (json['shipping_fee'] as num?)?.toDouble() ?? 0.0,
-    idempotencyKey: json['idempotency_key'] as String?,
-    paymentMethod: json['payment_method'] as String? ?? 'cod',
-    salesmanId: json['salesman_id'] as int?, // can be null
-    salesmanComission: json['salesman_comission'] != null
-        ? (json['salesman_comission'] as int)
-        : 0,
-    orderItems: json['order_items'] != null
-        ? OrderItemModel.fromJsonList(json['order_items'] as List)
-        : null,
-  );
-}
-
 
   OrderModel copyWith({
     int? orderId,
@@ -286,6 +271,3 @@ factory OrderModel.fromJson(Map<String, dynamic> json) {
     );
   }
 }
-
-
-

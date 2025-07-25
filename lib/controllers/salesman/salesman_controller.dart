@@ -39,12 +39,12 @@ class SalesmanController extends GetxController {
 
   RxInt salesmanId = (-1).obs;
 
-  @override
-  void onInit() {
-    super.onInit();
+  // @override
+  // void onInit() {
+  //   super.onInit();
 
-    fetchAllSalesman();
-  }
+  //   fetchAllSalesman();
+  // }
 
   Future<void> fetchAllSalesman() async {
     try {

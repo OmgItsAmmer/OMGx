@@ -1,0 +1,117 @@
+class OrderAddressModel {
+  final int? orderAddressId;
+  final String location;
+  final String? phoneNumber;
+  final String? postalCode;
+  final String? city;
+  final String? country;
+  final String fullName;
+  final int? customerId;
+  final int? vendorId;
+  final int? salesmanId;
+  final int? userId;
+  final int? addressId;
+
+  String get name => fullName;
+
+  String get formattedAddress {
+    return [location, city, postalCode, country]
+        .where((element) => element != null && element.isNotEmpty)
+        .join(', ');
+  }
+
+  OrderAddressModel({
+    this.orderAddressId,
+    this.location = '',
+    this.phoneNumber,
+    this.postalCode,
+    this.city,
+    this.country,
+    this.fullName = '',
+    this.customerId,
+    this.vendorId,
+    this.salesmanId,
+    this.userId,
+    this.addressId,
+  });
+
+  // Static function to create an empty order address model
+  static OrderAddressModel empty() => OrderAddressModel();
+
+  // Convert model to JSON for database insertion
+  Map<String, dynamic> toJson({bool isInsert = false}) {
+    final Map<String, dynamic> data = {
+      'shipping_address': location,
+      'phone_number': phoneNumber,
+      'postal_code': postalCode,
+      'city': city,
+      'country': country,
+      'full_name': fullName,
+      'customer_id': customerId,
+      'vendor_id': vendorId,
+      'salesman_id': salesmanId,
+      'user_id': userId,
+      'address_id': addressId,
+    };
+
+    if (!isInsert) {
+      data['order_address_id'] = orderAddressId;
+    }
+
+    return data;
+  }
+
+  // Factory method to create an OrderAddressModel from JSON
+  factory OrderAddressModel.fromJson(Map<String, dynamic> json) {
+    return OrderAddressModel(
+      orderAddressId: json['order_address_id'] as int?,
+      location: json['shipping_address'] as String? ?? '',
+      phoneNumber: json['phone_number'] as String?,
+      postalCode: json['postal_code'] as String?,
+      city: json['city'] as String?,
+      country: json['country'] as String?,
+      fullName: json['full_name'] as String? ?? '',
+      customerId: json['customer_id'] as int?,
+      vendorId: json['vendor_id'] as int?,
+      salesmanId: json['salesman_id'] as int?,
+      userId: json['user_id'] as int?,
+      addressId: json['address_id'] as int?,
+    );
+  }
+
+  // Static method to create a list of OrderAddressModel from a JSON list
+  static List<OrderAddressModel> fromJsonList(List<dynamic> jsonList) {
+    return jsonList.map((json) => OrderAddressModel.fromJson(json)).toList();
+  }
+
+  // CopyWith method
+  OrderAddressModel copyWith({
+    int? orderAddressId,
+    String? location,
+    String? phoneNumber,
+    String? postalCode,
+    String? city,
+    String? country,
+    String? fullName,
+    int? customerId,
+    int? vendorId,
+    int? salesmanId,
+    int? userId,
+    int? addressId,
+  }) {
+    return OrderAddressModel(
+      orderAddressId: orderAddressId ?? this.orderAddressId,
+      location: location ?? this.location,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      postalCode: postalCode ?? this.postalCode,
+      city: city ?? this.city,
+      country: country ?? this.country,
+      fullName: fullName ?? this.fullName,
+      customerId: customerId ?? this.customerId,
+      vendorId: vendorId ?? this.vendorId,
+      salesmanId: salesmanId ?? this.salesmanId,
+      userId: userId ?? this.userId,
+      addressId: addressId ?? this.addressId,
+    );
+  }
+}

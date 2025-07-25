@@ -67,7 +67,9 @@ class OrderTransaction extends StatelessWidget {
                           ), //TODO add payment method to database
                           //Adjust your payment Method Fee if any
                           Text(
-                            orderModel.saletype.toString(),
+                            (orderModel.saletype != null)
+                                ? orderModel.saletype.toString()
+                                : "Not Available",
                             style: Theme.of(context).textTheme.labelMedium,
                           ),
                         ],

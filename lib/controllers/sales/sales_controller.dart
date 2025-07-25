@@ -749,7 +749,7 @@ class SalesController extends GetxController {
                 quantity; // For regular products, multiply by quantity
 
         return OrderItemModel(
-          orderItemId: -1,
+         // orderItemId: -1,
           //createdAt: DateTime.now(),
           productId: sale.productId,
           orderId: -1,

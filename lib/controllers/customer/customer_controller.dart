@@ -38,12 +38,12 @@ class CustomerController extends GetxController {
   // final alertStock = TextEditingController();
   // final brandName = TextEditingController();
 
-  @override
-  void onInit() {
-    super.onInit();
+  // @override
+  // void onInit() {
+  //   super.onInit();
 
-    fetchAllCustomers();
-  }
+  //   fetchAllCustomers();
+  // }
 
   Future<void> fetchAllCustomers() async {
     try {

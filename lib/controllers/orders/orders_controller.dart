@@ -15,6 +15,7 @@ import '../address/address_controller.dart';
 import '../customer/customer_controller.dart';
 import '../guarantors/guarantor_controller.dart';
 import '../salesman/salesman_controller.dart';
+import '../../main.dart';
 
 class OrderController extends GetxController {
   static OrderController get instance => Get.find();
@@ -46,7 +47,6 @@ class OrderController extends GetxController {
 
   Future<void> fetchOrders() async {
     try {
-     
       isOrdersFetching.value = true;
       final orders = await orderRepository.fetchOrders();
 
@@ -180,8 +180,7 @@ class OrderController extends GetxController {
       salesmanController.fetchSalesmanInfo(order.salesmanId ?? -1);
 
       // Fetch customer addresses
-      addressController.fetchEntityAddresses(
-          order.customerId ?? -1, EntityType.customer);
+      addressController.fetchOrderAddress(order.addressId ?? -1);
 
       // Set remaining amount for the order
       orderController.setRemainingAmount(order);
@@ -311,7 +310,32 @@ class OrderController extends GetxController {
       // Update status in database
       await orderRepository.updateStatus(orderId, status);
 
-      // Update the status in allOrders list  
+      // If the new status is 'ready', call the Supabase edge function
+      if (status == 'ready') {
+        try {
+          final order = allOrders[index];
+          final response = await supabase.functions.invoke(
+            'notify-ready',
+            body: {
+              "new": {
+                "order_id": order.orderId,
+                "customer_id": order
+                    .customerId, // This must exist in your `customers` table
+              }
+            },
+          );
+          if (kDebugMode) {
+            print('notify-ready response: \\${response.data}');
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print(
+                'Error invoking notify-ready edge function: \\${e.toString()}');
+          }
+        }
+      }
+
+      // Update the status in allOrders list
       allOrders[index] = allOrders[index].copyWith(status: status);
       allOrders.refresh(); // Notify UI about the update
 

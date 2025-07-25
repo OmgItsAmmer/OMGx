@@ -173,16 +173,61 @@ class BasicInfo extends StatelessWidget {
 
 
                   //dropdown with enums
-                  DropdownButtonFormField<ProductTag>(
-                    value: productController.productTag.value,
-                    items: ProductTag.values.map((e) => DropdownMenuItem(value: e, child: Text(e.name))).toList(),
-                    onChanged: (value) {
-                      productController.productTag.value = value!;
-                    },
-                    decoration: const InputDecoration(
-                      labelText: 'Tag',
-                      hintText: 'Enter product tag',
-                    ),
+                  Row(
+                    children: [
+                      //Price Range Textfield with validator to put it like 3000-4000 etc
+                      Expanded(
+                        child: TextFormField(
+                          
+                          controller: productController.priceRange,
+                       //   focusNode: productController.priceRangeFocusNode,
+                          textInputAction: TextInputAction.next,
+                        //  onFieldSubmitted: (_) => productController.productTagFocusNode.requestFocus(),
+                        //make validator to check if the value is like 3000-4000 etc
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Price range is required';
+                            }
+                            //there should be - between the two numbers
+                            if (!value.contains('-')) {
+                              return 'Price range must be in the format 3000-4000';
+                            }
+                            //there shouldnt be any hard limit on no of digits but the two numbers should be numbers
+                            if (!RegExp(r'^\d{4}-\d{4}$').hasMatch(value)) {
+                              return 'Price range must be in the format 3000-4000';
+                            }
+                            //the two numbers should be numbers
+                            if (!RegExp(r'^\d{4}-\d{4}$').hasMatch(value)) {
+                              return 'Price range must be in the format 3000-4000'; 
+                            } 
+                            return null;
+                          },
+                          decoration: const InputDecoration(
+                            prefix: Text('Rs '),
+                            
+                            labelText: 'Price range',
+                            hintText: 'Enter price range (3000-4000)',
+                          ),
+                        ),
+                      ),
+
+
+                      const SizedBox(width: TSizes.spaceBtwInputFields),
+
+                      Expanded(
+                        child: DropdownButtonFormField<ProductTag>(
+                          value: productController.productTag.value,
+                          items: ProductTag.values.map((e) => DropdownMenuItem(value: e, child: Text(e.name))).toList(),
+                          onChanged: (value) {
+                            productController.productTag.value = value!;
+                          },
+                          decoration: const InputDecoration(
+                            labelText: 'Tag',
+                            hintText: 'Enter product tag',
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
 
 

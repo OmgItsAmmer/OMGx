@@ -64,12 +64,32 @@ class AccountBookController extends GetxController {
   Rx<DateTime?> filterStartDate = Rx<DateTime?>(null);
   Rx<DateTime?> filterEndDate = Rx<DateTime?>(null);
 
-  @override
-  void onInit() {
-    super.onInit();
-    fetchAllAccountBookEntries();
-    loadSummaryData();
-    loadEntitiesForCurrentType();
+  // @override
+  // void onInit() {
+  //   super.onInit();
+  //   fetchAllAccountBookEntries();
+  //   loadSummaryData();
+  //   loadEntitiesForCurrentType();
+
+  //   // Listen to search changes
+  //   searchController.addListener(() {
+  //     searchTerm.value = searchController.text;
+  //     filterEntries();
+  //   });
+
+  //   // Listen to filter changes
+  //   ever(filterEntityType, (_) => filterEntries());
+  //   ever(filterTransactionType, (_) => filterEntries());
+  //   ever(filterStartDate, (_) => filterEntries());
+  //   ever(filterEndDate, (_) => filterEntries());
+
+  //   // Listen to entity type changes to load relevant entities
+  //   ever(selectedEntityType, (_) => loadEntitiesForCurrentType());
+  // }
+  Future<void> setUpAccountBook() async {
+    await fetchAllAccountBookEntries();
+    await loadSummaryData();
+    await loadEntitiesForCurrentType();
 
     // Listen to search changes
     searchController.addListener(() {

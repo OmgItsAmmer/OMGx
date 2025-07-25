@@ -7,6 +7,7 @@
 "workbench.iconTheme": "vs-minimal", // or pick a minimal icon theme
 "terminal.integrated.fontSize": 11,
 "window.zoomLevel": -1,
+"editor.hover.enabled": false,
 
 
 

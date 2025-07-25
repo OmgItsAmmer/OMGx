@@ -64,6 +64,7 @@ class ProductController extends GetxController {
       TextEditingController();
   final TextEditingController selectedCategoryNameController =
       TextEditingController();
+  final TextEditingController priceRange = TextEditingController();
 
   int selectedBrandId = -1;
   int selectedCategoryId = -1;
@@ -85,11 +86,11 @@ class ProductController extends GetxController {
 
   RxBool isVisible = false.obs;
 
-  @override
-  void onInit() {
-    fetchProducts();
-    super.onInit();
-  }
+  // @override
+  // void onInit() {
+  //   fetchProducts();
+  //   super.onInit();
+  // }
 
   @override
   void onClose() {
@@ -103,7 +104,7 @@ class ProductController extends GetxController {
     selectedBrandNameController.dispose();
     selectedCategoryNameController.dispose();
     salePrice.dispose();
-
+    priceRange.dispose();
     // Dispose focus nodes
     nameFocusNode.dispose();
     descriptionFocusNode.dispose();
@@ -111,7 +112,7 @@ class ProductController extends GetxController {
     salePriceFocusNode.dispose();
     stockFocusNode.dispose();
     alertStockFocusNode.dispose();
-
+    //priceRangeFocusNode.dispose();
     // Clear any cached data to prevent stale state
     currentProductVariants.clear();
     unsavedProductVariants.clear();
@@ -144,6 +145,7 @@ class ProductController extends GetxController {
       originalCategoryId = -1;
       selectedCategoryNameController.clear();
       selectedBrandNameController.clear();
+      priceRange.clear();
 
       // Clear variants
       if (currentProductVariants.isNotEmpty) {
@@ -216,6 +218,7 @@ class ProductController extends GetxController {
         productTag: productTag.value,
         isPopular: isPopular.value,
         isVisible: isVisible.value,
+        priceRange: priceRange.text.trim(),
       );
 
       // Insert the product into the database
@@ -330,6 +333,7 @@ class ProductController extends GetxController {
         productTag: productTag.value,
         isPopular: isPopular.value,
         isVisible: isVisible.value,
+        priceRange: priceRange.text.trim(),
       );
 
       final json = productModel.toJson(isUpdate: true);
@@ -435,7 +439,7 @@ class ProductController extends GetxController {
       productTag.value = product.productTag;
       isPopular.value = product.isPopular ?? false;
       isVisible.value = product.isVisible ?? false;
-
+      priceRange.text = product.priceRange ?? '';
       // Fetch product variants
       if (product.productId != null) {
         fetchProductVariants(product.productId!);

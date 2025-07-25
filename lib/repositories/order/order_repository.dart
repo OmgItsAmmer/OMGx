@@ -330,7 +330,7 @@ class OrderRepository {
     try {
       for (var item in orderItems) {
         // Skip null items
-        if (item == null) continue;
+     //   if (item == null) continue;
 
         if (item.variantId != null) {
           // For items with variants, check variant stock

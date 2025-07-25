@@ -9,10 +9,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
+import '../../../../Models/address/address_model.dart';
+import '../../../../controllers/customer/customer_controller.dart';
+import '../../../../controllers/salesman/salesman_controller.dart';
 import '../../../../utils/constants/enums.dart';
 
-class VendorInfo extends StatelessWidget {
-  const VendorInfo({
+class CustomerInfo extends StatelessWidget {
+  const CustomerInfo({
     super.key,
     required this.mediaCategory,
     required this.title,
@@ -35,6 +38,10 @@ class VendorInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     final MediaController mediaController = Get.find<MediaController>();
     final AddressController addressController = Get.find<AddressController>();
+    final CustomerController customerController =
+        Get.find<CustomerController>();
+    final SalesmanController salesmanController =
+        Get.find<SalesmanController>();
 
     return TRoundedContainer(
       padding: const EdgeInsets.all(TSizes.defaultSpace),
@@ -177,7 +184,7 @@ class VendorInfo extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Address',
+                              'Shipping Address',
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
                             const SizedBox(height: 4),
@@ -188,17 +195,37 @@ class VendorInfo extends StatelessWidget {
                                 return const TShimmerEffect(
                                     width: double.infinity, height: 40);
                               } else if (addressController
-                                  .allVendorAddresses.isEmpty) {
+                                  .selectedOrderAddress.value == AddressModel.empty()) {
                                 return Text(
                                   'No address found',
                                   style: Theme.of(context).textTheme.bodyMedium,
                                 );
                               } else {
                                 final address =
-                                    addressController.allVendorAddresses.first;
-                                return Text(
-                                  address.location,
-                                  style: Theme.of(context).textTheme.bodyMedium,
+                                    addressController.selectedOrderAddress.value;
+                                return Column(
+                                  children: [
+                                    Text(
+                                      //prefix icon
+                                      
+                                      address.fullName,
+                                      style: Theme.of(context).textTheme.bodyMedium,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: TSizes.spaceBtwItems),
+                                    Text(
+                                      address.location,
+                                      style: Theme.of(context).textTheme.bodyMedium,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: TSizes.spaceBtwItems),
+                                    Text(
+                                      address.phoneNumber ?? 'No phone number',
+                                      style: Theme.of(context).textTheme.bodyMedium,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                  
                                 );
                               }
                             }),
