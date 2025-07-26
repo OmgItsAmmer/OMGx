@@ -67,6 +67,7 @@ class SalesController extends GetxController {
 
   //Variables
   Rx<String> selectedProductName = ''.obs;
+  Rx<String> selectedVariantName = ''.obs;
   Rx<UnitType> selectedUnit = UnitType.item.obs;
   Rx<int> selectedProductId = (-1).obs;
   RxDouble subTotal = (0.0).obs; // Sum of all product prices only
@@ -116,6 +117,9 @@ class SalesController extends GetxController {
   final totalPrice = TextEditingController().obs;
   final discountController = TextEditingController(); // to reset field to zero
   final dropdownController = TextEditingController(); // to reset field to zero
+
+  final variantDropdownController =
+      TextEditingController(); // to reset field to zero
 
   //Customer Info fields
   final customerNameController = TextEditingController();
@@ -168,6 +172,7 @@ class SalesController extends GetxController {
 
   // Focus Nodes for Tab Order
   final FocusNode productNameFocus = FocusNode();
+  final FocusNode variantNameFocus = FocusNode();
   final FocusNode unitPriceFocus = FocusNode();
   final FocusNode quantityFocus = FocusNode();
   final FocusNode totalPriceFocus = FocusNode();
@@ -206,6 +211,91 @@ class SalesController extends GetxController {
       }
     }
     super.onClose();
+  }
+
+  void setCustomerInfo(CustomerModel customer) {
+    try {
+      customerNameController.text = customer.fullName;
+      customerPhoneNoController.value.text = customer.phoneNumber;
+      customerCNICController.value.text = customer.cnic;
+      entityId.value = customer.customerId ?? -1;
+
+      //customer address
+      final addressController = Get.find<AddressController>();
+      customerAddressController.value.text =
+          addressController.selectedOrderAddress.value.location;
+      selectedAddressId =
+          addressController.selectedOrderAddress.value.addressId;
+    } catch (e) {
+      if (kDebugMode) {
+        TLoaders.errorSnackBar(title: e.toString());
+        print('Error setting customer info: $e');
+      }
+    }
+  }
+
+  void setSalesmanInfo(SalesmanModel salesman) {
+    try {
+      salesmanNameController.text = salesman.fullName;
+      salesmanCityController.value.text = salesman.city;
+      salesmanAreaController.value.text = salesman.area;
+      selectedSalesmanId = salesman.salesmanId ?? -1;
+    } catch (e) {
+      if (kDebugMode) {
+        TLoaders.errorSnackBar(title: e.toString());
+        print('Error setting salesman info: $e');
+      }
+    }
+  }
+
+  void setOrderInfo(OrderModel order, double remainingAmountValue) {
+    try {
+      //remaining amount
+      remainingAmount.value.text = remainingAmountValue.toString();
+      discount.value = order.discount.toString();
+      subTotal.value = order.subTotal - order.discount;
+      netTotal.value = order.subTotal -
+          order.discount +
+          order.shippingFee +
+          (order.subTotal * (order.salesmanComission ?? 0)) / 100;
+      //  originalSubTotal.value = order.originalSubTotal;
+      //  originalNetTotal.value = order.originalNetTotal;
+      //  buyingPriceTotal = order.buyingPriceTotal;
+    } catch (e) {
+      if (kDebugMode) {
+        TLoaders.errorSnackBar(title: e.toString());
+        print('Error setting order info: $e');
+      }
+    }
+  }
+
+  void setOrderItems(OrderModel order) {
+    try {
+      allSales.clear();
+
+      //convert order items to sales
+      final sales = convertOrderItemsToSales(order);
+
+      allSales.addAll(sales);
+    } catch (e) {
+      if (kDebugMode) {
+        TLoaders.errorSnackBar(title: e.toString());
+        print('Error setting order items: $e');
+      }
+    }
+  }
+
+  List<SaleModel> convertOrderItemsToSales(OrderModel order) {
+    try {
+     
+     return [];
+    } catch (e) {
+      if (kDebugMode) {
+        TLoaders.errorSnackBar(title: e.toString());
+        print('Error converting order items to sales: $e');
+      }
+        return [];
+    }
   }
 
   // Method to manually reset sales data when navigating away (except to installments)
@@ -749,7 +839,7 @@ class SalesController extends GetxController {
                 quantity; // For regular products, multiply by quantity
 
         return OrderItemModel(
-         // orderItemId: -1,
+          // orderItemId: -1,
           //createdAt: DateTime.now(),
           productId: sale.productId,
           orderId: -1,
@@ -1022,6 +1112,7 @@ class SalesController extends GetxController {
       // Important: To properly clear autocomplete, we need a direct text assignment
       // rather than just calling clear()
       dropdownController.text = '';
+      variantDropdownController.text = '';
 
       // Reset product selection
       selectedProductName.value = '';
@@ -1029,10 +1120,7 @@ class SalesController extends GetxController {
       isManualTextEntry.value = false;
 
       // Reset variant selection
-      selectedVariantId.value = -1;
-      if (availableVariants.isNotEmpty) {
-        availableVariants.clear();
-      }
+      clearVariantSelection();
 
       // Reset form states
       selectedChipIndex.value = -1;
@@ -1388,6 +1476,14 @@ class SalesController extends GetxController {
     }
   }
 
+  // Method to clear variant selection
+  void clearVariantSelection() {
+    selectedVariantId.value = -1;
+    selectedVariantName.value = '';
+    variantDropdownController.text = '';
+    availableVariants.clear();
+  }
+
   // Add this method after the setupUserDetails method
   Future<void> loadAvailableVariants(int productId) async {
     try {
@@ -1397,7 +1493,9 @@ class SalesController extends GetxController {
       // Reset fields
       availableVariants.clear();
 
-      if (productId <= 0) return;
+      if (productId <= 0) {
+        return;
+      }
 
       // Get the product
       final productController = Get.find<ProductController>();
@@ -1406,23 +1504,24 @@ class SalesController extends GetxController {
         orElse: () => ProductModel.empty(),
       );
 
-      // // Only load variants for serialized products
-      // if (!product.hasSerialNumbers) return;
+      if (product.productId == null) {
+        return;
+      }
 
       // Load available variants
       final variants = await productController.getVisibleVariants(productId);
-      availableVariants.assignAll(variants);
 
-      // If variants are available, update the UI
-      if (variants.isNotEmpty) {
-        unitPrice.value.text = "";
-        quantity.text = "1"; // For serialized products, quantity is always 1
-        totalPrice.value.text = "";
-      }
+      // Use assignAll to trigger reactive updates - no need for manual update() calls
+      availableVariants.assignAll(variants);
+      availableVariants.refresh();
+
+      // // If variants are available, update the UI
+      // if (variants.isNotEmpty) {
+      //   unitPrice.value.text = "";
+      //   quantity.text = "1"; // For serialized products, quantity is always 1
+      //   totalPrice.value.text = "";
+      // }
     } catch (e) {
-      if (kDebugMode) {
-        print('Error loading variants: $e');
-      }
       TLoaders.errorSnackBar(
         title: 'Error',
         message: 'Failed to load product variants: $e',

@@ -32,26 +32,15 @@ class ProductSearchBar extends StatelessWidget {
         getItemId: (ProductModel product) => product.productId,
         onManualTextEntry: (String text) {
           // Clear variants and product id if the user is typing manually
-          salesController.availableVariants.clear();
-          salesController.selectedVariantId.value = -1;
+          salesController.clearVariantSelection();
         },
         onSelected: (ProductModel selectedProduct) async {
           // For all products, load their variants since every product has variants now
           await salesController
               .loadAvailableVariants(selectedProduct.productId ?? -1);
 
-          // Set default unit price from product base price
-          salesController.unitPrice.value.text =
-              selectedProduct.salePrice ?? "0";
-
-          // Calculate buying price for profit calculation
-          salesController.buyingPriceIndividual = double.tryParse(
-                selectedProduct.basePrice ?? "0",
-              ) ??
-              0.0;
-
           // Request focus on the unit price field after selection logic is complete
-          salesController.unitPriceFocus.requestFocus();
+          salesController.variantNameFocus.requestFocus();
         },
       ),
     );

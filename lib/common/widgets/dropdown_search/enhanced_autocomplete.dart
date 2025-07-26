@@ -3,15 +3,12 @@ import 'package:get/get.dart';
 import '../loaders/tloaders.dart';
 import 'custom_autocomplete.dart';
 
-/// An enhanced autocomplete widget that exactly matches the behavior of ProductSearchBar
-/// in sale_product_bar.dart with additional error handling capabilities.
+/// An enhanced autocomplete widget for GetX projects.
 ///
-/// Key features:
-/// 1. Shows overlay with options immediately on focus (for address, brand, category)
-/// 2. Properly hides overlay when clicking elsewhere
-/// 3. Shows validation errors for invalid entries
-/// 4. Allows syncing with an external controller
-class EnhancedAutocomplete<T extends Object> extends StatefulWidget {
+/// NOTE: If you pass reactive (Rx) values (like RxList) for [options],
+/// you MUST wrap this widget in an Obx or GetBuilder in the parent widget.
+/// This widget is stateless and will rebuild only when its parent rebuilds.
+class EnhancedAutocomplete<T extends Object> extends StatelessWidget {
   /// The label text for the field
   final String labelText;
 
@@ -21,7 +18,7 @@ class EnhancedAutocomplete<T extends Object> extends StatefulWidget {
   /// Function that converts an object to its display string
   final String Function(T) displayStringForOption;
 
-  /// List of all available options
+  /// List of all available options (should be a normal List, or use Obx in parent for RxList)
   final List<T> options;
 
   /// External controller to sync with
@@ -68,74 +65,25 @@ class EnhancedAutocomplete<T extends Object> extends StatefulWidget {
     this.showOptionsOnFocus = false,
   }) : super(key: key);
 
-  @override
-  State<EnhancedAutocomplete<T>> createState() =>
-      _EnhancedAutocompleteState<T>();
-}
+  void _validateManualEntry(BuildContext context, String text) {
+    if (text.isEmpty) return;
 
-class _EnhancedAutocompleteState<T extends Object>
-    extends State<EnhancedAutocomplete<T>> {
-  late TextEditingController _innerController;
-  final LayerLink _layerLink = LayerLink();
-  bool _isMounted = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _innerController = TextEditingController();
-    _isMounted = true;
-
-    // Listen to changes in the external controller
-    if (widget.externalController != null) {
-      widget.externalController!.addListener(_updateInnerFromExternal);
-    }
-  }
-
-  // Method to update inner controller when external changes
-  void _updateInnerFromExternal() {
-    if (!_isMounted) return;
-
-    if (widget.externalController != null &&
-        _innerController.text != widget.externalController!.text) {
-      // Need to use setState to update the UI
-      setState(() {
-        _innerController.text = widget.externalController!.text;
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _isMounted = false;
-    if (widget.externalController != null) {
-      widget.externalController!.removeListener(_updateInnerFromExternal);
-    }
-    if (widget.externalController == null) {
-      _innerController.dispose();
-    }
-    super.dispose();
-  }
-
-  void _validateManualEntry(String text) {
-    if (!_isMounted || text.isEmpty) return;
-
-    bool isValid = widget.options.any((option) =>
-        widget.displayStringForOption(option).toLowerCase() ==
-        text.toLowerCase());
+    bool isValid = options.any((option) =>
+        displayStringForOption(option).toLowerCase() == text.toLowerCase());
 
     if (!isValid) {
       TLoaders.errorSnackBar(
           title: 'Invalid Selection',
-          message: '${widget.labelText} "${text}" not found in the list');
+          message: ' ${labelText} "${text}" not found in the list');
 
       // Reset the field if needed
-      if (_isMounted && widget.externalController != null) {
-        widget.externalController!.clear();
+      if (externalController != null) {
+        externalController!.clear();
       }
 
       // Call the manual text entry callback if provided
-      if (_isMounted && widget.onManualTextEntry != null) {
-        widget.onManualTextEntry!('');
+      if (onManualTextEntry != null) {
+        onManualTextEntry!('');
       }
     }
   }
@@ -143,7 +91,7 @@ class _EnhancedAutocompleteState<T extends Object>
   @override
   Widget build(BuildContext context) {
     return CustomAutocomplete<T>(
-      displayStringForOption: widget.displayStringForOption,
+      displayStringForOption: displayStringForOption,
       optionsViewBuilder: (BuildContext context, void Function(T) onSelected,
           Iterable<T> options) {
         final AlignmentDirectional optionsAlignment =
@@ -167,7 +115,7 @@ class _EnhancedAutocompleteState<T extends Object>
                     },
                     child: Container(
                       padding: const EdgeInsets.all(16.0),
-                      child: Text(widget.displayStringForOption(option)),
+                      child: Text(displayStringForOption(option)),
                     ),
                   );
                 },
@@ -180,110 +128,80 @@ class _EnhancedAutocompleteState<T extends Object>
           TextEditingController textEditingController,
           FocusNode focusNode,
           VoidCallback onFieldSubmitted) {
-        // Store reference to the text controller
-        _innerController = textEditingController;
-
-        // This is crucial: Always ensure the internal controller matches the external
-        // regardless of whether they're empty or not
-        if (widget.externalController != null &&
-            textEditingController.text != widget.externalController!.text) {
-          // Use WidgetsBinding to avoid text input issues
+        // Only sync from external controller on initial build, not during typing
+        if (externalController != null &&
+            textEditingController.text.isEmpty &&
+            externalController!.text.isNotEmpty) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (_isMounted) {
-              textEditingController.text = widget.externalController!.text;
-              textEditingController.selection = TextSelection.fromPosition(
-                  TextPosition(offset: textEditingController.text.length));
-            }
+            textEditingController.text = externalController!.text;
+            textEditingController.selection = TextSelection.fromPosition(
+                TextPosition(offset: textEditingController.text.length));
           });
         }
 
-        // Set up a listener to keep the controllers in sync
         textEditingController.addListener(() {
-          if (!_isMounted) return;
-
           final currentText = textEditingController.text;
 
           // Sync with external controller if provided
-          if (widget.externalController != null) {
-            widget.externalController!.text = currentText;
+          if (externalController != null) {
+            externalController!.text = currentText;
           }
 
           // Check if the text was manually edited and doesn't match the selected item
-          if (widget.selectedItemName != null &&
-              currentText != widget.selectedItemName!.value) {
+          if (selectedItemName != null &&
+              currentText != selectedItemName!.value) {
             // Set flag to indicate manual text entry
-            if (widget.isManualTextEntry != null) {
-              widget.isManualTextEntry!.value = true;
+            if (isManualTextEntry != null) {
+              isManualTextEntry!.value = true;
             }
 
             // Call the manual text entry callback if provided
-            if (widget.onManualTextEntry != null) {
-              widget.onManualTextEntry!(currentText);
+            if (onManualTextEntry != null) {
+              onManualTextEntry!(currentText);
             }
           }
         });
 
-        // Handle focus changes
         focusNode.addListener(() {
-          if (!_isMounted) return;
-
           if (!focusNode.hasFocus &&
-              widget.isManualTextEntry != null &&
-              widget.isManualTextEntry!.value) {
-            _validateManualEntry(textEditingController.text);
-          }
-
-          // Show options on focus for fields that need it, but avoid auto-selection
-          if (focusNode.hasFocus &&
-              widget.showOptionsOnFocus &&
-              textEditingController.text.isEmpty &&
-              widget.options.isNotEmpty) {
-            // Instead of calling onFieldSubmitted immediately, we'll let the optionsBuilder
-            // handle showing options naturally when the field is focused and empty
-            // This avoids the auto-selection issue
+              isManualTextEntry != null &&
+              isManualTextEntry!.value) {
+            _validateManualEntry(context, textEditingController.text);
           }
         });
 
         return CompositedTransformTarget(
-          link: _layerLink,
+          link: LayerLink(),
           child: TextFormField(
             focusNode: focusNode,
             controller: textEditingController,
-            validator: widget.validator,
-            onTap: () {
-              // Simplified onTap - let the optionsBuilder handle showing options
-              // This prevents the auto-selection issue that was happening with onFieldSubmitted
-            },
+            validator: validator,
+            onTap: () {},
             onFieldSubmitted: (String value) {
-              if (!_isMounted) return;
-
               onFieldSubmitted();
-              if (widget.isManualTextEntry != null &&
-                  widget.isManualTextEntry!.value) {
-                _validateManualEntry(value);
+              if (isManualTextEntry != null && isManualTextEntry!.value) {
+                _validateManualEntry(context, value);
               }
             },
             decoration: InputDecoration(
-              labelText: widget.labelText,
-              hintText: widget.hintText,
+              labelText: labelText,
+              hintText: hintText,
               suffixIcon: textEditingController.text.isNotEmpty
                   ? IconButton(
                       icon: const Icon(Icons.close, size: 18),
                       onPressed: () {
-                        if (!_isMounted) return;
-
                         textEditingController.clear();
-                        if (widget.externalController != null) {
-                          widget.externalController!.clear();
+                        if (externalController != null) {
+                          externalController!.clear();
                         }
-                        if (widget.selectedItemName != null) {
-                          widget.selectedItemName!.value = '';
+                        if (selectedItemName != null) {
+                          selectedItemName!.value = '';
                         }
-                        if (widget.selectedItemId != null) {
-                          widget.selectedItemId!.value = -1;
+                        if (selectedItemId != null) {
+                          selectedItemId!.value = -1;
                         }
-                        if (widget.onManualTextEntry != null) {
-                          widget.onManualTextEntry!('');
+                        if (onManualTextEntry != null) {
+                          onManualTextEntry!('');
                         }
                       },
                     )
@@ -293,49 +211,45 @@ class _EnhancedAutocompleteState<T extends Object>
         );
       },
       optionsBuilder: (TextEditingValue textEditingValue) {
-        if (textEditingValue.text.isEmpty && !widget.showOptionsOnFocus) {
+        if (textEditingValue.text.isEmpty && !showOptionsOnFocus) {
           return Iterable<T>.empty();
         }
 
         // For fields that should show options on focus, show all options when empty
-        if (textEditingValue.text.isEmpty && widget.showOptionsOnFocus) {
-          return widget.options;
+        if (textEditingValue.text.isEmpty && showOptionsOnFocus) {
+          return options;
         }
 
         // Filter options based on the entered text
-        return widget.options.where((T option) {
-          return widget
-              .displayStringForOption(option)
+        return options.where((T option) {
+          return displayStringForOption(option)
               .toLowerCase()
               .contains(textEditingValue.text.toLowerCase());
         });
       },
       onSelected: (T selectedItem) {
-        if (!_isMounted) return;
+        final String itemName = displayStringForOption(selectedItem);
 
-        // Update controllers and notifiers
-        final String itemName = widget.displayStringForOption(selectedItem);
-
-        if (widget.externalController != null) {
-          widget.externalController!.text = itemName;
+        if (externalController != null) {
+          externalController!.text = itemName;
         }
 
-        if (widget.selectedItemName != null) {
-          widget.selectedItemName!.value = itemName;
+        if (selectedItemName != null) {
+          selectedItemName!.value = itemName;
         }
 
-        if (widget.selectedItemId != null && widget.getItemId != null) {
-          final itemId = widget.getItemId!(selectedItem) ?? -1;
-          widget.selectedItemId!.value = itemId;
+        if (selectedItemId != null && getItemId != null) {
+          final itemId = getItemId!(selectedItem) ?? -1;
+          selectedItemId!.value = itemId;
         }
 
-        if (widget.isManualTextEntry != null) {
-          widget.isManualTextEntry!.value = false;
+        if (isManualTextEntry != null) {
+          isManualTextEntry!.value = false;
         }
 
         // Call the selection callback if provided
-        if (widget.onSelected != null) {
-          widget.onSelected!(selectedItem);
+        if (onSelected != null) {
+          onSelected!(selectedItem);
         }
       },
     );

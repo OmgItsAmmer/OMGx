@@ -14,6 +14,7 @@ import '../../routes/routes.dart';
 import '../address/address_controller.dart';
 import '../customer/customer_controller.dart';
 import '../guarantors/guarantor_controller.dart';
+import '../sales/sales_controller.dart';
 import '../salesman/salesman_controller.dart';
 import '../../main.dart';
 
@@ -72,12 +73,12 @@ class OrderController extends GetxController {
         (order.subTotal * (order.salesmanComission ?? 0)) / 100;
 
     // Calculate the total amount including subtotal, shipping tax, and salesman commission
-    double totalAmount = order.subTotal +
+    double totalAmount = (order.subTotal - (order.discount)) +
         (order.shippingFee) +
         salesmanCommissionAmount +
         (order.tax);
 
-    // Calculate the remaining amount
+    // Calculate the remaining amount with discount
     remainingAmount.value = totalAmount - (order.paidAmount ?? 0.0);
   }
 
@@ -580,6 +581,25 @@ class OrderController extends GetxController {
       if (kDebugMode) {
         print('Controller Error: $e');
       }
+    }
+  }
+
+  //edit order (transfering data from order to sales screen fields in sales_controller)
+  void transferOrderDataToSalesScreen(OrderModel order) {
+    //transfer data from order to sales screen fields in sales_controller
+    final salesController = Get.find<SalesController>();
+
+    try {
+      //step by step
+      //step 1 customer info transfer
+
+      //step 2 salesman info transfer
+
+      //step 3 order items transfer
+
+      //step 4 order info transfer
+    } catch (e) {
+      TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
   }
 }

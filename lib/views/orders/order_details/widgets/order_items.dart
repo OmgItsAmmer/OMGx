@@ -43,9 +43,9 @@ class OrderItems extends StatelessWidget {
     // Calculate the discount amount based on the percentage
     final discountAmount = subTotal * (order.discount / 100);
 
-    // Calculate the total before installment charges
-    final totalBeforeInstallmentCharges =
-        subTotal + (order.tax) + (order.shippingFee) - discountAmount;
+    // // Calculate the total before installment charges
+    // final totalBeforeInstallmentCharges =
+    //     subTotal + (order.tax) + (order.shippingFee) - discountAmount;
 
     return FutureBuilder<InstallmentPlanModel?>(
         future: order.saletype?.toLowerCase() == 'installment'
@@ -76,9 +76,27 @@ class OrderItems extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Items',
-                  style: Theme.of(context).textTheme.headlineMedium,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Items',
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                    const SizedBox(width: TSizes.spaceBtwItems),
+                    //edit order button
+                    SizedBox(
+                      width: 150,
+                      height: 40,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          //edit order
+                        },
+                        icon: const Icon(Iconsax.edit,color: TColors.white,),
+                        label: const Text('Edit Order'),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: TSizes.spaceBtwSections),
 

@@ -1,6 +1,5 @@
 import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
 import 'package:ecommerce_dashboard/common/widgets/icons/t_circular_icon.dart';
-import 'package:ecommerce_dashboard/controllers/address/address_controller.dart';
 import 'package:ecommerce_dashboard/controllers/customer/customer_controller.dart';
 import 'package:ecommerce_dashboard/utils/constants/colors.dart';
 import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
@@ -10,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
-import '../../../controllers/media/media_controller.dart';
 import '../../../controllers/sales/sales_controller.dart';
 import '../table/sale_table.dart';
 import '../widgets/cashier_info.dart';
@@ -20,6 +18,7 @@ import '../widgets/sales_saleman_info.dart';
 import '../widgets/sales_summary.dart';
 import '../widgets/unit_price_quantity.dart';
 import '../widgets/unit_total_price.dart';
+import '../widgets/variant_search_bar.dart';
 
 class SalesDesktop extends GetView<SalesController> {
   const SalesDesktop({super.key});
@@ -176,6 +175,19 @@ class SalesDesktop extends GetView<SalesController> {
                               const SizedBox(
                                 width: TSizes.spaceBtwItems,
                               ),
+                              // Variant Bar - Wrap with FocusTraversalOrder
+                              Expanded(
+                                child: FocusTraversalOrder(
+                                  order: const NumericFocusOrder(2.0),
+                                  child: VariantSearchBar(
+                                      variantNameFocus:
+                                          controller.variantNameFocus),
+                                ),
+                              ),
+
+                              const SizedBox(
+                                width: TSizes.spaceBtwItems,
+                              ),
 
                               // Unit Price Quantity - Wrap with FocusTraversalOrder (contains two focus nodes)
                               // Note: Internal order within UnitPriceQuantity is handled by default LTR
@@ -206,53 +218,39 @@ class SalesDesktop extends GetView<SalesController> {
                               ),
 
                               // Add Button - Wrap with FocusTraversalOrder
-                              Expanded(
-                                child: FocusTraversalOrder(
-                                  order: const NumericFocusOrder(5.0),
-                                  child: SizedBox(
-                                    height:
-                                        58, // Match approximate TextFormField height
-                                    width: double.infinity,
-                                    child: Obx(() => ElevatedButton(
-                                          focusNode: controller.addButtonFocus,
-                                          onPressed: controller.isLoading.value
-                                              ? null
-                                              : () {
-                                                  controller.addProduct();
-                                                  // Request focus after adding
-                                                  controller.productNameFocus
-                                                      .requestFocus();
-                                                },
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: TColors.primary,
-                                            foregroundColor: TColors.white,
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 16),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
+                              FocusTraversalOrder(
+                                order: const NumericFocusOrder(5.0),
+                                child: Obx(() => controller.isLoading.value
+                                    ? Container(
+                                        width: 58,
+                                        height: 58,
+                                        decoration: BoxDecoration(
+                                          color: TColors.primary,
+                                          borderRadius:
+                                              BorderRadius.circular(29),
+                                        ),
+                                        child: const Center(
+                                          child: SizedBox(
+                                            height: 20,
+                                            width: 20,
+                                            child: CircularProgressIndicator(
+                                              color: TColors.white,
+                                              strokeWidth: 2,
                                             ),
                                           ),
-                                          child: controller.isLoading.value
-                                              ? const SizedBox(
-                                                  height: 20,
-                                                  width: 20,
-                                                  child:
-                                                      CircularProgressIndicator(
-                                                    color: TColors.white,
-                                                    strokeWidth: 2,
-                                                  ),
-                                                )
-                                              : const Text(
-                                                  'Add',
-                                                  style: TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                        )),
-                                  ),
-                                ),
+                                        ),
+                                      )
+                                    : TCircularIcon(
+                                        icon: Iconsax.add,
+                                        backgroundColor: TColors.primary,
+                                        color: TColors.white,
+                                        onPressed: () {
+                                          controller.addProduct();
+                                          // Request focus after adding
+                                          controller.productNameFocus
+                                              .requestFocus();
+                                        },
+                                      )),
                               ),
                               const SizedBox(
                                 width: TSizes.spaceBtwItems,
@@ -282,12 +280,12 @@ class SalesDesktop extends GetView<SalesController> {
                     height: TSizes.spaceBtwSections / 2,
                   ),
 
-                  // Serial Numbers Selector (for products with serial numbers)
-                  const SerialVariantSelector(),
+                  // // Serial Numbers Selector (for products with serial numbers)
+                  // const SerialVariantSelector(),
 
-                  const SizedBox(
-                    height: TSizes.spaceBtwSections / 2,
-                  ),
+                  // const SizedBox(
+                  //   height: TSizes.spaceBtwSections / 2,
+                  // ),
 
                   // Sale Table
                   const TRoundedContainer(height: 530, child: SaleTable()),

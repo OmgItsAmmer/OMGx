@@ -63,7 +63,7 @@ class OrderDetailDesktopScreen extends StatelessWidget {
           children: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+              children: [ 
                 Expanded(
                   flex: 2,
                   child: Column(
