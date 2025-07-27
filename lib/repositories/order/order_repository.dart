@@ -330,7 +330,7 @@ class OrderRepository {
     try {
       for (var item in orderItems) {
         // Skip null items
-     //   if (item == null) continue;
+        //   if (item == null) continue;
 
         if (item.variantId != null) {
           // For items with variants, check variant stock
@@ -375,6 +375,233 @@ class OrderRepository {
         print('Error checking stock availability: $e');
       }
       TLoaders.errorSnackBar(title: 'Stock Check Error', message: e.toString());
+      return false;
+    }
+  }
+
+  /// Update an existing order with new data
+  Future<bool> updateOrder(int orderId, Map<String, dynamic> orderData,
+      List<OrderItemModel> newOrderItems) async {
+    try {
+      // Start a transaction-like approach
+
+      // Step 1: Update the main order record
+      await supabase.from('orders').update(orderData).eq('order_id', orderId);
+
+      // Step 2: Handle order items update
+      if (newOrderItems.isNotEmpty) {
+        // Delete existing order items
+        await supabase.from('order_items').delete().eq('order_id', orderId);
+
+        // Insert new order items
+        final orderItemsJson = newOrderItems
+            .map((item) => {
+                  'order_id': orderId,
+                  'product_id': item.productId,
+                  'variant_id': item.variantId,
+                  'quantity': item.quantity,
+                  'price': item.price,
+                  'unit': item.unit,
+                  'total_buy_price': item.totalBuyPrice,
+                })
+            .toList();
+
+        await supabase.from('order_items').insert(orderItemsJson);
+      }
+
+      TLoaders.successSnackBar(
+          title: 'Order Updated',
+          message: 'Order #$orderId has been updated successfully');
+
+      return true;
+    } catch (e) {
+      TLoaders.errorSnackBar(
+          title: 'Update Order Error', message: e.toString());
+      if (kDebugMode) {
+        print('Error updating order: $e');
+      }
+      return false;
+    }
+  }
+
+  /// Get the original order items before editing (for stock restoration)
+  Future<List<OrderItemModel>> getOriginalOrderItems(int orderId) async {
+    try {
+      final response = await supabase
+          .from('order_items')
+          .select('*')
+          .eq('order_id', orderId);
+
+      return response
+          .map<OrderItemModel>((item) => OrderItemModel(
+                productId: item['product_id'],
+                orderId: item['order_id'],
+                quantity: item['quantity'],
+                price: (item['price'] as num).toDouble(),
+                unit: item['unit'],
+                totalBuyPrice: (item['total_buy_price'] as num?)?.toDouble(),
+                variantId: item['variant_id'],
+              ))
+          .toList();
+    } catch (e) {
+      TLoaders.errorSnackBar(
+          title: 'Fetch Order Items Error', message: e.toString());
+      if (kDebugMode) {
+        print('Error fetching original order items: $e');
+      }
+      return [];
+    }
+  }
+
+  /// Calculate stock differences between original and new order items
+  Future<Map<String, dynamic>> calculateStockDifferences(
+      List<OrderItemModel> originalItems, List<OrderItemModel> newItems) async {
+    try {
+      Map<String, int> stockChanges = {};
+      Map<String, int> variantStockChanges = {};
+
+      // Create maps for easier lookup
+      Map<int, int> originalProductQuantities = {};
+      Map<int, int> originalVariantQuantities = {};
+
+      for (var item in originalItems) {
+        if (item.variantId != null) {
+          originalVariantQuantities[item.variantId!] =
+              (originalVariantQuantities[item.variantId!] ?? 0) + item.quantity;
+        } else {
+          originalProductQuantities[item.productId] =
+              (originalProductQuantities[item.productId] ?? 0) + item.quantity;
+        }
+      }
+
+      Map<int, int> newProductQuantities = {};
+      Map<int, int> newVariantQuantities = {};
+
+      for (var item in newItems) {
+        if (item.variantId != null) {
+          newVariantQuantities[item.variantId!] =
+              (newVariantQuantities[item.variantId!] ?? 0) + item.quantity;
+        } else {
+          newProductQuantities[item.productId] =
+              (newProductQuantities[item.productId] ?? 0) + item.quantity;
+        }
+      }
+
+      // Calculate differences for products
+      Set<int> allProductIds = {
+        ...originalProductQuantities.keys,
+        ...newProductQuantities.keys
+      };
+      for (int productId in allProductIds) {
+        int originalQty = originalProductQuantities[productId] ?? 0;
+        int newQty = newProductQuantities[productId] ?? 0;
+        int difference = newQty -
+            originalQty; // Positive means more items needed, negative means stock restored
+
+        if (difference != 0) {
+          stockChanges['product_$productId'] = difference;
+        }
+      }
+
+      // Calculate differences for variants
+      Set<int> allVariantIds = {
+        ...originalVariantQuantities.keys,
+        ...newVariantQuantities.keys
+      };
+      for (int variantId in allVariantIds) {
+        int originalQty = originalVariantQuantities[variantId] ?? 0;
+        int newQty = newVariantQuantities[variantId] ?? 0;
+        int difference = newQty - originalQty;
+
+        if (difference != 0) {
+          variantStockChanges['variant_$variantId'] = difference;
+        }
+      }
+
+      return {
+        'productChanges': stockChanges,
+        'variantChanges': variantStockChanges,
+      };
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error calculating stock differences: $e');
+      }
+      return {
+        'productChanges': <String, int>{},
+        'variantChanges': <String, int>{}
+      };
+    }
+  }
+
+  /// Apply stock changes based on differences
+  Future<bool> applyStockChanges(Map<String, dynamic> stockDifferences) async {
+    try {
+      final productChanges =
+          stockDifferences['productChanges'] as Map<String, int>;
+      final variantChanges =
+          stockDifferences['variantChanges'] as Map<String, int>;
+
+      // Apply product stock changes
+      for (var entry in productChanges.entries) {
+        String key = entry.key;
+        int change = entry.value;
+        int productId = int.parse(key.split('_')[1]);
+
+        // Get current stock
+        final response = await supabase
+            .from('products')
+            .select('stock_quantity')
+            .eq('product_id', productId)
+            .single();
+
+        int currentStock = response['stock_quantity'] as int;
+        int newStock =
+            currentStock - change; // Subtract because we're updating stock
+
+        if (newStock < 0) {
+          TLoaders.errorSnackBar(
+              title: 'Insufficient Stock',
+              message: 'Not enough stock for product ID: $productId');
+          return false;
+        }
+
+        await supabase
+            .from('products')
+            .update({'stock_quantity': newStock}).eq('product_id', productId);
+      }
+
+      // Apply variant stock changes
+      final variantsRepository = Get.find<ProductVariantsRepository>();
+      for (var entry in variantChanges.entries) {
+        String key = entry.key;
+        int change = entry.value;
+        int variantId = int.parse(key.split('_')[1]);
+
+        // Get current variant stock
+        final variants = await variantsRepository
+            .fetchProductVariants(0); // We'll filter by variantId
+        final variant = variants.firstWhere((v) => v.variantId == variantId);
+
+        int newStock =
+            variant.stock - change; // Subtract because we're updating stock
+
+        if (newStock < 0) {
+          TLoaders.errorSnackBar(
+              title: 'Insufficient Stock',
+              message: 'Not enough stock for variant ID: $variantId');
+          return false;
+        }
+
+        await variantsRepository.updateVariantStock(variantId, newStock);
+      }
+
+      return true;
+    } catch (e) {
+      TLoaders.errorSnackBar(
+          title: 'Stock Update Error', message: e.toString());
+      if (kDebugMode) {
+        print('Error applying stock changes: $e');
+      }
       return false;
     }
   }

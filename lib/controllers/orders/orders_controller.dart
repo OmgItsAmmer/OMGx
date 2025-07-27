@@ -10,6 +10,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
+import '../../Models/salesman/salesman_model.dart';
 import '../../routes/routes.dart';
 import '../address/address_controller.dart';
 import '../customer/customer_controller.dart';
@@ -600,6 +601,23 @@ class OrderController extends GetxController {
       //step 4 order info transfer
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+    }
+  }
+
+  Future<void> editOrder(OrderModel order) async {
+    try {
+      final salesController = Get.find<SalesController>();
+
+      // Setup the order for editing with proper state management
+      await salesController.setupOrderForEditing(order);
+
+      // Navigate to sales screen in edit mode
+      Get.toNamed(TRoutes.sales);
+    } catch (e) {
+      if (kDebugMode) {
+        TLoaders.errorSnackBar(title: e.toString());
+        print(e);
+      }
     }
   }
 }

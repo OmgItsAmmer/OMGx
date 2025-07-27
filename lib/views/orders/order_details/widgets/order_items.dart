@@ -15,6 +15,7 @@ import '../../../../common/widgets/containers/rounded_container.dart';
 import '../../../../common/widgets/icons/t_circular_icon.dart';
 import '../../../../common/widgets/shimmers/shimmer.dart';
 import '../../../../controllers/media/media_controller.dart';
+import '../../../../controllers/orders/orders_controller.dart';
 import '../../../../repositories/products/product_variants_repository.dart';
 import '../../../../utils/constants/enums.dart';
 import '../../../../utils/constants/sizes.dart';
@@ -33,12 +34,8 @@ class OrderItems extends StatelessWidget {
         Get.put(ProductVariantsRepository());
     final InstallmentRepository installmentRepository =
         Get.put(InstallmentRepository());
-
-    final subTotal = order.orderItems?.fold(
-          0.0,
-          (previousValue, element) => previousValue + element.price,
-        ) ??
-        0.0; // Ensure it's never null
+    final OrderController ordersController = Get.find<OrderController>();
+    final subTotal = order.subTotal;   // Ensure it's never null
 
     // Calculate the discount amount based on the percentage
     final discountAmount = subTotal * (order.discount / 100);
@@ -91,6 +88,7 @@ class OrderItems extends StatelessWidget {
                       child: ElevatedButton.icon(
                         onPressed: () {
                           //edit order
+                          ordersController.editOrder(order);
                         },
                         icon: const Icon(Iconsax.edit,color: TColors.white,),
                         label: const Text('Edit Order'),
@@ -221,7 +219,7 @@ class OrderItems extends StatelessWidget {
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text(
-                                    (item.price / item.quantity)
+                                    (item.price)
                                         .toStringAsFixed(2),
                                     style:
                                         Theme.of(context).textTheme.bodyLarge),
@@ -234,7 +232,7 @@ class OrderItems extends StatelessWidget {
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: Text((item.price).toStringAsFixed(2),
+                                child: Text((item.price * item.quantity).toStringAsFixed(2),
                                     style:
                                         Theme.of(context).textTheme.bodyLarge),
                               ),

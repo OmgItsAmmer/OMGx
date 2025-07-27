@@ -68,7 +68,7 @@ class SaleCustomerInfo extends StatelessWidget {
                     userNameTextController.text = '';
                     //    addressTextController.text = '';
                     salesController.customerPhoneNoController.value.clear();
-                    salesController.customerCNICController.value.clear();
+                    // salesController.customerCNICController.value.clear();
                     salesController.customerAddressController.value.clear();
                     salesController.selectedAddressId = null;
                     salesController.entityId.value = -1;
@@ -241,24 +241,24 @@ class SaleCustomerInfo extends StatelessWidget {
                         const SizedBox(
                           height: TSizes.spaceBtwInputFields / 2,
                         ),
-                        SizedBox(
-                          width: double.infinity,
-                          child: TextFormField(
-                            controller:
-                                salesController.customerCNICController.value,
-                            validator: (value) =>
-                                TValidator.validateEmptyText('CNIC', value),
-                            style: Theme.of(context).textTheme.bodyMedium,
-                            decoration:
-                                const InputDecoration(labelText: 'CNIC'),
-                            keyboardType: TextInputType
-                                .number, // Ensure numeric keyboard is shown
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly
-                            ],
-                            readOnly: true,
-                          ),
-                        ),
+                        // SizedBox(
+                        //   width: double.infinity,
+                        //   child: TextFormField(
+                        //     controller:
+                        //         salesController.customerCNICController.value,
+                        //     validator: (value) =>
+                        //         TValidator.validateEmptyText('CNIC', value),
+                        //     style: Theme.of(context).textTheme.bodyMedium,
+                        //     decoration:
+                        //         const InputDecoration(labelText: 'CNIC'),
+                        //     keyboardType: TextInputType
+                        //         .number, // Ensure numeric keyboard is shown
+                        //     inputFormatters: [
+                        //       FilteringTextInputFormatter.digitsOnly
+                        //     ],
+                        //     readOnly: true,
+                        //   ),
+                        // ),
                       ],
                     ),
                   ),

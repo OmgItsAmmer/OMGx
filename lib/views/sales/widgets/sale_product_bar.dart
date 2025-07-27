@@ -24,7 +24,7 @@ class ProductSearchBar extends StatelessWidget {
         labelText: 'Product Name',
         hintText: 'Select a product',
         displayStringForOption: (ProductModel product) => product.name,
-        options: productController.allProducts,
+        options: productController.allProducts.value,
         externalController: salesController.dropdownController,
         isManualTextEntry: salesController.isManualTextEntry,
         selectedItemName: salesController.selectedProductName,

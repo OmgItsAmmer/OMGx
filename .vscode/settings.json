@@ -8,6 +8,14 @@
 "terminal.integrated.fontSize": 11,
 "window.zoomLevel": -1,
 "editor.hover.enabled": false,
+"files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    ".mdnotes": true
+},
 
 
 

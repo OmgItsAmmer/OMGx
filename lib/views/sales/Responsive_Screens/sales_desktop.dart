@@ -172,18 +172,18 @@ class SalesDesktop extends GetView<SalesController> {
                                     productNameFocus:
                                         controller.productNameFocus),
                               )),
-                              const SizedBox(
-                                width: TSizes.spaceBtwItems,
-                              ),
-                              // Variant Bar - Wrap with FocusTraversalOrder
-                              Expanded(
-                                child: FocusTraversalOrder(
-                                  order: const NumericFocusOrder(2.0),
-                                  child: VariantSearchBar(
-                                      variantNameFocus:
-                                          controller.variantNameFocus),
-                                ),
-                              ),
+                              // const SizedBox(
+                              //   width: TSizes.spaceBtwItems,
+                              // ),
+                              // // Variant Bar - Wrap with FocusTraversalOrder
+                              // Expanded(
+                              //         child: FocusTraversalOrder(
+                              //           order: const NumericFocusOrder(2.0),
+                              //           child: VariantSearchBar(
+                              //               variantNameFocus:
+                              //                   controller.variantNameFocus),
+                              //   ),
+                              // ),
 
                               const SizedBox(
                                 width: TSizes.spaceBtwItems,
@@ -281,11 +281,11 @@ class SalesDesktop extends GetView<SalesController> {
                   ),
 
                   // // Serial Numbers Selector (for products with serial numbers)
-                  // const SerialVariantSelector(),
+                  const SerialVariantSelector(),
 
-                  // const SizedBox(
-                  //   height: TSizes.spaceBtwSections / 2,
-                  // ),
+                  const SizedBox(
+                    height: TSizes.spaceBtwSections / 2,
+                  ),
 
                   // Sale Table
                   const TRoundedContainer(height: 530, child: SaleTable()),

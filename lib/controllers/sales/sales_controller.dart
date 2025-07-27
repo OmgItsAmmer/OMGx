@@ -32,6 +32,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:iconsax/iconsax.dart';
 import '../../views/reports/specific_reports/receipt_report/receipt_report.dart';
+import '../../main.dart';
 
 class SalesController extends GetxController {
   static SalesController get instance => Get.find();
@@ -64,6 +65,11 @@ class SalesController extends GetxController {
   // Loading state for fetching products
   final isLoading = false.obs;
   final isCheckingOut = false.obs;
+
+  // Order editing state
+  RxBool isEditingOrder = false.obs;
+  RxInt editingOrderId = (-1).obs;
+  List<OrderItemModel> originalOrderItems = [];
 
   //Variables
   Rx<String> selectedProductName = ''.obs;
@@ -234,12 +240,12 @@ class SalesController extends GetxController {
     }
   }
 
-  void setSalesmanInfo(SalesmanModel salesman) {
+  void setSalesmanInfo(SalesmanModel? salesman) {
     try {
-      salesmanNameController.text = salesman.fullName;
-      salesmanCityController.value.text = salesman.city;
-      salesmanAreaController.value.text = salesman.area;
-      selectedSalesmanId = salesman.salesmanId ?? -1;
+      salesmanNameController.text = salesman?.fullName ?? '';
+      salesmanCityController.value.text = salesman?.city ?? '';
+      salesmanAreaController.value.text = salesman?.area ?? '';
+      selectedSalesmanId = salesman?.salesmanId ?? -1;
     } catch (e) {
       if (kDebugMode) {
         TLoaders.errorSnackBar(title: e.toString());
@@ -250,17 +256,26 @@ class SalesController extends GetxController {
 
   void setOrderInfo(OrderModel order, double remainingAmountValue) {
     try {
-      //remaining amount
+      // Set basic order info
       remainingAmount.value.text = remainingAmountValue.toString();
       discount.value = order.discount.toString();
-      subTotal.value = order.subTotal - order.discount;
-      netTotal.value = order.subTotal -
-          order.discount +
-          order.shippingFee +
-          (order.subTotal * (order.salesmanComission ?? 0)) / 100;
-      //  originalSubTotal.value = order.originalSubTotal;
-      //  originalNetTotal.value = order.originalNetTotal;
-      //  buyingPriceTotal = order.buyingPriceTotal;
+
+      // Set date
+      selectedDate.value = DateTime.tryParse(order.orderDate) ?? DateTime.now();
+
+      // Set sale type
+      selectedSaleType.value = SaleType.values.firstWhere(
+        (type) => type.name == order.saletype,
+        orElse: () => SaleType.cash,
+      );
+
+      // Set paid amount
+      paidAmount.text = (order.paidAmount ?? 0.0).toString();
+
+      if (kDebugMode) {
+        print(
+            'Set order info - Date: ${selectedDate.value}, SaleType: ${selectedSaleType.value}');
+      }
     } catch (e) {
       if (kDebugMode) {
         TLoaders.errorSnackBar(title: e.toString());
@@ -269,14 +284,39 @@ class SalesController extends GetxController {
     }
   }
 
-  void setOrderItems(OrderModel order) {
+  Future<void> setOrderItems(OrderModel order) async {
     try {
       allSales.clear();
 
-      //convert order items to sales
-      final sales = convertOrderItemsToSales(order);
-
+      // Convert order items to sales
+      final sales = await convertOrderItemsToSales(order);
       allSales.addAll(sales);
+
+      // Recalculate all totals after setting items
+      recalculateTotalsFromSales();
+
+      // Apply any existing discount
+      if (discount.value.isNotEmpty && discount.value != "0") {
+        String discountStr = discount.value.replaceAll('%', '');
+        double discountPercentage = double.tryParse(discountStr) ?? 0.0;
+
+        if (discountPercentage > 0) {
+          // Calculate discount amount based on original sub total
+          double discountAmount =
+              (originalSubTotal.value * discountPercentage) / 100;
+
+          // Apply discount to sub total
+          subTotal.value = originalSubTotal.value - discountAmount;
+
+          // Recalculate net total with discount applied
+          calculateNetTotal();
+        }
+      }
+
+      if (kDebugMode) {
+        print(
+            'Set order items - Count: ${allSales.length}, SubTotal: ${subTotal.value}');
+      }
     } catch (e) {
       if (kDebugMode) {
         TLoaders.errorSnackBar(title: e.toString());
@@ -285,16 +325,89 @@ class SalesController extends GetxController {
     }
   }
 
-  List<SaleModel> convertOrderItemsToSales(OrderModel order) {
+  Future<List<SaleModel>> convertOrderItemsToSales(OrderModel order) async {
     try {
-     
-     return [];
+      // Get ProductController to access product names
+      final productController = Get.find<ProductController>();
+
+      // Check if order has order items
+      if (order.orderItems == null || order.orderItems!.isEmpty) {
+        return [];
+      }
+
+      List<SaleModel> sales = [];
+
+      // Convert each OrderItemModel to SaleModel
+      for (var orderItem in order.orderItems!) {
+        // Find the product to get its name
+        final product = productController.allProducts.firstWhere(
+          (p) => p.productId == orderItem.productId,
+          orElse: () => ProductModel.empty(),
+        );
+
+        // Calculate individual buy price from order item
+        final buyPrice = calculateBuyPriceFromOrderItem(orderItem);
+
+        // Calculate total price for this item
+        final totalPrice =
+            (orderItem.price * orderItem.quantity).toStringAsFixed(2);
+
+        // Handle variants for serialized products
+        ProductVariantModel? variant;
+        if (orderItem.variantId != null) {
+          // Load variants for this product if needed
+          if (availableVariants.isEmpty ||
+              !availableVariants
+                  .any((v) => v.variantId == orderItem.variantId)) {
+            await loadAvailableVariants(orderItem.productId);
+          }
+
+          // Find the specific variant
+          variant = availableVariants.firstWhere(
+            (v) => v.variantId == orderItem.variantId,
+            orElse: () => ProductVariantModel.empty(),
+          );
+
+          // If variant not found but we have a variantId, create a minimal variant model
+          if (variant.variantId == null && orderItem.variantId != null) {
+            variant = ProductVariantModel(
+              variantId: orderItem.variantId,
+              productId: orderItem.productId,
+              variantName: 'Variant ${orderItem.variantId}', // placeholder name
+              sellPrice: orderItem.price,
+              buyPrice: buyPrice,
+              sku: 'VARIANT_${orderItem.variantId}', // placeholder SKU
+              stock: 0, // Unknown stock
+              isVisible: true,
+            );
+            // Add to available variants for consistency
+            availableVariants.add(variant);
+          }
+        }
+
+        sales.add(SaleModel(
+          productId: orderItem.productId,
+          name: product.name,
+          salePrice: orderItem.price.toStringAsFixed(2),
+          buyPrice: buyPrice,
+          unit: orderItem.unit ?? "item",
+          quantity: orderItem.quantity.toString(),
+          totalPrice: totalPrice,
+          variantId: variant?.variantId,
+        ));
+      }
+
+      if (kDebugMode) {
+        print('Converted ${sales.length} order items to sales');
+      }
+
+      return sales;
     } catch (e) {
       if (kDebugMode) {
         TLoaders.errorSnackBar(title: e.toString());
         print('Error converting order items to sales: $e');
       }
-        return [];
+      return [];
     }
   }
 
@@ -309,6 +422,102 @@ class SalesController extends GetxController {
       if (kDebugMode) {
         print('Error clearing sales data on navigation: $e');
       }
+    }
+  }
+
+  /// Modular method to calculate totals from existing sales
+  void recalculateTotalsFromSales() {
+    try {
+      // Reset totals
+      subTotal.value = 0.0;
+      originalSubTotal.value = 0.0;
+      buyingPriceTotal = 0.0;
+
+      // Calculate totals from all sales
+      for (var sale in allSales) {
+        double totalPrice = double.tryParse(sale.totalPrice) ?? 0.0;
+        double quantity = double.tryParse(sale.quantity) ?? 0.0;
+
+        // Add to subtotals
+        subTotal.value += totalPrice;
+        originalSubTotal.value += totalPrice;
+
+        // Calculate buying price total
+        if (sale.variantId != null) {
+          // For serialized products, quantity is always 1
+          buyingPriceTotal += sale.buyPrice;
+        } else {
+          // For regular products, multiply by quantity
+          buyingPriceTotal += sale.buyPrice * quantity;
+        }
+      }
+
+      // Calculate net totals including fees
+      calculateNetTotal();
+      calculateOriginalNetTotal();
+
+      if (kDebugMode) {
+        print(
+            'Recalculated totals - SubTotal: ${subTotal.value}, NetTotal: ${netTotal.value}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        TLoaders.errorSnackBar(title: e.toString());
+        print('Error recalculating totals: $e');
+      }
+    }
+  }
+
+  /// Helper method to calculate buy price for order items
+  double calculateBuyPriceFromOrderItem(OrderItemModel orderItem) {
+    try {
+      if (orderItem.variantId != null) {
+        // For serialized products, use the total buy price directly
+        return orderItem.totalBuyPrice ?? 0.0;
+      } else {
+        // For regular products, divide total by quantity to get individual buy price
+        double quantity = orderItem.quantity.toDouble();
+        if (quantity > 0) {
+          return (orderItem.totalBuyPrice ?? 0.0) / quantity;
+        }
+        return 0.0;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error calculating buy price from order item: $e');
+      }
+      return 0.0;
+    }
+  }
+
+  /// Helper method to determine if shipping fee should be applied
+  double getShippingFee() {
+    try {
+      // Check if we're in edit mode and get the payment method from the order
+      if (isEditingOrder.value && editingOrderId.value > 0) {
+        // In edit mode, check the order's payment method
+        final orderController = Get.find<OrderController>();
+        final order = orderController.allOrders.firstWhere(
+          (o) => o.orderId == editingOrderId.value,
+          orElse: () => OrderModel.empty(),
+        );
+
+        // Don't add shipping fee if payment method is pickup
+        if (order.paymentMethod.toLowerCase() == 'pickup') {
+          return 0.0;
+        }
+      } else {
+        // In new order mode, check the selected sale type
+        // For now, we'll add shipping fee for all new orders
+        // This can be enhanced later if needed
+      }
+
+      return shopController.selectedShop?.value.shippingPrice ?? 0.0;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting shipping fee: $e');
+      }
+      return 0.0;
     }
   }
 
@@ -723,9 +932,15 @@ class SalesController extends GetxController {
     isSerialziedProduct.value = false;
   }
 
+  /// Main checkout method - handles both new orders and order updates
   Future<int> checkOut() async {
     try {
       isCheckingOut.value = true;
+
+      // Check if we're editing an existing order
+      if (isEditingOrder.value) {
+        return await editCheckout();
+      }
 
       // Validate that there are sales to checkout
       if (allSales.isEmpty) {
@@ -792,17 +1007,69 @@ class SalesController extends GetxController {
         return -1;
       }
 
-      // Store serialized variants to mark as sold later
-      final List<int> serializedVariantIds = [];
-      for (var sale in allSales) {
-        if (sale.variantId != null) {
-          serializedVariantIds.add(sale.variantId!);
-        }
+      // Convert allSales to cartItems format expected by edge function
+      final List<Map<String, dynamic>> cartItems = allSales.map((sale) {
+        return {
+          'variantId':
+              sale.variantId ?? 0, // Use variantId if available, otherwise 0
+          'quantity': int.tryParse(sale.quantity) ?? 1,
+          'sellPrice': double.tryParse(sale.salePrice) ?? 0.0,
+          'buyPrice': sale.buyPrice,
+          'productId': sale.productId,
+          'productName': sale.name,
+        };
+      }).toList();
+
+      // Get current user's JWT token
+      final session = supabase.auth.currentSession;
+      if (session == null) {
+        TLoaders.errorSnackBar(
+            title: 'Authentication Error',
+            message: 'Please log in again to continue.');
+        return -1;
       }
 
-      // print(buyingPriceTotal);
+      // Prepare checkout data for edge function
+      final checkoutData = {
+        'cartItems': cartItems,
+        'addressId': selectedAddressId,
+        'paymentMethod': selectedSaleType.value.toString().split('.').last,
+        'directCheckout': null, // Not using direct checkout
+      };
 
-      // Create an OrderModel instance with formatted date
+      // Call the edge function
+      final response = await supabase.functions.invoke(
+        'secure-checkout', // Replace with your actual function name
+        body: checkoutData,
+        headers: {
+          'Authorization': 'Bearer ${session.accessToken}',
+        },
+      );
+
+      // Handle response
+      if (response.status != 200) {
+        final errorData = response.data as Map<String, dynamic>?;
+        final errorMessage = errorData?['message'] ?? 'Checkout failed';
+        final errorCode = errorData?['errorCode'] ?? 'UNKNOWN_ERROR';
+
+        TLoaders.errorSnackBar(
+            title: 'Checkout Error',
+            message: '$errorMessage (Code: $errorCode)');
+        return -1;
+      }
+
+      final responseData = response.data as Map<String, dynamic>;
+      final orderId = responseData['orderId'] as int?;
+      final total = responseData['total'] as double?;
+
+      if (orderId == null || orderId <= 0) {
+        TLoaders.errorSnackBar(
+            title: 'Checkout Error',
+            message: 'Failed to create order. Please try again.');
+        return -1;
+      }
+
+      // Create OrderModel for local state management
       OrderModel order = OrderModel(
         discount: double.tryParse(discount.value.replaceAll('%', '')) ?? 0.0,
         salesmanComission: salesmanController.allSalesman
@@ -814,9 +1081,9 @@ class SalesController extends GetxController {
             0,
         shippingFee: shopController.selectedShop!.value.shippingPrice,
         tax: shopController.selectedShop!.value.taxrate,
-        orderId: -1, // Using -1 as a temporary ID instead of null
+        orderId: orderId,
         orderDate: formatDate(selectedDate.value ?? DateTime.now()),
-        subTotal: subTotal.value, // Use actual subTotal (product prices only)
+        subTotal: subTotal.value,
         buyingPrice: buyingPriceTotal,
         status: statusCheck(),
         saletype: selectedSaleType.value.toString().split('.').last,
@@ -825,24 +1092,18 @@ class SalesController extends GetxController {
         userId: userController.currentUser.value.userId,
         paidAmount: paidAmountValue,
         customerId: customerController.selectedCustomer.value.customerId,
+        paymentMethod: selectedSaleType.value.toString().split('.').last,
       );
 
-      // Create order items with the correct variant IDs
+      // Create order items for local state
       final List<OrderItemModel> orderItems = allSales.map((sale) {
         int quantity = int.tryParse(sale.quantity) ?? 0;
-        // For serialized products (variantId != null), quantity is always 1
-        // For regular products, multiply buyPrice by quantity to get total buying price
-        double totalBuyingPrice = sale.variantId != null
-            ? sale
-                .buyPrice // For serialized products, buyPrice is already the total
-            : sale.buyPrice *
-                quantity; // For regular products, multiply by quantity
+        double totalBuyingPrice =
+            sale.variantId != null ? sale.buyPrice : sale.buyPrice * quantity;
 
         return OrderItemModel(
-          // orderItemId: -1,
-          //createdAt: DateTime.now(),
           productId: sale.productId,
-          orderId: -1,
+          orderId: orderId,
           quantity: quantity,
           price: double.tryParse(sale.totalPrice) ?? 0.0,
           unit: sale.unit.toString().split('.').last,
@@ -853,106 +1114,40 @@ class SalesController extends GetxController {
 
       order = order.copyWith(orderItems: orderItems);
 
-      // Upload order to repository
-      int orderId = await orderRepository.uploadOrder(
-          order.toJson(isUpdate: true), order.orderItems ?? []);
+      // Add the order to local state
+      final OrderController orderController = Get.find<OrderController>();
+      orderController.allOrders.insert(0, order);
+      orderController.currentOrders.insert(0, order);
+      orderController.allOrders.refresh();
+      orderController.currentOrders.refresh();
 
-      // Ensure orderId is valid before proceeding
-      if (orderId > 0) {
-        // Assign actual orderId to each order item using copyWith
-        order = order.copyWith(
-          orderId: orderId,
-          orderItems: order.orderItems
-              ?.map((item) => item.copyWith(
-                    orderId: orderId,
-                  ))
-              .toList(),
-        );
-
-        // Add the order to the allOrders and currentOrders lists in OrderController
-        final OrderController orderController = Get.find<OrderController>();
-        orderController.allOrders.insert(0, order); // Insert at the beginning
-        orderController.currentOrders
-            .insert(0, order); // Insert at the beginning
-        orderController.allOrders.refresh(); // Refresh the list
-        orderController.currentOrders.refresh(); // Refresh the list
-
-        final ProductController productController =
-            Get.find<ProductController>();
-
-        try {
-          // Mark serialized variants as sold
-          if (serializedVariantIds.isNotEmpty) {
-            final productVariantsRepository =
-                Get.find<ProductVariantsRepository>();
-
-            for (var variantId in serializedVariantIds) {
-              await productVariantsRepository.toggleVariantVisibility(
-                  variantId, false);
-              if (kDebugMode) {
-                print('Marked variant $variantId as sold');
-              }
-            }
-          }
-
-          // Update stock quantities for non-serialized products
-          if (order.orderItems != null) {
-            await productController.updateStockQuantities(order.orderItems);
-          }
-
-          // Check for low stock notifications
-          if (order.orderItems != null) {
-            List<int> productIds =
-                order.orderItems!.map((item) => item.productId).toList();
-            await productController.checkLowStock(productIds);
-          }
-
-          // Close loading dialog
-          Navigator.of(Get.context!).pop();
-
-          // Generate PDF receipt
-          try {
-            showReceiptPdfReport(order);
-            if (kDebugMode) {
-              print('PDF Receipt generated successfully');
-            }
-          } catch (e) {
-            if (kDebugMode) {
-              print('Error generating PDF receipt: $e');
-            }
-            // Don't throw the error since receipt generation is not critical
-          }
-
-          // Clear all sales data
-          clearSaleDetails();
-
-          // Show success message
-          TLoaders.successSnackBar(
-            title: 'Order Placed Successfully',
-            message: 'Order #$orderId has been placed successfully.',
-          );
-
-          return orderId;
-        } catch (e) {
-          Navigator.of(Get.context!).pop();
-          if (kDebugMode) {
-            print('Error updating stock: $e');
-          }
-          TLoaders.errorSnackBar(
-              title: 'Stock Update Error', message: e.toString());
-          return orderId; // Still return orderId as the order was created
-        }
-      } else {
+      // Close loading dialog if open
+      if (Get.isDialogOpen == true) {
         Navigator.of(Get.context!).pop();
-        if (kDebugMode) {
-          print('Order upload failed');
-        }
-        TLoaders.errorSnackBar(
-          title: 'Order Creation Failed',
-          message: 'Failed to create order. Please try again.',
-        );
-        return -1;
       }
+
+      // Generate PDF receipt
+      try {
+        showReceiptPdfReport(order);
+        if (kDebugMode) {
+          print('PDF Receipt generated successfully');
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('Error generating PDF receipt: $e');
+        }
+      }
+
+      // Clear all sales data
+      clearSaleDetails();
+
+      // Show success message
+      TLoaders.successSnackBar(
+        title: 'Order Placed Successfully',
+        message: 'Order #$orderId has been placed successfully.',
+      );
+
+      return orderId;
     } catch (e) {
       // Close loading dialog if open
       if (Get.isDialogOpen == true) {
@@ -965,6 +1160,255 @@ class SalesController extends GetxController {
       TLoaders.errorSnackBar(
         title: 'Checkout Error',
         message: 'An error occurred during checkout: ${e.toString()}',
+      );
+      return -1;
+    } finally {
+      isCheckingOut.value = false;
+    }
+  }
+
+  /// Edit/Update an existing order
+  Future<int> editCheckout() async {
+    try {
+      isCheckingOut.value = true;
+
+      // Validate that we're in editing mode
+      if (!isEditingOrder.value || editingOrderId.value <= 0) {
+        TLoaders.errorSnackBar(
+            title: 'Edit Error', message: 'No order selected for editing.');
+        return -1;
+      }
+
+      // Validate that there are sales to update
+      if (allSales.isEmpty) {
+        TLoaders.errorSnackBar(
+            title: 'Edit Error', message: 'No products added to update.');
+        return -1;
+      }
+
+      // Validate forms (same as checkout)
+      if (!customerFormKey.currentState!.validate()) {
+        TLoaders.errorSnackBar(
+            title: 'Customer Information Error',
+            message: 'Please fill all required customer fields.');
+        return -1;
+      }
+
+      if (!salesmanFormKey.currentState!.validate()) {
+        TLoaders.errorSnackBar(
+            title: 'Salesman Information Error',
+            message: 'Please fill all required salesman fields.');
+        return -1;
+      }
+
+      if (!cashierFormKey.currentState!.validate()) {
+        TLoaders.errorSnackBar(
+            title: 'Cashier Information Error',
+            message: 'Please fill all required cashier fields.');
+        return -1;
+      }
+
+      // Validate critical fields
+      if (customerNameController.text.isEmpty) {
+        TLoaders.errorSnackBar(
+            title: 'Customer Error', message: 'Please select a customer.');
+        return -1;
+      }
+
+      if (selectedDate.value == null) {
+        TLoaders.errorSnackBar(
+            title: 'Date Error', message: 'Please select a valid date.');
+        return -1;
+      }
+
+      if (salesmanNameController.text.isEmpty) {
+        TLoaders.errorSnackBar(
+            title: 'Salesman Error', message: 'Please select a salesman.');
+        return -1;
+      }
+
+      if (selectedAddressId == null || selectedAddressId == -1) {
+        TLoaders.errorSnackBar(
+            title: 'Address Error', message: 'Please select a valid address.');
+        return -1;
+      }
+
+      // Validate paid amount
+      double paidAmountValue = double.tryParse(paidAmount.text.trim()) ?? 0.0;
+      if (paidAmountValue < 0) {
+        TLoaders.errorSnackBar(
+            title: 'Payment Error',
+            message: 'Please enter a valid paid amount.');
+        return -1;
+      }
+
+      // Create new order items from current sales
+      final List<OrderItemModel> newOrderItems = allSales.map((sale) {
+        int quantity = int.tryParse(sale.quantity) ?? 0;
+        double totalBuyingPrice =
+            sale.variantId != null ? sale.buyPrice : sale.buyPrice * quantity;
+
+        return OrderItemModel(
+          productId: sale.productId,
+          orderId: editingOrderId.value,
+          quantity: quantity,
+          price: double.tryParse(sale.totalPrice) ?? 0.0,
+          unit: sale.unit.toString().split('.').last,
+          totalBuyPrice: totalBuyingPrice,
+          variantId: sale.variantId,
+        );
+      }).toList();
+
+      // Calculate stock differences and check availability
+      final stockDifferences = await orderRepository.calculateStockDifferences(
+          originalOrderItems, newOrderItems);
+
+      // Check if we have enough stock for the changes
+      bool canApplyChanges =
+          await orderRepository.applyStockChanges(stockDifferences);
+      if (!canApplyChanges) {
+        return -1; // Error message already shown in applyStockChanges
+      }
+
+      // Prepare updated order data
+      Map<String, dynamic> updatedOrderData = {
+        'order_date': formatDate(selectedDate.value ?? DateTime.now()),
+        'sub_total': subTotal.value,
+        'status': statusCheck(),
+        'saletype': selectedSaleType.value.toString().split('.').last,
+        'address_id': selectedAddressId,
+        'user_id': userController.currentUser.value.userId,
+        'customer_id': customerController.selectedCustomer.value.customerId,
+        'paid_amount': paidAmountValue,
+        'buying_price': buyingPriceTotal,
+        'discount': double.tryParse(discount.value.replaceAll('%', '')) ?? 0.0,
+        'tax': shopController.selectedShop!.value.taxrate,
+        'shipping_fee': shopController.selectedShop!.value.shippingPrice,
+        'payment_method': selectedSaleType.value.toString().split('.').last,
+      };
+
+      // Add salesman info if available
+      if (selectedSalesmanId > 0) {
+        final selectedSalesman = salesmanController.allSalesman.firstWhere(
+          (salesman) => salesman.salesmanId == selectedSalesmanId,
+          orElse: () => SalesmanModel.empty(),
+        );
+        // Note: salesman_id and salesman_commission might not be in your database schema
+        // Include them only if your database supports them
+      }
+
+      // Update the order in the database
+      bool updateSuccess = await orderRepository.updateOrder(
+          editingOrderId.value, updatedOrderData, newOrderItems);
+
+      if (!updateSuccess) {
+        // Rollback stock changes if order update failed
+        try {
+          // Reverse the stock changes
+          final reversedChanges = {
+            'productChanges':
+                (stockDifferences['productChanges'] as Map<String, int>)
+                    .map((key, value) => MapEntry(key, -value)),
+            'variantChanges':
+                (stockDifferences['variantChanges'] as Map<String, int>)
+                    .map((key, value) => MapEntry(key, -value)),
+          };
+          await orderRepository.applyStockChanges(reversedChanges);
+        } catch (e) {
+          if (kDebugMode) {
+            print('Error rolling back stock changes: $e');
+          }
+        }
+        return -1;
+      }
+
+      // Update local order lists
+      final OrderController orderController = Get.find<OrderController>();
+
+      // Create updated OrderModel for UI
+      OrderModel updatedOrder = OrderModel(
+        orderId: editingOrderId.value,
+        orderDate: formatDate(selectedDate.value ?? DateTime.now()),
+        subTotal: subTotal.value,
+        status: statusCheck(),
+        saletype: selectedSaleType.value.toString().split('.').last,
+        addressId: selectedAddressId,
+        userId: userController.currentUser.value.userId,
+        customerId: customerController.selectedCustomer.value.customerId,
+        paidAmount: paidAmountValue,
+        buyingPrice: buyingPriceTotal,
+        discount: double.tryParse(discount.value.replaceAll('%', '')) ?? 0.0,
+        tax: shopController.selectedShop!.value.taxrate,
+        shippingFee: shopController.selectedShop!.value.shippingPrice,
+        paymentMethod: selectedSaleType.value.toString().split('.').last,
+        salesmanId: selectedSalesmanId,
+        salesmanComission: salesmanController.allSalesman
+                .firstWhere(
+                  (salesman) => salesman.salesmanId == selectedSalesmanId,
+                  orElse: () => SalesmanModel.empty(),
+                )
+                .comission ??
+            0,
+        orderItems: newOrderItems,
+      );
+
+      // Update in allOrders list
+      int allOrdersIndex = orderController.allOrders
+          .indexWhere((order) => order.orderId == editingOrderId.value);
+      if (allOrdersIndex != -1) {
+        orderController.allOrders[allOrdersIndex] = updatedOrder;
+        orderController.allOrders.refresh();
+      }
+
+      // Update in currentOrders list
+      int currentOrdersIndex = orderController.currentOrders
+          .indexWhere((order) => order.orderId == editingOrderId.value);
+      if (currentOrdersIndex != -1) {
+        orderController.currentOrders[currentOrdersIndex] = updatedOrder;
+        orderController.currentOrders.refresh();
+      }
+
+      // Close loading dialog if open
+      if (Get.isDialogOpen == true) {
+        Navigator.of(Get.context!).pop();
+      }
+
+      // Generate PDF receipt for updated order
+      try {
+        showReceiptPdfReport(updatedOrder);
+        if (kDebugMode) {
+          print('PDF Receipt generated successfully for updated order');
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('Error generating PDF receipt: $e');
+        }
+      }
+
+      // Clear editing state and sales data
+      clearEditingState();
+      clearSaleDetails();
+
+      // Show success message
+      TLoaders.successSnackBar(
+        title: 'Order Updated Successfully',
+        message:
+            'Order #${editingOrderId.value} has been updated successfully.',
+      );
+
+      return editingOrderId.value;
+    } catch (e) {
+      // Close loading dialog if open
+      if (Get.isDialogOpen == true) {
+        Navigator.of(Get.context!).pop();
+      }
+
+      if (kDebugMode) {
+        print('Edit checkout error: $e');
+      }
+      TLoaders.errorSnackBar(
+        title: 'Update Error',
+        message: 'An error occurred while updating the order: ${e.toString()}',
       );
       return -1;
     } finally {
@@ -1193,6 +1637,127 @@ class SalesController extends GetxController {
     }
   }
 
+  /// Clear editing state when done editing
+  void clearEditingState() {
+    try {
+      isEditingOrder.value = false;
+      editingOrderId.value = -1;
+      originalOrderItems.clear();
+
+      // Refresh the UI
+      update();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error clearing editing state: $e');
+      }
+    }
+  }
+
+  /// Setup order for editing
+  Future<void> setupOrderForEditing(OrderModel order) async {
+    try {
+      // Set editing state
+      isEditingOrder.value = true;
+      editingOrderId.value = order.orderId;
+
+      // Store original order items for stock calculation
+      originalOrderItems =
+          await orderRepository.getOriginalOrderItems(order.orderId);
+
+      // Set customer information first
+      final customerController = Get.find<CustomerController>();
+      final addressController = Get.find<AddressController>();
+
+      if (order.customerId != null) {
+        final customer = customerController.allCustomers.firstWhere(
+          (c) => c.customerId == order.customerId,
+          orElse: () => CustomerModel.empty(),
+        );
+        if (customer.customerId != null) {
+          // Load customer addresses first
+          await addressController.fetchEntityAddresses(
+              customer.customerId!, EntityType.customer);
+
+          // Set the specific order address if available
+          if (order.addressId != null) {
+            await addressController.fetchOrderAddress(order.addressId!);
+          }
+
+          setCustomerInfo(customer);
+        }
+      }
+
+      // Set salesman information and handle selection
+      final salesmanController = Get.find<SalesmanController>();
+      if (order.salesmanId != null) {
+        final salesman = salesmanController.allSalesman.firstWhere(
+          (s) => s.salesmanId == order.salesmanId,
+          orElse: () => SalesmanModel.empty(),
+        );
+        if (salesman.salesmanId != null) {
+          setSalesmanInfo(salesman);
+          // Important: Set the selected salesman ID for proper commission calculation
+          handleSalesmanSelection(salesman.salesmanId ?? -1);
+        }
+      }
+
+      // Set up the order items first (this will calculate initial totals)
+      await setOrderItems(order);
+
+      // Set up the order data in the form (this includes date, sale type, paid amount, discount)
+      setOrderInfo(order,
+          0.0); // Remaining amount will be calculated by updateRemainingAmount
+
+      // Calculate the remaining amount properly
+      double salesmanCommissionAmount = 0.0;
+      if (order.salesmanComission != null && order.salesmanComission! > 0) {
+        salesmanCommissionAmount =
+            (subTotal.value * order.salesmanComission!) / 100;
+      }
+
+      // Only add shipping fee if payment method is not pickup
+      double shippingFee = 0.0;
+      if (order.paymentMethod.toLowerCase() != 'pickup') {
+        shippingFee = order.shippingFee;
+      }
+
+      double totalAmount =
+          subTotal.value + shippingFee + (order.tax) + salesmanCommissionAmount;
+
+      double calculatedRemaining = totalAmount - (order.paidAmount ?? 0.0);
+      remainingAmount.value.text = calculatedRemaining.toStringAsFixed(2);
+
+      // Set other order details (moved here for proper sequence)
+      selectedSaleType.value = SaleType.values.firstWhere(
+        (type) => type.name == order.saletype,
+        orElse: () => SaleType.cash,
+      );
+
+      selectedDate.value = DateTime.tryParse(order.orderDate) ?? DateTime.now();
+
+      // Final update of remaining amount based on current calculations
+      updateRemainingAmount();
+
+      if (kDebugMode) {
+        print(
+            'Order setup complete - SubTotal: ${subTotal.value}, NetTotal: ${netTotal.value}, Remaining: ${remainingAmount.value.text}');
+      }
+
+      TLoaders.successSnackBar(
+        title: 'Order Loaded',
+        message: 'Order #${order.orderId} loaded for editing.',
+      );
+    } catch (e) {
+      TLoaders.errorSnackBar(
+        title: 'Setup Error',
+        message: 'Error setting up order for editing: ${e.toString()}',
+      );
+      if (kDebugMode) {
+        print('Error setting up order for editing: $e');
+      }
+    }
+  }
+
   String statusCheck() {
     try {
       double paidAmountValue = double.tryParse(paidAmount.text) ?? 0.0;
@@ -1230,75 +1795,40 @@ class SalesController extends GetxController {
 
   void deleteItem(SaleModel saleItem, int index) {
     try {
-      // Ensure totalPrice is a valid number
-      double? totalPrice = double.tryParse(
-          saleItem.totalPrice.replaceAll(RegExp(r'[^0-9.]'), ''));
+      // Remove the item from the list first
+      allSales.removeAt(index);
 
-      // Clean the remainingAmount string to ensure it's a valid number
-      String cleanedRemaining =
-          remainingAmount.value.text.replaceAll(RegExp(r'[^0-9.]'), '');
+      // Recalculate all totals from the remaining sales items
+      // This is more accurate than trying to subtract individual values
+      recalculateTotalsFromSales();
 
-      // Extract only the first valid number (up to the first decimal point)
-      if (cleanedRemaining.contains('.')) {
-        List<String> parts = cleanedRemaining.split('.');
-        if (parts.length > 1) {
-          // Take the integer part and the first two decimal places
-          cleanedRemaining =
-              '${parts[0]}.${parts[1].substring(0, parts[1].length > 2 ? 2 : parts[1].length)}';
+      // Reapply any existing discount
+      if (discount.value.isNotEmpty && discount.value != "0") {
+        String discountStr = discount.value.replaceAll('%', '');
+        double discountPercentage = double.tryParse(discountStr) ?? 0.0;
+
+        if (discountPercentage > 0) {
+          // Calculate discount amount based on original sub total
+          double discountAmount =
+              (originalSubTotal.value * discountPercentage) / 100;
+
+          // Apply discount to sub total
+          subTotal.value = originalSubTotal.value - discountAmount;
+
+          // Recalculate net total with discount applied
+          calculateNetTotal();
         }
       }
 
-      // Parse the cleaned remaining amount
-      double? remaining = double.tryParse(cleanedRemaining);
-
-      if (totalPrice == null) {
-        throw Exception("Invalid totalPrice: ${saleItem.totalPrice}");
+      if (kDebugMode) {
+        print(
+            'Item removed - SubTotal: ${subTotal.value}, NetTotal: ${netTotal.value}');
       }
-
-      if (remaining == null) {
-        throw Exception(
-            "Invalid remainingAmount: ${remainingAmount.value.text}");
-      }
-
-      // Calculate buying price to subtract from buyingPriceTotal
-      double buyingPriceToSubtract = 0.0;
-
-      // For serialized products (variantId is not null)
-      if (saleItem.variantId != null) {
-        // For serialized products, quantity is always 1, so just subtract the buyPrice
-        buyingPriceToSubtract = saleItem.buyPrice;
-      } else {
-        // For regular products, multiply buyPrice by quantity
-        double quantity = double.tryParse(saleItem.quantity) ?? 0.0;
-        buyingPriceToSubtract = saleItem.buyPrice * quantity;
-      }
-
-      // Update sub total (product prices only)
-      subTotal.value = (subTotal.value - totalPrice).abs() < 1e-10
-          ? 0
-          : subTotal.value - totalPrice;
-
-      // Update original sub total to reflect item removal
-      originalSubTotal.value =
-          (originalSubTotal.value - totalPrice).abs() < 1e-10
-              ? 0
-              : originalSubTotal.value - totalPrice;
-
-      // Update buyingPriceTotal to reflect item removal
-      buyingPriceTotal =
-          (buyingPriceTotal - buyingPriceToSubtract).abs() < 1e-10
-              ? 0
-              : buyingPriceTotal - buyingPriceToSubtract;
-
-      // Recalculate net total including fees
-      calculateNetTotal();
-      calculateOriginalNetTotal();
-
-      // Remove the item from the list
-      allSales.removeAt(index);
     } catch (e) {
-      print("Error: $e"); // Debugging
-      TLoaders.errorSnackBar(title: e.toString());
+      if (kDebugMode) {
+        print("Error deleting item: $e");
+      }
+      TLoaders.errorSnackBar(title: 'Delete Error', message: e.toString());
     }
   }
 
@@ -1686,8 +2216,7 @@ class SalesController extends GetxController {
   // Calculate net total from sub total plus fees
   void calculateNetTotal() {
     try {
-      double shippingFee =
-          shopController.selectedShop?.value.shippingPrice ?? 0.0;
+      double shippingFee = getShippingFee();
       double tax = shopController.selectedShop?.value.taxrate ?? 0.0;
       double salesmanCommission = 0.0;
 
@@ -1722,8 +2251,7 @@ class SalesController extends GetxController {
   // Calculate original net total from original sub total plus fees
   void calculateOriginalNetTotal() {
     try {
-      double shippingFee =
-          shopController.selectedShop?.value.shippingPrice ?? 0.0;
+      double shippingFee = getShippingFee();
       double tax = shopController.selectedShop?.value.taxrate ?? 0.0;
       double salesmanCommission = 0.0;
 
@@ -1763,6 +2291,33 @@ class SalesController extends GetxController {
     } catch (e) {
       if (kDebugMode) {
         print('Error updating remaining amount: $e');
+      }
+    }
+  }
+
+  /// Get the appropriate button text based on editing state
+  String getCheckoutButtonText() {
+    return isEditingOrder.value ? 'Update Order' : 'Checkout';
+  }
+
+  /// Get the appropriate button color based on editing state
+  Color getCheckoutButtonColor() {
+    return isEditingOrder.value ? Colors.orange : Colors.green;
+  }
+
+  /// Cancel editing and clear all data
+  void cancelEditing() {
+    try {
+      clearEditingState();
+      clearSaleDetails();
+
+      TLoaders.successSnackBar(
+        title: 'Edit Cancelled',
+        message: 'Order editing has been cancelled.',
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error cancelling edit: $e');
       }
     }
   }

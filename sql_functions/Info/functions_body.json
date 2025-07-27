@@ -1,0 +1,177 @@
+[
+    {
+      "function_name": "add_to_cart_validation",
+      "parameters": "p_variant_id_input integer, p_new_quantity_input integer",
+      "function_body": "CREATE OR REPLACE FUNCTION public.add_to_cart_validation(p_variant_id_input integer, p_new_quantity_input integer)\n RETURNS boolean\n LANGUAGE plpgsql\nAS $function$\r\nDECLARE\r\n    v_customer_id INT;\r\n    v_current_stock INT := 0;\r\n    v_customer_current_quantity INT := 0;\r\nBEGIN\r\n    -- Get customer ID from logged-in user\r\n    SELECT customer_id INTO v_customer_id\r\n    FROM customers\r\n    WHERE auth_uid = auth.uid();\r\n\r\n    IF v_customer_id IS NULL THEN\r\n        RETURN FALSE;\r\n    END IF;\r\n\r\n    -- Get stock\r\n    SELECT COALESCE(stock, 0) INTO v_current_stock\r\n    FROM product_variants\r\n    WHERE variant_id = p_variant_id_input;\r\n\r\n    IF v_current_stock <= 0 THEN\r\n        RETURN FALSE;\r\n    END IF;\r\n\r\n    -- Get total quantity user already added\r\n    SELECT COALESCE(SUM(\r\n        CASE \r\n            WHEN quantity ~ '^[0-9]+$' THEN quantity::INT \r\n            ELSE 0 \r\n        END\r\n    ), 0) INTO v_customer_current_quantity\r\n    FROM cart\r\n    WHERE variant_id = p_variant_id_input\r\n      AND customer_id = v_customer_id;\r\n\r\n    -- Validate: not exceeding stock\r\n    IF (v_customer_current_quantity + p_new_quantity_input) <= v_current_stock THEN\r\n        RETURN TRUE;\r\n    ELSE\r\n        RETURN FALSE;\r\n    END IF;\r\nEXCEPTION\r\n    WHEN OTHERS THEN\r\n        RETURN FALSE;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "bytea_to_text",
+      "parameters": "data bytea",
+      "function_body": "CREATE OR REPLACE FUNCTION public.bytea_to_text(data bytea)\n RETURNS text\n LANGUAGE c\n IMMUTABLE STRICT\nAS '$libdir/http', $function$bytea_to_text$function$\n"
+    },
+    {
+      "function_name": "cleanup_expired_reservations",
+      "parameters": "",
+      "function_body": "CREATE OR REPLACE FUNCTION public.cleanup_expired_reservations()\n RETURNS integer\n LANGUAGE plpgsql\nAS $function$\r\nDECLARE\r\n    deleted_count INTEGER;\r\nBEGIN\r\n    DELETE FROM inventory_reservations\r\n    WHERE expires_at < NOW();\r\n    \r\n    GET DIAGNOSTICS deleted_count = ROW_COUNT;\r\n    \r\n    -- Log the cleanup activity\r\n    INSERT INTO security_audit_log (event_type, event_data, severity)\r\n    VALUES ('reservation_cleanup', \r\n            jsonb_build_object('deleted_count', deleted_count), \r\n            'info');\r\n    \r\n    RETURN deleted_count;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "confirm_inventory_reservation",
+      "parameters": "p_reservation_id character varying",
+      "function_body": "CREATE OR REPLACE FUNCTION public.confirm_inventory_reservation(p_reservation_id character varying)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nDECLARE\r\n    reservation_record RECORD;\r\n    success BOOLEAN := TRUE;\r\nBEGIN\r\n    -- Process each reservation\r\n    FOR reservation_record IN \r\n        SELECT variant_id, quantity \r\n        FROM inventory_reservations \r\n        WHERE reservation_id = p_reservation_id\r\n    LOOP\r\n        -- Use existing reduce_variant_stock function\r\n        BEGIN\r\n            PERFORM reduce_variant_stock(reservation_record.variant_id, reservation_record.quantity);\r\n        EXCEPTION WHEN OTHERS THEN\r\n            success := FALSE;\r\n            EXIT; -- Exit loop on first failure\r\n        END;\r\n    END LOOP;\r\n    \r\n    -- If successful, remove all reservations\r\n    IF success THEN\r\n        DELETE FROM inventory_reservations \r\n        WHERE reservation_id = p_reservation_id;\r\n    END IF;\r\n    \r\n    RETURN success;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "copy_address_to_order_address",
+      "parameters": "p_address_id integer",
+      "function_body": "CREATE OR REPLACE FUNCTION public.copy_address_to_order_address(p_address_id integer)\n RETURNS boolean\n LANGUAGE plpgsql\nAS $function$\r\nDECLARE\r\n    v_success BOOLEAN := FALSE;\r\nBEGIN\r\n    INSERT INTO public.order_addresses (\r\n        shipping_address,\r\n        phone_number,\r\n        postal_code,\r\n        city,\r\n        country,\r\n        full_name,\r\n        customer_id,\r\n        vendor_id,\r\n        salesman_id,\r\n        user_id,\r\n        address_id\r\n    )\r\n    SELECT\r\n        shipping_address,\r\n        phone_number,\r\n        postal_code,\r\n        city,\r\n        country,\r\n        full_name,\r\n        customer_id,\r\n        vendor_id,\r\n        salesman_id,\r\n        user_id,\r\n        address_id\r\n    FROM\r\n        public.addresses\r\n    WHERE\r\n        address_id = p_address_id;\r\n\r\n    IF FOUND THEN\r\n        v_success := TRUE;\r\n    END IF;\r\n\r\n    RETURN v_success;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "copy_address_to_order_addresses",
+      "parameters": "p_address_id integer",
+      "function_body": "CREATE OR REPLACE FUNCTION public.copy_address_to_order_addresses(p_address_id integer)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nDECLARE\r\n    address_record RECORD;\r\nBEGIN\r\n    -- Get address details from existing addresses table\r\n    SELECT a.*\r\n    INTO address_record\r\n    FROM addresses a\r\n    WHERE a.address_id = p_address_id;\r\n    \r\n    IF NOT FOUND THEN\r\n        RETURN FALSE;\r\n    END IF;\r\n    \r\n    -- Insert into order_addresses using existing structure\r\n    INSERT INTO order_addresses (\r\n        customer_id,\r\n        full_name,\r\n        phone_number,\r\n        shipping_address,  -- Using existing column name\r\n        city,\r\n        country,\r\n        postal_code,\r\n        vendor_id,\r\n        salesman_id,\r\n        user_id,\r\n        address_id\r\n    ) VALUES (\r\n        address_record.customer_id,  -- Use customer_id from address record\r\n        address_record.full_name,\r\n        address_record.phone_number,\r\n        address_record.shipping_address,\r\n        address_record.city,\r\n        address_record.country,\r\n        address_record.postal_code,\r\n        address_record.vendor_id,\r\n        address_record.salesman_id,\r\n        address_record.user_id,\r\n        address_record.address_id\r\n    );\r\n    \r\n    RETURN TRUE;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "get_available_stock",
+      "parameters": "variant_id_param integer",
+      "function_body": "CREATE OR REPLACE FUNCTION public.get_available_stock(variant_id_param integer)\n RETURNS bigint\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nDECLARE\r\n    total_stock BIGINT;\r\n    reserved_stock BIGINT;\r\nBEGIN\r\n    SELECT stock INTO total_stock \r\n    FROM product_variants \r\n    WHERE variant_id = variant_id_param;\r\n\r\n    RAISE NOTICE 'Total stock: %', total_stock;\r\n\r\n    IF total_stock IS NULL THEN\r\n        RETURN 0;\r\n    END IF;\r\n\r\n    SELECT COALESCE(SUM(quantity), 0) INTO reserved_stock\r\n    FROM inventory_reservations \r\n    WHERE variant_id = variant_id_param \r\n    AND expires_at > NOW();\r\n\r\n    RAISE NOTICE 'Reserved stock: %', reserved_stock;\r\n\r\n    RETURN GREATEST(0, total_stock - reserved_stock);\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "handle_order_ready",
+      "parameters": "",
+      "function_body": "CREATE OR REPLACE FUNCTION public.handle_order_ready()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\r\nDECLARE\r\n  service_url TEXT := 'https://your-endpoint.com/your-path';  -- Replace with actual target URL\r\n  service_key TEXT := 'Bearer YOUR_SERVICE_KEY_HERE';         -- Replace with your actual auth key if needed\r\nBEGIN\r\n  IF NEW.status = 'ready' THEN\r\n    PERFORM http_post(\r\n      service_url,\r\n      json_build_object(\r\n        'order_id', NEW.order_id,\r\n        'customer_id', NEW.customer_id\r\n      )::TEXT,\r\n      ARRAY[\r\n        http_header('Content-Type', 'application/json'),\r\n        http_header('Authorization', service_key)\r\n      ]\r\n    );\r\n  END IF;\r\n  RETURN NEW;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "http",
+      "parameters": "request http_request",
+      "function_body": "CREATE OR REPLACE FUNCTION public.http(request http_request)\n RETURNS http_response\n LANGUAGE c\nAS '$libdir/http', $function$http_request$function$\n"
+    },
+    {
+      "function_name": "http_delete",
+      "parameters": "uri character varying",
+      "function_body": "CREATE OR REPLACE FUNCTION public.http_delete(uri character varying)\n RETURNS http_response\n LANGUAGE sql\nAS $function$ SELECT public.http(('DELETE', $1, NULL, NULL, NULL)::public.http_request) $function$\n"
+    },
+    {
+      "function_name": "http_delete",
+      "parameters": "uri character varying, content character varying, content_type character varying",
+      "function_body": "CREATE OR REPLACE FUNCTION public.http_delete(uri character varying, content character varying, content_type character varying)\n RETURNS http_response\n LANGUAGE sql\nAS $function$ SELECT public.http(('DELETE', $1, NULL, $3, $2)::public.http_request) $function$\n"
+    },
+    {
+      "function_name": "http_get",
+      "parameters": "uri character varying",
+      "function_body": "CREATE OR REPLACE FUNCTION public.http_get(uri character varying)\n RETURNS http_response\n LANGUAGE sql\nAS $function$ SELECT public.http(('GET', $1, NULL, NULL, NULL)::public.http_request) $function$\n"
+    },
+    {
+      "function_name": "http_get",
+      "parameters": "uri character varying, data jsonb",
+      "function_body": "CREATE OR REPLACE FUNCTION public.http_get(uri character varying, data jsonb)\n RETURNS http_response\n LANGUAGE sql\nAS $function$\n        SELECT public.http(('GET', $1 || '?' || public.urlencode($2), NULL, NULL, NULL)::public.http_request)\n    $function$\n"
+    },
+    {
+      "function_name": "http_head",
+      "parameters": "uri character varying",
+      "function_body": "CREATE OR REPLACE FUNCTION public.http_head(uri character varying)\n RETURNS http_response\n LANGUAGE sql\nAS $function$ SELECT public.http(('HEAD', $1, NULL, NULL, NULL)::public.http_request) $function$\n"
+    },
+    {
+      "function_name": "http_header",
+      "parameters": "field character varying, value character varying",
+      "function_body": "CREATE OR REPLACE FUNCTION public.http_header(field character varying, value character varying)\n RETURNS http_header\n LANGUAGE sql\nAS $function$ SELECT $1, $2 $function$\n"
+    },
+    {
+      "function_name": "http_list_curlopt",
+      "parameters": "",
+      "function_body": "CREATE OR REPLACE FUNCTION public.http_list_curlopt()\n RETURNS TABLE(curlopt text, value text)\n LANGUAGE c\nAS '$libdir/http', $function$http_list_curlopt$function$\n"
+    },
+    {
+      "function_name": "http_patch",
+      "parameters": "uri character varying, content character varying, content_type character varying",
+      "function_body": "CREATE OR REPLACE FUNCTION public.http_patch(uri character varying, content character varying, content_type character varying)\n RETURNS http_response\n LANGUAGE sql\nAS $function$ SELECT public.http(('PATCH', $1, NULL, $3, $2)::public.http_request) $function$\n"
+    },
+    {
+      "function_name": "http_post",
+      "parameters": "uri character varying, data jsonb",
+      "function_body": "CREATE OR REPLACE FUNCTION public.http_post(uri character varying, data jsonb)\n RETURNS http_response\n LANGUAGE sql\nAS $function$\n        SELECT public.http(('POST', $1, NULL, 'application/x-www-form-urlencoded', public.urlencode($2))::public.http_request)\n    $function$\n"
+    },
+    {
+      "function_name": "http_post",
+      "parameters": "uri character varying, content character varying, content_type character varying",
+      "function_body": "CREATE OR REPLACE FUNCTION public.http_post(uri character varying, content character varying, content_type character varying)\n RETURNS http_response\n LANGUAGE sql\nAS $function$ SELECT public.http(('POST', $1, NULL, $3, $2)::public.http_request) $function$\n"
+    },
+    {
+      "function_name": "http_put",
+      "parameters": "uri character varying, content character varying, content_type character varying",
+      "function_body": "CREATE OR REPLACE FUNCTION public.http_put(uri character varying, content character varying, content_type character varying)\n RETURNS http_response\n LANGUAGE sql\nAS $function$ SELECT public.http(('PUT', $1, NULL, $3, $2)::public.http_request) $function$\n"
+    },
+    {
+      "function_name": "http_reset_curlopt",
+      "parameters": "",
+      "function_body": "CREATE OR REPLACE FUNCTION public.http_reset_curlopt()\n RETURNS boolean\n LANGUAGE c\nAS '$libdir/http', $function$http_reset_curlopt$function$\n"
+    },
+    {
+      "function_name": "http_set_curlopt",
+      "parameters": "curlopt character varying, value character varying",
+      "function_body": "CREATE OR REPLACE FUNCTION public.http_set_curlopt(curlopt character varying, value character varying)\n RETURNS boolean\n LANGUAGE c\nAS '$libdir/http', $function$http_set_curlopt$function$\n"
+    },
+    {
+      "function_name": "insert_order_with_items",
+      "parameters": "p_order_date timestamp with time zone, p_sub_total numeric, p_status text, p_address_id integer, p_paid_amount numeric, p_customer_id integer, p_user_id integer, p_order_items jsonb[]",
+      "function_body": "CREATE OR REPLACE FUNCTION public.insert_order_with_items(p_order_date timestamp with time zone, p_sub_total numeric, p_status text, p_address_id integer, p_paid_amount numeric, p_customer_id integer, p_user_id integer, p_order_items jsonb[])\n RETURNS integer\n LANGUAGE plpgsql\nAS $function$\nDECLARE\n  v_order_id INTEGER;\n  v_item JSONB;\nBEGIN\n  -- Insert the order\n  INSERT INTO public.orders (\n    order_date,\n    total_price,\n    status,\n    address_id,\n    paid_amount,\n    customer_id,\n    user_id\n  ) VALUES (\n    COALESCE(p_order_date, NOW()),\n    p_sub_total,\n    p_status,\n    p_address_id,\n    p_paid_amount,\n    p_customer_id,\n    p_user_id\n  ) RETURNING order_id INTO v_order_id;\n\n  -- Insert order items\n  FOREACH v_item IN ARRAY p_order_items\n  LOOP\n    INSERT INTO public.order_items (\n      order_id,\n      product_id,\n      quantity,\n      price,\n      unit,\n      total_buy_price,\n      variant_id\n    ) VALUES (\n      v_order_id,\n      (v_item->>'product_id')::INTEGER,\n      (v_item->>'quantity')::INTEGER,\n      (v_item->>'price')::NUMERIC(10, 2),\n      v_item->>'unit',\n      (v_item->>'total_buy_price')::NUMERIC(10, 2),\n      (v_item->>'variant_id')::INTEGER\n    );\n  END LOOP;\n\n  RETURN v_order_id;\nEND;\n$function$\n"
+    },
+    {
+      "function_name": "log_price_changes",
+      "parameters": "",
+      "function_body": "CREATE OR REPLACE FUNCTION public.log_price_changes()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\r\nBEGIN\r\n    -- Log price changes in product_variants\r\n    IF OLD.sell_price IS DISTINCT FROM NEW.sell_price THEN\r\n        INSERT INTO security_audit_log (event_type, event_data, severity)\r\n        VALUES ('price_change',\r\n                jsonb_build_object(\r\n                    'variant_id', NEW.variant_id,\r\n                    'old_price', OLD.sell_price,\r\n                    'new_price', NEW.sell_price,\r\n                    'change_amount', NEW.sell_price - OLD.sell_price\r\n                ),\r\n                'warning');\r\n    END IF;\r\n    \r\n    RETURN NEW;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "notify_order_ready",
+      "parameters": "",
+      "function_body": "CREATE OR REPLACE FUNCTION public.notify_order_ready()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\r\nbegin\r\n  IF NEW.status = 'ready' AND OLD.status IS DISTINCT FROM NEW.status THEN\r\n    RAISE NOTICE '✅ Trigger fired: order_id = %, status = %', NEW.order_id, NEW.status;\r\n    \r\n    -- Edge function call (commented to isolate problem)\r\n    -- PERFORM http_post(\r\n    --   url := 'https://jjxqwtltkepeajwtcish.functions.supabase.co/notify-ready',\r\n    --   headers := json_build_object('Content-Type', 'application/json'),\r\n    --   body := json_build_object('new', row_to_json(NEW))\r\n    -- );\r\n\r\n  END IF;\r\n  RETURN NEW;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "reduce_variant_stock",
+      "parameters": "variant_id_param integer, quantity_param integer",
+      "function_body": "CREATE OR REPLACE FUNCTION public.reduce_variant_stock(variant_id_param integer, quantity_param integer)\n RETURNS boolean\n LANGUAGE plpgsql\nAS $function$\r\nDECLARE\r\n    current_stock INTEGER;\r\nBEGIN\r\n    -- Lock the row for update to prevent race conditions\r\n    SELECT stock INTO current_stock \r\n    FROM product_variants \r\n    WHERE variant_id = variant_id_param \r\n    FOR UPDATE;\r\n    \r\n    -- Check if sufficient stock is available\r\n    IF current_stock IS NULL THEN\r\n        RAISE EXCEPTION 'Product variant not found: %', variant_id_param;\r\n    END IF;\r\n    \r\n    IF current_stock < quantity_param THEN\r\n        RAISE EXCEPTION 'Insufficient stock. Available: %, Requested: %', current_stock, quantity_param;\r\n    END IF;\r\n    \r\n    -- Reduce the stock\r\n    UPDATE product_variants \r\n    SET stock = stock - quantity_param,\r\n        updated_at = NOW()\r\n    WHERE variant_id = variant_id_param;\r\n    \r\n    RETURN TRUE;\r\nEXCEPTION\r\n    WHEN OTHERS THEN\r\n        -- Log the error and re-raise\r\n        RAISE;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "text_to_bytea",
+      "parameters": "data text",
+      "function_body": "CREATE OR REPLACE FUNCTION public.text_to_bytea(data text)\n RETURNS bytea\n LANGUAGE c\n IMMUTABLE STRICT\nAS '$libdir/http', $function$text_to_bytea$function$\n"
+    },
+    {
+      "function_name": "trigger_cleanup_reservations",
+      "parameters": "",
+      "function_body": "CREATE OR REPLACE FUNCTION public.trigger_cleanup_reservations()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\r\nBEGIN\r\n    -- Cleanup expired reservations on insert (during new reservations)\r\n    DELETE FROM inventory_reservations\r\n    WHERE expires_at < NOW() - INTERVAL '1 hour'; -- Keep some buffer\r\n    \r\n    RETURN NEW;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "update_brand_product_count",
+      "parameters": "",
+      "function_body": "CREATE OR REPLACE FUNCTION public.update_brand_product_count()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$BEGIN\r\n  -- Handle INSERT operation\r\n  IF TG_OP = 'INSERT' THEN\r\n    UPDATE brands\r\n    SET product_count = product_count + 1\r\n    WHERE \"brandID\" = NEW.\"brandID\";\r\n  END IF;\r\n\r\n  -- Handle DELETE operation\r\n  IF TG_OP = 'DELETE' THEN\r\n    UPDATE brands\r\n    SET product_count = product_count - 1\r\n    WHERE \"brandID\" = OLD.\"brandID\";\r\n  END IF;\r\n\r\n  RETURN NULL;\r\nEND;$function$\n"
+    },
+    {
+      "function_name": "update_inventory_after_order",
+      "parameters": "",
+      "function_body": "CREATE OR REPLACE FUNCTION public.update_inventory_after_order()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  UPDATE product_variants\n  SET stock_quantity = stock_quantity - NEW.quantity\n  WHERE variant_id = NEW.variant_id;\n  RETURN NEW;\nEND;\n$function$\n"
+    },
+    {
+      "function_name": "update_variant_stock_with_validation",
+      "parameters": "p_variant_id_input integer, p_new_stock_value_input integer, p_customer_id_input integer",
+      "function_body": "CREATE OR REPLACE FUNCTION public.update_variant_stock_with_validation(p_variant_id_input integer, p_new_stock_value_input integer, p_customer_id_input integer)\n RETURNS boolean\n LANGUAGE plpgsql\nAS $function$\r\nDECLARE\r\n    v_current_stock_in_db INT;\r\n    v_current_cart_items_total INT;\r\n    v_customer_cart_quantity INT;\r\n    v_debug_message TEXT;\r\nBEGIN\r\n    -- Initialize debug message\r\n    v_debug_message := 'Starting validation for variant: ' || p_variant_id_input || \r\n                      ', new stock: ' || p_new_stock_value_input || \r\n                      ', customer: ' || p_customer_id_input;\r\n    RAISE NOTICE '%', v_debug_message;\r\n\r\n    -- 1. Lock and get current stock\r\n    BEGIN\r\n        SELECT stock INTO v_current_stock_in_db\r\n        FROM public.product_variants\r\n        WHERE variant_id = p_variant_id_input\r\n        FOR UPDATE;\r\n        \r\n        IF NOT FOUND THEN\r\n            v_debug_message := 'Variant not found in database';\r\n            RAISE NOTICE '%', v_debug_message;\r\n            RETURN FALSE;\r\n        END IF;\r\n        \r\n        RAISE NOTICE 'Current stock: %', v_current_stock_in_db;\r\n    EXCEPTION WHEN OTHERS THEN\r\n        v_debug_message := 'Failed to read stock: ' || SQLERRM;\r\n        RAISE NOTICE '%', v_debug_message;\r\n        RETURN FALSE;\r\n    END;\r\n\r\n    -- 2. Get cart quantities\r\n    BEGIN\r\n        -- Global cart quantity\r\n        SELECT COALESCE(SUM(NULLIF(quantity, '')::INT), 0)\r\n        INTO v_current_cart_items_total\r\n        FROM public.cart\r\n        WHERE variant_id = p_variant_id_input;\r\n        \r\n        RAISE NOTICE 'Total in all carts: %', v_current_cart_items_total;\r\n\r\n        -- Customer-specific quantity\r\n        SELECT COALESCE(SUM(NULLIF(quantity, '')::INT), 0)\r\n        INTO v_customer_cart_quantity\r\n        FROM public.cart\r\n        WHERE variant_id = p_variant_id_input\r\n        AND customer_id = p_customer_id_input;\r\n        \r\n        RAISE NOTICE 'In customer cart: %', v_customer_cart_quantity;\r\n    EXCEPTION WHEN OTHERS THEN\r\n        v_debug_message := 'Failed to read cart quantities: ' || SQLERRM;\r\n        RAISE NOTICE '%', v_debug_message;\r\n        RETURN FALSE;\r\n    END;\r\n\r\n    -- 3. Validate stock\r\n    IF (p_new_stock_value_input + v_current_cart_items_total) <= v_current_stock_in_db AND\r\n       (p_new_stock_value_input + v_customer_cart_quantity) <= v_current_stock_in_db THEN\r\n        \r\n        -- Update stock\r\n        UPDATE public.product_variants\r\n        SET stock = p_new_stock_value_input,\r\n            updated_at = NOW()\r\n        WHERE variant_id = p_variant_id_input;\r\n        \r\n        v_debug_message := 'SUCCESS: Stock updated to ' || p_new_stock_value_input || \r\n                          ' (Was: ' || v_current_stock_in_db || \r\n                          ', All carts: ' || v_current_cart_items_total || \r\n                          ', Customer cart: ' || v_customer_cart_quantity || ')';\r\n        RAISE NOTICE '%', v_debug_message;\r\n        RETURN TRUE;\r\n    ELSE\r\n        v_debug_message := 'FAILED: Cannot update stock. Requested: ' || p_new_stock_value_input || \r\n                          ' + Existing carts: ' || v_current_cart_items_total || \r\n                          ' + Customer cart: ' || v_customer_cart_quantity || \r\n                          ' > Current stock: ' || v_current_stock_in_db;\r\n        RAISE NOTICE '%', v_debug_message;\r\n        RETURN FALSE;\r\n    END IF;\r\nEXCEPTION\r\n    WHEN OTHERS THEN\r\n        v_debug_message := 'UNEXPECTED ERROR: ' || SQLERRM;\r\n        RAISE NOTICE '%', v_debug_message;\r\n        RETURN FALSE;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "urlencode",
+      "parameters": "string bytea",
+      "function_body": "CREATE OR REPLACE FUNCTION public.urlencode(string bytea)\n RETURNS text\n LANGUAGE c\n IMMUTABLE STRICT\nAS '$libdir/http', $function$urlencode$function$\n"
+    },
+    {
+      "function_name": "urlencode",
+      "parameters": "string character varying",
+      "function_body": "CREATE OR REPLACE FUNCTION public.urlencode(string character varying)\n RETURNS text\n LANGUAGE c\n IMMUTABLE STRICT\nAS '$libdir/http', $function$urlencode$function$\n"
+    },
+    {
+      "function_name": "urlencode",
+      "parameters": "data jsonb",
+      "function_body": "CREATE OR REPLACE FUNCTION public.urlencode(data jsonb)\n RETURNS text\n LANGUAGE c\n IMMUTABLE STRICT\nAS '$libdir/http', $function$urlencode_jsonb$function$\n"
+    },
+    {
+      "function_name": "validate_order_integrity",
+      "parameters": "order_id_param integer",
+      "function_body": "CREATE OR REPLACE FUNCTION public.validate_order_integrity(order_id_param integer)\n RETURNS boolean\n LANGUAGE plpgsql\nAS $function$\r\nDECLARE\r\n    order_total DECIMAL;\r\n    calculated_total DECIMAL;\r\n    item_count INTEGER;\r\nBEGIN\r\n    -- Get order total from orders table\r\n    SELECT paid_amount INTO order_total\r\n    FROM orders\r\n    WHERE order_id = order_id_param;\r\n    \r\n    -- Calculate total from order items\r\n    SELECT COUNT(*), COALESCE(SUM(price * quantity), 0)\r\n    INTO item_count, calculated_total\r\n    FROM order_items\r\n    WHERE order_id = order_id_param;\r\n    \r\n    -- Validate totals match (allow small rounding differences)\r\n    IF ABS(order_total - calculated_total) > 0.01 THEN\r\n        INSERT INTO security_audit_log (event_type, event_data, severity)\r\n        VALUES ('order_integrity_violation',\r\n                jsonb_build_object(\r\n                    'order_id', order_id_param,\r\n                    'order_total', order_total,\r\n                    'calculated_total', calculated_total,\r\n                    'difference', order_total - calculated_total\r\n                ),\r\n                'critical');\r\n        RETURN FALSE;\r\n    END IF;\r\n    \r\n    -- Validate order has items\r\n    IF item_count = 0 THEN\r\n        INSERT INTO security_audit_log (event_type, event_data, severity)\r\n        VALUES ('empty_order_detected',\r\n                jsonb_build_object('order_id', order_id_param),\r\n                'error');\r\n        RETURN FALSE;\r\n    END IF;\r\n    \r\n    RETURN TRUE;\r\nEND;\r\n$function$\n"
+    }
+  ]

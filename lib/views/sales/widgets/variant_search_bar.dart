@@ -20,7 +20,7 @@ class VariantSearchBar extends StatelessWidget {
     return Focus(
       focusNode: variantNameFocus,
       child: Obx(
-          () => EnhancedAutocomplete<ProductVariantModel>(
+        () => EnhancedAutocomplete<ProductVariantModel>(
           // No focusNode passed internally anymore
           labelText: 'Variant Name',
           hintText: 'Select a variant',
@@ -41,7 +41,8 @@ class VariantSearchBar extends StatelessWidget {
             // Set the selected variant ID
             salesController.selectedVariantId.value =
                 selectedVariant.variantId ?? -1;
-            salesController.selectedVariantName.value = selectedVariant.variantName;
+            salesController.selectedVariantName.value =
+                selectedVariant.variantName;
 
             // Set default unit price from variant sell price
             salesController.unitPrice.value.text =

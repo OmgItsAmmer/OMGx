@@ -1,6 +1,6 @@
 class OrderItemModel {
   final int productId;
-  final double price;
+  final double  price;
   final int quantity;
   final int orderId;
   final String? unit;
