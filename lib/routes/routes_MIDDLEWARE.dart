@@ -10,6 +10,7 @@ import 'package:ecommerce_dashboard/controllers/salesman/salesman_controller.dar
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../utils/constants/enums.dart';
+import 'routes.dart';
 
 class TRouteMiddleware extends GetMiddleware {
   @override
@@ -27,8 +28,19 @@ class TRouteMiddleware extends GetMiddleware {
 
     mediaController.selectedPath.value = MediaCategory.folders;
 
-    // Run function when navigating to ProfileScreen
+    // Run function when navigating to any screen
     if (route != null) {
+      // Clear sales data when navigating away from sales screen (except to installments)
+      if (route != TRoutes.sales && route != TRoutes.installment) {
+        try {
+          final SalesController salesController = Get.find<SalesController>();
+          salesController.clearSaleDetails();
+        } catch (e) {
+          // Controller might not be initialized yet, ignore error
+        }
+      }
+
+      // Other controller cleanups (currently commented out)
       // CategoryController.instance.cleanCategoryDetail();
       // ProductController.instance.cleanProductDetail();
       // BrandController.instance.cleanBrandDetail();

@@ -25,6 +25,7 @@ import '../../Models/orders/order_item_model.dart';
 
 import '../../Models/products/product_model.dart';
 import '../../repositories/order/order_repository.dart';
+import '../../routes/routes.dart';
 import '../customer/customer_controller.dart';
 import '../shop/shop_controller.dart';
 import '../../Models/salesman/salesman_model.dart';
@@ -415,7 +416,7 @@ class SalesController extends GetxController {
   void onNavigateAway(String targetRoute) {
     try {
       // Only clear if not going to installments
-      if (targetRoute != '/installments') {
+      if (targetRoute != TRoutes.installment) {
         clearSaleDetails();
       }
     } catch (e) {
@@ -442,14 +443,8 @@ class SalesController extends GetxController {
         subTotal.value += totalPrice;
         originalSubTotal.value += totalPrice;
 
-        // Calculate buying price total
-        if (sale.variantId != null) {
-          // For serialized products, quantity is always 1
-          buyingPriceTotal += sale.buyPrice;
-        } else {
-          // For regular products, multiply by quantity
-          buyingPriceTotal += sale.buyPrice * quantity;
-        }
+        // Calculate buying price total (all products have variants, so multiply by quantity)
+        buyingPriceTotal += sale.buyPrice * quantity;
       }
 
       // Calculate net totals including fees
@@ -471,17 +466,12 @@ class SalesController extends GetxController {
   /// Helper method to calculate buy price for order items
   double calculateBuyPriceFromOrderItem(OrderItemModel orderItem) {
     try {
-      if (orderItem.variantId != null) {
-        // For serialized products, use the total buy price directly
-        return orderItem.totalBuyPrice ?? 0.0;
-      } else {
-        // For regular products, divide total by quantity to get individual buy price
-        double quantity = orderItem.quantity.toDouble();
-        if (quantity > 0) {
-          return (orderItem.totalBuyPrice ?? 0.0) / quantity;
-        }
-        return 0.0;
+      // All products have variants, so divide total by quantity to get individual buy price
+      double quantity = orderItem.quantity.toDouble();
+      if (quantity > 0) {
+        return (orderItem.totalBuyPrice ?? 0.0) / quantity;
       }
+      return 0.0;
     } catch (e) {
       if (kDebugMode) {
         print('Error calculating buy price from order item: $e');
@@ -493,26 +483,8 @@ class SalesController extends GetxController {
   /// Helper method to determine if shipping fee should be applied
   double getShippingFee() {
     try {
-      // Check if we're in edit mode and get the payment method from the order
-      if (isEditingOrder.value && editingOrderId.value > 0) {
-        // In edit mode, check the order's payment method
-        final orderController = Get.find<OrderController>();
-        final order = orderController.allOrders.firstWhere(
-          (o) => o.orderId == editingOrderId.value,
-          orElse: () => OrderModel.empty(),
-        );
-
-        // Don't add shipping fee if payment method is pickup
-        if (order.paymentMethod.toLowerCase() == 'pickup') {
-          return 0.0;
-        }
-      } else {
-        // In new order mode, check the selected sale type
-        // For now, we'll add shipping fee for all new orders
-        // This can be enhanced later if needed
-      }
-
-      return shopController.selectedShop?.value.shippingPrice ?? 0.0;
+      // For POS orders, shipping is always 0 (customer pickup)
+      return 0.0;
     } catch (e) {
       if (kDebugMode) {
         print('Error getting shipping fee: $e');
@@ -1007,16 +979,23 @@ class SalesController extends GetxController {
         return -1;
       }
 
-      // Convert allSales to cartItems format expected by edge function
+      // Convert allSales to cartItems format expected by admin edge function
       final List<Map<String, dynamic>> cartItems = allSales.map((sale) {
+        // Ensure all required data is present and properly typed
+        final variantId = sale.variantId;
+        if (variantId == null) {
+          throw Exception(
+              'Every product must have a variant selected: ${sale.name}');
+        }
+
         return {
-          'variantId':
-              sale.variantId ?? 0, // Use variantId if available, otherwise 0
+          'variantId': variantId, // Required - every product must have variants
+          'productId': sale.productId,
           'quantity': int.tryParse(sale.quantity) ?? 1,
           'sellPrice': double.tryParse(sale.salePrice) ?? 0.0,
           'buyPrice': sale.buyPrice,
-          'productId': sale.productId,
           'productName': sale.name,
+          'unit': sale.unit ?? 'item',
         };
       }).toList();
 
@@ -1029,17 +1008,34 @@ class SalesController extends GetxController {
         return -1;
       }
 
-      // Prepare checkout data for edge function
+      // Prepare checkout data for admin edge function
       final checkoutData = {
         'cartItems': cartItems,
         'addressId': selectedAddressId,
-        'paymentMethod': selectedSaleType.value.toString().split('.').last,
-        'directCheckout': null, // Not using direct checkout
+        'paymentMethod': _mapSaleTypeToPaymentMethod(selectedSaleType.value),
+        'customerInfo': {
+          'customerId': customerController.selectedCustomer.value.customerId,
+          'fullName': customerNameController.text,
+          'phoneNumber': customerPhoneNoController.value.text,
+          'cnic': customerCNICController.value.text,
+        },
+        'salesmanInfo': {
+          'salesmanId': selectedSalesmanId,
+          'commission': (salesmanController.allSalesman
+                      .firstWhere(
+                        (salesman) => salesman.salesmanId == selectedSalesmanId,
+                        orElse: () => SalesmanModel.empty(),
+                      )
+                      .comission ??
+                  0)
+              .toDouble(),
+        },
+        'discount': double.tryParse(discount.value.replaceAll('%', '')) ?? 0.0,
       };
 
-      // Call the edge function
+      // Call the admin edge function
       final response = await supabase.functions.invoke(
-        'secure-checkout', // Replace with your actual function name
+        'admin-secure-checkout',
         body: checkoutData,
         headers: {
           'Authorization': 'Bearer ${session.accessToken}',
@@ -1060,7 +1056,9 @@ class SalesController extends GetxController {
 
       final responseData = response.data as Map<String, dynamic>;
       final orderId = responseData['orderId'] as int?;
-      final total = responseData['total'] as double?;
+      final total = (responseData['total'] is int)
+          ? (responseData['total'] as int).toDouble()
+          : responseData['total'] as double?;
 
       if (orderId == null || orderId <= 0) {
         TLoaders.errorSnackBar(
@@ -1092,20 +1090,21 @@ class SalesController extends GetxController {
         userId: userController.currentUser.value.userId,
         paidAmount: paidAmountValue,
         customerId: customerController.selectedCustomer.value.customerId,
-        paymentMethod: selectedSaleType.value.toString().split('.').last,
+        paymentMethod: _mapSaleTypeToPaymentMethod(selectedSaleType.value),
       );
 
       // Create order items for local state
       final List<OrderItemModel> orderItems = allSales.map((sale) {
         int quantity = int.tryParse(sale.quantity) ?? 0;
-        double totalBuyingPrice =
-            sale.variantId != null ? sale.buyPrice : sale.buyPrice * quantity;
+        // All products have variants, so multiply by quantity
+        double totalBuyingPrice = sale.buyPrice * quantity;
 
         return OrderItemModel(
           productId: sale.productId,
           orderId: orderId,
           quantity: quantity,
-          price: double.tryParse(sale.totalPrice) ?? 0.0,
+          price: double.tryParse(sale.salePrice) ??
+              0.0, // Use salePrice (unit price) not totalPrice
           unit: sale.unit.toString().split('.').last,
           totalBuyPrice: totalBuyingPrice,
           variantId: sale.variantId,
@@ -1242,88 +1241,116 @@ class SalesController extends GetxController {
         return -1;
       }
 
-      // Create new order items from current sales
-      final List<OrderItemModel> newOrderItems = allSales.map((sale) {
-        int quantity = int.tryParse(sale.quantity) ?? 0;
-        double totalBuyingPrice =
-            sale.variantId != null ? sale.buyPrice : sale.buyPrice * quantity;
+      // Convert allSales to cartItems format expected by admin update edge function
+      final List<Map<String, dynamic>> updatedCartItems = allSales.map((sale) {
+        // Ensure all required data is present and properly typed
+        final variantId = sale.variantId;
+        if (variantId == null) {
+          throw Exception(
+              'Every product must have a variant selected: ${sale.name}');
+        }
 
-        return OrderItemModel(
-          productId: sale.productId,
-          orderId: editingOrderId.value,
-          quantity: quantity,
-          price: double.tryParse(sale.totalPrice) ?? 0.0,
-          unit: sale.unit.toString().split('.').last,
-          totalBuyPrice: totalBuyingPrice,
-          variantId: sale.variantId,
-        );
+        return {
+          'variantId': variantId, // Required - every product must have variants
+          'productId': sale.productId,
+          'quantity': int.tryParse(sale.quantity) ?? 1,
+          'sellPrice': double.tryParse(sale.salePrice) ?? 0.0,
+          'buyPrice': sale.buyPrice,
+          'productName': sale.name,
+          'unit': sale.unit ?? 'item',
+        };
       }).toList();
 
-      // Calculate stock differences and check availability
-      final stockDifferences = await orderRepository.calculateStockDifferences(
-          originalOrderItems, newOrderItems);
-
-      // Check if we have enough stock for the changes
-      bool canApplyChanges =
-          await orderRepository.applyStockChanges(stockDifferences);
-      if (!canApplyChanges) {
-        return -1; // Error message already shown in applyStockChanges
+      // Get current user's JWT token
+      final session = supabase.auth.currentSession;
+      if (session == null) {
+        TLoaders.errorSnackBar(
+            title: 'Authentication Error',
+            message: 'Please log in again to continue.');
+        return -1;
       }
 
-      // Prepare updated order data
-      Map<String, dynamic> updatedOrderData = {
-        'order_date': formatDate(selectedDate.value ?? DateTime.now()),
-        'sub_total': subTotal.value,
-        'status': statusCheck(),
-        'saletype': selectedSaleType.value.toString().split('.').last,
-        'address_id': selectedAddressId,
-        'user_id': userController.currentUser.value.userId,
-        'customer_id': customerController.selectedCustomer.value.customerId,
-        'paid_amount': paidAmountValue,
-        'buying_price': buyingPriceTotal,
+      // Prepare update data for admin edge function
+      final updateData = {
+        'orderId': editingOrderId.value,
+        'updatedCartItems': updatedCartItems,
+        'addressId': selectedAddressId,
+        'paymentMethod': _mapSaleTypeToPaymentMethod(selectedSaleType.value),
+        'customerInfo': {
+          'customerId': customerController.selectedCustomer.value.customerId,
+          'fullName': customerNameController.text,
+          'phoneNumber': customerPhoneNoController.value.text,
+          'cnic': customerCNICController.value.text,
+        },
+        'salesmanInfo': {
+          'salesmanId': selectedSalesmanId,
+          'commission': (salesmanController.allSalesman
+                      .firstWhere(
+                        (salesman) => salesman.salesmanId == selectedSalesmanId,
+                        orElse: () => SalesmanModel.empty(),
+                      )
+                      .comission ??
+                  0)
+              .toDouble(),
+        },
         'discount': double.tryParse(discount.value.replaceAll('%', '')) ?? 0.0,
-        'tax': shopController.selectedShop!.value.taxrate,
-        'shipping_fee': shopController.selectedShop!.value.shippingPrice,
-        'payment_method': selectedSaleType.value.toString().split('.').last,
+        'paidAmount': paidAmountValue,
+        'orderDate': formatDate(selectedDate.value ?? DateTime.now()),
       };
 
-      // Add salesman info if available
-      if (selectedSalesmanId > 0) {
-        final selectedSalesman = salesmanController.allSalesman.firstWhere(
-          (salesman) => salesman.salesmanId == selectedSalesmanId,
-          orElse: () => SalesmanModel.empty(),
-        );
-        // Note: salesman_id and salesman_commission might not be in your database schema
-        // Include them only if your database supports them
+      // Call the admin update edge function
+      final response = await supabase.functions.invoke(
+        'admin-update-order',
+        body: updateData,
+        headers: {
+          'Authorization': 'Bearer ${session.accessToken}',
+        },
+      );
+
+      // Handle response
+      if (response.status != 200) {
+        final errorData = response.data as Map<String, dynamic>?;
+        final errorMessage = errorData?['message'] ?? 'Order update failed';
+        final errorCode = errorData?['errorCode'] ?? 'UNKNOWN_ERROR';
+
+        TLoaders.errorSnackBar(
+            title: 'Update Error', message: '$errorMessage (Code: $errorCode)');
+        return -1;
       }
 
-      // Update the order in the database
-      bool updateSuccess = await orderRepository.updateOrder(
-          editingOrderId.value, updatedOrderData, newOrderItems);
+      final responseData = response.data as Map<String, dynamic>;
+      final orderId = responseData['orderId'] as int?;
+      final total = (responseData['total'] is int)
+          ? (responseData['total'] as int).toDouble()
+          : responseData['total'] as double?;
 
-      if (!updateSuccess) {
-        // Rollback stock changes if order update failed
-        try {
-          // Reverse the stock changes
-          final reversedChanges = {
-            'productChanges':
-                (stockDifferences['productChanges'] as Map<String, int>)
-                    .map((key, value) => MapEntry(key, -value)),
-            'variantChanges':
-                (stockDifferences['variantChanges'] as Map<String, int>)
-                    .map((key, value) => MapEntry(key, -value)),
-          };
-          await orderRepository.applyStockChanges(reversedChanges);
-        } catch (e) {
-          if (kDebugMode) {
-            print('Error rolling back stock changes: $e');
-          }
-        }
+      if (orderId == null || orderId <= 0) {
+        TLoaders.errorSnackBar(
+            title: 'Update Error',
+            message: 'Failed to update order. Please try again.');
         return -1;
       }
 
       // Update local order lists
       final OrderController orderController = Get.find<OrderController>();
+
+      // Create new order items for local state
+      final List<OrderItemModel> newOrderItems = allSales.map((sale) {
+        int quantity = int.tryParse(sale.quantity) ?? 0;
+        // All products have variants, so multiply by quantity
+        double totalBuyingPrice = sale.buyPrice * quantity;
+
+        return OrderItemModel(
+          productId: sale.productId,
+          orderId: editingOrderId.value,
+          quantity: quantity,
+          price: double.tryParse(sale.salePrice) ??
+              0.0, // Confirmed: using salePrice (unit price)
+          unit: sale.unit.toString().split('.').last,
+          totalBuyPrice: totalBuyingPrice,
+          variantId: sale.variantId,
+        );
+      }).toList();
 
       // Create updated OrderModel for UI
       OrderModel updatedOrder = OrderModel(
@@ -1340,7 +1367,7 @@ class SalesController extends GetxController {
         discount: double.tryParse(discount.value.replaceAll('%', '')) ?? 0.0,
         tax: shopController.selectedShop!.value.taxrate,
         shippingFee: shopController.selectedShop!.value.shippingPrice,
-        paymentMethod: selectedSaleType.value.toString().split('.').last,
+        paymentMethod: _mapSaleTypeToPaymentMethod(selectedSaleType.value),
         salesmanId: selectedSalesmanId,
         salesmanComission: salesmanController.allSalesman
                 .firstWhere(
@@ -1541,6 +1568,18 @@ class SalesController extends GetxController {
     }
   }
 
+  // Helper method to map SaleType to database payment method values
+  String _mapSaleTypeToPaymentMethod(SaleType saleType) {
+    switch (saleType) {
+      case SaleType.cash:
+        return 'cod'; // Cash on delivery
+      case SaleType.installment:
+        return 'credit_card'; // Installment payments typically use credit card
+      default:
+        return 'cod'; // Default to cash on delivery
+    }
+  }
+
   // Reset form fields only - used internally
   void resetFields() {
     try {
@@ -1709,9 +1748,9 @@ class SalesController extends GetxController {
           0.0); // Remaining amount will be calculated by updateRemainingAmount
 
       // Calculate the remaining amount properly
-      double salesmanCommissionAmount = 0.0;
+      double salesman_comissionAmount = 0.0;
       if (order.salesmanComission != null && order.salesmanComission! > 0) {
-        salesmanCommissionAmount =
+        salesman_comissionAmount =
             (subTotal.value * order.salesmanComission!) / 100;
       }
 
@@ -1722,7 +1761,7 @@ class SalesController extends GetxController {
       }
 
       double totalAmount =
-          subTotal.value + shippingFee + (order.tax) + salesmanCommissionAmount;
+          subTotal.value + shippingFee + (order.tax) + salesman_comissionAmount;
 
       double calculatedRemaining = totalAmount - (order.paidAmount ?? 0.0);
       remainingAmount.value.text = calculatedRemaining.toStringAsFixed(2);
@@ -2218,7 +2257,7 @@ class SalesController extends GetxController {
     try {
       double shippingFee = getShippingFee();
       double tax = shopController.selectedShop?.value.taxrate ?? 0.0;
-      double salesmanCommission = 0.0;
+      double salesman_comission = 0.0;
 
       // Get salesman commission if a salesman is selected
       if (selectedSalesmanId > 0) {
@@ -2228,16 +2267,16 @@ class SalesController extends GetxController {
             orElse: () => SalesmanModel.empty(),
           );
           double commissionPercent =
-              selectedSalesman.comission?.toDouble() ?? 0.0;
+              (selectedSalesman.comission ?? 0).toDouble();
           // Convert percentage to amount: (commission% * subTotal) / 100
-          salesmanCommission = (commissionPercent * subTotal.value) / 100;
+          salesman_comission = (commissionPercent * subTotal.value) / 100;
         } catch (e) {
-          salesmanCommission = 0.0;
+          salesman_comission = 0.0;
         }
       }
 
       // Calculate net total
-      netTotal.value = subTotal.value + shippingFee + tax + salesmanCommission;
+      netTotal.value = subTotal.value + shippingFee + tax + salesman_comission;
 
       // Update remaining amount based on net total
       updateRemainingAmount();
@@ -2253,7 +2292,7 @@ class SalesController extends GetxController {
     try {
       double shippingFee = getShippingFee();
       double tax = shopController.selectedShop?.value.taxrate ?? 0.0;
-      double salesmanCommission = 0.0;
+      double salesman_comission = 0.0;
 
       // Get salesman commission if a salesman is selected
       if (selectedSalesmanId > 0) {
@@ -2263,18 +2302,18 @@ class SalesController extends GetxController {
             orElse: () => SalesmanModel.empty(),
           );
           double commissionPercent =
-              selectedSalesman.comission?.toDouble() ?? 0.0;
+              (selectedSalesman.comission ?? 0).toDouble();
           // Convert percentage to amount: (commission% * originalSubTotal) / 100
-          salesmanCommission =
+          salesman_comission =
               (commissionPercent * originalSubTotal.value) / 100;
         } catch (e) {
-          salesmanCommission = 0.0;
+          salesman_comission = 0.0;
         }
       }
 
       // Calculate original net total
       originalNetTotal.value =
-          originalSubTotal.value + shippingFee + tax + salesmanCommission;
+          originalSubTotal.value + shippingFee + tax + salesman_comission;
     } catch (e) {
       if (kDebugMode) {
         print('Error calculating original net total: $e');

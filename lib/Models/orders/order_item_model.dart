@@ -1,6 +1,6 @@
 class OrderItemModel {
   final int productId;
-  final double  price;
+  final double price;
   final int quantity;
   final int orderId;
   final String? unit;
@@ -220,9 +220,7 @@ class OrderModel {
       idempotencyKey: json['idempotency_key'] as String?,
       paymentMethod: json['payment_method'] as String? ?? 'cod',
       salesmanId: json['salesman_id'] as int?, // can be null
-      salesmanComission: json['salesman_comission'] != null
-          ? (json['salesman_comission'] as int)
-          : 0,
+      salesmanComission: json['salesman_comission'] as int? ?? 0,
       orderItems: json['order_items'] != null
           ? OrderItemModel.fromJsonList(json['order_items'] as List)
           : null,
