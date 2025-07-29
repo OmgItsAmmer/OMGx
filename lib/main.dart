@@ -44,15 +44,14 @@ Future<void> main() async {
   //Get Local Storage
   await GetStorage.init();
 
-  // Initialize SecureKeys instance
-  final secureKeys = SecureKeys.instance;
-  await secureKeys.initialize();
+  // // Initialize SecureKeys instance
+  // final secureKeys = SecureKeys.instance;
+  // await secureKeys.initialize();
 
   // Get Supabase credentials securely
-  final supabaseUrl =
-      await secureKeys.getSupabaseUrl() ?? SupabaseStrings.projectUrl;
-  final supabaseAnonKey =
-      await secureKeys.getSupabaseAnonKey() ?? SupabaseStrings.anonKey;
+  const supabaseUrl =
+        SupabaseStrings.projectUrl;
+  const supabaseAnonKey = SupabaseStrings.anonKey;
 
   // Initialize SupabaseNetworkManager first for better connection handling
   final networkManager = SupabaseNetworkManager.instance;

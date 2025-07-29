@@ -1,4 +1,4 @@
-package com.example.admin_dashboard_v3
+package com.omgx.kks_ecommerce_dashboard
 
 import io.flutter.embedding.android.FlutterActivity
 
