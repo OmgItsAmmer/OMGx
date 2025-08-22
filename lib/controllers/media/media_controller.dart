@@ -48,7 +48,7 @@ class MediaController extends GetxController {
 
   // Pagination (lazy loading)
   int offset = 0;
-  final int limit = 10;
+  final int limit = 20;
 
   late DropzoneViewController dropzoneViewController;
 
@@ -522,8 +522,14 @@ class MediaController extends GetxController {
       );
 
       if (images.isNotEmpty) {
-        allImages.assignAll(images);
-        offset += limit; // Increment offset for the next batch
+        if (offset == 0) {
+          // First load - replace all images
+          allImages.assignAll(images);
+        } else {
+          // Subsequent loads - append new images
+          allImages.addAll(images);
+        }
+        offset += images.length; // Increment offset by actual fetched count
       }
     } catch (e) {
       if (kDebugMode) {

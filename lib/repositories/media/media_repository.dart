@@ -33,8 +33,12 @@ class MediaRepository extends GetxController {
       // if (imageIds.isEmpty) return [];
 
       // Step 3: Fetch corresponding images using image IDs
-      final List<Map<String, dynamic>> imageJsonList =
-          await supabase.from('images').select().eq('folderType', folderType);
+      final List<Map<String, dynamic>> imageJsonList = await supabase
+          .from('images')
+          .select()
+          .eq('folderType', folderType)
+          .order('created_at', ascending: false)
+          .range(offset, offset + limit - 1);
 
       final List<ImageModel> imageModels =
           imageJsonList.map((json) => ImageModel.fromJson(json)).toList();
@@ -95,9 +99,8 @@ class MediaRepository extends GetxController {
   Future<String?> fetchImageFromBucket(
       String filePath, String bucketName) async {
     try {
-      final response = await supabase.storage
-          .from(bucketName)
-          .createSignedUrl(filePath, 60); // expires in 60 seconds
+      final response = await supabase.storage.from(bucketName).createSignedUrl(
+          filePath, 3600); // expires in 1 hour for better caching
       return response;
 
       //return response; // response is of type Uint8List

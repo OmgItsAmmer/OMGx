@@ -1,23 +1,20 @@
 {
-    "cmake.ignoreCMakeListsMissing": true,
-    "files.autoSave": "afterDelay",
-    "editor.lineHeight": 18,
-    "workbench.editor.tabSizing": "shrink",
-    "workbench.tree.indent": 10,
-"workbench.iconTheme": "vs-minimal", // or pick a minimal icon theme
-"terminal.integrated.fontSize": 11,
-"window.zoomLevel": -1,
-"editor.hover.enabled": false,
-"files.exclude": {
+  "cmake.ignoreCMakeListsMissing": true,
+  "files.autoSave": "afterDelay",
+  "editor.lineHeight": 18,
+  "workbench.editor.tabSizing": "shrink",
+  "workbench.tree.indent": 10,
+  "workbench.iconTheme": "vs-minimal",
+  "terminal.integrated.fontSize": 11,
+  "window.zoomLevel": -1,
+  "editor.hover.enabled": false,
+  "files.exclude": {
     "**/.git": true,
     "**/.svn": true,
     "**/.hg": true,
     "**/.DS_Store": true,
     "**/Thumbs.db": true,
     ".mdnotes": true
-},
-
-
-
-
+  },
+  "dart.flutterSdkPath": ".fvm/versions/stable"
 }

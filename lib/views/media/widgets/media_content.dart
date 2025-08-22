@@ -10,8 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:extended_image/extended_image.dart';
 
-import '../../../common/widgets/images/t_rounded_image.dart';
 import '../../../utils/constants/colors.dart';
 import '../../../utils/constants/enums.dart';
 import 'folder_dropdown.dart';
@@ -179,7 +179,7 @@ class MediaContent extends StatelessWidget {
                       isMobile ? const EdgeInsets.only(top: TSizes.lg) : null,
                   decoration: isMobile
                       ? BoxDecoration(
-                          color: Colors.grey.withOpacity(0.05),
+                          color: Colors.grey.withValues(alpha: 0.05),
                           borderRadius:
                               BorderRadius.circular(TSizes.borderRadiusSm),
                         )
@@ -207,21 +207,71 @@ class MediaContent extends StatelessWidget {
                                 builder: (context, snapshot) {
                                   if (snapshot.connectionState ==
                                       ConnectionState.waiting) {
-                                    return const CircularProgressIndicator();
+                                    return Container(
+                                      width: imageWidth,
+                                      height: imageHeight,
+                                      padding: const EdgeInsets.all(TSizes.sm),
+                                      decoration: BoxDecoration(
+                                        color: TColors.primaryBackground,
+                                        borderRadius:
+                                            BorderRadius.circular(TSizes.sm),
+                                      ),
+                                      child: TShimmerEffect(
+                                        width: imageWidth - TSizes.sm * 2,
+                                        height: imageHeight - TSizes.sm * 2,
+                                        radius: TSizes.sm,
+                                      ),
+                                    );
                                   } else if (snapshot.hasError) {
                                     return Text('Error: ${snapshot.error}');
                                   } else {
                                     return Stack(
                                       children: [
-                                        TRoundedImage(
-                                          imageurl: snapshot.data ?? '',
+                                        Container(
                                           width: imageWidth,
                                           height: imageHeight,
                                           padding:
                                               const EdgeInsets.all(TSizes.sm),
-                                          backgroundColor:
-                                              TColors.primaryBackground,
-                                          isNetworkImage: true,
+                                          decoration: BoxDecoration(
+                                            color: TColors.primaryBackground,
+                                            borderRadius: BorderRadius.circular(
+                                                TSizes.sm),
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                                TSizes.sm),
+                                            child: ExtendedImage.network(
+                                              snapshot.data ?? '',
+                                              fit: BoxFit.cover,
+                                              cache: true,
+                                              clearMemoryCacheIfFailed: true,
+                                              retries: 3,
+                                              loadStateChanged:
+                                                  (ExtendedImageState state) {
+                                                switch (state
+                                                    .extendedImageLoadState) {
+                                                  case LoadState.loading:
+                                                    return TShimmerEffect(
+                                                      width: imageWidth -
+                                                          TSizes.sm * 2,
+                                                      height: imageHeight -
+                                                          TSizes.sm * 2,
+                                                      radius: TSizes.sm,
+                                                    );
+                                                  case LoadState.completed:
+                                                    return null;
+                                                  case LoadState.failed:
+                                                    return Container(
+                                                      color: Colors.grey[300],
+                                                      child: const Icon(
+                                                        Icons.broken_image,
+                                                        color: Colors.grey,
+                                                      ),
+                                                    );
+                                                }
+                                              },
+                                            ),
+                                          ),
                                         ),
                                         // Only show checkbox when allowSelection is true
                                         if (allowSelection)
@@ -266,19 +316,19 @@ class MediaContent extends StatelessWidget {
                                   }
                                 },
                               ),
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: TSizes.xs),
-                                  child: Text(
-                                    image.filename ?? 'No Name Found',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style:
-                                        Theme.of(context).textTheme.bodySmall,
-                                  ),
-                                ),
-                              ),
+                              // Expanded(
+                              //   child: Padding(
+                              //     padding: const EdgeInsets.symmetric(
+                              //         horizontal: TSizes.xs),
+                              //     child: Text(
+                              //       image.filename ?? 'No Name Found',
+                              //       maxLines: 1,
+                              //       overflow: TextOverflow.ellipsis,
+                              //       style:
+                              //           Theme.of(context).textTheme.bodySmall,
+                              //     ),
+                              //   ),
+                              // ),
                             ],
                           ),
                         ),
@@ -343,11 +393,30 @@ class MediaContent extends StatelessWidget {
                 image.filename ?? ''), // Fetch the image URL
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                // Show a loader while fetching the image
+                // Show a skeleton while fetching the image
                 return Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    TShimmerEffect(width: dialogWidth, height: dialogHeight)
+                    // Image skeleton
+                    TShimmerEffect(
+                      width: dialogWidth,
+                      height: dialogHeight,
+                      radius: 12,
+                    ),
+                    const SizedBox(height: TSizes.spaceBtwItems),
+                    // Text field skeleton
+                    TShimmerEffect(
+                      width: dialogWidth,
+                      height: 48,
+                      radius: 8,
+                    ),
+                    const SizedBox(height: TSizes.spaceBtwItems),
+                    // Button skeleton
+                    const TShimmerEffect(
+                      width: 120,
+                      height: 36,
+                      radius: 6,
+                    ),
                   ],
                 );
               } else if (snapshot.hasError) {
@@ -362,13 +431,94 @@ class MediaContent extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      TRoundedImage(
-                        imageurl: snapshot.data!, // Use the fetched image URL
-                        width: dialogWidth,
-                        height: dialogHeight,
-                        padding: const EdgeInsets.all(TSizes.sm),
-                        backgroundColor: TColors.primaryBackground,
-                        isNetworkImage: true,
+                      Stack(
+                        children: [
+                          Container(
+                            width: dialogWidth,
+                            height: dialogHeight,
+                            padding: const EdgeInsets.all(TSizes.sm),
+                            decoration: BoxDecoration(
+                              color: TColors.primaryBackground,
+                              borderRadius: BorderRadius.circular(TSizes.md),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(TSizes.md),
+                              child: ExtendedImage.network(
+                                snapshot.data!,
+                                fit: BoxFit.contain,
+                                mode: ExtendedImageMode.gesture,
+                                cache: true,
+                                clearMemoryCacheIfFailed: true,
+                                retries: 3,
+                                filterQuality: FilterQuality.high,
+                                initGestureConfigHandler: (state) {
+                                  return GestureConfig(
+                                    minScale: 0.5,
+                                    animationMinScale: 0.3,
+                                    maxScale: 8.0,
+                                    animationMaxScale: 8.5,
+                                    speed: 1.0,
+                                    inertialSpeed: 100.0,
+                                    initialScale: 1.0,
+                                    inPageView: false,
+                                    initialAlignment: InitialAlignment.center,
+                                  );
+                                },
+                                loadStateChanged: (ExtendedImageState state) {
+                                  switch (state.extendedImageLoadState) {
+                                    case LoadState.loading:
+                                      return const Center(
+                                        child: TShimmerEffect(
+                                          width: 80,
+                                          height: 80,
+                                        ),
+                                      );
+                                    case LoadState.completed:
+                                      return null;
+                                    case LoadState.failed:
+                                      return const Center(
+                                        child: Icon(Icons.error),
+                                      );
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
+                          // Close button overlay
+                          Positioned(
+                            top: TSizes.xs,
+                            right: TSizes.xs,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.6),
+                                shape: BoxShape.circle,
+                              ),
+                              child: IconButton(
+                                icon: const Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                                onPressed: () => Navigator.of(context).pop(),
+                                padding: const EdgeInsets.all(4),
+                                constraints: const BoxConstraints(
+                                  minWidth: 32,
+                                  minHeight: 32,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: TSizes.xs),
+                      // Zoom instruction text
+                      Text(
+                        'Pinch to zoom • Double tap to reset',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: TColors.darkerGrey,
+                              fontStyle: FontStyle.italic,
+                            ),
+                        textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: TSizes.spaceBtwItems),
                       // TextField with image URL and copy button
