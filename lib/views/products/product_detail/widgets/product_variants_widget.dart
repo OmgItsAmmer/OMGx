@@ -88,6 +88,10 @@ class ProductVariantsWidget extends StatelessWidget {
                           flex: 1,
                           child: Text('Stock',
                               style: TextStyle(fontWeight: FontWeight.bold))),
+                      Expanded(
+                          flex: 1,
+                          child: Text('Alert Stock',
+                              style: TextStyle(fontWeight: FontWeight.bold))),
                       SizedBox(
                           width: 60,
                           child: Text('Visible',
@@ -113,28 +117,61 @@ class ProductVariantsWidget extends StatelessWidget {
           // Total Stock Summary
           const SizedBox(height: TSizes.spaceBtwItems),
           Obx(() {
-            final totalStock = controller.currentProductVariants
-                    .fold<int>(0, (sum, variant) => sum + variant.stock) +
-                controller.unsavedProductVariants
-                    .fold<int>(0, (sum, variant) => sum + variant.stock);
-            return Container(
-              padding: const EdgeInsets.all(TSizes.sm),
-              decoration: BoxDecoration(
-                color: TColors.success.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(TSizes.borderRadiusMd),
-                border:
-                    Border.all(color: TColors.success.withValues(alpha: 0.3)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Total Stock:',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  Text('$totalStock units',
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, color: TColors.success)),
+            final allVariants = <ProductVariantModel>[];
+            allVariants.addAll(controller.currentProductVariants);
+            allVariants.addAll(controller.unsavedProductVariants);
+
+            final totalStock =
+                allVariants.fold<int>(0, (sum, variant) => sum + variant.stock);
+            final lowStockVariants = controller.getLowStockVariantsCount();
+
+            return Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(TSizes.sm),
+                  decoration: BoxDecoration(
+                    color: TColors.success.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(TSizes.borderRadiusMd),
+                    border: Border.all(
+                        color: TColors.success.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Total Stock:',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text('$totalStock units',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: TColors.success)),
+                    ],
+                  ),
+                ),
+                if (lowStockVariants > 0) ...[
+                  const SizedBox(height: TSizes.xs),
+                  Container(
+                    padding: const EdgeInsets.all(TSizes.sm),
+                    decoration: BoxDecoration(
+                      color: TColors.error.withValues(alpha: 0.1),
+                      borderRadius:
+                          BorderRadius.circular(TSizes.borderRadiusMd),
+                      border: Border.all(
+                          color: TColors.error.withValues(alpha: 0.3)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Low Stock Alert:',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text('$lowStockVariants variants',
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: TColors.error)),
+                      ],
+                    ),
+                  ),
                 ],
-              ),
+              ],
             );
           }),
         ],
@@ -209,7 +246,38 @@ class ProductVariantsWidget extends StatelessWidget {
           // Stock
           Expanded(
             flex: 1,
-            child: Text('${variant.stock}'),
+            child: Row(
+              children: [
+                Text('${variant.stock}'),
+                if (controller.isVariantBelowAlertStock(variant))
+                  const Padding(
+                    padding: EdgeInsets.only(left: 4.0),
+                    child: Icon(
+                      Iconsax.warning_2,
+                      color: TColors.error,
+                      size: 16,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          // Alert Stock
+          Expanded(
+            flex: 1,
+            child: Row(
+              children: [
+                Text('${variant.alertStock}'),
+                if (variant.alertStock > 0)
+                  const Padding(
+                    padding: EdgeInsets.only(left: 4.0),
+                    child: Icon(
+                      Iconsax.shield_tick,
+                      color: TColors.success,
+                      size: 16,
+                    ),
+                  ),
+              ],
+            ),
           ),
           // Visible
           SizedBox(
@@ -280,6 +348,8 @@ class ProductVariantsWidget extends StatelessWidget {
         TextEditingController(text: variant?.sellPrice.toString() ?? '');
     final stockController =
         TextEditingController(text: variant?.stock.toString() ?? '0');
+    final alertStockController =
+        TextEditingController(text: variant?.alertStock.toString() ?? '0');
     final isVisibleNotifier = ValueNotifier<bool>(variant?.isVisible ?? true);
 
     showDialog(
@@ -403,6 +473,31 @@ class ProductVariantsWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: TSizes.spaceBtwInputFields),
 
+                // Alert Stock
+                TextFormField(
+                  controller: alertStockController,
+                  decoration: const InputDecoration(
+                    labelText: 'Alert Stock *',
+                    hintText: '0',
+                    prefixIcon: Icon(Iconsax.warning_2),
+                    helperText: 'Stock level to trigger low stock alert',
+                  ),
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Alert stock is required';
+                    }
+                    if (int.tryParse(value) == null) {
+                      return 'Enter valid alert stock quantity';
+                    }
+                    if (int.parse(value) < 0) {
+                      return 'Alert stock cannot be negative';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: TSizes.spaceBtwInputFields),
+
                 // Visibility Toggle
                 ValueListenableBuilder<bool>(
                   valueListenable: isVisibleNotifier,
@@ -463,15 +558,16 @@ class ProductVariantsWidget extends StatelessWidget {
                   buyPrice: double.parse(buyPriceController.text.trim()),
                   sellPrice: double.parse(sellPriceController.text.trim()),
                   stock: isEditing ? int.parse(stockController.text.trim()) : 0,
+                  alertStock: int.parse(alertStockController.text.trim()),
                   isVisible: isVisibleNotifier.value,
                 );
 
                 if (isEditing) {
-                  // For editing, we'll add to unsaved list and handle save later
-                  controller.addVariantToUnsaved(newVariant);
+                  // For editing, update in database immediately
+                  await controller.addVariantToUnsaved(newVariant);
                 } else {
                   // For new variants, add to unsaved list
-                  controller.addVariantToUnsaved(newVariant);
+                  await controller.addVariantToUnsaved(newVariant);
                 }
 
                 Navigator.of(context).pop();

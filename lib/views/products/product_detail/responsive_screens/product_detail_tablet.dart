@@ -20,10 +20,10 @@ class ProductDetailTablet extends StatelessWidget {
     // Use a separate method to initialize variants to make it cleaner
     _initializeVariantsIfNeeded(controller);
 
-    return Scaffold(
+    return const Scaffold(
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(TSizes.md),
+          padding: EdgeInsets.all(TSizes.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -36,34 +36,34 @@ class ProductDetailTablet extends StatelessWidget {
                     flex: 3,
                     child: BasicInfo(),
                   ),
-                  const SizedBox(width: TSizes.spaceBtwItems),
+                  SizedBox(width: TSizes.spaceBtwItems),
                   // Right column with Thumbnail
                   Expanded(
                     flex: 2,
-                    child: ThumbnailInfo(),
+                    child: ExtraImages(),
                   ),
                 ],
               ),
 
-              const SizedBox(height: TSizes.spaceBtwSections),
+              SizedBox(height: TSizes.spaceBtwSections),
 
               // Brand & Category & visibility
-              const ProductBrandcCategory(),
+              ProductBrandcCategory(),
 
-              const SizedBox(height: TSizes.spaceBtwSections),
+              SizedBox(height: TSizes.spaceBtwSections),
 
               // Product Variants - All products now have variants
-              const ProductVariantsWidget(),
+              ProductVariantsWidget(),
 
-              const SizedBox(height: TSizes.spaceBtwSections),
+              SizedBox(height: TSizes.spaceBtwSections),
 
               // Extra Images
-              const ExtraImages(),
+              ExtraImages(),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: const ProductDetailBottomBar(),
+      bottomNavigationBar: ProductDetailBottomBar(),
     );
   }
 

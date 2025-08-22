@@ -7,6 +7,7 @@ class ProductVariantModel {
   final bool isVisible;
   final String sku;
   final int stock;
+  final int alertStock;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -19,6 +20,7 @@ class ProductVariantModel {
     this.isVisible = true,
     required this.sku,
     this.stock = 0,
+    this.alertStock = 0,
     this.createdAt,
     this.updatedAt,
   });
@@ -37,6 +39,7 @@ class ProductVariantModel {
       isVisible: json['is_visible'] ?? true,
       sku: json['sku'] ?? '',
       stock: json['stock'] ?? 0,
+      alertStock: json['alert_stock'] ?? 0,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
           : null,
@@ -55,6 +58,7 @@ class ProductVariantModel {
       'is_visible': isVisible,
       'sku': sku,
       'stock': stock,
+      'alert_stock': alertStock,
     };
 
     if (variantId != null && isUpdate) {
@@ -73,6 +77,7 @@ class ProductVariantModel {
     bool? isVisible,
     String? sku,
     int? stock,
+    int? alertStock,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -85,6 +90,7 @@ class ProductVariantModel {
       isVisible: isVisible ?? this.isVisible,
       sku: sku ?? this.sku,
       stock: stock ?? this.stock,
+      alertStock: alertStock ?? this.alertStock,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -100,11 +106,12 @@ class ProductVariantModel {
       isVisible: true,
       sku: '',
       stock: 0,
+      alertStock: 0,
     );
   }
 
   @override
   String toString() {
-    return 'ProductVariantModel(variantId: $variantId, productId: $productId, variantName: $variantName, buyPrice: $buyPrice, sellPrice: $sellPrice, isVisible: $isVisible, sku: $sku, stock: $stock)';
+    return 'ProductVariantModel(variantId: $variantId, productId: $productId, variantName: $variantName, buyPrice: $buyPrice, sellPrice: $sellPrice, isVisible: $isVisible, sku: $sku, stock: $stock, alertStock: $alertStock)';
   }
 }

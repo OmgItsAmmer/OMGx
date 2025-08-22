@@ -97,17 +97,19 @@ class BrandRepository {
     }
   }
 
-  Future<void> deleteBrandFromTable(int brandId) async {
+  Future<bool> deleteBrandFromTable(int brandId) async {
     try {
-      await supabase.from('brands').delete().match({'brand_id': brandId});
+      await supabase.from('brands').delete().match({'brandID': brandId});
 
       TLoaders.successSnackBar(
           title: "Success", message: "Brand deleted successfully");
+      return true;
     } catch (e) {
       if (kDebugMode) {
         TLoaders.errorSnackBar(title: 'Brand Repo', message: e.toString());
         print("Error deleting brand: $e");
       }
+      return false;
     }
   }
 }

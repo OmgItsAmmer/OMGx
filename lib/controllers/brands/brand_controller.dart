@@ -235,18 +235,21 @@ class BrandController extends GetxController {
       final brandName = brandToRemove.brandName;
 
       // Call the repository function to delete from the database
-      await brandRepository.deleteBrandFromTable(brandId);
+      final isDeleted = await brandRepository.deleteBrandFromTable(brandId);
+      if (!isDeleted) {
+        throw Exception("Failed to delete brand from the database");
+      } else {
+        // Remove brand from local list
+        allBrands.removeWhere((brand) => brand.brandID == brandId);
 
-      // Remove brand from local list
-      allBrands.removeWhere((brand) => brand.brandID == brandId);
+        // Force UI update
+        update();
 
-      // Force UI update
-      update();
-
-      // Show success message
-      TLoaders.successSnackBar(
-          title: "Success",
-          message: "${brandName ?? 'Brand'} deleted successfully");
+        // Show success message
+        TLoaders.successSnackBar(
+            title: "Success",
+            message: "${brandName ?? 'Brand'} deleted successfully");
+      }
     } catch (e) {
       if (kDebugMode) {
         print("Error deleting brand: $e");

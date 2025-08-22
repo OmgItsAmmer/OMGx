@@ -105,6 +105,7 @@ class OrderModel {
   final String orderDate;
   final double subTotal;
   final String status;
+  final String? shippingMethod;
   final String? saletype;
   final int? addressId;
   final int? userId;
@@ -125,6 +126,7 @@ class OrderModel {
     required this.orderDate,
     required this.subTotal,
     required this.status,
+    this.shippingMethod,
     this.saletype,
     this.addressId,
     this.userId,
@@ -146,6 +148,7 @@ class OrderModel {
         orderDate: DateTime.now().toIso8601String(),
         subTotal: 0.0,
         status: "pending",
+        shippingMethod: null,
         saletype: null,
         addressId: null,
         userId: null,
@@ -167,6 +170,7 @@ class OrderModel {
       'order_date': orderDate,
       'sub_total': subTotal,
       'status': status,
+      'shipping_method': shippingMethod,
       'saletype': saletype,
       'address_id': addressId,
       'user_id': userId,
@@ -208,6 +212,7 @@ class OrderModel {
       orderDate: formattedDate,
       subTotal: (json['sub_total'] as num?)?.toDouble() ?? 0.0,
       status: json['status'] as String? ?? 'pending',
+      shippingMethod: json['shipping_method'] as String?,
       saletype: json['saletype'] as String?, // can be null
       addressId: json['address_id'] as int?,
       userId: json['user_id'] as int?, // nullable user_id
@@ -232,6 +237,7 @@ class OrderModel {
     String? orderDate,
     double? subTotal,
     String? status,
+    String? shippingMethod,
     String? saletype,
     int? addressId,
     int? userId,
@@ -252,7 +258,8 @@ class OrderModel {
       orderDate: orderDate ?? this.orderDate,
       subTotal: subTotal ?? this.subTotal,
       status: status ?? this.status,
-      saletype: saletype ?? this.saletype,
+      shippingMethod: shippingMethod ?? this.shippingMethod,
+        saletype: saletype ?? this.saletype,
       addressId: addressId ?? this.addressId,
       userId: userId ?? this.userId,
       customerId: customerId ?? this.customerId,

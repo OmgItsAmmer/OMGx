@@ -62,23 +62,26 @@ class ProductVariantsRepository {
   }
 
   // Update an existing variant
-  Future<void> updateVariant(ProductVariantModel variant) async {
+  Future<bool> updateVariant(ProductVariantModel variant) async {
     try {
       int? variantId = variant.variantId;
       if (variantId == null) {
         throw Exception('Variant ID is required for update.');
       }
 
-      await supabase
+      final response = await supabase
           .from('product_variants')
           .update(variant.toJson(isUpdate: true))
-          .eq('variant_id', variantId);
+          .eq('variant_id', variantId)
+          .select();
+
+      return response.isNotEmpty;
     } on PostgrestException catch (e) {
       TLoaders.errorSnackBar(title: 'Variant Repo', message: e.message);
-      rethrow;
+      return false;
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Variant Repo', message: e.toString());
-      rethrow;
+      return false;
     }
   }
 
@@ -228,6 +231,46 @@ class ProductVariantsRepository {
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Variant Repo', message: e.toString());
       return [];
+    }
+  }
+
+  // Get variants that are below their alert stock level
+  Future<List<ProductVariantModel>> getVariantsBelowAlertStock(
+      int productId) async {
+    try {
+      // First get all variants for the product
+      final data = await supabase
+          .from('product_variants')
+          .select()
+          .eq('product_id', productId);
+
+      // Filter variants where stock is less than or equal to alert_stock
+      final variantList = data.map((item) {
+        return ProductVariantModel.fromJson(item);
+      }).toList();
+
+      // Filter in Dart code since Supabase doesn't support column-to-column comparison in filter
+      final lowStockVariants = variantList
+          .where((variant) =>
+              variant.stock <= variant.alertStock && variant.alertStock > 0)
+          .toList();
+
+      return lowStockVariants;
+    } catch (e) {
+      TLoaders.errorSnackBar(title: 'Variant Repo', message: e.toString());
+      return [];
+    }
+  }
+
+  // Update variant alert stock
+  Future<void> updateVariantAlertStock(int variantId, int alertStock) async {
+    try {
+      await supabase
+          .from('product_variants')
+          .update({'alert_stock': alertStock}).eq('variant_id', variantId);
+    } catch (e) {
+      TLoaders.errorSnackBar(title: 'Variant Repo', message: e.toString());
+      rethrow;
     }
   }
 }

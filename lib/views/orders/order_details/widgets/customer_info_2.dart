@@ -10,6 +10,7 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
 import '../../../../Models/address/address_model.dart';
+import '../../../../Models/orders/order_item_model.dart';
 import '../../../../controllers/customer/customer_controller.dart';
 import '../../../../controllers/salesman/salesman_controller.dart';
 import '../../../../utils/constants/enums.dart';
@@ -24,6 +25,7 @@ class CustomerInfo extends StatelessWidget {
     required this.email,
     required this.phoneNumber,
     required this.isLoading,
+    required this.order,
   });
 
   final MediaCategory mediaCategory;
@@ -33,15 +35,16 @@ class CustomerInfo extends StatelessWidget {
   final String email;
   final String phoneNumber;
   final bool isLoading;
+  final OrderModel order;
 
   @override
   Widget build(BuildContext context) {
     final MediaController mediaController = Get.find<MediaController>();
     final AddressController addressController = Get.find<AddressController>();
-    final CustomerController customerController =
-        Get.find<CustomerController>();
-    final SalesmanController salesmanController =
-        Get.find<SalesmanController>();
+    // final CustomerController customerController =
+    //     Get.find<CustomerController>();
+    // final SalesmanController salesmanController =
+    //     Get.find<SalesmanController>();
 
     return TRoundedContainer(
       padding: const EdgeInsets.all(TSizes.defaultSpace),
@@ -75,7 +78,7 @@ class CustomerInfo extends StatelessWidget {
                     FutureBuilder<String?>(
                       future: fullName != 'Not Found'
                           ? mediaController.fetchMainImage(
-                              0, // Using 0 as placeholder - adjust based on your vendor ID system
+                              order.customerId ?? 0,
                               mediaCategory.toString().split('.').last,
                             )
                           : Future.value(null),
@@ -167,73 +170,93 @@ class CustomerInfo extends StatelessWidget {
 
                 // Address section
                 if (showAddress) ...[
-                  const SizedBox(height: TSizes.spaceBtwSections),
-                  const Divider(),
-                  const SizedBox(height: TSizes.spaceBtwItems),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Iconsax.location,
-                        size: 20,
-                        color: TColors.primary,
-                      ),
-                      const SizedBox(width: TSizes.spaceBtwItems),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                  order.shippingMethod == 'pickup'
+                      ? const SizedBox.shrink()
+                      : Column(
                           children: [
-                            Text(
-                              'Shipping Address',
-                              style: Theme.of(context).textTheme.titleMedium,
+                            const SizedBox(height: TSizes.spaceBtwSections),
+                            const Divider(),
+                            const SizedBox(height: TSizes.spaceBtwItems),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(
+                                  Iconsax.location,
+                                  size: 20,
+                                  color: TColors.primary,
+                                ),
+                                const SizedBox(width: TSizes.spaceBtwItems),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Shipping Address',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      //name , location and phone number
+
+                                      Obx(() {
+                                        if (addressController.isLoading.value) {
+                                          return const TShimmerEffect(
+                                              width: double.infinity,
+                                              height: 40);
+                                        } else if (addressController
+                                                .selectedOrderAddress.value ==
+                                            AddressModel.empty()) {
+                                          return Text(
+                                            'No address found',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium,
+                                          );
+                                        } else {
+                                          final address = addressController
+                                              .selectedOrderAddress.value;
+                                          return Column(
+                                            children: [
+                                              Text(
+                                                //prefix icon
+
+                                                address.fullName,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyMedium,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              const SizedBox(
+                                                  height: TSizes.spaceBtwItems),
+                                              Text(
+                                                address.location,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyMedium,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              const SizedBox(
+                                                  height: TSizes.spaceBtwItems),
+                                              Text(
+                                                address.phoneNumber ?? '',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyMedium,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ],
+                                          );
+                                        }
+                                      }),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 4),
-                            //name , location and phone number
-                             
-                            Obx(() {
-                              if (addressController.isLoading.value) {
-                                return const TShimmerEffect(
-                                    width: double.infinity, height: 40);
-                              } else if (addressController
-                                  .selectedOrderAddress.value == AddressModel.empty()) {
-                                return Text(
-                                  'No address found',
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                );
-                              } else {
-                                final address =
-                                    addressController.selectedOrderAddress.value;
-                                return Column(
-                                  children: [
-                                    Text(
-                                      //prefix icon
-                                      
-                                      address.fullName,
-                                      style: Theme.of(context).textTheme.bodyMedium,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: TSizes.spaceBtwItems),
-                                    Text(
-                                      address.location,
-                                      style: Theme.of(context).textTheme.bodyMedium,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: TSizes.spaceBtwItems),
-                                    Text(
-                                      address.phoneNumber ?? 'No phone number',
-                                      style: Theme.of(context).textTheme.bodyMedium,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
-                                  
-                                );
-                              }
-                            }),
                           ],
                         ),
-                      ),
-                    ],
-                  ),
                 ],
               ],
             ),

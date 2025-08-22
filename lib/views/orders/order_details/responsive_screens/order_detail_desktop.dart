@@ -82,6 +82,7 @@ class OrderDetailDesktopScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       CustomerInfo(
+                        order: orderModel,
                         mediaCategory: MediaCategory.customers,
                         title: 'Customer',
                         showAddress: true,

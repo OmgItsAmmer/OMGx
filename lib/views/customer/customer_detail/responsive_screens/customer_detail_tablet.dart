@@ -45,34 +45,38 @@ class CustomerDetailTablet extends StatelessWidget {
 
               // Row layout for tablet - customer info side by side
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     child: UserInfo(customerModel: customerModel),
                   ),
-                  const SizedBox(width: TSizes.spaceBtwItems),
+
+                  const SizedBox(width: TSizes.spaceBtwSections),
+
+                  // Orders in full width
                   Expanded(
-                    child: CustomerShippingInfo(customerModel: customerModel),
-                  ),
+                    child: TRoundedContainer(
+                        padding: const EdgeInsets.only(
+                            top: TSizes.sm,
+                            bottom: TSizes.sm,
+                            left: TSizes.sm,
+                            right: TSizes.sm),
+                          
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Orders',
+                              style: Theme.of(context).textTheme.headlineMedium,
+                            ),
+                            const SizedBox(height: TSizes.spaceBtwItems),
+                            const CustomerOrderTable(),
+                          ],
+                        )),
+                  )
                 ],
               ),
-
-              const SizedBox(height: TSizes.spaceBtwSections),
-
-              // Orders in full width
-              TRoundedContainer(
-                  padding: const EdgeInsets.all(TSizes.md),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Orders',
-                        style: Theme.of(context).textTheme.headlineMedium,
-                      ),
-                      const SizedBox(height: TSizes.spaceBtwItems),
-                      const CustomerOrderTable(),
-                    ],
-                  ))
             ],
           ),
         ),

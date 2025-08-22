@@ -64,7 +64,7 @@ class ProductModel {
       'stock_quantity': stockQuantity,
       'brandID': brandID,
       'alert_stock': alertStock,
-      'tag': productTag?.toString().split('.').last, // Convert enum to string
+      'tag': productTag?.name.toUpperCase(), // Convert enum to string
       'ispopular': isPopular,
       'isVisible': isVisible,
     };
@@ -76,7 +76,7 @@ class ProductModel {
     return data;
   }
 
-  // Factory method to create a ProductModel from Supabase response 
+  // Factory method to create a ProductModel from Supabase response
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
       productId: json['product_id'] as int?,
@@ -92,11 +92,8 @@ class ProductModel {
           : null,
       brandID: json['brandID'] as int?,
       alertStock: json['alert_stock'] as int?,
-      productTag: json['tag'] != null
-          ? ProductTag.values.firstWhere(
-              (e) => e.toString().split('.').last == json['tag'],
-              orElse: () => ProductTag.none, // Default or error handling
-            )
+      productTag: json['tag'] != null && json['tag'].toString().isNotEmpty
+          ? _parseProductTag(json['tag'].toString())
           : null,
       isPopular: json['ispopular'] as bool? ?? false,
       isVisible: json['isVisible'] as bool? ?? false,
@@ -136,5 +133,16 @@ class ProductModel {
       isPopular: isPopular ?? this.isPopular,
       isVisible: isVisible ?? this.isVisible,
     );
+  }
+
+  // Helper method to safely parse ProductTag from string
+  static ProductTag? _parseProductTag(String tagString) {
+    try {
+      return ProductTag.values.firstWhere(
+        (e) => e.name.toUpperCase() == tagString.toUpperCase(),
+      );
+    } catch (e) {
+      return null;
+    }
   }
 }

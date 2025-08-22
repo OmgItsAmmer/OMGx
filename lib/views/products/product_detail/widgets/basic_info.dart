@@ -59,7 +59,7 @@ class BasicInfo extends StatelessWidget {
                     textInputAction: TextInputAction.next,
                     onFieldSubmitted: (_) {
                       // Force focus to the serial numbers toggle
-                     // productController.serialNumbersFocusNode.requestFocus();
+                      // productController.serialNumbersFocusNode.requestFocus();
                     },
                     validator: (value) => TValidator.validateEmptyText(
                         'Product description', value),
@@ -108,8 +108,7 @@ class BasicInfo extends StatelessWidget {
                   //   );
                   // }),
 
-
-                //  const SizedBox(height: TSizes.spaceBtwInputFields),
+                  //  const SizedBox(height: TSizes.spaceBtwInputFields),
 
                   // // Pricing & Stock Row
                   // Row(
@@ -136,7 +135,7 @@ class BasicInfo extends StatelessWidget {
                   //                 labelText: 'Base Price',
                   //                 hintText: 'Basic price of product',
                   //               ),
-                              
+
                   //             ),
                   //           ),
                   //         ),
@@ -163,7 +162,7 @@ class BasicInfo extends StatelessWidget {
                   //                 labelText: 'Sale Price',
                   //                 hintText: 'Selling price of product',
                   //               ),
-                               
+
                   //             ),
                   //           ),
                   //         )
@@ -171,55 +170,84 @@ class BasicInfo extends StatelessWidget {
                   // ),
                   const SizedBox(height: TSizes.spaceBtwInputFields),
 
+                  // Price Range Section
+                  const TSectionHeading(title: 'Price Range'),
+                  const SizedBox(height: TSizes.spaceBtwItems),
 
-                  //dropdown with enums
+                  //Price Range Row with two separate fields
                   Row(
                     children: [
-                      //Price Range Textfield with validator to put it like 3000-4000 etc
+                      // Starting Price Field
                       Expanded(
                         child: TextFormField(
-                          
-                          controller: productController.priceRange,
-                       //   focusNode: productController.priceRangeFocusNode,
+                          controller: productController.startingPrice,
                           textInputAction: TextInputAction.next,
-                        //  onFieldSubmitted: (_) => productController.productTagFocusNode.requestFocus(),
-                        //make validator to check if the value is like 3000-4000 etc
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Price range is required';
+                              return 'Starting price is required';
                             }
-                            //there should be - between the two numbers
-                            if (!value.contains('-')) {
-                              return 'Price range must be in the format 3000-4000';
-                            }
-                            //there shouldnt be any hard limit on no of digits but the two numbers should be numbers
-                            if (!RegExp(r'^\d{4}-\d{4}$').hasMatch(value)) {
-                              return 'Price range must be in the format 3000-4000';
-                            }
-                            //the two numbers should be numbers
-                            if (!RegExp(r'^\d{4}-\d{4}$').hasMatch(value)) {
-                              return 'Price range must be in the format 3000-4000'; 
-                            } 
                             return null;
                           },
                           decoration: const InputDecoration(
                             prefix: Text('Rs '),
-                            
-                            labelText: 'Price range',
-                            hintText: 'Enter price range (3000-4000)',
+                            labelText: 'Starting Price',
+                            hintText: '3000',
                           ),
                         ),
                       ),
 
+                      // Separator
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: TSizes.sm),
+                        child: Text(
+                          '-',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+
+                      // Ending Price Field
+                      Expanded(
+                        child: TextFormField(
+                          controller: productController.endingPrice,
+                          textInputAction: TextInputAction.next,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Ending price is required';
+                            }
+                            return null;
+                          },
+                          decoration: const InputDecoration(
+                            prefix: Text('Rs '),
+                            labelText: 'Ending Price',
+                            hintText: '4000',
+                          ),
+                        ),
+                      ),
 
                       const SizedBox(width: TSizes.spaceBtwInputFields),
 
                       Expanded(
                         child: DropdownButtonFormField<ProductTag>(
                           value: productController.productTag.value,
-                          items: ProductTag.values.map((e) => DropdownMenuItem(value: e, child: Text(e.name))).toList(),
-                          onChanged: (value) {
-                            productController.productTag.value = value!;
+                          items: ProductTag.values
+                              .map((e) => DropdownMenuItem(
+                                  value: e, child: Text(e.name)))
+                              .toList(),
+                          onChanged: ( value) {
+                            try {
+                              productController.productTag.value = value!;
+                            } catch (e) {
+                              print('error: $e');
+                            }
                           },
                           decoration: const InputDecoration(
                             labelText: 'Tag',
@@ -230,45 +258,44 @@ class BasicInfo extends StatelessWidget {
                     ],
                   ),
 
+                  // Display merged price range (read-only)
+                  // const SizedBox(height: TSizes.spaceBtwInputFields),
 
                   const SizedBox(height: TSizes.spaceBtwInputFields),
-                   Row(
+                  Row(
                     children: [
-                     //two enable/disable buttons isPopular and isVisible
+                      //two enable/disable buttons isPopular and isVisible
 
-                     //isPopular
-                    // isPopular toggle button
-                    Expanded(
-                      child: Obx(
-                        () => SwitchListTile(
-                          title: const Text('Popular Product'),
-                          value: productController.isPopular.value,
-                          onChanged: (value) {
-                            productController.isPopular.value = value;
-                          },
-                          contentPadding: EdgeInsets.zero,
+                      //isPopular
+                      // isPopular toggle button
+                      Expanded(
+                        child: Obx(
+                          () => SwitchListTile(
+                            title: const Text('Popular Product'),
+                            value: productController.isPopular.value,
+                            onChanged: (value) {
+                              productController.isPopular.value = value;
+                            },
+                            contentPadding: EdgeInsets.zero,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: TSizes.spaceBtwInputFields),
-                    // isVisible toggle button
-                    Expanded(
-                      child: Obx(
-                        () => SwitchListTile(
-                          title: const Text('Visible Product'),
-                          value: productController.isVisible.value,
-                          onChanged: (value) {
-                            productController.isVisible.value = value;
-                          },
-                          contentPadding: EdgeInsets.zero,
+                      const SizedBox(width: TSizes.spaceBtwInputFields),
+                      // isVisible toggle button
+                      Expanded(
+                        child: Obx(
+                          () => SwitchListTile(
+                            title: const Text('Visible Product'),
+                            value: productController.isVisible.value,
+                            onChanged: (value) {
+                              productController.isVisible.value = value;
+                            },
+                            contentPadding: EdgeInsets.zero,
+                          ),
                         ),
                       ),
-                    ),
-                     
-                  
                     ],
                   )
-                  
 
                   // Row(
                   //   children: [
@@ -325,7 +352,7 @@ class BasicInfo extends StatelessWidget {
                   //     ),
                   //   ],
                   // ),
-                 // const SizedBox(height: TSizes.spaceBtwSections),
+                  // const SizedBox(height: TSizes.spaceBtwSections),
                 ],
               ),
             ),

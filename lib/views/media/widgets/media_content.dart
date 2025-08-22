@@ -1,4 +1,3 @@
-import 'package:ecommerce_dashboard/Models/image/combined_image_model.dart';
 import 'package:ecommerce_dashboard/Models/image/image_model.dart';
 import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
 import 'package:ecommerce_dashboard/common/widgets/loaders/loader_animation.dart';
@@ -11,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:path/path.dart';
 
 import '../../../common/widgets/images/t_rounded_image.dart';
 import '../../../utils/constants/colors.dart';
@@ -398,7 +396,12 @@ class MediaContent extends StatelessWidget {
                         height: TSizes.spaceBtwItems,
                       ),
                       TextButton(
-                          onPressed: () {},
+                          onPressed: () async {
+                            try {
+                              await mediaController.deleteImage(image: image);
+                              Navigator.of(context).pop();
+                            } catch (_) {}
+                          },
                           child: Text(
                             'Delete Image',
                             style: Theme.of(context)
@@ -417,56 +420,7 @@ class MediaContent extends StatelessWidget {
     );
   }
 
-  Future<Widget> _buildListWithCheckbox(
-    ImageModel image,
-  ) async {
-    final MediaController mediaController = Get.find<MediaController>();
-
-    return Stack(
-      children: [
-        TRoundedImage(
-          imageurl: await mediaController.getImageFromBucket(
-                  image.folderType ?? '', image.filename ?? '') ??
-              '',
-          width: 140,
-          height: 140,
-          padding: const EdgeInsets.all(TSizes.sm),
-          backgroundColor: TColors.primaryBackground,
-          isNetworkImage: true,
-        ),
-        // Only show checkbox when allowSelection is true
-        if (allowSelection)
-          Positioned(
-            top: TSizes.md,
-            right: TSizes.md,
-            child: Obx(
-              () => Checkbox(
-                value: image.isSelected.value,
-                onChanged: (selected) {
-                  if (selected != null) {
-                    image.isSelected.value = selected;
-                    if (selected) {
-                      if (!allowMultipleSelection) {
-                        // If multiple selection is not allowed, uncheck others
-                        for (var otherImage in selectedImages) {
-                          if (otherImage != image) {
-                            otherImage.isSelected.value = false;
-                          }
-                        }
-                        selectedImages.clear();
-                      }
-                      selectedImages.add(image);
-                    } else {
-                      selectedImages.remove(image);
-                    }
-                  }
-                },
-              ),
-            ),
-          ),
-      ],
-    );
-  }
+  // Unused helper removed
 
   Widget buildAddSelectedImageButton(BuildContext context,
       {bool isMobile = false}) {

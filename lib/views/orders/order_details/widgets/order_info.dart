@@ -149,10 +149,9 @@ class OrderInfo extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Date'),
+                          const Text('Order ID'),
                           Text(
-                            DateFormat('dd-MM-yyyy')
-                                .format(DateTime.parse(orderModel.orderDate)),
+                            '#${orderModel.orderId}',
                             style: Theme.of(context).textTheme.bodyLarge,
                           ),
                         ],

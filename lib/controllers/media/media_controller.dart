@@ -105,8 +105,7 @@ class MediaController extends GetxController {
     bool allowSelection = true,
     bool multipleSelection = false,
   }) async {
-    // Store current state to restore later
-    final previousSelectedImages = List<ImageModel>.from(selectedImages);
+    // Store current state to restore later (not currently used)
 
     // Clear selected images for this operation
     selectedImages.clear();
@@ -610,5 +609,48 @@ class MediaController extends GetxController {
   // Call this when user changes (in login controller or when changing users)
   void refreshUserImage() {
     clearProfileImageCache();
+  }
+
+  //=========================================================================
+  // DELETE IMAGE (bucket + image_entity + images) and update local state
+  //=========================================================================
+  Future<void> deleteImage({
+    required ImageModel image,
+  }) async {
+    try {
+      isLoading.value = true;
+
+      final String bucketName = image.folderType ?? '';
+      final String filename = image.filename ?? '';
+
+      if (bucketName.isEmpty || filename.isEmpty) {
+        throw Exception('Invalid image metadata for deletion.');
+      }
+
+      await mediaRepository.deleteImageAndReferences(
+        imageId: image.imageId,
+        bucketName: bucketName,
+        filename: filename,
+      );
+
+      // Remove from local caches/state
+      allImages.removeWhere((img) => (img.imageId == image.imageId));
+      selectedImages.removeWhere((img) => (img.imageId == image.imageId));
+      multipleDisplayImages
+          .removeWhere((ownerImg) => ownerImg.image.imageId == image.imageId);
+
+      if (displayImage.value?.imageId == image.imageId) {
+        displayImage.value = null;
+        displayImageOwner.value = null;
+      }
+
+      TLoaders.successSnackBar(
+          title: 'Deleted', message: 'Image deleted successfully');
+    } catch (e) {
+      TLoaders.errorSnackBar(title: 'Delete Failed', message: e.toString());
+      rethrow;
+    } finally {
+      isLoading.value = false;
+    }
   }
 }

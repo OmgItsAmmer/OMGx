@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../../../common/widgets/containers/rounded_container.dart';
-import '../../../../common/widgets/loaders/tloaders.dart';
 import '../../../../controllers/product/product_controller.dart';
 import '../../../../utils/constants/colors.dart';
 import '../../../../utils/constants/sizes.dart';

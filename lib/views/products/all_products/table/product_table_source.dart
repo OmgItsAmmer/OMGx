@@ -49,19 +49,19 @@ class ProductRow extends DataTableSource {
                 .apply(color: TColors.primary),
           )),
           DataCell(Text(
-            product.basePrice?.toString() ?? '',
+            product.priceRange?.toString() ?? '',
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
                 .apply(color: TColors.primary),
           )),
-          DataCell(Text(
-            product.salePrice?.toString() ?? '',
-            style: Theme.of(Get.context!)
-                .textTheme
-                .bodyLarge!
-                .apply(color: TColors.primary),
-          )),
+          // DataCell(Text(
+          //   product.salePrice?.toString() ?? '',
+          //   style: Theme.of(Get.context!)
+          //       .textTheme
+          //       .bodyLarge!
+          //       .apply(color: TColors.primary),
+          // )),
           DataCell(Text(
             product.stockQuantity?.toString() ?? '',
             style: Theme.of(Get.context!)

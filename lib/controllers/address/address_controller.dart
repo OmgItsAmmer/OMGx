@@ -147,5 +147,16 @@ class AddressController extends GetxController {
     }
   }
 
+  void clearSelectedOrderAddress() {  
+    try {
+      selectedOrderAddress.value = AddressModel.empty();
+    } catch (e) {
+      if (kDebugMode) {
+        TLoaders.errorSnackBar(title: e.toString());
+        print(e);
+      }
+    }
+  }
+
  
 }

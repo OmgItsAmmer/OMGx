@@ -5,6 +5,7 @@ import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:ecommerce_dashboard/views/installments/refund/installment_refund_report.dart';
 import 'package:ecommerce_dashboard/views/installments/table/installment_table.dart';
 import 'package:ecommerce_dashboard/views/orders/order_details/widgets/customer_info.dart';
+import 'package:ecommerce_dashboard/views/orders/order_details/widgets/customer_info_2.dart';
 import 'package:ecommerce_dashboard/views/orders/order_details/widgets/oorder_transaction.dart';
 import 'package:ecommerce_dashboard/views/orders/order_details/widgets/order_info.dart';
 import 'package:ecommerce_dashboard/views/orders/order_details/widgets/order_items.dart';
@@ -81,7 +82,8 @@ class OrderDetailTabletScreen extends StatelessWidget {
                   flex: 2,
                   child: Column(
                     children: [
-                      UserInfo(
+                      CustomerInfo(
+                        order: orderModel,
                         mediaCategory: MediaCategory.customers,
                         title: 'Customer',
                         showAddress: true,
@@ -92,22 +94,24 @@ class OrderDetailTabletScreen extends StatelessWidget {
                             .selectedCustomer.value.phoneNumber,
                         isLoading: customerController.isLoading.value,
                       ),
-                      const SizedBox(height: TSizes.spaceBtwItems),
-                      UserInfo(
-                        mediaCategory: MediaCategory.salesman,
-                        title: 'Salesman',
-                        showAddress: false,
-                        fullName: salesmanController
-                                .selectedSalesman?.value.fullName ??
-                            'Not Found',
-                        email:
-                            salesmanController.selectedSalesman?.value.email ??
-                                'Not Found',
-                        phoneNumber: salesmanController
-                                .selectedSalesman?.value.phoneNumber ??
-                            'Not Found',
-                        isLoading: salesmanController.isLoading.value,
-                      ),
+                      if (orderModel.salesmanId != null) ...[
+                        const SizedBox(height: TSizes.spaceBtwItems),
+                        UserInfo(
+                          mediaCategory: MediaCategory.salesman,
+                          title: 'Salesman',
+                          showAddress: false,
+                          fullName: salesmanController
+                                  .selectedSalesman?.value.fullName ??
+                              'Not Found',
+                          email: salesmanController
+                                  .selectedSalesman?.value.email ??
+                              'Not Found',
+                          phoneNumber: salesmanController
+                                  .selectedSalesman?.value.phoneNumber ??
+                              'Not Found',
+                          isLoading: salesmanController.isLoading.value,
+                        ),
+                      ],
                     ],
                   ),
                 ),

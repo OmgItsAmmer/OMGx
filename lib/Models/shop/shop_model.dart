@@ -3,6 +3,7 @@ class ShopModel {
   final String shopname;
   final double taxrate;
   final double shippingPrice;
+  final bool? isShippingEnable;
   final double? thresholdFreeShipping; // Optional field
   final String? softwareCompanyName; // Software company name
   final String? softwareWebsiteLink; // Software website link
@@ -13,6 +14,7 @@ class ShopModel {
     required this.shopname,
     required this.taxrate,
     required this.shippingPrice,
+    this.isShippingEnable,
     this.thresholdFreeShipping,
     this.softwareCompanyName,
     this.softwareWebsiteLink,
@@ -25,6 +27,7 @@ class ShopModel {
         shopname: "",
         taxrate: 0.0,
         shippingPrice: 0.0,
+        isShippingEnable: false,
         thresholdFreeShipping: null,
         softwareCompanyName: null,
         softwareWebsiteLink: null,
@@ -38,6 +41,7 @@ class ShopModel {
       'shopname': shopname,
       'taxrate': taxrate,
       'shipping_price': shippingPrice,
+      'is_shipping_enable': isShippingEnable,   
       'threshold_free_shipping': thresholdFreeShipping,
       'software_company_name': softwareCompanyName,
       'software_website_link': softwareWebsiteLink,
@@ -48,10 +52,11 @@ class ShopModel {
   // Factory method to create a ShopModel from a JSON object
   factory ShopModel.fromJson(Map<String, dynamic> json) {
     return ShopModel(
-      shopId: json['shop_id'] as int,
+      shopId: json['shop_id'] as int, 
       shopname: json['shopname'] as String,
       taxrate: (json['taxrate'] as num).toDouble(), // Convert num to double
       shippingPrice: (json['shipping_price'] as num).toDouble(),
+      isShippingEnable: json['is_shipping_enable'] as bool,
       thresholdFreeShipping: json['threshold_free_shipping'] != null
           ? (json['threshold_free_shipping'] as num).toDouble()
           : null,
@@ -63,6 +68,6 @@ class ShopModel {
 
   // Static method to create a list of ShopModel from a JSON list
   static List<ShopModel> fromJsonList(List<dynamic> jsonList) {
-    return jsonList.map((json) => ShopModel.fromJson(json)).toList();
+    return jsonList.map((json) => ShopModel.fromJson(json)).toList(); 
   }
 }

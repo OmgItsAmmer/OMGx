@@ -47,7 +47,7 @@ enum MediaCategory {
   vendors,
 }
 
-enum OrderStatus { pending, ready, completed, cancelled }
+enum OrderStatus { pending, processing, ready, completed, cancelled }
 
 enum PurchaseStatus { pending, received, cancelled }
 

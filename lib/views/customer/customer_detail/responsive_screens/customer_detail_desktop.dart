@@ -55,14 +55,14 @@ class CustomerDetailDesktop extends StatelessWidget {
                           UserInfo(
                             customerModel: customerModel,
                           ),
-                          const SizedBox(
-                            height: TSizes.spaceBtwSections,
-                          ),
+                          // const SizedBox(
+                          //   height: TSizes.spaceBtwSections,
+                          // ),
 
-                          //shipping info
-                          CustomerShippingInfo(
-                            customerModel: customerModel,
-                          ),
+                          // //shipping info
+                          // CustomerShippingInfo(
+                          //   customerModel: customerModel,
+                          // ),
                         ],
                       ),
                     ),

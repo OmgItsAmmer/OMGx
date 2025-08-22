@@ -20,41 +20,41 @@ class ProductDetailMobile extends StatelessWidget {
     // Use a separate method to initialize variants to make it cleaner
     _initializeVariantsIfNeeded(controller);
 
-    return Scaffold(
+    return const Scaffold(
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(TSizes.sm),
+          padding: EdgeInsets.all(TSizes.sm),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // All elements stacked vertically for mobile
               // Thumbnail first
-              const ThumbnailInfo(),
+              ExtraImages(),
 
-              const SizedBox(height: TSizes.spaceBtwSections),
+              SizedBox(height: TSizes.spaceBtwSections),
 
               // Basic Info
-              const BasicInfo(),
+              BasicInfo(),
 
-              const SizedBox(height: TSizes.spaceBtwSections),
+              SizedBox(height: TSizes.spaceBtwSections),
 
               // Brand & Category & visibility
-              const ProductBrandcCategory(),
+              ProductBrandcCategory(),
 
-              const SizedBox(height: TSizes.spaceBtwSections),
+              SizedBox(height: TSizes.spaceBtwSections),
 
               // Product Variants - All products now have variants
-              const ProductVariantsWidget(),
+              ProductVariantsWidget(),
 
-              const SizedBox(height: TSizes.spaceBtwSections),
+              SizedBox(height: TSizes.spaceBtwSections),
 
               // Extra Images
-              const ExtraImages(),
+              ExtraImages(),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: const ProductDetailBottomBar(),
+      bottomNavigationBar: ProductDetailBottomBar(),
     );
   }
 

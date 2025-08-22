@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:ecommerce_dashboard/Models/image/image_entity_model.dart';
 import 'package:ecommerce_dashboard/common/widgets/loaders/tloaders.dart';
-import 'package:ecommerce_dashboard/utils/constants/enums.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
@@ -96,7 +95,6 @@ class MediaRepository extends GetxController {
   Future<String?> fetchImageFromBucket(
       String filePath, String bucketName) async {
     try {
-      
       final response = await supabase.storage
           .from(bucketName)
           .createSignedUrl(filePath, 60); // expires in 60 seconds
@@ -334,6 +332,40 @@ class MediaRepository extends GetxController {
         print("❌ fetchImageFromImageTable failed: $e");
       }
       return ImageModel.empty(); // Return null if any error occurs
+    }
+  }
+
+  Future<void> deleteImageAndReferences({
+    required int imageId,
+    required String bucketName,
+    required String filename,
+  }) async {
+    try {
+      // Attempt to remove file from storage bucket (ignore if missing)
+      try {
+        await supabase.storage.from(bucketName).remove([filename]);
+      } catch (e) {
+        if (kDebugMode) {
+          print("⚠️ Storage remove warning for $filename in $bucketName: $e");
+        }
+      }
+
+      // Remove references from image_entity table
+      await supabase.from('image_entity').delete().eq('image_id', imageId);
+
+      // Remove row from images table
+      await supabase.from('images').delete().eq('image_id', imageId);
+
+      if (kDebugMode) {
+        print('✅ Deleted image $imageId and references successfully');
+      }
+    } catch (e) {
+      TLoaders.errorSnackBar(
+          title: 'Delete Image Failed', message: e.toString());
+      if (kDebugMode) {
+        print('❌ deleteImageAndReferences failed: $e');
+      }
+      rethrow;
     }
   }
 }

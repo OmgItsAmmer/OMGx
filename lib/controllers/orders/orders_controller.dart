@@ -182,7 +182,12 @@ class OrderController extends GetxController {
       salesmanController.fetchSalesmanInfo(order.salesmanId ?? -1);
 
       // Fetch customer addresses
-      addressController.fetchOrderAddress(order.addressId ?? -1);
+      if (order.shippingMethod != 'pickup') {
+        addressController.fetchOrderAddress(order.addressId ?? -1);
+      }
+      else {
+        addressController.clearSelectedOrderAddress();
+      }
 
       // Set remaining amount for the order
       orderController.setRemainingAmount(order);
@@ -277,6 +282,102 @@ class OrderController extends GetxController {
     }
   }
 
+  // Future<String> updateStatus(int orderId, String status) async {
+  //   try {
+  //     isStatusLoading.value = true;
+
+  //     // Validate order exists before updating
+  //     int index = allOrders.indexWhere((order) => order.orderId == orderId);
+  //     if (index == -1) {
+  //       throw Exception('Order not found with ID: $orderId');
+  //     }
+
+  //     // Get the original status for comparison
+  //     final originalStatus = allOrders[index].status;
+
+  //     // CRITICAL: Check stock availability BEFORE making any changes
+  //     // If moving from cancelled to another status, validate stock first
+  //     if (originalStatus == 'cancelled' && status != 'cancelled') {
+  //       if (allOrders[index].orderItems != null &&
+  //           allOrders[index].orderItems!.isNotEmpty) {
+  //         // Check if there's enough stock available before allowing status change
+  //         bool hasStock = await orderRepository
+  //             .checkStockAvailability(allOrders[index].orderItems!);
+
+  //         if (!hasStock) {
+  //           TLoaders.errorSnackBar(
+  //               title: 'Insufficient Stock',
+  //               message:
+  //                   'Cannot change order status from cancelled to $status. Some products are out of stock or variants are already sold.');
+  //           return originalStatus; // Return original status if stock check fails
+  //         }
+  //       }
+  //     }
+
+  //     // Update status in database
+  //     await orderRepository.updateStatus(orderId, status);
+
+  //     // If the new status is 'ready', call the Supabase edge function
+  //     if (status == 'ready') {
+  //       try {
+  //         final order = allOrders[index];
+  //         final response = await supabase.functions.invoke(
+  //           'notify-ready',
+  //           body: {
+  //             "new": {
+  //               "order_id": order.orderId,
+  //               "customer_id": order
+  //                   .customerId, // This must exist in your `customers` table
+  //             }
+  //           },
+  //         );
+  //         if (kDebugMode) {
+  //           print('notify-ready response: \\${response.data}');
+  //         }
+  //       } catch (e) {
+  //         if (kDebugMode) {
+  //           print(
+  //               'Error invoking notify-ready edge function: \\${e.toString()}');
+  //         }
+  //       }
+  //     }
+
+  //     // Update the status in allOrders list
+  //     allOrders[index] = allOrders[index].copyWith(status: status);
+  //     allOrders.refresh(); // Notify UI about the update
+
+  //     // Dashboard will auto-update through reactive listeners
+
+  //     // If moving to cancelled and order items exist, handle stock restoration
+  //     if (status == 'cancelled' && originalStatus != 'cancelled') {
+  //       // Make sure order items are available
+  //       if (allOrders[index].orderItems != null &&
+  //           allOrders[index].orderItems!.isNotEmpty) {
+  //         await restoreQuantity(allOrders[index].orderItems);
+  //       }
+  //     }
+  //     // If moving from cancelled to another status, handle adding back quantity
+  //     else if (originalStatus == 'cancelled' && status != 'cancelled') {
+  //       if (allOrders[index].orderItems != null &&
+  //           allOrders[index].orderItems!.isNotEmpty) {
+  //         // Stock was already validated above, now subtract the quantity
+  //         await addBackQuantity(allOrders[index].orderItems);
+  //       }
+  //     }
+
+  //     return status;
+  //   } catch (e) {
+  //     if (kDebugMode) {
+  //       print('Error updating order status: $e');
+  //     }
+  //     TLoaders.errorSnackBar(
+  //         title: 'Status Update Error', message: e.toString());
+  //     return '';
+  //   } finally {
+  //     isStatusLoading.value = false;
+  //   }
+  // }
+
   Future<String> updateStatus(int orderId, String status) async {
     try {
       isStatusLoading.value = true;
@@ -312,28 +413,26 @@ class OrderController extends GetxController {
       // Update status in database
       await orderRepository.updateStatus(orderId, status);
 
-      // If the new status is 'ready', call the Supabase edge function
-      if (status == 'ready') {
-        try {
-          final order = allOrders[index];
-          final response = await supabase.functions.invoke(
-            'notify-ready',
-            body: {
-              "new": {
-                "order_id": order.orderId,
-                "customer_id": order
-                    .customerId, // This must exist in your `customers` table
-              }
-            },
-          );
-          if (kDebugMode) {
-            print('notify-ready response: \\${response.data}');
-          }
-        } catch (e) {
-          if (kDebugMode) {
-            print(
-                'Error invoking notify-ready edge function: \\${e.toString()}');
-          }
+      // Call the generic notification edge function for any status change
+      try {
+        final order = allOrders[index];
+        final response = await supabase.functions.invoke(
+          'status_update', // Update this to your actual edge function name
+          body: {
+            "new": {
+              "order_id": order.orderId,
+              "customer_id": order.customerId,
+              "status": status, // Pass the new status
+            }
+          },
+        );
+        if (kDebugMode) {
+          print('generic-order-notification response: ${response.data}');
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print(
+              'Error invoking generic-order-notification edge function: ${e.toString()}');
         }
       }
 

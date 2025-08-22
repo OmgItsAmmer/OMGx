@@ -16,6 +16,10 @@ class THelperFunctions {
   static Color getOrderStatusColor(OrderStatus value) {
     if (OrderStatus.pending == value) {
       return Colors.blue;
+    } else if (OrderStatus.processing == value) {
+      return Colors.orange;
+    } else if (OrderStatus.ready == value) {
+      return Colors.green;
     } else if (OrderStatus.completed == value) {
       return Colors.green;
     } else if (OrderStatus.cancelled == value) {

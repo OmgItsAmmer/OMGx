@@ -2,6 +2,7 @@ import 'package:ecommerce_dashboard/Models/orders/order_item_model.dart';
 import 'package:ecommerce_dashboard/Models/products/product_model.dart';
 import 'package:ecommerce_dashboard/Models/products/product_variant_model.dart';
 import 'package:ecommerce_dashboard/Models/image/image_entity_model.dart';
+import 'package:ecommerce_dashboard/Models/image/image_model.dart';
 import 'package:ecommerce_dashboard/common/widgets/loaders/tloaders.dart';
 import 'package:ecommerce_dashboard/controllers/brands/brand_controller.dart';
 import 'package:ecommerce_dashboard/controllers/category/category_controller.dart';
@@ -43,6 +44,10 @@ class ProductController extends GetxController {
   RxList<ImageEntityModel> productImages = <ImageEntityModel>[].obs;
   RxBool isLoadingImages = false.obs;
 
+  // Temporary images for new/unsaved products
+  RxList<ImageModel> temporaryImages = <ImageModel>[].obs;
+  RxBool hasTemporaryFeaturedImage = false.obs;
+
   // Store selected Rows
   RxList<bool> selectedRows = <bool>[].obs;
 
@@ -65,6 +70,8 @@ class ProductController extends GetxController {
   final TextEditingController selectedCategoryNameController =
       TextEditingController();
   final TextEditingController priceRange = TextEditingController();
+  final TextEditingController startingPrice = TextEditingController();
+  final TextEditingController endingPrice = TextEditingController();
 
   int selectedBrandId = -1;
   int selectedCategoryId = -1;
@@ -80,11 +87,60 @@ class ProductController extends GetxController {
   // Track if we're in the middle of a variant fetch to prevent loops
   bool _isInVariantFetch = false;
 
-  Rx<ProductTag?> productTag = null.obs;
+  Rx<ProductTag> productTag = ProductTag.none.obs;
 
   RxBool isPopular = false.obs;
 
   RxBool isVisible = false.obs;
+
+  @override
+  void onInit() {
+    setupPriceRangeListeners();
+    super.onInit();
+  }
+
+  // Method to merge starting and ending price into priceRange
+  void mergePriceRange() {
+    final starting = startingPrice.text.trim();
+    final ending = endingPrice.text.trim();
+
+    if (starting.isNotEmpty && ending.isNotEmpty) {
+      priceRange.text = '$starting-$ending';
+    } else if (starting.isNotEmpty) {
+      priceRange.text = starting;
+    } else if (ending.isNotEmpty) {
+      priceRange.text = ending;
+    } else {
+      priceRange.text = '';
+    }
+  }
+
+  // Method to parse priceRange back into starting and ending price fields
+  void parsePriceRange() {
+    final range = priceRange.text.trim();
+    if (range.contains('-')) {
+      final parts = range.split('-');
+      if (parts.length == 2) {
+        startingPrice.text = parts[0].trim();
+        endingPrice.text = parts[1].trim();
+      }
+    } else if (range.isNotEmpty) {
+      // If only one price is provided, put it in starting price
+      startingPrice.text = range;
+      endingPrice.clear();
+    }
+  }
+
+  // Method to set up listeners for automatic price range merging
+  void setupPriceRangeListeners() {
+    startingPrice.addListener(() {
+      mergePriceRange();
+    });
+
+    endingPrice.addListener(() {
+      mergePriceRange();
+    });
+  }
 
   // @override
   // void onInit() {
@@ -105,6 +161,8 @@ class ProductController extends GetxController {
     selectedCategoryNameController.dispose();
     salePrice.dispose();
     priceRange.dispose();
+    startingPrice.dispose();
+    endingPrice.dispose();
     // Dispose focus nodes
     nameFocusNode.dispose();
     descriptionFocusNode.dispose();
@@ -146,6 +204,8 @@ class ProductController extends GetxController {
       selectedCategoryNameController.clear();
       selectedBrandNameController.clear();
       priceRange.clear();
+      startingPrice.clear();
+      endingPrice.clear();
 
       // Clear variants
       if (currentProductVariants.isNotEmpty) {
@@ -154,12 +214,15 @@ class ProductController extends GetxController {
       if (unsavedProductVariants.isNotEmpty) {
         unsavedProductVariants.clear();
       }
-      productTag.value = null;
+      productTag.value = ProductTag.none;
       isPopular.value = false;
       isVisible.value = false;
 
       // Clear product images
       clearProductImages();
+
+      // Clear temporary images
+      clearTemporaryImages();
 
       update(); // Force UI update
     } catch (e) {
@@ -202,8 +265,12 @@ class ProductController extends GetxController {
         return -1;
       }
 
+      // Merge starting and ending price into priceRange
+      mergePriceRange();
+
       // Create the product model with calculated stock from variants
       final totalStock = _calculateTotalStock();
+      print('totalStock: $totalStock');
 
       final productModel = ProductModel(
         productId: null,
@@ -215,7 +282,7 @@ class ProductController extends GetxController {
         alertStock: int.tryParse(alertStock.text.trim()) ?? 0,
         brandID: selectedBrandId,
         categoryId: selectedCategoryId,
-        productTag: productTag.value,
+        productTag: setProductTagtoNull(productTag.value),
         isPopular: isPopular.value,
         isVisible: isVisible.value,
         priceRange: priceRange.text.trim(),
@@ -255,13 +322,12 @@ class ProductController extends GetxController {
       originalBrandId = selectedBrandId;
       originalCategoryId = selectedCategoryId;
 
-      // Save the image
+      // Save temporary images if any
       try {
-        await mediaController.imageAssigner(newProductId,
-            MediaCategory.products.toString().split('.').last, true);
-        debugPrint('Product image uploaded successfully');
+        await saveTemporaryImages();
+        debugPrint('Product images saved successfully');
       } catch (e) {
-        debugPrint('Error uploading image: $e');
+        debugPrint('Error saving images: $e');
       }
 
       // Add to local list
@@ -270,6 +336,9 @@ class ProductController extends GetxController {
 
       // Check for low stock
       await checkLowStock([newProductId]);
+
+      // Check for variant low stock
+      await checkVariantLowStock(newProductId);
 
       // Show success message
       TLoaders.successSnackBar(
@@ -317,8 +386,13 @@ class ProductController extends GetxController {
         return false;
       }
 
+      // Merge starting and ending price into priceRange
+      mergePriceRange();
+
       // Calculate total stock from variants
       final totalStock = _calculateTotalStock();
+
+      print('priceRange: ${productTag.value}');
 
       final productModel = ProductModel(
         productId: productId.value,
@@ -330,7 +404,7 @@ class ProductController extends GetxController {
         alertStock: int.tryParse(alertStock.text.trim()) ?? 0,
         brandID: selectedBrandId,
         categoryId: selectedCategoryId,
-        productTag: productTag.value,
+        productTag: setProductTagtoNull(productTag.value),
         isPopular: isPopular.value,
         isVisible: isVisible.value,
         priceRange: priceRange.text.trim(),
@@ -366,13 +440,12 @@ class ProductController extends GetxController {
       originalBrandId = selectedBrandId;
       originalCategoryId = selectedCategoryId;
 
-      // Update the image
+      // Save temporary images if any
       try {
-        await mediaController.imageAssigner(productId.value,
-            MediaCategory.products.toString().split('.').last, true);
-        debugPrint('Product image updated successfully');
+        await saveTemporaryImages();
+        debugPrint('Product images saved successfully');
       } catch (e) {
-        debugPrint('Error updating product image: $e');
+        debugPrint('Error saving images: $e');
       }
 
       // Update local list
@@ -388,6 +461,9 @@ class ProductController extends GetxController {
 
       // Check for low stock
       await checkLowStock([productId.value]);
+
+      // Check for variant low stock
+      await checkVariantLowStock(productId.value);
 
       // Show success message
       TLoaders.successSnackBar(
@@ -436,10 +512,14 @@ class ProductController extends GetxController {
           .firstWhere((category) => category.categoryId == product.categoryId)
           .categoryName;
 
-      productTag.value = product.productTag;
+      productTag.value = product.productTag ?? ProductTag.none;
       isPopular.value = product.isPopular ?? false;
       isVisible.value = product.isVisible ?? false;
       priceRange.text = product.priceRange ?? '';
+
+      // Parse priceRange into starting and ending price fields
+      parsePriceRange();
+
       // Fetch product variants
       if (product.productId != null) {
         fetchProductVariants(product.productId!);
@@ -447,6 +527,11 @@ class ProductController extends GetxController {
 
       // Fetch product images when product is selected
       fetchProductImages();
+
+      // Check for low stock variants when product is loaded
+      if (product.productId != null) {
+        checkVariantLowStock(product.productId!);
+      }
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }
@@ -501,6 +586,9 @@ class ProductController extends GetxController {
       // Update the product stock display
       updateProductStockFromVariants();
 
+      // Check for low stock variants
+      await checkVariantLowStock(productId);
+
       update(['variants_list']);
     } catch (e) {
       debugPrint('Error fetching variants: $e');
@@ -512,27 +600,65 @@ class ProductController extends GetxController {
     }
   }
 
-  // Add variant to unsaved list
-  void addVariantToUnsaved(ProductVariantModel variant) {
+  // Add variant to unsaved list or update existing variant
+  Future<void> addVariantToUnsaved(ProductVariantModel variant) async {
+    bool isUpdate = false;
+
     // Check if variant already exists (for editing)
     if (variant.variantId != null) {
-      // For existing variants, update in currentProductVariants
-      final index = currentProductVariants
-          .indexWhere((v) => v.variantId == variant.variantId);
-      if (index != -1) {
-        currentProductVariants[index] = variant;
+      // For existing variants with ID, update in database and currentProductVariants
+      try {
+        final isUpdated =
+            await productVariantsRepository.updateVariant(variant);
+
+        final index = currentProductVariants
+            .indexWhere((v) => v.variantId == variant.variantId);
+        if (index != -1 && isUpdated) {
+          currentProductVariants[index] = variant;
+        } else {
+          TLoaders.errorSnackBar(
+            title: "Update Error",
+            message: 'Failed to update variant in database.',
+          );
+          return;
+        }
+        isUpdate = true;
+      } catch (e) {
+        debugPrint('Error updating variant in database: $e');
+        TLoaders.errorSnackBar(
+          title: "Update Error",
+          message: 'Failed to update variant in database: ${e.toString()}',
+        );
+        return;
       }
     } else {
-      // For new variants, add to unsaved list
-      unsavedProductVariants.add(variant);
+      // For variants without ID, check if they exist in unsaved list by name
+      final unsavedIndex = unsavedProductVariants
+          .indexWhere((v) => v.variantName == variant.variantName);
+      if (unsavedIndex != -1) {
+        // Update existing unsaved variant
+        unsavedProductVariants[unsavedIndex] = variant;
+        isUpdate = true;
+      } else {
+        // For truly new variants, add to unsaved list
+        unsavedProductVariants.add(variant);
+        isUpdate = false;
+      }
     }
 
     // Update total stock display
     updateProductStockFromVariants();
 
+    // Check for low stock if this is an update to an existing variant
+    if (isUpdate && variant.variantId != null) {
+      await checkVariantLowStock(productId.value);
+    }
+
     TLoaders.successSnackBar(
-      title: "Variant Added",
-      message: 'Variant added successfully. Remember to save changes.',
+      title: isUpdate ? "Variant Updated" : "Variant Added",
+      message: isUpdate
+          ? 'Variant updated successfully in database.'
+          : 'Variant added successfully. Remember to save changes.',
     );
   }
 
@@ -570,6 +696,9 @@ class ProductController extends GetxController {
       // Update stock display
       updateProductStockFromVariants();
 
+      // Check for low stock after saving variants
+      await checkVariantLowStock(productId.value);
+
       TLoaders.successSnackBar(
         title: "Variants Saved",
         message: "$variantCount variants saved to database",
@@ -597,6 +726,9 @@ class ProductController extends GetxController {
       // Update stock display
       updateProductStockFromVariants();
 
+      // Check for low stock after deletion
+      await checkVariantLowStock(productId.value);
+
       TLoaders.successSnackBar(
         title: "Success",
         message: 'Variant deleted successfully',
@@ -613,6 +745,7 @@ class ProductController extends GetxController {
   void deleteUnsavedVariant(String variantName) {
     unsavedProductVariants.removeWhere((v) => v.variantName == variantName);
     updateProductStockFromVariants();
+    // Note: No need to check low stock for unsaved variants as they're not in database yet
   }
 
   // Update the product's stock count based on variants
@@ -713,6 +846,9 @@ class ProductController extends GetxController {
         }
         // Also update the overall product stock display
         updateProductStockFromVariants();
+
+        // Check for low stock after stock update
+        await checkVariantLowStock(productId.value);
       } else {
         // Handle case where variant is not found locally (e.g., fetch from repo if needed)
         // For now, just log a warning or error
@@ -726,12 +862,66 @@ class ProductController extends GetxController {
     }
   }
 
+  // Method to update alert stock for product variants
+  Future<void> updateVariantAlertStock(int variantId, int alertStock) async {
+    try {
+      await productVariantsRepository.updateVariantAlertStock(
+          variantId, alertStock);
+
+      // Update local list
+      final index =
+          currentProductVariants.indexWhere((v) => v.variantId == variantId);
+      if (index != -1) {
+        currentProductVariants[index] =
+            currentProductVariants[index].copyWith(alertStock: alertStock);
+        update(); // Update UI if necessary
+      }
+
+      TLoaders.successSnackBar(
+        title: 'Alert Stock Updated',
+        message: 'Alert stock updated successfully',
+      );
+    } catch (e) {
+      TLoaders.errorSnackBar(
+          title: 'Alert Stock Update Error', message: e.toString());
+    }
+  }
+
   Future<void> checkLowStock(List<int> productIds) async {
     try {
       await productRepository.checkLowStock(productIds);
     } catch (e) {
       if (kDebugMode) {
         print('Low Stock Check Error: $e');
+      }
+    }
+  }
+
+  // Check for variants below alert stock
+  Future<void> checkVariantLowStock(int productId) async {
+    try {
+      final lowStockVariants =
+          await productVariantsRepository.getVariantsBelowAlertStock(productId);
+
+      if (lowStockVariants.isNotEmpty) {
+        for (final variant in lowStockVariants) {
+          if (kDebugMode) {
+            print('Low stock alert for variant: ${variant.variantName}');
+            print(
+                'Current stock: ${variant.stock}, Alert threshold: ${variant.alertStock}');
+          }
+
+          // You can add notification logic here
+          TLoaders.warningSnackBar(
+            title: 'Low Stock Alert',
+            message:
+                'Variant "${variant.variantName}" is below alert stock level (${variant.stock}/${variant.alertStock})',
+          );
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error checking variant low stock: $e');
       }
     }
   }
@@ -750,6 +940,36 @@ class ProductController extends GetxController {
           title: 'Fetch Variants Error', message: e.toString());
       return [];
     }
+  }
+
+  // Get variants below alert stock for a product
+  Future<List<ProductVariantModel>> getVariantsBelowAlertStock(
+      int productId) async {
+    try {
+      return await productVariantsRepository
+          .getVariantsBelowAlertStock(productId);
+    } catch (e) {
+      TLoaders.errorSnackBar(
+          title: 'Fetch Low Stock Variants Error', message: e.toString());
+      return [];
+    }
+  }
+
+  // Get count of variants below alert stock for current product
+  int getLowStockVariantsCount() {
+    final allVariants = <ProductVariantModel>[];
+    allVariants.addAll(currentProductVariants);
+    allVariants.addAll(unsavedProductVariants);
+
+    return allVariants
+        .where((variant) =>
+            variant.stock <= variant.alertStock && variant.alertStock > 0)
+        .length;
+  }
+
+  // Check if a specific variant is below its alert stock
+  bool isVariantBelowAlertStock(ProductVariantModel variant) {
+    return variant.stock <= variant.alertStock && variant.alertStock > 0;
   }
 
   Future<void> handleSave() async {
@@ -855,5 +1075,123 @@ class ProductController extends GetxController {
   /// Clear product images
   void clearProductImages() {
     productImages.clear();
+  }
+
+  //==========================================================================
+  // TEMPORARY IMAGES MANAGEMENT
+  //==========================================================================
+
+  /// Add temporary images (for unsaved products)
+  void addTemporaryImages(List<ImageModel> images) {
+    temporaryImages.addAll(images);
+
+    // If this is the first image and no featured image exists, mark it as featured
+    if (temporaryImages.length == 1 && !hasTemporaryFeaturedImage.value) {
+      hasTemporaryFeaturedImage.value = true;
+    }
+  }
+
+  /// Remove temporary image
+  void removeTemporaryImage(ImageModel image) {
+    temporaryImages.remove(image);
+
+    // If we removed the featured image and there are other images, make the first one featured
+    if (temporaryImages.isNotEmpty && !hasTemporaryFeaturedImage.value) {
+      hasTemporaryFeaturedImage.value = true;
+    }
+  }
+
+  /// Set temporary image as featured
+  void setTemporaryImageAsFeatured(ImageModel image) {
+    hasTemporaryFeaturedImage.value = true;
+  }
+
+  /// Clear temporary images
+  void clearTemporaryImages() {
+    temporaryImages.clear();
+    hasTemporaryFeaturedImage.value = false;
+  }
+
+  /// Save temporary images to database
+  Future<void> saveTemporaryImages() async {
+    if (temporaryImages.isEmpty || productId.value <= 0) return;
+
+    try {
+      // Check if the product has any existing images
+      final hasImages = productImages.isNotEmpty;
+
+      if (!hasImages && temporaryImages.isNotEmpty) {
+        // Product has no images, so mark the first selected image as featured
+        final firstImage = temporaryImages.first;
+        final imageEntityModel = ImageEntityModel(
+          imageEntityId: -1,
+          imageId: firstImage.imageId,
+          isFeatured: true,
+          entityId: productId.value,
+          entityCategory: MediaCategory.products.toString().split('.').last,
+        );
+        await mediaController.mediaRepository
+            .assignNewImage(imageEntityModel.toJson(isUpdate: true));
+
+        // Add remaining images as non-featured
+        for (int i = 1; i < temporaryImages.length; i++) {
+          final imageEntityModel = ImageEntityModel(
+            imageEntityId: -1,
+            imageId: temporaryImages[i].imageId,
+            isFeatured: false,
+            entityId: productId.value,
+            entityCategory: MediaCategory.products.toString().split('.').last,
+          );
+          await mediaController.mediaRepository
+              .assignNewImage(imageEntityModel.toJson(isUpdate: true));
+        }
+      } else {
+        // Product already has images, so add all selected images as non-featured
+        for (var selectedImage in temporaryImages) {
+          final imageEntityModel = ImageEntityModel(
+            imageEntityId: -1,
+            imageId: selectedImage.imageId,
+            isFeatured: false,
+            entityId: productId.value,
+            entityCategory: MediaCategory.products.toString().split('.').last,
+          );
+          await mediaController.mediaRepository
+              .assignNewImage(imageEntityModel.toJson(isUpdate: true));
+        }
+      }
+
+      // Refresh the product images from database to get the correct IDs
+      await fetchProductImages();
+
+      // Clear temporary images after successful save
+      clearTemporaryImages();
+
+      if (kDebugMode) {
+        print('Temporary images saved successfully');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error saving temporary images: $e');
+      }
+      TLoaders.errorSnackBar(
+        title: 'Error',
+        message: 'Failed to save images: $e',
+      );
+    }
+  }
+
+  //==========================================================================
+  // PRODUCT TAG MANAGEMENT
+  //==========================================================================
+
+  ProductTag? setProductTagtoNull(ProductTag? tag) {
+    try {
+      if (tag == ProductTag.none) {
+        return null;
+      }
+      return tag!;
+    } catch (e) {
+      return null;
+    }
   }
 }

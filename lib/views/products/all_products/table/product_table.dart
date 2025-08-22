@@ -76,15 +76,15 @@ class ProductTable extends StatelessWidget {
             tooltip: 'Product Name',
           ),
           const DataColumn2(
-            label: Text('Buy Price'),
+            label: Text('Price-Range'),
             tooltip: 'Buy Price',
             numeric: true,
           ),
-          const DataColumn2(
-            label: Text('Sale Price'),
-            tooltip: 'Sale Price',
-            numeric: true,
-          ),
+          // const DataColumn2(
+          //   label: Text('Sale Price'),
+          //   tooltip: 'Sale Price',
+          //   numeric: true,
+          // ),
           DataColumn2(
             label: const Text('Stock'),
             tooltip: 'Available Stock',

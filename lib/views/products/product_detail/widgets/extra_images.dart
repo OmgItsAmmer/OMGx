@@ -41,29 +41,28 @@ class ExtraImages extends StatelessWidget {
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   // Add Images Button
-                  ElevatedButton.icon(
+                  TCircularIcon(
                     onPressed: () async {
                       await _addMultipleImages(
                           context, mediaController, productController);
                     },
-                    icon: const Icon(Iconsax.add),
-                    label: const Text('Add Images'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: TColors.primary,
-                      foregroundColor: Colors.white,
-                    ),
+                    icon: Iconsax.add,
+                    backgroundColor: TColors.primary,
+                    color: TColors.white,
                   ),
                   const SizedBox(width: TSizes.sm),
                   // Refresh Button
-                  IconButton(
+                  TCircularIcon(
                     onPressed: () {
                       // Trigger refresh of product images
                       productController.update();
                     },
-                    icon: const Icon(Iconsax.refresh),
-                    tooltip: 'Refresh Images',
+                    icon: Iconsax.refresh,
+                    backgroundColor: TColors.primary.withValues(alpha: 0.1),
+                    color: TColors.primary,
                   ),
                 ],
               ),
@@ -106,8 +105,84 @@ class ExtraImages extends StatelessWidget {
               return const TShimmerEffect(width: 200, height: 150);
             }
 
-            final featuredImage = productController.getFeaturedImage();
+            // First check for temporary featured image
+            if (productController.temporaryImages.isNotEmpty &&
+                productController.hasTemporaryFeaturedImage.value) {
+              final featuredImage = productController.temporaryImages.first;
+              return FutureBuilder<String?>(
+                future: _getTemporaryImageUrl(featuredImage, mediaController),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const TShimmerEffect(width: 200, height: 150);
+                  } else if (snapshot.hasError) {
+                    return _buildErrorContainer();
+                  } else if (snapshot.hasData && snapshot.data != null) {
+                    return Stack(
+                      children: [
+                        TRoundedImage(
+                          isNetworkImage: true,
+                          width: 200,
+                          height: 150,
+                          imageurl: snapshot.data!,
+                          fit: BoxFit.cover,
+                        ),
+                        // Featured Badge
+                        Positioned(
+                          top: TSizes.xs,
+                          left: TSizes.xs,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: TSizes.sm,
+                              vertical: TSizes.xs,
+                            ),
+                            decoration: BoxDecoration(
+                              color: TColors.success,
+                              borderRadius: BorderRadius.circular(TSizes.sm),
+                            ),
+                            child: const Text(
+                              'FEATURED',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        // Temporary Badge
+                        Positioned(
+                          top: TSizes.xs,
+                          right: TSizes.xs,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: TSizes.sm,
+                              vertical: TSizes.xs,
+                            ),
+                            decoration: BoxDecoration(
+                              color: TColors.warning,
+                              borderRadius: BorderRadius.circular(TSizes.sm),
+                            ),
+                            child: const Text(
+                              'TEMP',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  } else {
+                    return _buildNoFeaturedImagePlaceholder();
+                  }
+                },
+              );
+            }
 
+            // Then check for saved featured image
+            final featuredImage = productController.getFeaturedImage();
             if (featuredImage != null) {
               return FutureBuilder<String?>(
                 future: _getFeaturedImageUrl(featuredImage, mediaController),
@@ -115,25 +190,7 @@ class ExtraImages extends StatelessWidget {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const TShimmerEffect(width: 200, height: 150);
                   } else if (snapshot.hasError) {
-                    return Container(
-                      width: 200,
-                      height: 150,
-                      decoration: BoxDecoration(
-                        color: TColors.error.withValues(alpha: 0.1),
-                        borderRadius:
-                            BorderRadius.circular(TSizes.borderRadiusMd),
-                        border: Border.all(color: TColors.error),
-                      ),
-                      child: const Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.error, size: 48, color: TColors.error),
-                          SizedBox(height: TSizes.xs),
-                          Text('Error loading image',
-                              style: TextStyle(color: TColors.error)),
-                        ],
-                      ),
-                    );
+                    return _buildErrorContainer();
                   } else if (snapshot.hasData && snapshot.data != null) {
                     return Stack(
                       children: [
@@ -183,6 +240,26 @@ class ExtraImages extends StatelessWidget {
     );
   }
 
+  Widget _buildErrorContainer() {
+    return Container(
+      width: 200,
+      height: 150,
+      decoration: BoxDecoration(
+        color: TColors.error.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(TSizes.borderRadiusMd),
+        border: Border.all(color: TColors.error),
+      ),
+      child: const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error, size: 48, color: TColors.error),
+          SizedBox(height: TSizes.xs),
+          Text('Error loading image', style: TextStyle(color: TColors.error)),
+        ],
+      ),
+    );
+  }
+
   Widget _buildNoFeaturedImagePlaceholder() {
     return Container(
       width: 200,
@@ -204,6 +281,17 @@ class ExtraImages extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<String?> _getTemporaryImageUrl(
+      ImageModel image, MediaController mediaController) async {
+    if (image.filename != null) {
+      return await mediaController.mediaRepository.fetchImageFromBucket(
+        image.filename!,
+        MediaCategory.products.toString().split('.').last,
+      );
+    }
+    return null;
   }
 
   Future<String?> _getFeaturedImageUrl(
@@ -241,11 +329,12 @@ class ExtraImages extends StatelessWidget {
           Obx(() {
             if (productController.isLoadingImages.value) {
               return _buildImageGridShimmer();
-            } else if (productController.productImages.isEmpty) {
+            } else if (productController.productImages.isEmpty &&
+                productController.temporaryImages.isEmpty) {
               return _buildEmptyImagesState();
             } else {
-              return _buildImagesGrid(context, productController.productImages,
-                  mediaController, productController, mediaRepository);
+              return _buildImagesGrid(
+                  context, productController, mediaController, mediaRepository);
             }
           }),
         ],
@@ -300,10 +389,27 @@ class ExtraImages extends StatelessWidget {
 
   Widget _buildImagesGrid(
       BuildContext context,
-      RxList<ImageEntityModel> imageEntities,
-      MediaController mediaController,
       ProductController productController,
+      MediaController mediaController,
       MediaRepository mediaRepository) {
+    // Combine saved and temporary images
+    final allImages = <Widget>[];
+
+    // Add saved images
+    for (final imageEntity in productController.productImages) {
+      allImages.add(_buildSavedImageCard(context, imageEntity, mediaController,
+          productController, mediaRepository));
+    }
+
+    // Add temporary images
+    for (int i = 0; i < productController.temporaryImages.length; i++) {
+      final image = productController.temporaryImages[i];
+      final isFeatured =
+          i == 0 && productController.hasTemporaryFeaturedImage.value;
+      allImages.add(_buildTemporaryImageCard(
+          context, image, isFeatured, productController, mediaController));
+    }
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -313,16 +419,12 @@ class ExtraImages extends StatelessWidget {
         mainAxisSpacing: TSizes.sm,
         childAspectRatio: 1,
       ),
-      itemCount: imageEntities.length,
-      itemBuilder: (context, index) {
-        final imageEntity = imageEntities[index];
-        return _buildImageCard(context, imageEntity, mediaController,
-            productController, mediaRepository);
-      },
+      itemCount: allImages.length,
+      itemBuilder: (context, index) => allImages[index],
     );
   }
 
-  Widget _buildImageCard(
+  Widget _buildSavedImageCard(
       BuildContext context,
       ImageEntityModel imageEntity,
       MediaController mediaController,
@@ -335,27 +437,7 @@ class ExtraImages extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const TShimmerEffect(width: 100, height: 100);
         } else if (snapshot.hasError || !snapshot.hasData) {
-          return Container(
-            decoration: BoxDecoration(
-              color: TColors.error.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(TSizes.borderRadiusSm),
-              border: Border.all(color: TColors.error.withValues(alpha: 0.3)),
-            ),
-            child: const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.broken_image, color: TColors.error, size: 24),
-                  SizedBox(height: TSizes.xs),
-                  Text(
-                    'Failed to load',
-                    style: TextStyle(color: TColors.error, fontSize: 10),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-          );
+          return _buildErrorImageCard();
         }
 
         final imageModel = snapshot.data!;
@@ -368,28 +450,7 @@ class ExtraImages extends StatelessWidget {
             if (urlSnapshot.connectionState == ConnectionState.waiting) {
               return const TShimmerEffect(width: 100, height: 100);
             } else if (urlSnapshot.hasError || !urlSnapshot.hasData) {
-              return Container(
-                decoration: BoxDecoration(
-                  color: TColors.error.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(TSizes.borderRadiusSm),
-                  border:
-                      Border.all(color: TColors.error.withValues(alpha: 0.3)),
-                ),
-                child: const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.cloud_off, color: TColors.error, size: 24),
-                      SizedBox(height: TSizes.xs),
-                      Text(
-                        'Image not found',
-                        style: TextStyle(color: TColors.error, fontSize: 10),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              );
+              return _buildErrorImageCard();
             }
 
             return Stack(
@@ -475,6 +536,139 @@ class ExtraImages extends StatelessWidget {
     );
   }
 
+  Widget _buildTemporaryImageCard(
+      BuildContext context,
+      ImageModel image,
+      bool isFeatured,
+      ProductController productController,
+      MediaController mediaController) {
+    return FutureBuilder<String?>(
+      future: _getTemporaryImageUrl(image, mediaController),
+      builder: (context, urlSnapshot) {
+        if (urlSnapshot.connectionState == ConnectionState.waiting) {
+          return const TShimmerEffect(width: 100, height: 100);
+        } else if (urlSnapshot.hasError || !urlSnapshot.hasData) {
+          return _buildErrorImageCard();
+        }
+
+        return Stack(
+          children: [
+            // Image
+            TRoundedImage(
+              isNetworkImage: true,
+              width: 100,
+              height: 100,
+              imageurl: urlSnapshot.data!,
+              fit: BoxFit.cover,
+            ),
+            // Featured Badge
+            if (isFeatured)
+              Positioned(
+                top: TSizes.xs,
+                left: TSizes.xs,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: TSizes.xs,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: TColors.success,
+                    borderRadius: BorderRadius.circular(TSizes.xs),
+                  ),
+                  child: const Text(
+                    'MAIN',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 8,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            // Temporary Badge
+            Positioned(
+              top: TSizes.xs,
+              right: TSizes.xs,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: TSizes.xs,
+                  vertical: 2,
+                ),
+                decoration: BoxDecoration(
+                  color: TColors.warning,
+                  borderRadius: BorderRadius.circular(TSizes.xs),
+                ),
+                child: const Text(
+                  'TEMP',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 8,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            // Action Buttons
+            Positioned(
+              bottom: TSizes.xs,
+              right: TSizes.xs,
+              child: Column(
+                children: [
+                  // Set as Featured Button
+                  if (!isFeatured)
+                    TCircularIcon(
+                      icon: Iconsax.star,
+                      size: TSizes.iconSm,
+                      backgroundColor: TColors.warning.withValues(alpha: 0.8),
+                      color: Colors.white,
+                      onPressed: () {
+                        productController.setTemporaryImageAsFeatured(image);
+                      },
+                    ),
+                  const SizedBox(height: TSizes.xs),
+                  // Delete Button
+                  TCircularIcon(
+                    icon: Iconsax.trash,
+                    size: TSizes.iconSm,
+                    backgroundColor: TColors.error.withValues(alpha: 0.8),
+                    color: Colors.white,
+                    onPressed: () {
+                      productController.removeTemporaryImage(image);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildErrorImageCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: TColors.error.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(TSizes.borderRadiusSm),
+        border: Border.all(color: TColors.error.withValues(alpha: 0.3)),
+      ),
+      child: const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.broken_image, color: TColors.error, size: 24),
+            SizedBox(height: TSizes.xs),
+            Text(
+              'Failed to load',
+              style: TextStyle(color: TColors.error, fontSize: 10),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _addMultipleImages(
       BuildContext context,
       MediaController mediaController,
@@ -486,57 +680,13 @@ class ExtraImages extends StatelessWidget {
       );
 
       if (mediaController.selectedImages.isNotEmpty) {
-        // Check if the product has any existing images
-        final hasImages = productController.productImages.isNotEmpty;
-
-        if (!hasImages && mediaController.selectedImages.isNotEmpty) {
-          // Product has no images, so mark the first selected image as featured
-          final firstImage = mediaController.selectedImages.first;
-          final imageEntityModel = ImageEntityModel(
-            imageEntityId: -1,
-            imageId: firstImage.imageId,
-            isFeatured: true,
-            entityId: productController.productId.value,
-            entityCategory: MediaCategory.products.toString().split('.').last,
-          );
-          await mediaController.mediaRepository
-              .assignNewImage(imageEntityModel.toJson(isUpdate: true));
-
-          // Add remaining images as non-featured
-          for (int i = 1; i < mediaController.selectedImages.length; i++) {
-            final imageEntityModel = ImageEntityModel(
-              imageEntityId: -1,
-              imageId: mediaController.selectedImages[i].imageId,
-              isFeatured: false,
-              entityId: productController.productId.value,
-              entityCategory: MediaCategory.products.toString().split('.').last,
-            );
-            await mediaController.mediaRepository
-                .assignNewImage(imageEntityModel.toJson(isUpdate: true));
-          }
-        } else {
-          // Product already has images, so add all selected images as non-featured
-          for (var selectedImage in mediaController.selectedImages) {
-            final imageEntityModel = ImageEntityModel(
-              imageEntityId: -1,
-              imageId: selectedImage.imageId,
-              isFeatured: false,
-              entityId: productController.productId.value,
-              entityCategory: MediaCategory.products.toString().split('.').last,
-            );
-            await mediaController.mediaRepository
-                .assignNewImage(imageEntityModel.toJson(isUpdate: true));
-          }
-        }
-
-        // Refresh the product images from database to get the correct IDs
-        await productController.fetchProductImages();
+        // Add selected images to temporary storage
+        productController.addTemporaryImages(mediaController.selectedImages);
 
         TLoaders.successSnackBar(
           title: 'Success',
-          message: hasImages
-              ? '${mediaController.selectedImages.length} images added successfully!'
-              : 'Images added successfully! First image set as featured.',
+          message:
+              '${mediaController.selectedImages.length} images added! Save to persist changes.',
         );
 
         // Clear selected images manually

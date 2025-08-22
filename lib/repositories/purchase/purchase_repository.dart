@@ -5,7 +5,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../main.dart';
 import '../../Models/purchase/purchase_model.dart';
-import '../../Models/products/product_model.dart';
 import '../../controllers/product/product_controller.dart';
 import '../../repositories/products/product_variants_repository.dart';
 
@@ -155,6 +154,9 @@ class PurchaseRepository {
 
         await variantsRepository.updateVariantStock(item.variantId!, newStock);
 
+        // Ensure parent product's total stock is updated in products table
+        await _recalculateAndPersistProductStock(item.productId);
+
         // Update local product list with calculated total stock
         try {
           final productController = Get.find<ProductController>();
@@ -230,6 +232,9 @@ class PurchaseRepository {
         final newStock = variant.stock - item.quantity;
 
         await variantsRepository.updateVariantStock(item.variantId!, newStock);
+
+        // Ensure parent product's total stock is updated in products table
+        await _recalculateAndPersistProductStock(item.productId);
 
         // Update local product list with calculated total stock
         try {
@@ -333,9 +338,6 @@ class PurchaseRepository {
       List<PurchaseItemModel> purchaseItems) async {
     try {
       for (var item in purchaseItems) {
-        // Skip null items
-        if (item == null) continue;
-
         if (item.variantId != null) {
           // For items with variants, check variant stock for cancellation
           final variantsRepository = Get.find<ProductVariantsRepository>();
@@ -380,6 +382,26 @@ class PurchaseRepository {
       }
       TLoaders.errorSnackBar(title: 'Stock Check Error', message: e.toString());
       return false;
+    }
+  }
+}
+
+extension on PurchaseRepository {
+  // Recalculate total stock from variants and persist it to products table
+  Future<void> _recalculateAndPersistProductStock(int productId) async {
+    try {
+      final variantsRepository = Get.find<ProductVariantsRepository>();
+      final totalStock =
+          await variantsRepository.calculateProductStock(productId);
+
+      await supabase
+          .from('products')
+          .update({'stock_quantity': totalStock}).eq('product_id', productId);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error updating parent product stock: $e');
+      }
+      // Do not rethrow to avoid breaking calling flows; UI already updates locally
     }
   }
 }
