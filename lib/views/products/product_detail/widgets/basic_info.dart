@@ -52,24 +52,47 @@ class BasicInfo extends StatelessWidget {
                   ),
                   const SizedBox(height: TSizes.spaceBtwInputFields),
 
-                  // Product Description
-                  TextFormField(
-                    controller: productController.productDescription,
-                    focusNode: productController.descriptionFocusNode,
-                    textInputAction: TextInputAction.next,
-                    onFieldSubmitted: (_) {
-                      // Force focus to the serial numbers toggle
-                      // productController.serialNumbersFocusNode.requestFocus();
-                    },
-                    validator: (value) => TValidator.validateEmptyText(
-                        'Product description', value),
-                    decoration: const InputDecoration(
-                      labelText: 'Product Description',
-                      hintText: 'Enter product description',
-                    ),
-                    minLines: 3,
-                    maxLines: null,
-                  ),
+                  // Product Description with AI Button
+                  Obx(() => TextFormField(
+                        key: ValueKey(
+                            'description_${productController.productDescription.text.hashCode}'),
+                        controller: productController.productDescription,
+                        focusNode: productController.descriptionFocusNode,
+                        textInputAction: TextInputAction.next,
+                        onFieldSubmitted: (_) {
+                          // Force focus to the serial numbers toggle
+                          // productController.serialNumbersFocusNode.requestFocus();
+                        },
+                        validator: (value) => TValidator.validateEmptyText(
+                            'Product description', value),
+                        decoration: InputDecoration(
+                          labelText: 'Product Description',
+                          hintText:
+                              'Enter product description or use AI to generate',
+                          suffixIcon:
+                              productController.isGeneratingDescription.value
+                                  ? const Padding(
+                                      padding: EdgeInsets.all(12.0),
+                                      child: SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2),
+                                      ),
+                                    )
+                                  : IconButton(
+                                      icon: const Icon(Icons.auto_awesome,
+                                          color: TColors.primary),
+                                      tooltip: 'Generate description with AI',
+                                      onPressed: () async {
+                                        await productController
+                                            .generateProductDescriptionWithAI();
+                                      },
+                                    ),
+                        ),
+                        minLines: 3,
+                        maxLines: null,
+                      )),
                   const SizedBox(height: TSizes.spaceBtwInputFields),
 
                   // Serial Numbers Toggle - Now properly focusable
@@ -242,7 +265,7 @@ class BasicInfo extends StatelessWidget {
                               .map((e) => DropdownMenuItem(
                                   value: e, child: Text(e.name)))
                               .toList(),
-                          onChanged: ( value) {
+                          onChanged: (value) {
                             try {
                               productController.productTag.value = value!;
                             } catch (e) {

@@ -9,6 +9,7 @@ import 'package:ecommerce_dashboard/controllers/category/category_controller.dar
 import 'package:ecommerce_dashboard/controllers/product/product_images_controller.dart';
 import 'package:ecommerce_dashboard/repositories/products/product_repository.dart';
 import 'package:ecommerce_dashboard/repositories/products/product_variants_repository.dart';
+import 'package:ecommerce_dashboard/services/gemini_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/foundation.dart';
@@ -92,6 +93,9 @@ class ProductController extends GetxController {
   RxBool isPopular = false.obs;
 
   RxBool isVisible = false.obs;
+
+  // Reactive variable to track AI description generation
+  RxBool isGeneratingDescription = false.obs;
 
   @override
   void onInit() {
@@ -217,6 +221,7 @@ class ProductController extends GetxController {
       productTag.value = ProductTag.none;
       isPopular.value = false;
       isVisible.value = false;
+      isGeneratingDescription.value = false;
 
       // Clear product images
       clearProductImages();
@@ -1192,6 +1197,76 @@ class ProductController extends GetxController {
       return tag!;
     } catch (e) {
       return null;
+    }
+  }
+
+  //==========================================================================
+  // GEMINI AI DESCRIPTION GENERATION
+  //==========================================================================
+
+  /// Generate product description using Gemini AI
+  /// Returns true if successful, false otherwise
+  Future<bool> generateProductDescriptionWithAI() async {
+    try {
+      // Check if product name is provided
+      final productName = this.productName.text.trim();
+      if (productName.isEmpty) {
+        TLoaders.errorSnackBar(
+          title: "Product Name Required",
+          message: 'Please enter a product name first to generate description.',
+        );
+        return false;
+      }
+
+      // Set loading state
+      isGeneratingDescription.value = true;
+
+      // Show loading indicator
+      TLoaders.successSnackBar(
+        title: "Generating Description",
+        message:
+            'AI is creating a compelling description for "$productName"...',
+      );
+
+      // Call Gemini API
+      final generatedDescription =
+          await GeminiService.generateProductDescription(
+        productName: productName,
+        maxCharacters: 300,
+      );
+
+      if (generatedDescription != null && generatedDescription.isNotEmpty) {
+        // Set the generated description
+        productDescription.text = generatedDescription;
+
+        if (kDebugMode) {
+          print('✅ Generated description: ${productDescription.text}');
+        }
+
+        // Trigger UI update
+        update();
+
+        TLoaders.successSnackBar(
+          title: "Description Generated",
+          message: 'AI has created a compelling description for your product!',
+        );
+        return true;
+      } else {
+        TLoaders.errorSnackBar(
+          title: "Generation Failed",
+          message: 'Unable to generate description. Please try again.',
+        );
+        return false;
+      }
+    } catch (e) {
+      TLoaders.errorSnackBar(
+        title: "Error",
+        message: 'Failed to generate description: ${e.toString()}',
+      );
+      return false;
+    } finally {
+      // Clear loading state
+      isGeneratingDescription.value = false;
     }
   }
 }

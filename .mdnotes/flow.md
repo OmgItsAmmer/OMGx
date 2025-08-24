@@ -49,7 +49,7 @@ extras table not accessable
 not all tags working
 <!-- alert stock -->
 <!-- in correct stock -->
-AI description
+<!-- AI description -->
 
 <!-- review screen
 creative responive card 
