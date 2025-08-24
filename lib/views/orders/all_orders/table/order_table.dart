@@ -99,8 +99,7 @@ class OrderTable extends StatelessWidget {
           const DataColumn2(label: Text('Action'), fixedWidth: 100),
         ],
         source: OrderRows(
-          ordersCount: filteredOrders.length,
-          filteredOrders: filteredOrders.cast<OrderModel>(),
+          searchTerm: searchTerm,
         ),
       );
     });

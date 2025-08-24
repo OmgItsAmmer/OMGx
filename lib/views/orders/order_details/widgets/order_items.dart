@@ -21,6 +21,7 @@ import '../../../../utils/constants/enums.dart';
 import '../../../../utils/constants/sizes.dart';
 import '../../../../repositories/installment/installment_repository.dart';
 import '../../../../Models/installments/installemt_plan_model.dart';
+import '../../../../controllers/report/report_controller.dart';
 
 class OrderItems extends StatelessWidget {
   const OrderItems({super.key, required this.order});
@@ -35,7 +36,7 @@ class OrderItems extends StatelessWidget {
     final InstallmentRepository installmentRepository =
         Get.put(InstallmentRepository());
     final OrderController ordersController = Get.find<OrderController>();
-    final subTotal = order.subTotal;   // Ensure it's never null
+    final subTotal = order.subTotal; // Ensure it's never null
 
     // Calculate the discount amount based on the percentage
     final discountAmount = subTotal * (order.discount / 100);
@@ -82,17 +83,45 @@ class OrderItems extends StatelessWidget {
                     ),
                     const SizedBox(width: TSizes.spaceBtwItems),
                     //edit order button
-                    SizedBox(
-                      width: 150,
-                      height: 40,
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          //edit order
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                       TCircularIcon(icon: Iconsax.printer,
+                       backgroundColor: TColors.primary,
+                       color: TColors.white,
+                       onPressed: () {
+                        //print invoice
+                          final ReportController reportController =
+                                  Get.find<ReportController>();
+                              reportController.printThermalReceipt(order);
+                       },
+                       ),
+                      const SizedBox(width: TSizes.spaceBtwItems),
+                       TCircularIcon(icon: Iconsax.edit,
+                       backgroundColor: TColors.primary,
+                       color: TColors.white,
+                       onPressed: () {
                           ordersController.editOrder(order);
-                        },
-                        icon: const Icon(Iconsax.edit,color: TColors.white,),
-                        label: const Text('Edit Order'),
-                      ),
+                       },
+                       ),
+                        //replace with icon
+                       
+                        // SizedBox(
+                        //   width: 150,
+                        //   height: 40,
+                        //   child: ElevatedButton.icon(
+                        //     onPressed: () {
+                        //       //edit order
+
+                        //     },
+                        //     icon: const Icon(
+                        //       Iconsax.edit,
+                        //       color: TColors.white,
+                        //     ),
+                        //     label: const Text('Edit Order'),
+                        //   ),
+                        // ),
+                      ],
                     ),
                   ],
                 ),
@@ -218,9 +247,7 @@ class OrderItems extends StatelessWidget {
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                    (item.price)
-                                        .toStringAsFixed(2),
+                                child: Text((item.price).toStringAsFixed(2),
                                     style:
                                         Theme.of(context).textTheme.bodyLarge),
                               ),
@@ -232,7 +259,9 @@ class OrderItems extends StatelessWidget {
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: Text((item.price * item.quantity).toStringAsFixed(2),
+                                child: Text(
+                                    (item.price * item.quantity)
+                                        .toStringAsFixed(2),
                                     style:
                                         Theme.of(context).textTheme.bodyLarge),
                               ),
@@ -336,7 +365,7 @@ class OrderItems extends StatelessWidget {
     String displayName = product.name ?? 'Not Found';
 
     // Check if this is a serialized product and has a variant ID
-    if ( item.variantId != null) {
+    if (item.variantId != null) {
       try {
         // Fetch the variant information
         final variants =
@@ -344,7 +373,7 @@ class OrderItems extends StatelessWidget {
         final variant =
             variants.firstWhereOrNull((v) => v.variantId == item.variantId);
 
-        if (variant != null ) {
+        if (variant != null) {
           // Append the serial number to the product name
           displayName = '$displayName (${variant.variantName})';
         }

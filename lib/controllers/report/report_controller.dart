@@ -27,6 +27,14 @@ import '../../Models/salesman/salesman_model.dart';
 import '../../repositories/reports/reports_repository.dart';
 import '../../views/reports/specific_reports/monthly_item_sale_report/monthly_item_sale_report.dart';
 import '../../views/reports/specific_reports/products/all_product_report.dart';
+import 'package:flutter_esc_pos_utils/flutter_esc_pos_utils.dart';
+import '../../Models/orders/order_item_model.dart';
+import '../../Models/products/product_model.dart';
+import '../../controllers/shop/shop_controller.dart';
+import '../../controllers/product/product_controller.dart';
+import '../../controllers/customer/customer_controller.dart';
+import '../../controllers/salesman/salesman_controller.dart';
+import '../../repositories/products/product_variants_repository.dart';
 
 class ReportController extends GetxController {
   static ReportController get instance => Get.find();
@@ -761,5 +769,291 @@ class ReportController extends GetxController {
         print('Error fetching account book report: $e');
       }
     }
+  }
+
+  // Thermal Printer Function for Order Receipt
+  Future<void> printThermalReceipt(OrderModel order) async {
+    try {
+      // Generate receipt bytes using esc_pos_utils
+      final List<int> receiptBytes = await _generateReceiptBytes(order);
+
+      // TODO: Integrate with actual thermal printer hardware
+      // For actual thermal printer integration, you would:
+      // 1. Use flutter_thermal_printer package to connect to printer
+      // 2. Send the receiptBytes to the printer
+      // 3. Handle printer connection status and errors
+
+      // Example integration code (uncomment when hardware is available):
+      // final FlutterThermalPrinter printer = FlutterThermalPrinter();
+      // bool isConnected = await printer.isConnected();
+      // if (isConnected) {
+      //   await printer.startPrint();
+      //   await printer.printBytes(receiptBytes);
+      //   await printer.endPrint();
+      // }
+
+      // TLoaders.successSnackBar(
+      //   title: 'Receipt Generated',
+      //   message:
+      //       'Thermal receipt has been generated successfully. Ready for printing.',
+      // );
+
+      if (kDebugMode) {
+        print('Receipt bytes generated: ${receiptBytes.length} bytes');
+        print('To print: Send these bytes to thermal printer hardware');
+      }
+    } catch (e) {
+      TLoaders.errorSnackBar(
+        title: 'Print Error',
+        message: 'Failed to generate receipt: ${e.toString()}',
+      );
+      if (kDebugMode) {
+        print('Thermal printer error: $e');
+      }
+    }
+  }
+
+  // Helper method to generate receipt bytes
+  Future<List<int>> _generateReceiptBytes(OrderModel order) async {
+    final ShopController shopController = Get.find<ShopController>();
+    final CustomerController customerController =
+        Get.find<CustomerController>();
+    final SalesmanController salesmanController =
+        Get.find<SalesmanController>();
+
+    final profile = await CapabilityProfile.load();
+    final generator = Generator(PaperSize.mm80, profile);
+    List<int> bytes = [];
+
+    // Print shop information
+    bytes += generator.text(
+      shopController.selectedShop?.value.shopname ?? 'Shop Name',
+      styles: const PosStyles(
+        bold: true,
+        align: PosAlign.center,
+      ),
+    );
+    bytes += generator.text(
+      'Date: ${DateFormat('dd/MM/yyyy').format(DateTime.now())}',
+      styles: const PosStyles(align: PosAlign.center),
+    );
+    bytes += generator.text(
+      'Time: ${DateFormat('HH:mm:ss').format(DateTime.now())}',
+      styles: const PosStyles(align: PosAlign.center),
+    );
+    bytes += generator.hr();
+
+    // Print order details
+    bytes += generator.text(
+      'Order #${order.orderId}',
+      styles: const PosStyles(bold: true),
+    );
+    bytes += generator.hr();
+
+    // Print customer information
+    final customer = customerController.selectedCustomer.value;
+    if (customer.fullName != null && customer.fullName!.isNotEmpty) {
+      bytes += generator.text(
+        'Customer: ${customer.fullName}',
+        styles: const PosStyles(bold: true),
+      );
+      if (customer.phoneNumber != null && customer.phoneNumber!.isNotEmpty) {
+        bytes += generator.text(
+          'Phone: ${customer.phoneNumber}',
+          styles: const PosStyles(align: PosAlign.left),
+        );
+      }
+      bytes += generator.text(''); // Empty line for spacing
+    }
+
+    // Print salesman information if available
+    if (order.salesmanId != null) {
+      final salesman = salesmanController.selectedSalesman?.value;
+      if (salesman != null &&
+          salesman.fullName != null &&
+          salesman.fullName!.isNotEmpty) {
+        bytes += generator.text(
+          'Salesman: ${salesman.fullName}',
+          styles: const PosStyles(bold: true),
+        );
+        bytes += generator.text(''); // Empty line for spacing
+      }
+    }
+
+    bytes += generator.hr();
+
+    // Print items - use the order items that are already loaded
+    for (var item in order.orderItems ?? []) {
+      // Get product information from ProductController
+      final product = productController.allProducts.firstWhere(
+        (product) => product.productId == item.productId,
+        orElse: () => ProductModel(name: 'Not Found'),
+      );
+
+      // Get product display name with variant if available
+      String displayName = await _getProductDisplayName(product, item);
+
+      // Print item details
+      bytes += generator.text(
+        displayName,
+        styles: const PosStyles(bold: true),
+      );
+      bytes += generator.text(
+        '${item.quantity} x Rs. ${item.price.toStringAsFixed(2)} = Rs. ${(item.quantity * item.price).toStringAsFixed(2)}',
+        styles: const PosStyles(align: PosAlign.right),
+      );
+      bytes += generator.text(''); // Empty line for spacing
+    }
+
+    bytes += generator.hr();
+
+    // Calculate totals
+    final subTotal = order.subTotal;
+    final discountAmount = subTotal * (order.discount / 100);
+    final tax = order.tax;
+    final shippingFee = order.shippingFee;
+
+    // Calculate commission
+    double commissionAmount = 0.0;
+    if (order.salesmanComission != null && order.salesmanComission! > 0) {
+      final commissionBase = subTotal - discountAmount;
+      commissionAmount = commissionBase * order.salesmanComission! / 100;
+    }
+
+    // Print totals
+    bytes += generator.row([
+      PosColumn(text: 'Subtotal:', width: 6),
+      PosColumn(
+        text: 'Rs. ${subTotal.toStringAsFixed(2)}',
+        width: 6,
+        styles: const PosStyles(align: PosAlign.right),
+      ),
+    ]);
+
+    if (order.discount > 0) {
+      bytes += generator.row([
+        PosColumn(text: 'Discount:', width: 6),
+        PosColumn(
+          text: '${order.discount}% (Rs. ${discountAmount.toStringAsFixed(2)})',
+          width: 6,
+          styles: const PosStyles(align: PosAlign.right),
+        ),
+      ]);
+    }
+
+    bytes += generator.row([
+      PosColumn(text: 'Tax:', width: 6),
+      PosColumn(
+        text: 'Rs. ${tax.toStringAsFixed(2)}',
+        width: 6,
+        styles: const PosStyles(align: PosAlign.right),
+      ),
+    ]);
+
+    bytes += generator.row([
+      PosColumn(text: 'Shipping:', width: 6),
+      PosColumn(
+        text: 'Rs. ${shippingFee.toStringAsFixed(2)}',
+        width: 6,
+        styles: const PosStyles(align: PosAlign.right),
+      ),
+    ]);
+
+    if (commissionAmount > 0) {
+      bytes += generator.row([
+        PosColumn(text: 'Commission:', width: 6),
+        PosColumn(
+          text: 'Rs. ${commissionAmount.toStringAsFixed(2)}',
+          width: 6,
+          styles: const PosStyles(align: PosAlign.right),
+        ),
+      ]);
+    }
+
+    bytes += generator.hr();
+
+    // Calculate grand total
+    final grandTotal =
+        subTotal - discountAmount + tax + shippingFee + commissionAmount;
+
+    bytes += generator.row([
+      PosColumn(text: 'TOTAL:', width: 6, styles: const PosStyles(bold: true)),
+      PosColumn(
+        text: 'Rs. ${grandTotal.toStringAsFixed(2)}',
+        width: 6,
+        styles: const PosStyles(bold: true, align: PosAlign.right),
+      ),
+    ]);
+
+    bytes += generator.row([
+      PosColumn(text: 'Paid:', width: 6),
+      PosColumn(
+        text: 'Rs. ${(order.paidAmount ?? 0).toStringAsFixed(2)}',
+        width: 6,
+        styles: const PosStyles(align: PosAlign.right),
+      ),
+    ]);
+
+    final change = (order.paidAmount ?? 0) - grandTotal;
+    if (change != 0) {
+      bytes += generator.row([
+        PosColumn(text: 'Change:', width: 6),
+        PosColumn(
+          text: 'Rs. ${change.toStringAsFixed(2)}',
+          width: 6,
+          styles: const PosStyles(align: PosAlign.right),
+        ),
+      ]);
+    }
+
+    bytes += generator.hr();
+
+    // Print footer
+    bytes += generator.text(
+      'Thank you for your purchase!',
+      styles: const PosStyles(
+        bold: true,
+        align: PosAlign.center,
+      ),
+    );
+
+    bytes += generator.text(
+      'Please visit again',
+      styles: const PosStyles(align: PosAlign.center),
+    );
+
+    bytes += generator.cut();
+
+    return bytes;
+  }
+
+  // Helper method to get the product display name with variant if available
+  Future<String> _getProductDisplayName(
+      ProductModel product, OrderItemModel item) async {
+    String displayName = product.name ?? 'Not Found';
+
+    // Check if this item has a variant ID
+    if (item.variantId != null) {
+      try {
+        final ProductVariantsRepository variantsRepository =
+            Get.put(ProductVariantsRepository());
+        // Fetch the variant information
+        final variants = await variantsRepository
+            .fetchProductVariants(product.productId ?? -1);
+        final variant =
+            variants.firstWhereOrNull((v) => v.variantId == item.variantId);
+
+        if (variant != null) {
+          // Append the variant name to the product name
+          displayName = '$displayName (${variant.variantName})';
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('Error fetching variant: $e');
+        }
+      }
+    }
+
+    return displayName;
   }
 }

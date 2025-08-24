@@ -9,8 +9,9 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
 import '../../../../common/widgets/containers/rounded_container.dart';
-import '../table/order_table.dart';
+import '../table/paginated_order_table.dart';
 import '../../../../common/widgets/icons/t_circular_icon.dart';
+import '../widgets/order_searchbar.dart';
 
 class OrdersDesktopScreen extends StatelessWidget {
   const OrdersDesktopScreen({super.key});
@@ -21,8 +22,7 @@ class OrdersDesktopScreen extends StatelessWidget {
     if (!Get.isRegistered<TableSearchController>(tag: 'orders')) {
       Get.put(TableSearchController(), tag: 'orders');
     }
-    final tableSearchController =
-        Get.find<TableSearchController>(tag: 'orders');
+
     final orderController = Get.find<OrderController>();
 
     return SingleChildScrollView(
@@ -47,20 +47,7 @@ class OrdersDesktopScreen extends StatelessWidget {
                       // Search field
                       Row(
                         children: [
-                          SizedBox(
-                            width: 500,
-                            child: TextFormField(
-                              controller:
-                                  tableSearchController.searchController,
-                              decoration: const InputDecoration(
-                                prefixIcon: Icon(Iconsax.search_normal),
-                                hintText: 'Search by order ID, date, or status',
-                              ),
-                              onChanged: (value) {
-                                tableSearchController.searchTerm.value = value;
-                              },
-                            ),
-                          ),
+                          const OrderSearchbar(),
                           const SizedBox(width: TSizes.sm),
                           TCircularIcon(
                             icon: Iconsax.refresh,
@@ -77,7 +64,7 @@ class OrdersDesktopScreen extends StatelessWidget {
                   const SizedBox(height: TSizes.spaceBtwSections),
 
                   // Order table
-                  const OrderTable(),
+                  const OrderTableWidget(),
                 ],
               ),
             ),

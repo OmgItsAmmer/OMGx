@@ -22,6 +22,7 @@ import '../controllers/search/search_controller.dart';
 import '../controllers/shop/shop_controller.dart';
 import '../controllers/user/user_controller.dart';
 import '../controllers/vendor/vendor_controller.dart';
+import '../controllers/report/report_controller.dart';
 import '../network_manager.dart';
 import '../utils/network/supabase_network_manager.dart';
 
@@ -54,6 +55,7 @@ class GeneralBindings extends Bindings {
     Get.put(NotificationController());
     Get.put(ShopController());
     Get.put(GuarantorImageController());
+    Get.lazyPut(() => ReportController(),fenix: true);
 
     // Initialize the search controller using the singleton pattern
     TSearchController.instance;

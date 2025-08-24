@@ -60,10 +60,10 @@ class _SplashScreenState extends State<SplashScreen>
     try {
       // Pre-initialize all required controllers in the background
       // These will be used in the dashboard after login
-      final dashboardController = Get.put(DashboardController());
-      final orderController = Get.put(OrderController());
-      final productController = Get.put(ProductController());
-      final customerController = Get.put(CustomerController());
+       Get.put(DashboardController());
+      Get.put(OrderController());
+       Get.put(ProductController());
+       Get.put(CustomerController());
 
       // Start fetching data in parallel
       // This will continue in the background even after navigation
@@ -73,11 +73,15 @@ class _SplashScreenState extends State<SplashScreen>
         // productController.fetchProducts(),
         // customerController.fetchAllCustomers(),
       ]).then((_) {
-        setState(() {
+        setState(() async {
           _isDataLoaded = true;
           // If animation has completed already, navigate now
           if (_controller.status == AnimationStatus.completed) {
-            Get.offAllNamed(TRoutes.login);
+            if (await checkSession()) {
+              Get.offAllNamed(TRoutes.dashboard);
+            } else {
+              Get.offAllNamed(TRoutes.login);
+            }
           }
         });
       });
@@ -114,4 +118,13 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
   }
+}
+
+Future<bool> checkSession() async {
+  final session =  supabase.auth.currentUser;
+  if (session == null) {
+   return false;
+  }
+ 
+  return true;
 }

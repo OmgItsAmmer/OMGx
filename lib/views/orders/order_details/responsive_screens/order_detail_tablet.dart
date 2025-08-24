@@ -126,19 +126,19 @@ class OrderDetailTabletScreen extends StatelessWidget {
             // Guarantor Section (if installment)
             if (saleTypeFromOrder == SaleType.installment) ...[
               const SizedBox(height: TSizes.spaceBtwSections),
-              Row(
+              const Row(
                 children: [
                   Expanded(
                     child: Column(
-                      children: const [
+                      children: [
                         GuarantorCard(title: 'Guarantor 1', guarantorIndex: 0),
                       ],
                     ),
                   ),
-                  const SizedBox(width: TSizes.spaceBtwItems),
+                  SizedBox(width: TSizes.spaceBtwItems),
                   Expanded(
                     child: Column(
-                      children: const [
+                      children: [
                         GuarantorCard(title: 'Guarantor 2', guarantorIndex: 1),
                       ],
                     ),

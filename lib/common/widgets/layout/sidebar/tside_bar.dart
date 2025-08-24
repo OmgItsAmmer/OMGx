@@ -148,23 +148,7 @@ class TSideBar extends StatelessWidget {
                       itemName: 'DashBoard',
                       route: TRoutes.dashboard,
                     ),
-                    Text(
-                      'BUY/SELL',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodySmall!
-                          .apply(letterSpacingDelta: 1.2),
-                    ),
-                    const TMenuItem(
-                      icon: Iconsax.money_send,
-                      itemName: 'Sale',
-                      route: TRoutes.sales,
-                    ),
-                    const TMenuItem(
-                      icon: Iconsax.receive_square,
-                      itemName: 'Purchase',
-                      route: TRoutes.purchaseSales,
-                    ),
+                  
                     Text(
                       'LOGS',
                       style: Theme.of(context)
@@ -193,29 +177,6 @@ class TSideBar extends StatelessWidget {
                       route: TRoutes.expenseScreen,
                     ),
                     Text(
-                      'PEOPLE',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodySmall!
-                          .apply(letterSpacingDelta: 1.2),
-                    ),
-
-                    const TMenuItem(
-                      icon: Iconsax.user_tag,
-                      itemName: 'Customers',
-                      route: TRoutes.customer,
-                    ),
-                    const TMenuItem(
-                      icon: Iconsax.profile_add,
-                      itemName: 'Vendors',
-                      route: TRoutes.vendor,
-                    ),
-                    const TMenuItem(
-                      icon: Iconsax.user_octagon,
-                      itemName: 'Salesman',
-                      route: TRoutes.salesman,
-                    ),
-                    Text(
                       'INVENTORY',
                       style: Theme.of(context)
                           .textTheme
@@ -237,6 +198,46 @@ class TSideBar extends StatelessWidget {
                       itemName: 'Categories',
                       route: TRoutes.category,
                     ),
+                      Text(
+                      'BUY/SELL',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall!
+                          .apply(letterSpacingDelta: 1.2),
+                    ),
+                    const TMenuItem(
+                      icon: Iconsax.money_send,
+                      itemName: 'Sale',
+                      route: TRoutes.sales,
+                    ),
+                    const TMenuItem(
+                      icon: Iconsax.receive_square,
+                      itemName: 'Purchase',
+                      route: TRoutes.purchaseSales,
+                    ),
+                    Text(
+                      'PEOPLE',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall!
+                          .apply(letterSpacingDelta: 1.2),
+                    ),
+                    const TMenuItem(
+                      icon: Iconsax.user_tag,
+                      itemName: 'Customers',
+                      route: TRoutes.customer,
+                    ),
+                    const TMenuItem(
+                      icon: Iconsax.profile_add,
+                      itemName: 'Vendors',
+                      route: TRoutes.vendor,
+                    ),
+                    const TMenuItem(
+                      icon: Iconsax.user_octagon,
+                      itemName: 'Salesman',
+                      route: TRoutes.salesman,
+                    ),
+                    
 
                     Text(
                       'OTHER',

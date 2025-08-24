@@ -27,15 +27,21 @@ edit order button -->
 
 <!-- update variant doenst work -->
 <!-- product image issue  -->
-delete picture option
-image lazy loading not working(cache the previously loaded)
-show latest first(if possible)
+<!-- delete picture option -->
+<!-- image lazy loading not working(cache the previously loaded) -->
+<!-- show latest first(if possible) -->
+image caching
+image quality
 
-print invoice 
-invoke processing
-status to complete gives error
+<!-- reverse table order  -->
+<!-- print invoice  -->
+<!-- show loading while changing status and disable irt -->
+<!-- status to complete gives error -->
+<!-- invoke processing -->
 edit order
-whatsapp contact
+whatsapp contact+
+
+
 shop screen update 
 extras table not accessable
 

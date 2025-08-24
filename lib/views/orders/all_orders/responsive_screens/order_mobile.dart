@@ -5,6 +5,7 @@ import 'package:ecommerce_dashboard/controllers/orders/orders_controller.dart';
 import 'package:ecommerce_dashboard/controllers/table/table_search_controller.dart';
 import 'package:ecommerce_dashboard/utils/constants/colors.dart';
 import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
+import 'package:ecommerce_dashboard/views/orders/all_orders/widgets/order_searchbar.dart' show OrderSearchbar;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
@@ -48,19 +49,8 @@ class OrdersMobileScreen extends StatelessWidget {
                   // Add search bar with full width for mobile
                   Row(
                     children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: tableSearchController.searchController,
-                          decoration: const InputDecoration(
-                            prefixIcon: Icon(Iconsax.search_normal,
-                                color: TColors.white),
-                            hintText: 'Search by order ID, date, or status',
-                          ),
-                          onChanged: (value) {
-                            // Update the search term
-                            tableSearchController.searchTerm.value = value;
-                          },
-                        ),
+                      const Expanded(
+                        child: OrderSearchbar(width: 300),
                       ),
                       const SizedBox(width: TSizes.sm),
                       TCircularIcon(

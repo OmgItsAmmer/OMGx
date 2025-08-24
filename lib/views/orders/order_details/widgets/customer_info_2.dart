@@ -8,6 +8,7 @@ import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../Models/address/address_model.dart';
 import '../../../../Models/orders/order_item_model.dart';
@@ -51,9 +52,21 @@ class CustomerInfo extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: Theme.of(context).textTheme.headlineMedium,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+
+              //icon button for whatsapp
+              IconButton(onPressed: (){
+                //open whatsapp
+                launchUrl(Uri.parse('https://wa.me/$phoneNumber'));
+
+              }, icon: const Icon(Iconsax.message,color: TColors.primary,)),
+            ],
           ),
           const SizedBox(height: TSizes.spaceBtwItems),
 
@@ -130,7 +143,7 @@ class CustomerInfo extends StatelessWidget {
                           Row(
                             children: [
                               const Icon(
-                                Iconsax.call,
+                                Iconsax.message,
                                 size: 16,
                                 color: TColors.primary,
                               ),

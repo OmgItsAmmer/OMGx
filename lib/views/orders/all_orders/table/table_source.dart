@@ -1,34 +1,31 @@
 import 'package:ecommerce_dashboard/common/widgets/icons/table_action_icon_buttons.dart';
-import 'package:ecommerce_dashboard/controllers/address/address_controller.dart';
 import 'package:ecommerce_dashboard/controllers/customer/customer_controller.dart';
-import 'package:ecommerce_dashboard/controllers/guarantors/guarantor_controller.dart';
-import 'package:ecommerce_dashboard/controllers/installments/installments_controller.dart';
 import 'package:ecommerce_dashboard/controllers/orders/orders_controller.dart';
-import 'package:ecommerce_dashboard/controllers/salesman/salesman_controller.dart';
 import 'package:ecommerce_dashboard/utils/constants/colors.dart';
 import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:ecommerce_dashboard/utils/helpers/helper_functions.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../Models/orders/order_item_model.dart';
-import '../../../../Models/customer/customer_model.dart';
 import '../../../../common/widgets/containers/rounded_container.dart';
+
 import '../../../../utils/constants/enums.dart';
 
 class OrderRows extends DataTableSource {
   OrderRows({
-    required this.ordersCount,
-    required this.filteredOrders,
+    required this.searchTerm,
   });
 
-  final int ordersCount;
-  final List<OrderModel> filteredOrders;
+  final String searchTerm;
   final OrderController orderController = Get.find<OrderController>();
   final CustomerController customerController = Get.find<CustomerController>();
+
+  List<OrderModel> _filteredOrders = [];
+  int _currentlyLoadedCount = 20;
+  bool _isLoading = false;
 
   // Get customer name by ID
   String getCustomerName(int? customerId) {
@@ -50,24 +47,81 @@ class OrderRows extends DataTableSource {
     }
   }
 
+  // Initialize filtered orders on first access
+  void _initializeFilteredOrders() {
+    if (_filteredOrders.isEmpty) {
+      var filtered = [...orderController.allOrders];
+
+      if (searchTerm.isNotEmpty) {
+        filtered = orderController.allOrders.where((order) {
+          return order.orderId
+                  .toString()
+                  .toLowerCase()
+                  .contains(searchTerm.toLowerCase()) ||
+              order.orderDate
+                  .toLowerCase()
+                  .contains(searchTerm.toLowerCase()) ||
+              order.status.toLowerCase().contains(searchTerm.toLowerCase()) ||
+              order.subTotal
+                  .toString()
+                  .toLowerCase()
+                  .contains(searchTerm.toLowerCase());
+        }).toList();
+      }
+
+      // Apply sorting (descending order by ID)
+      filtered.sort((a, b) {
+        int orderIdComparison = b.orderId.compareTo(a.orderId);
+        if (orderIdComparison == 0) {
+          try {
+            DateTime dateA = DateTime.parse(a.orderDate);
+            DateTime dateB = DateTime.parse(b.orderDate);
+            return dateB.compareTo(dateA);
+          } catch (e) {
+            return 0;
+          }
+        }
+        return orderIdComparison;
+      });
+
+      _filteredOrders = filtered;
+    }
+  }
+
+  // Load more data when needed
+  void _loadMoreIfNeeded(int index) {
+    if (index >= _currentlyLoadedCount - 5 &&
+        _currentlyLoadedCount < _filteredOrders.length &&
+        !_isLoading) {
+      _isLoading = true;
+      // Simulate loading delay
+      Future.delayed(const Duration(milliseconds: 300), () {
+        _currentlyLoadedCount =
+            (_currentlyLoadedCount + 20).clamp(0, _filteredOrders.length);
+        _isLoading = false;
+        notifyListeners();
+      });
+    }
+  }
+
   @override
   DataRow? getRow(int index) {
-    final InstallmentController installmentController =
-        Get.find<InstallmentController>();
-    final AddressController addressController = Get.find<AddressController>();
-    final GuarantorController guarantorController =
-        Get.find<GuarantorController>();
-    final SalesmanController salesmanController =
-        Get.find<SalesmanController>();
+    _initializeFilteredOrders();
 
-    // Use the filtered orders list
-    final OrderModel order = filteredOrders[index];
+    // Check if we need to load more data
+    _loadMoreIfNeeded(index);
 
-    SaleType? saleTypeFromOrder = SaleType.values.firstWhere(
-      (e) => e.name == order.saletype,
-      orElse: () => SaleType.cash,
-    );
+    // Return null if we're beyond our currently loaded count and still loading
+    if (index >= _currentlyLoadedCount) {
+      return null;
+    }
 
+    // Check if index is within bounds
+    if (index >= _filteredOrders.length) {
+      return null;
+    }
+
+    final order = _filteredOrders[index];
     OrderStatus? orderStatus = OrderStatus.values.firstWhere(
       (e) => e.name == order.status,
       orElse: () => OrderStatus.pending,
@@ -128,11 +182,21 @@ class OrderRows extends DataTableSource {
   }
 
   @override
-  bool get isRowCountApproximate => false;
+  bool get isRowCountApproximate =>
+      _currentlyLoadedCount < _filteredOrders.length;
 
   @override
-  int get rowCount => ordersCount;
+  int get rowCount {
+    _initializeFilteredOrders();
+    return _filteredOrders.length;
+  }
 
   @override
   int get selectedRowCount => 0;
+
+  // Get the currently loaded count for UI purposes
+  int get currentlyLoadedCount => _currentlyLoadedCount;
+
+  // Check if currently loading
+  bool get isLoading => _isLoading;
 }

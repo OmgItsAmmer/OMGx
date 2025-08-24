@@ -17,6 +17,7 @@ import '../customer/customer_controller.dart';
 import '../guarantors/guarantor_controller.dart';
 import '../sales/sales_controller.dart';
 import '../salesman/salesman_controller.dart';
+import '../report/report_controller.dart';
 import '../../main.dart';
 
 class OrderController extends GetxController {
@@ -184,8 +185,7 @@ class OrderController extends GetxController {
       // Fetch customer addresses
       if (order.shippingMethod != 'pickup') {
         addressController.fetchOrderAddress(order.addressId ?? -1);
-      }
-      else {
+      } else {
         addressController.clearSelectedOrderAddress();
       }
 
@@ -456,6 +456,33 @@ class OrderController extends GetxController {
             allOrders[index].orderItems!.isNotEmpty) {
           // Stock was already validated above, now subtract the quantity
           await addBackQuantity(allOrders[index].orderItems);
+        }
+      }
+
+      // Print thermal receipt when status is changed to "processing"
+      if (status == 'processing') {
+        try {
+          final ReportController reportController =
+              Get.find<ReportController>();
+          final order = allOrders[index];
+
+          // Ensure order items are loaded for the receipt
+          if (order.orderItems == null || order.orderItems!.isEmpty) {
+            order.orderItems = await fetchOrderItems(order.orderId);
+          }
+
+          // Print the thermal receipt
+          await reportController.printThermalReceipt(order);
+        } catch (e) {
+          if (kDebugMode) {
+            print('Error printing thermal receipt: $e');
+          }
+          // Don't fail the status update if printing fails
+          TLoaders.errorSnackBar(
+            title: 'Print Error',
+            message:
+                'Status updated but failed to print receipt: ${e.toString()}',
+          );
         }
       }
 

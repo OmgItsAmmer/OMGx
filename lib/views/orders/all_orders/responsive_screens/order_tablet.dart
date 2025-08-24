@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
 import '../table/order_table.dart';
+import '../widgets/order_searchbar.dart';
 
 class OrdersTabletScreen extends StatelessWidget {
   const OrdersTabletScreen({super.key});
@@ -46,20 +47,7 @@ class OrdersTabletScreen extends StatelessWidget {
                   // Add search bar
                   Row(
                     children: [
-                      SizedBox(
-                        width: 400,
-                        child: TextFormField(
-                          controller: tableSearchController.searchController,
-                          decoration: const InputDecoration(
-                            prefixIcon: Icon(Iconsax.search_normal),
-                            hintText: 'Search by order ID, customer, or status',
-                          ),
-                          onChanged: (value) {
-                            // Update the search term
-                            tableSearchController.searchTerm.value = value;
-                          },
-                        ),
-                      ),
+                      const OrderSearchbar(width: 400,),
                       const SizedBox(width: TSizes.sm),
                       TCircularIcon(
                         icon: Iconsax.refresh,
