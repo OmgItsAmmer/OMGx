@@ -61,11 +61,29 @@ class CustomerInfo extends StatelessWidget {
               ),
 
               //icon button for whatsapp
-              IconButton(onPressed: (){
-                //open whatsapp
-                launchUrl(Uri.parse('https://wa.me/$phoneNumber'));
+              IconButton(
+                  onPressed: () {
+                    //open whatsapp
+                    // Format Pakistani phone number: remove leading 0 and add country code 92
+                    String formattedNumber = phoneNumber;
+                    if (formattedNumber.startsWith('0')) {
+                      formattedNumber =
+                          formattedNumber.substring(1); // Remove leading 0
+                    }
+                    formattedNumber =
+                        '92$formattedNumber'; // Add Pakistan country code
 
-              }, icon: const Icon(Iconsax.message,color: TColors.primary,)),
+                    // Pre-written greeting message from KKS Online
+                    String message = Uri.encodeComponent(
+                        'Assalam-o-Alaikum! This is a message from KKS Online.');
+
+                    launchUrl(Uri.parse(
+                        'https://wa.me/$formattedNumber?text=$message'));
+                  },
+                  icon: const Icon(
+                    Iconsax.message,
+                    color: TColors.primary,
+                  )),
             ],
           ),
           const SizedBox(height: TSizes.spaceBtwItems),

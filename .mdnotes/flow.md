@@ -39,7 +39,7 @@ image quality
 <!-- status to complete gives error -->
 <!-- invoke processing -->
 edit order
-whatsapp contact+
+<!-- whatsapp contact+ -->
 
 
 shop screen update 
@@ -52,7 +52,7 @@ not all tags working
 AI description
 
 review screen
-different colors
+different colors of the card acc to review rating
 product name
 customer name
 open whatsapp/email to contact
