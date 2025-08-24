@@ -51,11 +51,12 @@ not all tags working
 <!-- in correct stock -->
 AI description
 
-review screen
+<!-- review screen
+creative responive card 
 different colors of the card acc to review rating
 product name
 customer name
-open whatsapp/email to contact
+open whatsapp/email to contact(phone number might not avaliable in customermodel just say errorsnackbar)
 search
 latest first
-lazy loading 
+lazy loading (20 inital , on each click next 20 append wwith previous) -->

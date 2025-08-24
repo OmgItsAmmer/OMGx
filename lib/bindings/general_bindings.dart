@@ -16,6 +16,7 @@ import '../controllers/orders/orders_controller.dart';
 import '../controllers/product/product_controller.dart';
 import '../controllers/purchase/purchase_controller.dart';
 import '../controllers/purchase_sales/purchase_sales_controller.dart';
+import '../controllers/reviews/review_controller.dart';
 import '../controllers/sales/sales_controller.dart';
 import '../controllers/salesman/salesman_controller.dart';
 import '../controllers/search/search_controller.dart';
@@ -56,6 +57,7 @@ class GeneralBindings extends Bindings {
     Get.put(ShopController());
     Get.put(GuarantorImageController());
     Get.lazyPut(() => ReportController(),fenix: true);
+    Get.lazyPut(() => ReviewController(),fenix: true);
 
     // Initialize the search controller using the singleton pattern
     TSearchController.instance;

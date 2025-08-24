@@ -31,7 +31,7 @@ class THelperFunctions {
 
   // Get purchase status color
   static Color getPurchaseStatusColor(PurchaseStatus status) {
-   if (PurchaseStatus.pending == status) {
+    if (PurchaseStatus.pending == status) {
       return Colors.blue;
     } else if (PurchaseStatus.received == status) {
       return Colors.green;
@@ -41,6 +41,7 @@ class THelperFunctions {
       return Colors.grey;
     }
   }
+
   static Color getNotificationColor(NotificationType type) {
     switch (type) {
       case NotificationType.company:
@@ -177,5 +178,70 @@ class THelperFunctions {
       wrappedList.add(Row(children: rowChildren));
     }
     return wrappedList;
+  }
+
+    // Get review rating color based on rating value
+  static Color getReviewRatingColor(double? rating) {
+    if (rating == null) return TColors.darkGrey;
+    
+    if (rating >= 4.5) {
+      return const Color(0xFF4CAF50); // Vibrant green
+    } else if (rating >= 3.5) {
+      return const Color(0xFF2196F3); // Vibrant blue
+    } else if (rating >= 2.5) {
+      return const Color(0xFFFF9800); // Vibrant orange
+    } else if (rating >= 1.5) {
+      return const Color(0xFFF44336); // Vibrant red
+    } else {
+      return const Color(0xFFFFEB3B); // Vibrant yellow
+    }
+  }
+
+  // Get review card background color with opacity
+  static Color getReviewCardColor(double? rating) {
+    return getReviewRatingColor(rating).withOpacity(0.1);
+  }
+
+  // Get review border color
+  static Color getReviewBorderColor(double? rating) {
+    return getReviewRatingColor(rating).withOpacity(0.3);
+  }
+
+    // Get star icons for rating display
+  static List<Widget> getStarIcons(double? rating, {double size = 16}) {
+    final List<Widget> stars = [];
+    final int fullStars = rating?.floor() ?? 0;
+    final double remainder = (rating ?? 0) - fullStars;
+    final Color starColor = getReviewRatingColor(rating);
+    
+    // Add full stars
+    for (int i = 0; i < fullStars; i++) {
+      stars.add(Icon(
+        Icons.star,
+        color: starColor,
+        size: size,
+      ));
+    }
+    
+    // Add half star if needed
+    if (remainder >= 0.5) {
+      stars.add(Icon(
+        Icons.star_half,
+        color: starColor,
+        size: size,
+      ));
+    }
+    
+    // Add empty stars to make it 5 total
+    final int totalStarsShown = fullStars + (remainder >= 0.5 ? 1 : 0);
+    for (int i = totalStarsShown; i < 5; i++) {
+      stars.add(Icon(
+        Icons.star_border,
+        color: Colors.grey.withOpacity(0.5),
+        size: size,
+      ));
+    }
+    
+    return stars;
   }
 }

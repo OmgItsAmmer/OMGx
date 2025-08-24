@@ -78,4 +78,6 @@ class TRoutes {
 
   // Account Book
   static const accountBook = '/account-book';
+
+  static const reviews = '/reviews';
 }

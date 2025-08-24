@@ -166,6 +166,11 @@ class TSideBar extends StatelessWidget {
                       itemName: 'Purchases',
                       route: TRoutes.purchases,
                     ),
+                     const TMenuItem(
+                      icon: Iconsax.star,
+                      itemName: 'Reviews',
+                      route: TRoutes.reviews,
+                    ),
                     const TMenuItem(
                       icon: Iconsax.receipt_1,
                       itemName: 'Account Book',

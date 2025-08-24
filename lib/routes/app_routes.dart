@@ -10,6 +10,7 @@ import 'package:ecommerce_dashboard/views/purchases/all_purchases/purchases.dart
 import 'package:ecommerce_dashboard/views/unkown_route.dart';
 import 'package:get/get.dart';
 
+import '../views/Reviews/review_screen.dart' show ReviewScreen;
 import '../views/brands/brand_details/brand_detail_screen.dart';
 import '../views/category/categories_detail/category_detail.dart';
 import '../views/customer/add_customer/add_customer.dart';
@@ -198,6 +199,12 @@ class TAppRoutes {
     GetPage(
         name: TRoutes.purchaseDetails,
         page: () => const PurchaseDetailScreen(),
+        middlewares: [TRouteMiddleware()]),
+
+    //Reviews Screens
+    GetPage(
+        name: TRoutes.reviews,
+        page: () => const ReviewScreen(),
         middlewares: [TRouteMiddleware()]),
   ];
 }
