@@ -110,8 +110,8 @@ class CustomerController extends GetxController {
       await mediaController.imageAssigner(
           customerId, MediaCategory.customers.toString().split('.').last, true);
 
-      await AddressController.instance
-          .saveAddress(customerId, EntityType.customer);
+      await AddressController.instance.saveAddress(
+          customerId, EntityType.customer, fullName: '${firstName.text} ${lastName.text}'.trim());
 
       customerModel.customerId = customerId;
 
@@ -162,8 +162,8 @@ class CustomerController extends GetxController {
       await mediaController.imageAssigner(
           customerId, MediaCategory.customers.toString().split('.').last, true);
 
-      await AddressController.instance
-          .saveAddress(customerId, EntityType.customer);
+      await AddressController.instance.saveAddress(
+          customerId, EntityType.customer, fullName: '${firstName.text} ${lastName.text}'.trim());
       //locally adding in table
       allCustomers.add(customerModel);
       if (kDebugMode) {

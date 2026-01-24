@@ -96,7 +96,7 @@ class AddressController extends GetxController {
     }
   }
 
-  Future<void> saveAddress(int entityId, EntityType entityType) async {
+  Future<void> saveAddress(int entityId, EntityType entityType, {String? fullName}) async {
     try {
       //   final entityName = entityType.toString().split('.').last;
       AddressModel addressModel = AddressModel.empty();
@@ -106,6 +106,7 @@ class AddressController extends GetxController {
           addressModel = AddressModel(
               location: address.text,
               postalCode: postalCode.text.isEmpty ? null : postalCode.text,
+              fullName: fullName ?? '',
               customerId: entityId);
           break;
 
@@ -113,6 +114,7 @@ class AddressController extends GetxController {
           addressModel = AddressModel(
               location: address.text,
               postalCode: postalCode.text.isEmpty ? null : postalCode.text,
+              fullName: fullName ?? '',
               salesmanId: entityId);
           break;
 
@@ -120,6 +122,7 @@ class AddressController extends GetxController {
           addressModel = AddressModel(
               location: address.text,
               postalCode: postalCode.text.isEmpty ? null : postalCode.text,
+              fullName: fullName ?? '',
               vendorId: entityId);
           break;
 

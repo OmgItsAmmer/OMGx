@@ -91,7 +91,8 @@ class VendorController extends GetxController {
       await vendorRepository.updateVendor(json);
       await mediaController.imageAssigner(
           id, MediaCategory.shop.toString().split('.').last, true);
-      await AddressController.instance.saveAddress(id, EntityType.vendor);
+      await AddressController.instance.saveAddress(
+          id, EntityType.vendor, fullName: '${firstName.text} ${lastName.text}'.trim());
       cleanVendorDetails();
       TLoaders.successSnackBar(
         title: 'Vendor Updated!',
@@ -126,7 +127,8 @@ class VendorController extends GetxController {
       final newId = await vendorRepository.insertVendorInTable(json);
       await mediaController.imageAssigner(
           newId, MediaCategory.shop.toString().split('.').last, true);
-      await AddressController.instance.saveAddress(newId, EntityType.vendor);
+      await AddressController.instance.saveAddress(
+          newId, EntityType.vendor, fullName: '${firstName.text} ${lastName.text}'.trim());
 
       // Locally adding to table
       allVendors.add(vendor);
