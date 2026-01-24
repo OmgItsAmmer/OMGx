@@ -4,7 +4,6 @@ import 'package:ecommerce_dashboard/utils/constants/colors.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import '../../../../common/widgets/icons/table_action_icon_buttons.dart';
 
 class BrandRow extends DataTableSource {
@@ -33,7 +32,7 @@ class BrandRow extends DataTableSource {
         },
         cells: [
           DataCell(Text(
-            brand.bname.toString(),
+            brand.brandname ?? '',
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
@@ -41,9 +40,7 @@ class BrandRow extends DataTableSource {
           )),
 
           DataCell(Text(
-            (brand.productsCount == null)
-                ? '0'
-                : brand.productsCount.toString(),
+            brand.productCount.toString(),
             style: Theme.of(Get.context!)
                 .textTheme
                 .bodyLarge!
@@ -61,14 +58,14 @@ class BrandRow extends DataTableSource {
               Get.defaultDialog(
                 title: "Confirm Delete",
                 middleText:
-                    "Are you sure you want to delete the brand ${brand.bname}?",
+                    "Are you sure you want to delete the brand ${brand.brandname ?? 'Unknown'}?",
                 textConfirm: "Delete",
                 textCancel: "Cancel",
                 confirmTextColor: Colors.white,
                 buttonColor: Colors.red,
                 onConfirm: () async {
                   Navigator.of(Get.context!).pop(); // Close the dialog
-                  await brandController.deleteBrand(brand.brandID!);
+                  await brandController.deleteBrand(brand.brandID);
                 },
                 onCancel: () {
                   Navigator.of(Get.context!).pop(); // Close the dialog

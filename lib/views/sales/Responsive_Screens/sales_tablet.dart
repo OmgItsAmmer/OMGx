@@ -1,4 +1,3 @@
-import 'package:ecommerce_dashboard/Models/address/address_model.dart';
 import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
 import 'package:ecommerce_dashboard/common/widgets/icons/t_circular_icon.dart';
 import 'package:ecommerce_dashboard/controllers/address/address_controller.dart';
@@ -6,16 +5,11 @@ import 'package:ecommerce_dashboard/controllers/customer/customer_controller.dar
 import 'package:ecommerce_dashboard/utils/constants/colors.dart';
 import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:ecommerce_dashboard/views/sales/widgets/sale_action_buttons.dart';
-import 'package:ecommerce_dashboard/views/sales/widgets/sales_chart.dart';
-import 'package:ecommerce_dashboard/views/sales/widgets/sales_stats.dart';
-import 'package:ecommerce_dashboard/views/sales/widgets/recent_sales.dart';
 import 'package:ecommerce_dashboard/views/sales/widgets/serial_variant_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:flutter/rendering.dart';
 
-import '../../../Models/customer/customer_model.dart';
 import '../../../controllers/media/media_controller.dart';
 import '../../../controllers/sales/sales_controller.dart';
 import '../table/sale_table.dart';

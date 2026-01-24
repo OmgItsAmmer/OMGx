@@ -1,7 +1,7 @@
 import 'package:ecommerce_dashboard/Models/products/product_variant_model.dart';
 import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
+import 'package:ecommerce_dashboard/common/widgets/loaders/tloaders.dart';
 import 'package:ecommerce_dashboard/common/widgets/texts/section_heading.dart';
-import 'package:ecommerce_dashboard/common/widgets/shimmers/shimmer.dart';
 import 'package:ecommerce_dashboard/controllers/product/product_controller.dart';
 import 'package:ecommerce_dashboard/utils/constants/colors.dart';
 import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
@@ -308,16 +308,14 @@ class ProductVariantsWidget extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.edit, size: 16),
                   onPressed: () {
-                    // TODO: Implement edit functionality
-                    debugPrint('Edit variant ${variant.variantId}');
+                    _showEditVariantDialog(variant, controller);
                   },
                   tooltip: 'Edit variant',
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete, size: 16, color: Colors.red),
                   onPressed: () {
-                    // TODO: Implement delete functionality
-                    debugPrint('Delete variant ${variant.variantId}');
+                    _showDeleteConfirmation(variant, controller);
                   },
                   tooltip: 'Delete variant',
                 ),
@@ -326,6 +324,99 @@ class ProductVariantsWidget extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _showEditVariantDialog(ProductVariantModel variant,
+      ProductController controller) {
+    final nameController = TextEditingController(text: variant.variantName);
+    final skuController = TextEditingController(text: variant.sku ?? '');
+    bool isVisible = variant.isVisible;
+
+    Get.defaultDialog(
+      title: 'Edit Variant',
+      content: StatefulBuilder(
+        builder: (context, setState) {
+          return ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    controller: nameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Variant Name',
+                      hintText: 'e.g., 1L, 1.5L, Red, Blue',
+                    ),
+                  ),
+                  const SizedBox(height: TSizes.spaceBtwInputFields),
+                  TextFormField(
+                    controller: skuController,
+                    decoration: const InputDecoration(
+                      labelText: 'SKU (Optional)',
+                      hintText: 'e.g., PEP-1L',
+                    ),
+                  ),
+                  const SizedBox(height: TSizes.spaceBtwInputFields),
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: isVisible,
+                        onChanged: (value) {
+                          setState(() {
+                            isVisible = value ?? false;
+                          });
+                        },
+                      ),
+                      const Text('Is Visible'),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+      textConfirm: 'Update',
+      textCancel: 'Cancel',
+      confirmTextColor: Colors.white,
+      buttonColor: TColors.primary,
+      onConfirm: () async {
+        if (nameController.text.trim().isEmpty) {
+          TLoaders.errorSnackBar(
+              title: 'Error', message: 'Variant name is required');
+          return;
+        }
+
+        Get.back();
+
+        final updatedVariant = variant.copyWith(
+          variantName: nameController.text.trim(),
+          sku: skuController.text.trim(),
+          isVisible: isVisible,
+        );
+
+        await controller.updateProductVariant(updatedVariant);
+      },
+    );
+  }
+
+  void _showDeleteConfirmation(ProductVariantModel variant, ProductController controller) {
+    Get.defaultDialog(
+      title: 'Delete Variant',
+      middleText:
+          'Are you sure you want to delete variant "${variant.variantName}"? This action cannot be undone.',
+      textConfirm: 'Delete',
+      textCancel: 'Cancel',
+      confirmTextColor: Colors.white,
+      buttonColor: Colors.red,
+      onConfirm: () async {
+        Get.back();
+        if (variant.variantId != null) {
+          await controller.deleteProductVariant(variant.variantId!);
+        }
+      },
     );
   }
 }

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../controllers/customer/customer_controller.dart';
-import '../../../../utils/device/device_utility.dart';
 import '../../../paginated_data_table.dart';
 import 'customer_table_soruce.dart';
 

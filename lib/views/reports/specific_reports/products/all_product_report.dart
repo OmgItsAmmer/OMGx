@@ -20,7 +20,7 @@ import '../../../../common/widgets/shimmers/shimmer.dart';
 class StockSummaryReportPage extends StatelessWidget {
   final List<ProductModel> products;
 
-  const StockSummaryReportPage({required this.products});
+  const StockSummaryReportPage({super.key, required this.products});
 
   @override
   Widget build(BuildContext context) {

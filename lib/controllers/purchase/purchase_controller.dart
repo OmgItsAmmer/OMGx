@@ -324,8 +324,6 @@ class PurchaseController extends GetxController {
 
       for (var item in purchaseItems) {
         // Skip null items
-        if (item == null) continue;
-
         try {
           // Get product information to determine if it has variants
           final productController = Get.find<ProductController>();
@@ -437,8 +435,6 @@ class PurchaseController extends GetxController {
 
       for (var item in purchaseItems) {
         // Skip null items
-        if (item == null) continue;
-
         try {
           await purchaseRepository.subtractStockQuantity(item);
         } catch (e) {

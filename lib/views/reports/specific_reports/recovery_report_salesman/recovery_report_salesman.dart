@@ -22,7 +22,7 @@ class SalesmanReportPage extends StatelessWidget {
   final DateTime startDate;
   final DateTime endDate;
 
-  const SalesmanReportPage({
+  const SalesmanReportPage({super.key, 
     required this.salesmanReport,
     required this.startDate,
     required this.endDate,
@@ -187,7 +187,7 @@ class SalesmanReportPage extends StatelessWidget {
                   for (var item in chunk)
                     pw.TableRow(
                       children: [
-                        _tableCell(item.orderId?.toString() ?? 'N/A'),
+                        _tableCell(item.orderId.toString() ?? 'N/A'),
                         _tableCell(item.salesmanName ?? 'N/A'),
                         _tableCell(item.customerName ?? 'N/A'),
                         _tableCell(_formatDate(item.orderDate)),
@@ -242,7 +242,7 @@ class SalesmanReportPage extends StatelessWidget {
         pw.Page(
           build: (context) => pw.Center(
             child: pw.Text('Error generating report: $e',
-                style: pw.TextStyle(color: PdfColors.red)),
+                style: const pw.TextStyle(color: PdfColors.red)),
           ),
         ),
       );
@@ -351,7 +351,7 @@ class SalesmanReportPage extends StatelessWidget {
       final startDateStr = DateFormat('yyyyMMdd').format(startDate);
       final endDateStr = DateFormat('yyyyMMdd').format(endDate);
       final file = File(
-          '${directory!.path}/Salesman_Report_${startDateStr}_to_${endDateStr}.pdf');
+          '${directory!.path}/Salesman_Report_${startDateStr}_to_$endDateStr.pdf');
       await file.writeAsBytes(pdfBytes);
 
       TLoaders.successSnackBar(

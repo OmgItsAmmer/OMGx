@@ -8,7 +8,6 @@ import 'package:iconsax/iconsax.dart';
 
 import '../../../common/widgets/containers/rounded_container.dart';
 import '../../../common/widgets/loaders/tloaders.dart';
-import '../../../controllers/sales/sales_controller.dart';
 import '../../../utils/validators/validation.dart';
 
 class PurchaseUnitTotalPrice extends StatelessWidget {

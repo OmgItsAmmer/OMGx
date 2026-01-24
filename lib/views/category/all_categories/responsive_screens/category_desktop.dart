@@ -11,7 +11,6 @@ import '../../../../Models/category/category_model.dart';
 import '../../../../controllers/category/category_controller.dart';
 import '../../../../routes/routes.dart';
 import '../table/category_table.dart';
-import '../../../../controllers/search/search_controller.dart';
 
 class AllCategoryDesktopScreen extends StatelessWidget {
   const AllCategoryDesktopScreen({super.key});

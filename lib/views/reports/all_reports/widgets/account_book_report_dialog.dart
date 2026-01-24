@@ -145,7 +145,7 @@ class _AccountBookReportDialogState extends State<AccountBookReportDialog> {
                   children: [
                     // Entity Type Dropdown
                     Obx(() => DropdownButtonFormField<EntityType>(
-                          value: selectedEntityType.value,
+                          initialValue: selectedEntityType.value,
                           decoration: const InputDecoration(
                             labelText: 'Entity Type *',
                             prefixIcon: Icon(Iconsax.category),

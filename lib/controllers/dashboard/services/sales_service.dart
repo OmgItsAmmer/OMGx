@@ -50,15 +50,15 @@ class SalesService {
     double currentMonthSales = filteredOrders.where((order) {
       DateTime orderDate = DateTime.parse(order.orderDate);
       return orderDate
-              .isAfter(firstDayOfCurrentMonth.subtract(Duration(days: 1))) &&
-          orderDate.isBefore(now.add(Duration(days: 1)));
+              .isAfter(firstDayOfCurrentMonth.subtract(const Duration(days: 1))) &&
+          orderDate.isBefore(now.add(const Duration(days: 1)));
     }).fold(0.0, (sum, order) => sum + order.subTotal);
 
     // Calculate sales for the same number of days from the previous month
     double previousMonthSales = filteredOrders.where((order) {
       DateTime orderDate = DateTime.parse(order.orderDate);
       return orderDate
-              .isAfter(firstDayOfPreviousMonth.subtract(Duration(days: 1))) &&
+              .isAfter(firstDayOfPreviousMonth.subtract(const Duration(days: 1))) &&
           orderDate.isBefore(
               firstDayOfPreviousMonth.add(Duration(days: daysInCurrentMonth)));
     }).fold(0.0, (sum, order) => sum + order.subTotal);

@@ -8,7 +8,7 @@ A comprehensive admin dashboard for business management built with Flutter and S
 
 - **Authentication**: Secure login system using Supabase
 - **Dashboard**: Analytics overview with visualizations using fl_chart
-- **Order Management**: Track and manage customer orders
+- **Order Management**: Track and manage customer orders with delivery location mapping
 - **Product Management**: CRUD operations for products
 - **Customer Management**: Track customer information and purchase history
 - **Vendor Management**: Comprehensive vendor management with CRUD operations, address tracking, and order history
@@ -25,6 +25,7 @@ A comprehensive admin dashboard for business management built with Flutter and S
 - **Secure Key Storage**: Protection of sensitive API keys
 - **Network Resilience**: Robust socket connection handling
 - **Improved Autocomplete**: Enhanced autocomplete component with validation and better UX
+- **Order Location Mapping**: Interactive OpenStreetMap integration showing exact delivery locations with coordinates
 
 ## Security Measures & Network Handling
 
@@ -302,6 +303,8 @@ The application now uses a comprehensive variant system instead of serial number
 - **GetX**: State management, navigation, and dependency injection
 - **fl_chart**: Data visualization
 - **PDF**: Report generation
+- **flutter_map**: Interactive map widget for displaying delivery locations
+- **OpenStreetMap**: Map tiles for location visualization
 - **And more**: See pubspec.yaml for the complete list of dependencies
 
 ## Getting Started
@@ -716,3 +719,15 @@ The component is used throughout the application for product selection, customer
 #   f l u t t e r _ s u p a b a s e _ a d m i n P a n e l 
  
  
+## Order Location Mapping
+
+The application includes an interactive map feature that displays the exact delivery location for each order using OpenStreetMap and coordinates stored in the database.
+
+### Features:
+- OpenStreetMap Integration: Uses flutter_map package with OSM tiles
+- Coordinate Display: Shows exact latitude and longitude for each order
+- Interactive Map: Users can zoom, pan, and interact with the map
+- Custom Markers: Visual markers indicate delivery locations
+- Address Display: Shows formatted address below the map
+- Responsive Design: Adapts to desktop, tablet, and mobile screens
+- Graceful Fallback: Shows message when coordinates are not available

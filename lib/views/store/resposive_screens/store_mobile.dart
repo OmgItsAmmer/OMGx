@@ -4,8 +4,6 @@ import 'package:ecommerce_dashboard/controllers/media/media_controller.dart';
 import 'package:ecommerce_dashboard/utils/constants/colors.dart';
 import 'package:ecommerce_dashboard/utils/constants/enums.dart';
 import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
-import 'package:ecommerce_dashboard/utils/device/device_utility.dart';
-import 'package:ecommerce_dashboard/utils/validators/validation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';

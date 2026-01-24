@@ -146,7 +146,7 @@ class ReportsRepository extends GetxController {
         throw Exception('No data received or invalid format from Supabase.');
       }
 
-      return (response as List)
+      return (response)
           .map((item) =>
               SimplePnLReportModel.fromJson(item as Map<String, dynamic>))
           .toList();
@@ -286,7 +286,7 @@ class ReportsRepository extends GetxController {
 
       return response
           .map(
-              (item) => AccountBookModel.fromJson(item as Map<String, dynamic>))
+              (item) => AccountBookModel.fromJson(item))
           .toList();
     } catch (e) {
       if (kDebugMode) {

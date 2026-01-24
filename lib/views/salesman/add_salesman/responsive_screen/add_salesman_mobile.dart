@@ -13,20 +13,20 @@ class AddSalesmanMobile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
+      body: const SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(TSizes.sm),
+          padding: EdgeInsets.all(TSizes.sm),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Stacked vertically for mobile
               // Thumbnail first
-              const SalesmanThumbnailInfo(),
+              SalesmanThumbnailInfo(),
 
-              const SizedBox(height: TSizes.spaceBtwSections),
+              SizedBox(height: TSizes.spaceBtwSections),
 
               // Basic Info
-              const SalesmanBasicInfo(),
+              SalesmanBasicInfo(),
             ],
           ),
         ),

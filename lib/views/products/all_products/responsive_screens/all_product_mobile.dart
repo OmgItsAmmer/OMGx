@@ -105,7 +105,7 @@ class AllProductMobileScreen extends GetView<ProductController> {
               if (searchTerm.isNotEmpty) {
                 filteredProducts = controller.allProducts
                     .where((product) =>
-                        (product.name?.toString().toLowerCase() ?? '')
+                        (product.name.toString().toLowerCase() ?? '')
                             .contains(searchTerm) ||
                         (product.salePrice?.toString().toLowerCase() ?? '')
                             .contains(searchTerm) ||
@@ -165,11 +165,11 @@ class ProductCard extends StatelessWidget {
   final VoidCallback onEdit;
 
   const ProductCard({
-    Key? key,
+    super.key,
     required this.product,
     required this.mediaController,
     required this.onEdit,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

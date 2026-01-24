@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
 import 'package:ecommerce_dashboard/common/widgets/images/t_rounded_image.dart';
 import 'package:ecommerce_dashboard/common/widgets/shimmers/shimmer.dart';
-import 'package:ecommerce_dashboard/utils/constants/image_strings.dart';
 import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:ecommerce_dashboard/controllers/address/address_controller.dart';
 import 'package:iconsax/iconsax.dart';

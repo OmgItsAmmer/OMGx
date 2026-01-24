@@ -170,7 +170,7 @@ class InstallmentRepository extends GetxController {
           .limit(1)
           .single();
 
-      if (result != null && result['order_id'] != null) {
+      if (result['order_id'] != null) {
         return result['order_id'] as int;
       }
       return null;
@@ -253,10 +253,8 @@ class InstallmentRepository extends GetxController {
           .limit(1)
           .single();
 
-      if (data != null) {
-        return InstallmentPlanModel.fromJson(data);
-      }
-      return null;
+      return InstallmentPlanModel.fromJson(data);
+          return null;
     } catch (e) {
       print('Error fetching installment plan: $e');
       return null;

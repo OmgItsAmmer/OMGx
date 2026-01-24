@@ -5,17 +5,16 @@ import 'package:ecommerce_dashboard/Models/products/varaint_batches_model.dart';
 import 'package:ecommerce_dashboard/common/widgets/loaders/tloaders.dart';
 import 'package:ecommerce_dashboard/controllers/brands/brand_controller.dart';
 import 'package:ecommerce_dashboard/controllers/category/category_controller.dart';
-import 'package:ecommerce_dashboard/controllers/product/product_images_controller.dart';
 import 'package:ecommerce_dashboard/repositories/products/product_repository.dart';
 import 'package:ecommerce_dashboard/repositories/products/product_variants_repository.dart';
 import 'package:ecommerce_dashboard/repositories/products/variant_batches_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 
 import '../../routes/routes.dart';
 import '../../utils/constants/enums.dart';
+import '../../utils/ai/gemini_service.dart';
 import '../media/media_controller.dart';
 
 class ProductController extends GetxController {
@@ -48,6 +47,7 @@ class ProductController extends GetxController {
   RxBool isUpdating = false.obs;
   RxBool isLoadingVariants = false.obs;
   RxBool isLoadingAddProductVariant = false.obs;
+  RxBool isGeneratingDescription = false.obs;
 
   // Deprecated properties - kept for compatibility
   RxBool hasSerialNumbers = false.obs; // Always false now, use variants instead
@@ -496,6 +496,41 @@ class ProductController extends GetxController {
     }
   }
 
+  // Update an existing product variant
+  Future<void> updateProductVariant(ProductVariantModel variant) async {
+    try {
+      await productVariantsRepository.updateVariant(variant);
+
+      // Update local list
+      final index = productVariants.indexWhere((v) => v.variantId == variant.variantId);
+      if (index != -1) {
+        productVariants[index] = variant;
+      }
+
+      TLoaders.successSnackBar(
+          title: 'Success', message: 'Variant updated successfully');
+    } catch (e) {
+      TLoaders.errorSnackBar(
+          title: 'Error', message: 'Failed to update variant: $e');
+    }
+  }
+
+  // Delete a product variant
+  Future<void> deleteProductVariant(int variantId) async {
+    try {
+      await productVariantsRepository.deleteVariant(variantId);
+
+      // Remove from local list
+      productVariants.removeWhere((v) => v.variantId == variantId);
+
+      TLoaders.successSnackBar(
+          title: 'Success', message: 'Variant deleted successfully');
+    } catch (e) {
+      TLoaders.errorSnackBar(
+          title: 'Error', message: 'Failed to delete variant: $e');
+    }
+  }
+
   // Get available variant batches for a product
   Future<List<VariantBatchesModel>> getAvailableVariantBatches(
       int productId) async {
@@ -610,5 +645,80 @@ class ProductController extends GetxController {
     // This method is deprecated. Serial numbers are replaced with variants.
     // Always keep hasSerialNumbers as false
     hasSerialNumbers.value = false;
+  }
+
+  /// Generates a product description using Gemini AI
+  /// Validates that product name is not empty before generating
+  Future<void> generateDescription() async {
+    if (kDebugMode) {
+      print('[ProductController] generateDescription() called');
+    }
+
+    try {
+      // Validate product name is not empty
+      final productNameText = productName.text.trim();
+      
+      if (kDebugMode) {
+        print('[ProductController] Validating product name: "$productNameText"');
+      }
+
+      if (productNameText.isEmpty) {
+        if (kDebugMode) {
+          print('[ProductController] ❌ Product name is empty - validation failed');
+        }
+        TLoaders.errorSnackBar(
+          title: 'Error',
+          message: 'Please enter a product name first',
+        );
+        return;
+      }
+
+      if (kDebugMode) {
+        print('[ProductController] ✅ Product name validation passed');
+        print('[ProductController] Setting isGeneratingDescription to true');
+      }
+
+      isGeneratingDescription.value = true;
+
+      if (kDebugMode) {
+        print('[ProductController] Calling GeminiService.generateProductDescription()');
+      }
+
+      // Generate description using Gemini
+      final description = await GeminiService.generateProductDescription(productNameText);
+      
+      if (kDebugMode) {
+        print('[ProductController] ✅ Description received from GeminiService');
+        print('[ProductController] Description length: ${description.length} characters');
+        print('[ProductController] Setting description to text field');
+      }
+      
+      // Set the generated description
+      productDescription.text = description;
+
+      if (kDebugMode) {
+        print('[ProductController] ✅ Description successfully set in text field');
+      }
+
+      TLoaders.successSnackBar(
+        title: 'Success',
+        message: 'Description generated successfully',
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('[ProductController] ❌ Error in generateDescription()');
+        print('[ProductController] Error type: ${e.runtimeType}');
+        print('[ProductController] Error message: ${e.toString()}');
+      }
+      TLoaders.errorSnackBar(
+        title: 'Error',
+        message: 'Failed to generate description: ${e.toString()}',
+      );
+    } finally {
+      if (kDebugMode) {
+        print('[ProductController] Setting isGeneratingDescription to false');
+      }
+      isGeneratingDescription.value = false;
+    }
   }
 }

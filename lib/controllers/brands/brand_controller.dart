@@ -73,6 +73,7 @@ class BrandController extends GetxController {
 
       // Validate form first
       if (!brandDetail.currentState!.validate()) {
+        isUpdating.value = false;
         TLoaders.errorSnackBar(
           title: "Empty Fields",
           message: 'Kindly fill all the fields before proceeding.',
@@ -83,6 +84,7 @@ class BrandController extends GetxController {
       // Check for duplicate brand name
       final brandNameText = brandName.text.trim();
       if (_brandNameExists(brandNameText)) {
+        isUpdating.value = false;
         TLoaders.errorSnackBar(
           title: "Duplicate Brand",
           message: 'A brand with the name "$brandNameText" already exists.',
@@ -138,6 +140,7 @@ class BrandController extends GetxController {
 
       // Validate form
       if (!brandDetail.currentState!.validate()) {
+        isUpdating.value = false;
         TLoaders.errorSnackBar(
           title: "Empty Fields",
           message: 'Kindly fill all the fields before proceeding.',
@@ -148,6 +151,7 @@ class BrandController extends GetxController {
       // Check for duplicate brand name (excluding the current brand being edited)
       final brandNameText = brandName.text.trim();
       if (_brandNameExists(brandNameText, excludeBrandId: brandId)) {
+        isUpdating.value = false;
         TLoaders.errorSnackBar(
           title: "Duplicate Brand",
           message: 'A brand with the name "$brandNameText" already exists.',
@@ -200,7 +204,7 @@ class BrandController extends GetxController {
 
       TLoaders.successSnackBar(
         title: 'Brand Updated!',
-        message: '${brandNameText} updated in Database',
+        message: '$brandNameText updated in Database',
       );
       Navigator.of(Get.context!).pop();
     } catch (e) {

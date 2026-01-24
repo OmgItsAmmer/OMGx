@@ -34,6 +34,7 @@ enum MediaCategory {
   guarantors,
   shop,
   vendors,
+  collections,
 }
 
 enum OrderStatus { pending, completed, cancelled }

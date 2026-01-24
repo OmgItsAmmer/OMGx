@@ -16,36 +16,36 @@ class ProductDetailMobile extends StatelessWidget {
   Widget build(BuildContext context) {
     final ProductController controller = Get.find<ProductController>();
 
-    return Scaffold(
+    return const Scaffold(
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(TSizes.sm),
+          padding: EdgeInsets.all(TSizes.sm),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // All elements stacked vertically for mobile
               // Thumbnail first
-              const ThumbnailInfo(),
+              ThumbnailInfo(),
 
-              const SizedBox(height: TSizes.spaceBtwSections),
+              SizedBox(height: TSizes.spaceBtwSections),
 
               // Basic Info
-              const BasicInfo(),
+              BasicInfo(),
 
-              const SizedBox(height: TSizes.spaceBtwSections),
+              SizedBox(height: TSizes.spaceBtwSections),
 
               // Brand & Category & visibility
-              const ProductBrandcCategory(),
+              ProductBrandcCategory(),
 
-              const SizedBox(height: TSizes.spaceBtwSections),
+              SizedBox(height: TSizes.spaceBtwSections),
 
               // Serial Variants - Only show for products with serial numbers
-              const ProductVariantsWidget(),
+              ProductVariantsWidget(),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: const ProductDetailBottomBar(),
+      bottomNavigationBar: ProductDetailBottomBar(),
     );
   }
 }

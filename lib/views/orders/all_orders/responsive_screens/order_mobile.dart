@@ -148,10 +148,10 @@ class OrderCard extends StatelessWidget {
   final VoidCallback onView;
 
   const OrderCard({
-    Key? key,
+    super.key,
     required this.order,
     required this.onView,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -252,7 +252,7 @@ class OrderCard extends StatelessWidget {
                     backgroundColor: TColors.warning.withOpacity(0.2),
                     label: Text(
                       'Due: Rs. ${(order.subTotal - (order.paidAmount ?? 0)).toStringAsFixed(2)}',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: TColors.warning,
                         fontSize: 12,
                       ),

@@ -13,8 +13,6 @@ import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../controllers/purchase/purchase_controller.dart';
-import '../../../../utils/constants/enums.dart';
-import '../../../../utils/validators/validation.dart';
 
 class PurchaseTransaction extends StatelessWidget {
   const PurchaseTransaction({super.key, required this.purchaseModel});

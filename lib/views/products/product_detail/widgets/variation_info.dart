@@ -1,14 +1,11 @@
 import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
 import 'package:ecommerce_dashboard/common/widgets/images/t_rounded_image.dart';
 import 'package:ecommerce_dashboard/utils/constants/colors.dart';
-import 'package:ecommerce_dashboard/utils/constants/enums.dart';
 import 'package:ecommerce_dashboard/utils/constants/image_strings.dart';
 import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 
-import '../../../../utils/helpers/helper_functions.dart';
 
 class VariationInfo extends StatelessWidget {
   const VariationInfo({super.key});

@@ -1,12 +1,4 @@
-import 'package:ecommerce_dashboard/controllers/brands/brand_controller.dart';
-import 'package:ecommerce_dashboard/controllers/category/category_controller.dart';
-import 'package:ecommerce_dashboard/controllers/customer/customer_controller.dart';
-import 'package:ecommerce_dashboard/controllers/installments/installments_controller.dart';
 import 'package:ecommerce_dashboard/controllers/media/media_controller.dart';
-import 'package:ecommerce_dashboard/controllers/orders/orders_controller.dart';
-import 'package:ecommerce_dashboard/controllers/product/product_controller.dart';
-import 'package:ecommerce_dashboard/controllers/sales/sales_controller.dart';
-import 'package:ecommerce_dashboard/controllers/salesman/salesman_controller.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../utils/constants/enums.dart';

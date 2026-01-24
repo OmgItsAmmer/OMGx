@@ -28,7 +28,7 @@ class ProductTable extends StatelessWidget {
       if (searchTerm.isNotEmpty) {
         filteredProducts = productController.allProducts
             .where((product) =>
-                (product.name?.toString().toLowerCase() ?? '')
+                (product.name.toString().toLowerCase() ?? '')
                     .contains(searchTerm) ||
                 (product.salePrice?.toString().toLowerCase() ?? '')
                     .contains(searchTerm) ||

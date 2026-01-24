@@ -524,7 +524,7 @@ class PurchaseSalesController extends GetxController {
             // Insert the new variant and get its ID
             finalVariantId =
                 await productVariantsRepository.insertVariant(newVariant);
-            if (finalVariantId! > 0) {
+            if (finalVariantId > 0) {
               if (kDebugMode) {
                 print(
                     '✓ Created new variant: ${newVariant.variantName} with ID: $finalVariantId');
@@ -542,7 +542,7 @@ class PurchaseSalesController extends GetxController {
             }
             TLoaders.errorSnackBar(
                 title: 'Variant Creation Error',
-                message: 'Failed to create variant for ' + cartItem.name);
+                message: 'Failed to create variant for ${cartItem.name}');
             continue;
           }
         }

@@ -6,13 +6,11 @@ import 'package:ecommerce_dashboard/controllers/table/table_search_controller.da
 import 'package:ecommerce_dashboard/routes/routes.dart';
 import 'package:ecommerce_dashboard/utils/constants/colors.dart';
 import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
-import 'package:ecommerce_dashboard/views/products/all_products/table/product_table.dart';
 import 'package:ecommerce_dashboard/views/salesman/all_salesman/table/salesman_table.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
-import '../../../customer/all_customer/table/customer_table.dart';
 
 class SalesmanDesktop extends StatelessWidget {
   const SalesmanDesktop({super.key});

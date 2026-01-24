@@ -3,6 +3,8 @@ import 'package:ecommerce_dashboard/routes/routes_MIDDLEWARE.dart';
 import 'package:ecommerce_dashboard/views/account_book/account_book.dart';
 import 'package:ecommerce_dashboard/views/brands/all_brands/brands.dart';
 import 'package:ecommerce_dashboard/views/category/all_categories/category.dart';
+import 'package:ecommerce_dashboard/views/collections/all_collections/all_collections.dart';
+import 'package:ecommerce_dashboard/views/collections/collection_detail/collection_detail.dart';
 import 'package:ecommerce_dashboard/views/expenses/expenses.dart';
 import 'package:ecommerce_dashboard/views/login/login.dart';
 import 'package:ecommerce_dashboard/views/orders/all_orders/orders.dart';
@@ -116,7 +118,7 @@ class TAppRoutes {
         page: () => const BrandDetailScreen(),
         middlewares: [TRouteMiddleware()]),
 
-    //Brand Screens
+    //Category Screens
     GetPage(
         name: TRoutes.category,
         page: () => const AllCategoryScreen(),
@@ -124,6 +126,16 @@ class TAppRoutes {
     GetPage(
         name: TRoutes.categoryDetails,
         page: () => const CategoryDetailScreen(),
+        middlewares: [TRouteMiddleware()]),
+
+    //Collection Screens
+    GetPage(
+        name: TRoutes.collections,
+        page: () => const AllCollections(),
+        middlewares: [TRouteMiddleware()]),
+    GetPage(
+        name: TRoutes.collectionDetails,
+        page: () => const CollectionDetailScreen(),
         middlewares: [TRouteMiddleware()]),
 
     //Profile

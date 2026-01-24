@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 class PurchaseItemModel {
   final int productId;
   final double price;
@@ -51,19 +53,72 @@ class PurchaseItemModel {
 
   // Factory method to create an PurchaseItemModel from JSON response
   factory PurchaseItemModel.fromJson(Map<String, dynamic> json) {
-    return PurchaseItemModel(
-      productId: json['product_id'] as int,
-      price: (json['price'] is num)
+    // Handle bigint values that might come as int or String
+    int parseToInt(dynamic value) {
+      if (value == null) return 0;
+      if (value is int) return value;
+      if (value is String) return int.tryParse(value) ?? 0;
+      return (value as num).toInt();
+    }
+
+    int? parseToIntNullable(dynamic value) {
+      if (value == null) return null;
+      if (value is int) return value;
+      if (value is String) return int.tryParse(value);
+      return (value as num).toInt();
+    }
+
+    if (kDebugMode) {
+      print('🔧 [PurchaseItemModel] Parsing JSON:');
+      print('   - JSON keys: ${json.keys.toList()}');
+      print('   - product_id: ${json['product_id']} (type: ${json['product_id'].runtimeType})');
+      print('   - purchase_id: ${json['purchase_id']} (type: ${json['purchase_id'].runtimeType})');
+      print('   - variant_id: ${json['variant_id']} (type: ${json['variant_id']?.runtimeType})');
+      print('   - price: ${json['price']} (type: ${json['price'].runtimeType})');
+      print('   - quantity: ${json['quantity']} (type: ${json['quantity'].runtimeType})');
+    }
+
+    try {
+      final productId = parseToInt(json['product_id']);
+      final purchaseId = parseToInt(json['purchase_id']);
+      final quantity = parseToInt(json['quantity']);
+      final price = (json['price'] is num)
           ? (json['price'] as num).toDouble()
-          : double.tryParse(json['price'].toString()) ?? 0.0,
-      quantity: json['quantity'] as int,
-      purchaseId: json['purchase_id'] as int,
-      unit: json['unit'] as String?,
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'])
-          : null,
-      variantId: json['variant_id'] as int?,
-    );
+          : double.tryParse(json['price'].toString()) ?? 0.0;
+      final variantId = parseToIntNullable(json['variant_id']);
+      final unit = json['unit'] as String?;
+      final createdAt = json['created_at'] != null
+          ? DateTime.parse(json['created_at'].toString())
+          : null;
+
+      if (kDebugMode) {
+        print('✅ [PurchaseItemModel] Parsed values:');
+        print('   - productId: $productId');
+        print('   - purchaseId: $purchaseId');
+        print('   - quantity: $quantity');
+        print('   - price: $price');
+        print('   - variantId: $variantId');
+        print('   - unit: $unit');
+        print('   - createdAt: $createdAt');
+      }
+
+      return PurchaseItemModel(
+        productId: productId,
+        price: price,
+        quantity: quantity,
+        purchaseId: purchaseId,
+        unit: unit,
+        createdAt: createdAt,
+        variantId: variantId,
+      );
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('❌ [PurchaseItemModel] Error parsing: $e');
+        print('   Stack trace: $stackTrace');
+        print('   JSON: $json');
+      }
+      rethrow;
+    }
   }
 
   // Method to handle a list of PurchaseItemModel from JSON

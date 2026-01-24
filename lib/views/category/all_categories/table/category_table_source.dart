@@ -1,11 +1,9 @@
-import 'package:ecommerce_dashboard/controllers/brands/brand_controller.dart';
 import 'package:ecommerce_dashboard/controllers/category/category_controller.dart';
 import 'package:ecommerce_dashboard/routes/routes.dart';
 import 'package:ecommerce_dashboard/utils/constants/colors.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import '../../../../common/widgets/icons/table_action_icon_buttons.dart';
 
 class CategoryRow extends DataTableSource {

@@ -52,7 +52,7 @@ class EnhancedAutocomplete<T extends Object> extends StatefulWidget {
   final bool showOptionsOnFocus;
 
   const EnhancedAutocomplete({
-    Key? key,
+    super.key,
     this.labelText = 'Item',
     this.hintText = 'Select an item',
     required this.displayStringForOption,
@@ -66,7 +66,7 @@ class EnhancedAutocomplete<T extends Object> extends StatefulWidget {
     this.onManualTextEntry,
     this.validator,
     this.showOptionsOnFocus = false,
-  }) : super(key: key);
+  });
 
   @override
   State<EnhancedAutocomplete<T>> createState() =>
@@ -126,7 +126,7 @@ class _EnhancedAutocompleteState<T extends Object>
     if (!isValid) {
       TLoaders.errorSnackBar(
           title: 'Invalid Selection',
-          message: '${widget.labelText} "${text}" not found in the list');
+          message: '${widget.labelText} "$text" not found in the list');
 
       // Reset the field if needed
       if (_isMounted && widget.externalController != null) {
@@ -146,7 +146,7 @@ class _EnhancedAutocompleteState<T extends Object>
       displayStringForOption: widget.displayStringForOption,
       optionsViewBuilder: (BuildContext context, void Function(T) onSelected,
           Iterable<T> options) {
-        final AlignmentDirectional optionsAlignment =
+        const AlignmentDirectional optionsAlignment =
             AlignmentDirectional.topStart;
 
         return Align(
@@ -154,7 +154,7 @@ class _EnhancedAutocompleteState<T extends Object>
           child: Material(
             elevation: 4.0,
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: 200.0),
+              constraints: const BoxConstraints(maxHeight: 200.0),
               child: ListView.builder(
                 padding: EdgeInsets.zero,
                 shrinkWrap: true,

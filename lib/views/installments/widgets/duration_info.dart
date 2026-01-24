@@ -66,7 +66,7 @@ class DurationInfo extends StatelessWidget {
           //DatePicker
 
           TRoundedContainer(
-              padding: EdgeInsets.all(TSizes.defaultSpace),
+              padding: const EdgeInsets.all(TSizes.defaultSpace),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

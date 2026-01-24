@@ -131,7 +131,7 @@ class NotificationDesktop extends StatelessWidget {
                 final notification = notifications[index];
 
                 return AnimatedSlide(
-                  offset: Offset(0, 0),
+                  offset: const Offset(0, 0),
                   duration: Duration(milliseconds: 300 + (index * 50)),
                   curve: Curves.easeOutQuart,
                   child: AnimatedOpacity(

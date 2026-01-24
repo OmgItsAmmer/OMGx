@@ -162,7 +162,7 @@ class ProductScreen extends StatelessWidget {
                   spreadRadius: 5, // Spread of the shadow
                   blurRadius: 10, // Blur intensity
                   offset:
-                      Offset(0, 5), // Offset for horizontal and vertical shadow
+                      const Offset(0, 5), // Offset for horizontal and vertical shadow
                 ),
               ],
             ),

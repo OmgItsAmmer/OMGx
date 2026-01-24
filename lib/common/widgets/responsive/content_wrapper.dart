@@ -38,7 +38,7 @@ class TContentWrapper extends StatelessWidget {
     }
 
     // Otherwise, wrap it in a container to render properly
-    return Container(
+    return SizedBox(
       width: double.infinity,
       height: double.infinity,
       child: content,

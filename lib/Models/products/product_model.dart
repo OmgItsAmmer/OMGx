@@ -1,4 +1,3 @@
-import 'package:ecommerce_dashboard/Models/products/variant_model.dart';
 
 class ProductModel {
   int? productId;

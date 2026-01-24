@@ -11,7 +11,6 @@ import '../../../../common/widgets/shimmers/shimmer.dart';
 import '../../../../common/widgets/tiles/user_advance_info_tile.dart';
 import '../../../../controllers/media/media_controller.dart';
 import '../../../../controllers/orders/orders_controller.dart';
-import '../../../../controllers/product/product_images_controller.dart';
 import '../../../../utils/constants/colors.dart';
 import '../../../../utils/constants/enums.dart';
 import '../../../profile/old/widgets/profile_menu.dart';

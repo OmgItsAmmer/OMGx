@@ -16,7 +16,7 @@ class MediaFolderDropDown extends StatelessWidget {
         width: 140,
         child: DropdownButtonFormField(
           isExpanded: false,
-          value: mediaController.selectedPath.value,
+          initialValue: mediaController.selectedPath.value,
           items: MediaCategory.values
               .map((category) => DropdownMenuItem(
                   value: category,

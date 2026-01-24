@@ -153,7 +153,7 @@ class PurchaseSalesMobile extends GetView<PurchaseSalesController> {
                                                     value: controller
                                                         .mergeIdenticalProducts
                                                         .value,
-                                                    activeColor:
+                                                    activeThumbColor:
                                                         TColors.primary,
                                                     activeTrackColor: TColors
                                                         .primary

@@ -1,5 +1,4 @@
 import 'package:ecommerce_dashboard/common/layouts/templates/site_template.dart';
-import 'package:ecommerce_dashboard/views/customer/all_customer/responsive_screens/customer_desktop.dart';
 import 'package:ecommerce_dashboard/views/media/responsive_screens/media_desktop.dart';
 import 'package:ecommerce_dashboard/views/media/responsive_screens/media_mobile.dart';
 import 'package:ecommerce_dashboard/views/media/responsive_screens/media_tablet.dart';

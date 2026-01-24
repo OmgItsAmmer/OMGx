@@ -33,10 +33,10 @@ class PurchaseDetailMobileScreen extends StatelessWidget {
             Theme(
               // Override theme for the purchase info section to fix status dropdown
               data: Theme.of(context).copyWith(
-                dropdownMenuTheme: DropdownMenuThemeData(
+                dropdownMenuTheme: const DropdownMenuThemeData(
                   inputDecorationTheme: InputDecorationTheme(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                    constraints: const BoxConstraints(
+                    contentPadding: EdgeInsets.symmetric(horizontal: 8),
+                    constraints: BoxConstraints(
                       maxWidth: 120, // Constrain width for mobile
                     ),
                   ),

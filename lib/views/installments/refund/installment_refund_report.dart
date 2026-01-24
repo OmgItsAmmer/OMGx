@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class InstallmentRefundReport extends StatelessWidget {
-  const InstallmentRefundReport({Key? key}) : super(key: key);
+  const InstallmentRefundReport({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -402,7 +402,7 @@ class InstallmentRefundReport extends StatelessWidget {
               Switch(
                 value: toggleValue.value,
                 onChanged: onChanged,
-                activeColor: TColors.primary,
+                activeThumbColor: TColors.primary,
               ),
             ],
           )),
@@ -419,14 +419,14 @@ class RefundDetailRow extends StatelessWidget {
   final String? includedText;
 
   const RefundDetailRow({
-    Key? key,
+    super.key,
     required this.title,
     required this.amount,
     this.color,
     this.isBold = false,
     this.isIncluded = false,
     this.includedText,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

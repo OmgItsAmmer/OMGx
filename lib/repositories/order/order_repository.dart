@@ -9,6 +9,7 @@ import '../../Models/orders/order_item_model.dart';
 import '../../Models/products/product_model.dart';
 import '../../controllers/product/product_controller.dart';
 import '../../repositories/products/product_variants_repository.dart';
+import '../../Models/address/order_address_model.dart';
 
 class OrderRepository {
   //fetch
@@ -134,7 +135,7 @@ class OrderRepository {
         .select('order_id')
         .eq('variant_id', variantId);
 
-    return response.map<int>((item) => item['order_id'] as int).toList();
+    return response.map<int>((item) => item['order_id'] as int? ?? 0).toList();
   }
 
   Future<void> restoreQuantity(OrderItemModel item) async {
@@ -171,7 +172,7 @@ class OrderRepository {
             .eq('product_id', item.productId)
             .single();
 
-        final int currentStock = response['stock_quantity'] as int;
+        final int currentStock = response['stock_quantity'] as int? ?? 0;
         final int newStock = currentStock + item.quantity;
 
         // Fixed: Handle null response properly
@@ -245,7 +246,7 @@ class OrderRepository {
             .single(); // Ensures we get a single row
 
         // Directly access the stock quantity from the response
-        final int currentStock = response['stock_quantity'] as int;
+        final int currentStock = response['stock_quantity'] as int? ?? 0;
         final int newStock = currentStock - item.quantity; // Subtract quantity
 
         // Step 2: Update the stock quantity
@@ -318,9 +319,6 @@ class OrderRepository {
       final productController = Get.find<ProductController>();
 
       for (var item in orderItems) {
-        // Skip null items
-        if (item == null) continue;
-
         // Find the product
         final product = productController.allProducts.firstWhere(
             (p) => p.productId == item.productId,
@@ -365,7 +363,7 @@ class OrderRepository {
               .eq('product_id', item.productId)
               .single();
 
-          final int currentStock = response['stock_quantity'] as int;
+          final int currentStock = response['stock_quantity'] as int? ?? 0;
 
           if (currentStock < item.quantity) {
             if (kDebugMode) {
@@ -384,6 +382,52 @@ class OrderRepository {
       }
       TLoaders.errorSnackBar(title: 'Stock Check Error', message: e.toString());
       return false;
+    }
+  }
+
+  /// Fetch order address with coordinates from order_addresses table
+  Future<OrderAddressModel?> fetchOrderAddressWithCoordinates(int? addressId) async {
+    try {
+      // Return null if addressId is null
+      if (addressId == null) {
+        if (kDebugMode) {
+          print('Address ID is null');
+        }
+        return null;
+      }
+
+      // First try to get the address from order_addresses table
+      final orderAddressResponse = await supabase
+          .from('order_addresses')
+          .select()
+          .eq('address_id', addressId)
+          .maybeSingle();
+
+      if (orderAddressResponse != null) {
+        return OrderAddressModel.fromJson(orderAddressResponse);
+      }
+
+      // If not found in order_addresses, try the addresses table
+      final addressResponse = await supabase
+          .from('addresses')
+          .select()
+          .eq('address_id', addressId)
+          .maybeSingle();
+
+      if (addressResponse != null) {
+        return OrderAddressModel.fromJson(addressResponse);
+      }
+
+      if (kDebugMode) {
+        print('Address not found for ID: $addressId');
+      }
+      return null;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching order address: $e');
+      }
+      // Don't show error snackbar as this is not critical
+      return null;
     }
   }
 }

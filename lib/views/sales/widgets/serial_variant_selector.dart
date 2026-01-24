@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SerialVariantSelector extends StatelessWidget {
-  const SerialVariantSelector({Key? key}) : super(key: key);
+  const SerialVariantSelector({super.key});
 
   @override
   Widget build(BuildContext context) {

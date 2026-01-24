@@ -1222,8 +1222,9 @@ class SalesController extends GetxController {
   void restoreDiscount() {
     try {
       // If no discount is selected, do nothing
-      if (selectedChipIndex.value == -1 || selectedChipValue.value.isEmpty)
+      if (selectedChipIndex.value == -1 || selectedChipValue.value.isEmpty) {
         return;
+      }
 
       // Reset subTotal to the original value
       subTotal.value = originalSubTotal.value;

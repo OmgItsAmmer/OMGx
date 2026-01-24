@@ -59,6 +59,10 @@ class TRoutes {
   static const category = '/categories';
   static const categoryDetails = '/categoryDetails';
 
+  //Collection Screens
+  static const collections = '/collections';
+  static const collectionDetails = '/collectionDetails';
+
   static const profileScreen = '/ProfileScreen';
 
   static const storeScreen = '/StoreScreen';

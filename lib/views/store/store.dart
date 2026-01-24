@@ -3,9 +3,7 @@ import 'package:ecommerce_dashboard/views/store/resposive_screens/store_desktop.
 import 'package:ecommerce_dashboard/views/store/resposive_screens/store_mobile.dart';
 import 'package:ecommerce_dashboard/views/store/resposive_screens/store_tablet.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
-import '../../controllers/shop/shop_controller.dart';
 
 class StoreScreen extends StatelessWidget {
   const StoreScreen({super.key});

@@ -158,11 +158,11 @@ class CustomerCard extends StatelessWidget {
   final VoidCallback onView;
 
   const CustomerCard({
-    Key? key,
+    super.key,
     required this.customer,
     required this.mediaController,
     required this.onView,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

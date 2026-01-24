@@ -4,13 +4,11 @@ import 'package:flutter/material.dart';
 
 import 'package:ecommerce_dashboard/common/widgets/images/t_rounded_image.dart';
 import 'package:ecommerce_dashboard/utils/constants/colors.dart';
-import 'package:ecommerce_dashboard/utils/constants/image_strings.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
 import '../../../../Models/orders/order_item_model.dart';
 import '../../../../Models/products/product_model.dart';
-import '../../../../Models/products/product_variant_model.dart';
 import '../../../../common/widgets/containers/rounded_container.dart';
 import '../../../../common/widgets/icons/t_circular_icon.dart';
 import '../../../../common/widgets/shimmers/shimmer.dart';

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../../layout/headers/header.dart';
 
 class DesktopLayout extends StatelessWidget {
-  DesktopLayout({super.key, this.body});
+  const DesktopLayout({super.key, this.body});
   final Widget? body;
 
   @override
@@ -20,7 +20,7 @@ class DesktopLayout extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   //HEADER
-                  THeader(),
+                  const THeader(),
                   //BODY
                   Expanded(child: body != null ? body! : const SizedBox())
                 ],

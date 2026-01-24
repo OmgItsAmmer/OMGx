@@ -9,7 +9,6 @@ import 'package:ecommerce_dashboard/utils/device/device_utility.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 
@@ -18,7 +17,6 @@ import '../../../../controllers/installments/installments_controller.dart';
 import '../../../../Models/installments/installment_table_model/installment_table_model.dart';
 import '../../../../views/reports/specific_reports/installment_plans/installment_plan_report.dart';
 import '../../../../utils/constants/enums.dart';
-import '../../../../utils/validators/validation.dart';
 
 class OrderTransaction extends StatelessWidget {
   const OrderTransaction({super.key, required this.orderModel});

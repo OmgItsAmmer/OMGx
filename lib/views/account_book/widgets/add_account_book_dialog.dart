@@ -59,7 +59,7 @@ class AddAccountBookDialog extends StatelessWidget {
                         // Entity Type Dropdown
                         Expanded(
                           child: Obx(() => DropdownButtonFormField<EntityType>(
-                                value: controller.selectedEntityType.value,
+                                initialValue: controller.selectedEntityType.value,
                                 decoration: const InputDecoration(
                                   labelText: 'Entity Type *',
                                   prefixIcon: Icon(Iconsax.category),
@@ -93,7 +93,7 @@ class AddAccountBookDialog extends StatelessWidget {
                         Expanded(
                           child: Obx(() =>
                               DropdownButtonFormField<TransactionType>(
-                                value: controller.selectedTransactionType.value,
+                                initialValue: controller.selectedTransactionType.value,
                                 decoration: const InputDecoration(
                                   labelText: 'Transaction Type *',
                                   prefixIcon:

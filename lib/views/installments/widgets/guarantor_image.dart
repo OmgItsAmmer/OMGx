@@ -18,13 +18,13 @@ class GuarantorImage extends StatelessWidget {
   final bool useDefaultImage;
 
   const GuarantorImage({
-    Key? key,
+    super.key,
     required this.guarantorId,
     required this.guarantorType,
     this.width = 150,
     this.height = 150,
     this.useDefaultImage = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

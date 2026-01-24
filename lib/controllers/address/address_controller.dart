@@ -35,6 +35,7 @@ class AddressController extends GetxController {
   final isLoading = false.obs; // Indicates whether a loading process is active
 
   final address = TextEditingController();
+  final postalCode = TextEditingController(text: '62350'); // Default postal code
 
   Future<void> fetchEntityAddresses(int entityId, EntityType entityType) async {
     try {
@@ -90,23 +91,27 @@ class AddressController extends GetxController {
 
   Future<void> saveAddress(AddressModel addressModel, EntityType entityType ) async {
     try {
-    
-    
+      // Trim address text to match database constraint
+      final trimmedAddress = address.text.trim();
+      final trimmedPostalCode = postalCode.text.trim().isEmpty ? '62350' : postalCode.text.trim();
+      final trimmedFullName = addressModel.fullName?.trim() ?? '';
+      final trimmedCity = addressModel.city?.trim() ?? '';
+      final trimmedCountry = addressModel.country?.trim() ?? '';
 
       switch (entityType) {
         case EntityType.customer:
           addressModel =
-              AddressModel(shippingAddress: address.text, customerId: addressModel.customerId , postalCode: addressModel.postalCode , city: addressModel.city , country: addressModel.country , fullName: addressModel.fullName , phoneNumber: addressModel.phoneNumber , userId: addressModel.userId , vendorId: addressModel.vendorId , salesmanId: addressModel.salesmanId );
+              AddressModel(shippingAddress: trimmedAddress, customerId: addressModel.customerId , postalCode: trimmedPostalCode , city: trimmedCity , country: trimmedCountry , fullName: trimmedFullName , phoneNumber: addressModel.phoneNumber , userId: addressModel.userId , vendorId: addressModel.vendorId , salesmanId: addressModel.salesmanId );
           break;
 
         case EntityType.salesman:
           addressModel =
-              AddressModel(shippingAddress: address.text, salesmanId: addressModel.salesmanId , postalCode: addressModel.postalCode , city: addressModel.city , country: addressModel.country , fullName: addressModel.fullName , phoneNumber: addressModel.phoneNumber , userId: addressModel.userId , vendorId: addressModel.vendorId , customerId: addressModel.customerId );
+              AddressModel(shippingAddress: trimmedAddress, salesmanId: addressModel.salesmanId , postalCode: trimmedPostalCode , city: trimmedCity , country: trimmedCountry , fullName: trimmedFullName , phoneNumber: addressModel.phoneNumber , userId: addressModel.userId , vendorId: addressModel.vendorId , customerId: addressModel.customerId );
           break;
 
         case EntityType.vendor:
           addressModel =
-              AddressModel(shippingAddress: address.text, vendorId: addressModel.vendorId , postalCode: addressModel.postalCode , city: addressModel.city , country: addressModel.country , fullName: addressModel.fullName , phoneNumber: addressModel.phoneNumber , userId: addressModel.userId , salesmanId: addressModel.salesmanId , customerId: addressModel.customerId );
+              AddressModel(shippingAddress: trimmedAddress, vendorId: addressModel.vendorId , postalCode: trimmedPostalCode , city: trimmedCity , country: trimmedCountry , fullName: trimmedFullName , phoneNumber: addressModel.phoneNumber , userId: addressModel.userId , salesmanId: addressModel.salesmanId , customerId: addressModel.customerId );
           break;
 
         case EntityType.user:

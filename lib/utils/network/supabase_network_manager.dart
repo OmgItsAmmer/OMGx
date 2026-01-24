@@ -71,7 +71,7 @@ class SupabaseNetworkManager {
       // Create a socket connection with timeout to check server reachability
       final uri = Uri.parse(SupabaseStrings.projectUrl);
       final socket = await Socket.connect(uri.host, uri.port,
-          timeout: Duration(seconds: _socketTimeout));
+          timeout: const Duration(seconds: _socketTimeout));
       socket.destroy();
 
       // If we get here, socket connected successfully

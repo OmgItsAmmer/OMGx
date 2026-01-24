@@ -17,7 +17,7 @@ import 'package:pdf/widgets.dart' as pw;
 class SimplePnLReportPage extends StatelessWidget {
   final List<SimplePnLReportModel> reports;
 
-  const SimplePnLReportPage({required this.reports});
+  const SimplePnLReportPage({super.key, required this.reports});
 
   @override
   Widget build(BuildContext context) {

@@ -96,7 +96,7 @@ class AddressInfo extends StatelessWidget {
           padding: const EdgeInsets.all(TSizes.defaultSpace),
           child: Obx(() {
             if (addressController.currentAddresses.isEmpty) {
-              return Text('a');
+              return const Text('a');
             }
             return ListView.separated(
               shrinkWrap: true,

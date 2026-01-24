@@ -10,13 +10,12 @@ class ODropDownMenu extends StatelessWidget {
   final Function(dynamic value)? onChanged;
   final String? Function(String?)? validator;
   ODropDownMenu(
-      {Key? key,
+      {super.key,
       this.chosenValue,
       this.hintText,
       this.itemsList,
       this.onChanged,
-      this.validator})
-      : super(key: key);
+      this.validator});
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +56,7 @@ class ODropDownMenu extends StatelessWidget {
         Icons.arrow_drop_down_sharp,
         size: 15,
       ),
-      value: chosenValue,
+      initialValue: chosenValue,
       items: itemsList?.map<DropdownMenuItem<String>>((String value) {
         return DropdownMenuItem<String>(
           value: value,

@@ -12,7 +12,6 @@ import '../../../../common/widgets/images/t_rounded_image.dart';
 import '../../../../common/widgets/shimmers/shimmer.dart';
 import '../../../../controllers/media/media_controller.dart';
 import '../../../../utils/constants/enums.dart';
-import '../../../../utils/constants/image_strings.dart';
 import '../../../../utils/constants/sizes.dart';
 import '../../../../utils/validators/validation.dart';
 

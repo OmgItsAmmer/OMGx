@@ -151,7 +151,7 @@ class SalesCashierInfo extends StatelessWidget {
                                     ],
                                   ),
                                 ),
-                                actions: [],
+                                actions: const [],
                               );
                             },
                           );

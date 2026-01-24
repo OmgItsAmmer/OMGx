@@ -52,7 +52,7 @@ class GuarantorCard extends StatelessWidget {
                 }
 
                 final guarantorId = guarantors[guarantorIndex].guarantorId;
-                if (guarantorId == null || guarantorId <= 0) {
+                if (guarantorId <= 0) {
                   return const TRoundedImage(
                     width: 120,
                     height: 120,

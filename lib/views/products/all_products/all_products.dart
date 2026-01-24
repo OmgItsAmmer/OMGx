@@ -1,13 +1,10 @@
 import 'package:ecommerce_dashboard/common/layouts/templates/site_template.dart';
-import 'package:ecommerce_dashboard/common/widgets/icons/t_circular_icon.dart';
 import 'package:ecommerce_dashboard/controllers/product/product_controller.dart';
-import 'package:ecommerce_dashboard/utils/constants/colors.dart';
 import 'package:ecommerce_dashboard/views/products/all_products/responsive_screens/all_product_desktop.dart';
 import 'package:ecommerce_dashboard/views/products/all_products/responsive_screens/all_product_tablet.dart';
 import 'package:ecommerce_dashboard/views/products/all_products/responsive_screens/all_product_mobile.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconsax/iconsax.dart';
 
 class AllProducts extends StatelessWidget {
   const AllProducts({super.key});

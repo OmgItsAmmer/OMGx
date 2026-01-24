@@ -159,10 +159,10 @@ class SalesmanCard extends StatelessWidget {
   final VoidCallback onView;
 
   const SalesmanCard({
-    Key? key,
+    super.key,
     required this.salesman,
     required this.onView,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

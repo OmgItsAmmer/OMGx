@@ -13,9 +13,9 @@ class AddCustomerTablet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
+      body: const SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(TSizes.md),
+          padding: EdgeInsets.all(TSizes.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -29,7 +29,7 @@ class AddCustomerTablet extends StatelessWidget {
                     child: CustomerBasicInfo(),
                   ),
 
-                  const SizedBox(width: TSizes.spaceBtwSections),
+                  SizedBox(width: TSizes.spaceBtwSections),
 
                   // Thumbnail Upload
                   Expanded(

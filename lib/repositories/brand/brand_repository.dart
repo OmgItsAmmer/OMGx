@@ -14,10 +14,8 @@ class BrandRepository {
       final updateData = Map<String, dynamic>.from(json)..remove('brandID');
 
       await supabase.from('brands').update(updateData).eq('brandID', brandId);
-
-      TLoaders.successSnackBar(
-          title: 'Brand Updated',
-          message: '${json['brandname']} has been updated.');
+      
+      // Note: Success message is handled by the controller to avoid duplicate messages
     } on PostgrestException catch (e) {
       TLoaders.errorSnackBar(title: 'Brand Repo Error', message: e.message);
       rethrow;
@@ -30,10 +28,10 @@ class BrandRepository {
   // New method to update product count
   Future<void> updateBrandProductCount(int brandId, int count) async {
     try {
-      // Update just the products_count field
+      // Update just the product_count field (singular, matching schema)
       await supabase
           .from('brands')
-          .update({'products_count': count}).eq('brandID', brandId);
+          .update({'product_count': count}).eq('brandID', brandId);
 
       if (kDebugMode) {
         print('Updated brand $brandId product count to $count');
@@ -99,7 +97,7 @@ class BrandRepository {
 
   Future<void> deleteBrandFromTable(int brandId) async {
     try {
-      await supabase.from('brands').delete().match({'brand_id': brandId});
+      await supabase.from('brands').delete().match({'brandID': brandId});
 
       TLoaders.successSnackBar(
           title: "Success", message: "Brand deleted successfully");

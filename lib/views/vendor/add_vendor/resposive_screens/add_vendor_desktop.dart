@@ -6,7 +6,6 @@ import '../../../../controllers/address/address_controller.dart';
 import '../widget/add_discard_bottom_bar.dart';
 import '../widget/entity_basic_info.dart';
 import '../widget/entity_thumbnail_info.dart';
-import '../widget/entity_address_info.dart';
 
 class AddVendorDesktop extends StatelessWidget {
   const AddVendorDesktop({super.key});

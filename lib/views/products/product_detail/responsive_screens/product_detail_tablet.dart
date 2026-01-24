@@ -16,10 +16,10 @@ class ProductDetailTablet extends StatelessWidget {
   Widget build(BuildContext context) {
     final ProductController controller = Get.find<ProductController>();
 
-    return Scaffold(
+    return const Scaffold(
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(TSizes.md),
+          padding: EdgeInsets.all(TSizes.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -32,7 +32,7 @@ class ProductDetailTablet extends StatelessWidget {
                     flex: 3,
                     child: BasicInfo(),
                   ),
-                  const SizedBox(width: TSizes.spaceBtwItems),
+                  SizedBox(width: TSizes.spaceBtwItems),
                   // Right column with Thumbnail
                   Expanded(
                     flex: 2,
@@ -41,20 +41,20 @@ class ProductDetailTablet extends StatelessWidget {
                 ],
               ),
 
-              const SizedBox(height: TSizes.spaceBtwSections),
+              SizedBox(height: TSizes.spaceBtwSections),
 
               // Brand & Category & visibility
-              const ProductBrandcCategory(),
+              ProductBrandcCategory(),
 
-              const SizedBox(height: TSizes.spaceBtwSections),
+              SizedBox(height: TSizes.spaceBtwSections),
 
               // Serial Variants - Only show for products with serial numbers
-              const ProductVariantsWidget(),
+              ProductVariantsWidget(),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: const ProductDetailBottomBar(),
+      bottomNavigationBar: ProductDetailBottomBar(),
     );
   }
 }

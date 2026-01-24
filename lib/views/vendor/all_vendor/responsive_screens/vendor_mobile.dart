@@ -157,11 +157,11 @@ class VendorCard extends StatelessWidget {
   final VoidCallback onView;
 
   const VendorCard({
-    Key? key,
+    super.key,
     required this.vendor,
     required this.mediaController,
     required this.onView,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -189,12 +189,12 @@ class CategoryCard extends StatelessWidget {
   final VoidCallback onDelete;
 
   const CategoryCard({
-    Key? key,
+    super.key,
     required this.category,
     required this.mediaController,
     required this.onEdit,
     required this.onDelete,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

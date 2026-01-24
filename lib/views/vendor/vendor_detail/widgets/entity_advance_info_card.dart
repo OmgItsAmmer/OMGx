@@ -13,7 +13,6 @@ import 'package:intl/intl.dart';
 import '../../../../common/widgets/icons/t_circular_icon.dart';
 import '../../../../common/widgets/tiles/user_advance_info_tile.dart';
 import '../../../../controllers/media/media_controller.dart';
-import '../../../../controllers/orders/orders_controller.dart';
 import '../../../profile/old/widgets/profile_menu.dart';
 
 class EntityAdvanceInfoCard<T> extends StatelessWidget {

@@ -74,7 +74,7 @@ class ImageModel {
   }) {
     return ImageModel(
       imageId: imageId ?? this.imageId,
-      url: imageUrl ?? this.url,
+      url: imageUrl ?? url,
       filename: filename ?? this.filename,
       createdAt: createdAt ?? this.createdAt,
       folderType: folderType ?? this.folderType,

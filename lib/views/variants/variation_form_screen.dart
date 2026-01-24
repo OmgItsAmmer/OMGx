@@ -37,7 +37,9 @@ class VariationFormScreen extends StatelessWidget {
                             hintText: 'Size',
                             chosenValue: selectedItem,
                             itemsList: items,
-                            validator: (value) {},
+                            validator: (value) {
+                              return null;
+                            },
                             onChanged: (value) {},
                           )),
                       const SizedBox(

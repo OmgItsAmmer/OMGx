@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 
 class ProductVariantModel {
   final int? variantId;
@@ -20,7 +19,7 @@ class ProductVariantModel {
       variantId: json['variant_id'],
       productId: json['product_id'],
       variantName: json['variant_name'] ?? '',
-      isVisible: json['isVisible'] ?? false,
+      isVisible: json['is_visible'] ?? false,
       sku: json['sku'],
     );
   }
@@ -29,7 +28,7 @@ class ProductVariantModel {
     final Map<String, dynamic> data = {
       'product_id': productId,
       'variant_name': variantName,
-      'isVisible': isVisible,
+      'is_visible': isVisible,
       'sku': sku,
     };
 

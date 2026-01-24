@@ -37,7 +37,7 @@ class SideMenuItem extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 20),
                 child: Text(
                   title,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
                   ),

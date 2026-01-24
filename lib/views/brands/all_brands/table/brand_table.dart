@@ -1,12 +1,9 @@
-import 'package:ecommerce_dashboard/controllers/product/product_controller.dart';
 import 'package:ecommerce_dashboard/controllers/table/table_search_controller.dart';
-import 'package:ecommerce_dashboard/views/products/all_products/table/product_table_source.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../controllers/brands/brand_controller.dart';
-import '../../../../utils/device/device_utility.dart';
 import '../../../paginated_data_table.dart';
 import 'brand_table_source.dart';
 

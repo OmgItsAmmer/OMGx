@@ -388,8 +388,6 @@ class OrderController extends GetxController {
 
       for (var item in orderItems) {
         // Skip null items
-        if (item == null) continue;
-
         try {
           await orderRepository.restoreQuantity(item);
         } catch (e) {
@@ -470,8 +468,6 @@ class OrderController extends GetxController {
 
       for (var item in orderItems) {
         // Skip null items
-        if (item == null) continue;
-
         try {
           await orderRepository.subtractQuantity(item);
         } catch (e) {

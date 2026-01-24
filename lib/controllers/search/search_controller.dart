@@ -21,11 +21,9 @@ class TSearchController extends GetxController {
 
   // Get a singleton instance
   static TSearchController get instance {
-    if (_instance == null) {
-      _instance = Get.isRegistered<TSearchController>()
+    _instance ??= Get.isRegistered<TSearchController>()
           ? Get.find<TSearchController>()
           : Get.put(TSearchController());
-    }
     return _instance!;
   }
 

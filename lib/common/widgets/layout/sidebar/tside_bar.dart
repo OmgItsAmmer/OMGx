@@ -8,7 +8,6 @@ import 'package:ecommerce_dashboard/utils/constants/image_strings.dart';
 import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:iconsax/iconsax.dart';
 
 import '../../../../controllers/media/media_controller.dart';
@@ -236,6 +235,11 @@ class TSideBar extends StatelessWidget {
                       icon: Iconsax.category,
                       itemName: 'Categories',
                       route: TRoutes.category,
+                    ),
+                    const TMenuItem(
+                      icon: Iconsax.box_1,
+                      itemName: 'Collections',
+                      route: TRoutes.collections,
                     ),
 
                     Text(

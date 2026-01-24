@@ -1,4 +1,3 @@
-import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
 import 'package:ecommerce_dashboard/controllers/purchase/purchase_controller.dart';
 import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:ecommerce_dashboard/views/purchases/purchase_details/widgets/vendor_info.dart';

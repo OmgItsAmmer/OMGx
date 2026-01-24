@@ -21,7 +21,7 @@ class MonthlySalesReportPage extends StatelessWidget {
   final String month;
   final String year; // 🔹 New field added
 
-  const MonthlySalesReportPage({
+  const MonthlySalesReportPage({super.key, 
     required this.salesReport,
     required this.month,
     required this.year, // 🔹 Added to constructor

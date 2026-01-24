@@ -6,7 +6,6 @@ import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-import '../../../../common/widgets/cards/hover_able_card.dart';
 import '../../../../controllers/product/product_controller.dart';
 import '../../../../routes/routes.dart';
 import '../table/product_table.dart';

@@ -121,7 +121,7 @@ class PurchaseVariantManager extends StatelessWidget {
                         prefixText: 'Rs ',
                       ),
                       keyboardType:
-                          TextInputType.numberWithOptions(decimal: true),
+                          const TextInputType.numberWithOptions(decimal: true),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return 'Purchase price is required';
@@ -145,7 +145,7 @@ class PurchaseVariantManager extends StatelessWidget {
                         prefixText: 'Rs ',
                       ),
                       keyboardType:
-                          TextInputType.numberWithOptions(decimal: true),
+                          const TextInputType.numberWithOptions(decimal: true),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return 'Selling price is required';
@@ -295,9 +295,9 @@ class PurchaseVariantManager extends StatelessWidget {
                 // Table header
                 Container(
                   padding: const EdgeInsets.all(TSizes.sm),
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: TColors.light,
-                    borderRadius: const BorderRadius.only(
+                    borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(TSizes.sm),
                       topRight: Radius.circular(TSizes.sm),
                     ),
@@ -379,11 +379,11 @@ class PurchaseVariantManager extends StatelessWidget {
             style: const TextStyle(fontWeight: FontWeight.w500),
           ),
         ),
-        Expanded(
+        const Expanded(
           flex: 2,
             child: Text('Purchase: Rs 0.00'), // Will show from batch info
         ),
-        Expanded(
+        const Expanded(
           flex: 2,
             child: Text('Selling: Rs 0.00'), // Will show from batch info
         ),

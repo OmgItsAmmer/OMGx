@@ -374,14 +374,14 @@ class InstallmentController extends GetxController {
       double marginAsDecimal = marginDouble / 100;
 
       // Perform the addition
-      double _payableExMargin =
+      double payableExMarginValue =
           billAmountDouble + documentChargesDouble + otherChargesDouble;
-      double _payableINCLMargin =
-          _payableExMargin + (_payableExMargin * marginAsDecimal);
+      double payableINCLMarginValue =
+          payableExMarginValue + (payableExMarginValue * marginAsDecimal);
 
       // Convert the result back to string if you want to display it in the text fields
-      payableExMargin.value.text = _payableExMargin.toString();
-      payableINCLMargin.value.text = _payableINCLMargin.toString();
+      payableExMargin.value.text = payableExMarginValue.toString();
+      payableINCLMargin.value.text = payableINCLMarginValue.toString();
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }

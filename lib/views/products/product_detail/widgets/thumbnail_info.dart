@@ -1,18 +1,15 @@
 import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
 import 'package:ecommerce_dashboard/common/widgets/icons/t_circular_icon.dart';
 import 'package:ecommerce_dashboard/common/widgets/images/t_rounded_image.dart';
-import 'package:ecommerce_dashboard/common/widgets/loaders/tloaders.dart';
 import 'package:ecommerce_dashboard/common/widgets/shimmers/shimmer.dart';
 import 'package:ecommerce_dashboard/controllers/product/product_controller.dart';
 import 'package:ecommerce_dashboard/utils/constants/colors.dart';
-import 'package:ecommerce_dashboard/utils/constants/image_strings.dart';
 import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
 import '../../../../controllers/media/media_controller.dart';
-import '../../../../controllers/product/product_images_controller.dart';
 import '../../../../utils/constants/enums.dart';
 
 class ThumbnailInfo extends StatelessWidget {

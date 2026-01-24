@@ -1,6 +1,5 @@
 import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
 import 'package:ecommerce_dashboard/common/widgets/icons/t_circular_icon.dart';
-import 'package:ecommerce_dashboard/controllers/address/address_controller.dart';
 import 'package:ecommerce_dashboard/controllers/customer/customer_controller.dart';
 import 'package:ecommerce_dashboard/utils/constants/colors.dart';
 import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
@@ -10,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
-import '../../../controllers/media/media_controller.dart';
 import '../../../controllers/sales/sales_controller.dart';
 import '../table/sale_table.dart';
 import '../widgets/cashier_info.dart';
@@ -30,11 +28,7 @@ class SalesDesktop extends GetView<SalesController> {
     // final addressController = Get.find<AddressController>();
     // final mediaController = Get.find<MediaController>();
 
-    // Mark ready for GetX to manage reactive rebuilds
-    final isContentReady = true.obs;
-
-    return Obx(() => isContentReady.value
-        ? SingleChildScrollView(
+    return SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(TSizes.defaultSpace),
               child: Column(
@@ -140,7 +134,7 @@ class SalesDesktop extends GetView<SalesController> {
                                     Obx(() => Switch(
                                           value: controller
                                               .mergeIdenticalProducts.value,
-                                          activeColor: TColors.primary,
+                                          activeThumbColor: TColors.primary,
                                           activeTrackColor:
                                               TColors.primary.withOpacity(0.5),
                                           inactiveThumbColor: TColors.grey,
@@ -308,7 +302,6 @@ class SalesDesktop extends GetView<SalesController> {
                 ],
               ),
             ),
-          )
-        : const Center(child: CircularProgressIndicator()));
+          );
   }
 }

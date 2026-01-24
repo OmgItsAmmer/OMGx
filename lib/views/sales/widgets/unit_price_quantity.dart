@@ -61,12 +61,16 @@ class UnitPriceQuantity extends StatelessWidget {
 
               //  height: 80,
               child: Obx(
-                () => TextFormField(
+                () {
+                  // For variant-based/serialized products, quantity should be fixed to 1
+                  final isVariantBased = salesController.isVariantBasedProduct.value;
+
+                  return TextFormField(
                   focusNode: quantityFocus,
                   onChanged: (value) {
                     salesController.calculateTotalPrice();
                   },
-            //      readOnly: salesController.isSerialziedProduct.value,
+                  readOnly: isVariantBased,
                   validator: (value) =>
                       TValidator.validateEmptyText('quantity ', value),
                   controller: salesController.quantity,
@@ -80,7 +84,8 @@ class UnitPriceQuantity extends StatelessWidget {
                           r'^\d*\.?\d{0,2}'), // Allows numbers with up to 2 decimal places
                     ),
                   ],
-                ),
+                );
+                },
               ),
             ),
           )

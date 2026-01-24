@@ -7,7 +7,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
-import '../installments/installments_controller.dart';
 
 class GuarantorController extends GetxController {
   static GuarantorController get instance => Get.find();

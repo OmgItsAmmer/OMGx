@@ -1,6 +1,5 @@
 import 'package:ecommerce_dashboard/common/widgets/chips/rounded_choice_chips.dart';
 import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
-import 'package:ecommerce_dashboard/common/widgets/loaders/tloaders.dart';
 import 'package:ecommerce_dashboard/controllers/shop/shop_controller.dart';
 import 'package:ecommerce_dashboard/utils/constants/colors.dart';
 import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
@@ -10,7 +9,6 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../../controllers/sales/sales_controller.dart';
-import '../../../utils/validators/validation.dart';
 
 class SalesSummary extends StatelessWidget {
   const SalesSummary({super.key});

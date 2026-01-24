@@ -1,19 +1,10 @@
-import 'package:ecommerce_dashboard/common/widgets/icons/table_action_icon_buttons.dart';
-import 'package:ecommerce_dashboard/controllers/address/address_controller.dart';
-import 'package:ecommerce_dashboard/controllers/guarantors/guarantor_controller.dart';
-import 'package:ecommerce_dashboard/controllers/installments/installments_controller.dart';
 import 'package:ecommerce_dashboard/controllers/orders/orders_controller.dart';
-import 'package:ecommerce_dashboard/utils/constants/colors.dart';
 import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:ecommerce_dashboard/utils/helpers/helper_functions.dart';
-import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import '../../../../Models/orders/order_item_model.dart';
 import '../../../../common/widgets/containers/rounded_container.dart';
-import '../../../../controllers/customer/customer_controller.dart';
-import '../../../../routes/routes.dart';
 import '../../../../utils/constants/enums.dart';
 import 'package:intl/intl.dart';
 

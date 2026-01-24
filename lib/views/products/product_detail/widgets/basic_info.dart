@@ -51,7 +51,7 @@ class BasicInfo extends StatelessWidget {
                   const SizedBox(height: TSizes.spaceBtwInputFields),
 
                   // Product Description
-                  TextFormField(
+                  Obx(() => TextFormField(
                     controller: productController.productDescription,
                     focusNode: productController.descriptionFocusNode,
                     textInputAction: TextInputAction.next,
@@ -61,13 +61,31 @@ class BasicInfo extends StatelessWidget {
                     },
                     validator: (value) => TValidator.validateEmptyText(
                         'Product description', value),
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Product Description',
                       hintText: 'Enter product description',
+                      suffixIcon: IconButton(
+                        icon: productController.isGeneratingDescription.value
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(
+                                Icons.auto_awesome,
+                                color: TColors.primary,
+                              ),
+                        tooltip: 'Generate description with AI',
+                        onPressed: productController.isGeneratingDescription.value
+                            ? null
+                            : () => productController.generateDescription(),
+                      ),
                     ),
                     minLines: 3,
                     maxLines: null,
-                  ),
+                  )),
                   const SizedBox(height: TSizes.spaceBtwInputFields),
 
                   // Note: Serial numbers feature has been replaced with variants

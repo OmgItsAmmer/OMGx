@@ -30,7 +30,7 @@ class CategoryTable extends StatelessWidget {
       ]; // Create a copy
       if (searchTerm.isNotEmpty) {
         filteredCategories = categoryController.allCategories.where((category) {
-          return (category.categoryName?.toLowerCase() ?? '')
+          return (category.categoryName.toLowerCase() ?? '')
               .contains(searchTerm);
         }).toList();
       }

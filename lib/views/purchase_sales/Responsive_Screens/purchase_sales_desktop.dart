@@ -115,7 +115,7 @@ class PurchaseSalesDesktop extends GetView<PurchaseSalesController> {
                                     Obx(() => Switch(
                                           value: controller
                                               .mergeIdenticalProducts.value,
-                                          activeColor: TColors.primary,
+                                          activeThumbColor: TColors.primary,
                                           activeTrackColor: TColors.primary
                                               .withValues(alpha: 0.5),
                                           inactiveThumbColor: TColors.grey,

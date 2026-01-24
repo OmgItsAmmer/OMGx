@@ -23,6 +23,20 @@ class PurchaseItems extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (kDebugMode) {
+      print('📋 [PurchaseItems] Widget build called');
+      print('   - Purchase ID: ${purchase.purchaseId}');
+      print('   - Purchase items: ${purchase.purchaseItems}');
+      print('   - Purchase items is null: ${purchase.purchaseItems == null}');
+      print('   - Purchase items count: ${purchase.purchaseItems?.length ?? 0}');
+      if (purchase.purchaseItems != null && purchase.purchaseItems!.isNotEmpty) {
+        print('   - First item: ${purchase.purchaseItems!.first}');
+        print('   - First item productId: ${purchase.purchaseItems!.first.productId}');
+        print('   - First item price: ${purchase.purchaseItems!.first.price}');
+        print('   - First item quantity: ${purchase.purchaseItems!.first.quantity}');
+      }
+    }
+
     final ProductController productController = Get.find<ProductController>();
     final MediaController mediaController = Get.find<MediaController>();
     final ProductVariantsRepository variantsRepository =
@@ -33,6 +47,10 @@ class PurchaseItems extends StatelessWidget {
           (previousValue, element) => previousValue + element.price,
         ) ??
         0.0; // Ensure it's never null
+
+    if (kDebugMode) {
+      print('💰 [PurchaseItems] Calculated subtotal: $subTotal');
+    }
 
     // Calculate the discount amount based on the percentage
     final discountAmount = subTotal * (purchase.discount / 100);

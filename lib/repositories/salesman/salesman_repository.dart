@@ -104,8 +104,9 @@ class SalesmanRepository extends GetxController {
   Future<void> updateSalesman(Map<String, dynamic> json) async {
     try {
       int? salesmanId = json['salesman_id'];
-      if (salesmanId == null)
+      if (salesmanId == null) {
         throw Exception('Salesman ID is required for update.');
+      }
 
       // Remove customer_id from the update payload to avoid trying to update the primary key
       final updateData = Map<String, dynamic>.from(json)..remove('salesman_id');

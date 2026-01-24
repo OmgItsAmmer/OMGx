@@ -146,8 +146,9 @@ class _TPaginatedDataTableState extends State<TPaginatedDataTable> {
             sortAscending: _sortAscending,
             sortColumnIndex: _sortColumnIndex,
             sortArrowBuilder: (bool ascending, bool sorted) {
-              if (!sorted)
+              if (!sorted) {
                 return Container(); // Don't show arrow if column is not sorted
+              }
               return Icon(
                 ascending ? Iconsax.arrow_up_3 : Iconsax.arrow_down,
                 size: TSizes.iconSm,

@@ -1,14 +1,10 @@
-import 'package:ecommerce_dashboard/controllers/orders/orders_controller.dart';
-import 'package:ecommerce_dashboard/controllers/product/product_controller.dart';
 import 'package:ecommerce_dashboard/utils/constants/image_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../../Models/installments/installment_table_model/installment_table_model.dart';
 import '../../../../common/widgets/cards/hover_able_card.dart';
 import '../../../../common/widgets/containers/rounded_container.dart';
 import '../../../../controllers/report/report_controller.dart';
 import '../../../../utils/constants/sizes.dart';
-import '../../specific_reports/installment_plans/installment_plan_report.dart';
 
 class ProductReportSection extends StatelessWidget {
   const ProductReportSection({

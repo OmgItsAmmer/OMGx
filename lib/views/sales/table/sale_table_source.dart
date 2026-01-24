@@ -3,8 +3,6 @@ import 'package:ecommerce_dashboard/utils/constants/colors.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get_storage/get_storage.dart';
 
 import '../../../Models/sales/sale_model.dart';
 import '../../../common/widgets/icons/table_action_icon_buttons.dart';

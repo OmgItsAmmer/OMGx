@@ -1,8 +1,6 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:ecommerce_dashboard/Models/orders/order_item_model.dart';
 import 'package:ecommerce_dashboard/Models/products/product_model.dart';
-import 'package:ecommerce_dashboard/Models/products/product_variant_model.dart';
 import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
 import 'package:ecommerce_dashboard/common/widgets/loaders/tloaders.dart';
 import 'package:ecommerce_dashboard/common/widgets/shimmers/shimmer.dart';

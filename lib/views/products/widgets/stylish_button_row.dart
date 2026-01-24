@@ -16,7 +16,7 @@ class StylishButtonsRow extends StatelessWidget {
   final String button2Title; // Title for Edit button
   final String button3Title; // Title for Delete button
 
-  StylishButtonsRow({
+  const StylishButtonsRow({super.key, 
     this.button1OnPressed, // Optional
     this.button2OnPressed, // Optional
     this.button3OnPressed, // Optional

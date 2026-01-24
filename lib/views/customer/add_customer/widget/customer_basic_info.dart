@@ -1,13 +1,10 @@
 import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
 import 'package:ecommerce_dashboard/controllers/address/address_controller.dart';
 import 'package:ecommerce_dashboard/controllers/customer/customer_controller.dart';
-import 'package:ecommerce_dashboard/utils/constants/colors.dart';
 import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:iconsax/iconsax.dart';
-import '../../../../controllers/product/product_controller.dart';
 import '../../../../utils/validators/validation.dart';
 
 class CustomerBasicInfo extends StatelessWidget {
@@ -46,12 +43,10 @@ class CustomerBasicInfo extends StatelessWidget {
               height: TSizes.spaceBtwSections,
             ),
             TextFormField(
-              validator: (value) =>
-                  TValidator.validateEmptyText('Last Name', value),
               controller: customerController.lastName,
               maxLines: 1,
               style: Theme.of(context).textTheme.bodyLarge,
-              decoration: const InputDecoration(labelText: 'Last Name'),
+              decoration: const InputDecoration(labelText: 'Last Name (Optional)'),
             ),
             const SizedBox(
               height: TSizes.spaceBtwSections,
@@ -72,7 +67,6 @@ class CustomerBasicInfo extends StatelessWidget {
             ),
 
             TextFormField(
-              validator: (value) => TValidator.validateEmptyText('CNIC', value),
               controller: customerController.cnic,
               keyboardType:
                   TextInputType.number, // Ensure numeric keyboard is shown
@@ -81,7 +75,7 @@ class CustomerBasicInfo extends StatelessWidget {
               ], // Allow only digits
               maxLines: 1,
               style: Theme.of(context).textTheme.bodyLarge,
-              decoration: const InputDecoration(labelText: 'CNIC'),
+              decoration: const InputDecoration(labelText: 'CNIC (Optional)'),
             ),
 
             const SizedBox(

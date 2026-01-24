@@ -3,9 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../../main.dart';
 
 import '../../common/widgets/loaders/tloaders.dart';
 import '../../network_manager.dart';
@@ -35,7 +33,7 @@ class LoginController extends GetxController {
 
     // Load saved credentials if remember me was selected
     email.text = localStorage.read('REMEMBER_ME_EMAIL') ?? "";
-    //password.text = localStorage.read('REMEMBER_ME_PASSWORD') ?? "";
+    password.text = localStorage.read('REMEMBER_ME_PASSWORD') ?? "";
 
     // Load the saved remember me state
     rememberMe.value = localStorage.read('REMEMBER_ME_CHECKED') ?? false;
@@ -67,11 +65,11 @@ class LoginController extends GetxController {
       //Save Data of Remember me is Selected
       if (rememberMe.value) {
         localStorage.write('REMEMBER_ME_EMAIL', email.text.trim());
-        //   localStorage.write('REMEMBER_ME_PASSWORD', password.text.trim());
+        localStorage.write('REMEMBER_ME_PASSWORD', password.text.trim());
       } else {
         // Clear saved credentials if remember me is not selected
         localStorage.remove('REMEMBER_ME_EMAIL');
-        //     localStorage.remove('REMEMBER_ME_PASSWORD');
+        localStorage.remove('REMEMBER_ME_PASSWORD');
       }
 
       // Log in the user
@@ -119,7 +117,7 @@ class LoginController extends GetxController {
     // If remember me is turned off, clear saved credentials
     if (!rememberMe.value) {
       localStorage.remove('REMEMBER_ME_EMAIL');
-      //  localStorage.remove('REMEMBER_ME_PASSWORD');
+      localStorage.remove('REMEMBER_ME_PASSWORD');
       // Don't clear the input fields while the user is still on the login screen
     }
   }

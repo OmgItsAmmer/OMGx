@@ -1,5 +1,4 @@
 import 'package:ecommerce_dashboard/Models/salesman/salesman_model.dart';
-import 'package:ecommerce_dashboard/Models/salesman/salesman_model.dart';
 import 'package:ecommerce_dashboard/controllers/salesman/salesman_controller.dart';
 import 'package:ecommerce_dashboard/routes/routes.dart';
 import 'package:ecommerce_dashboard/utils/constants/colors.dart';

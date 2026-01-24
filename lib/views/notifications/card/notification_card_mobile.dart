@@ -1,4 +1,3 @@
-import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
 import 'package:ecommerce_dashboard/controllers/notification/notification_controller.dart';
 import 'package:ecommerce_dashboard/utils/constants/enums.dart';
 import 'package:ecommerce_dashboard/utils/constants/sizes.dart';

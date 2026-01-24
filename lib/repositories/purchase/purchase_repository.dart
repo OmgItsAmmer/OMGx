@@ -107,21 +107,56 @@ class PurchaseRepository {
 
   Future<List<PurchaseItemModel>> fetchPurchaseItems(int purchaseId) async {
     try {
+      if (kDebugMode) {
+        print('🔍 [PurchaseRepository] Fetching purchase items for purchase_id: $purchaseId');
+      }
+
       final data = await supabase
           .from('purchase_items')
           .select('*, products(product_id, name)') // Joining with products
           .eq('purchase_id', purchaseId);
 
       if (kDebugMode) {
-        print(data);
+        print('📦 [PurchaseRepository] Raw data from database:');
+        print('   - Data type: ${data.runtimeType}');
+        print('   - Data length: ${data.length}');
+        print('   - Full data: $data');
+        if (data.isNotEmpty) {
+          print('   - First item keys: ${data[0].keys}');
+          print('   - First item: ${data[0]}');
+        }
       }
 
       final purchaseItemList = data.map((item) {
-        return PurchaseItemModel.fromJson(item);
+        if (kDebugMode) {
+          print('🔄 [PurchaseRepository] Parsing item: $item');
+        }
+        try {
+          final parsed = PurchaseItemModel.fromJson(item);
+          if (kDebugMode) {
+            print('✅ [PurchaseRepository] Successfully parsed item: productId=${parsed.productId}, price=${parsed.price}, quantity=${parsed.quantity}');
+          }
+          return parsed;
+        } catch (e, stackTrace) {
+          if (kDebugMode) {
+            print('❌ [PurchaseRepository] Error parsing item: $e');
+            print('   Stack trace: $stackTrace');
+            print('   Item data: $item');
+          }
+          rethrow;
+        }
       }).toList();
 
+      if (kDebugMode) {
+        print('✅ [PurchaseRepository] Successfully fetched ${purchaseItemList.length} purchase items');
+      }
+
       return purchaseItemList;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('❌ [PurchaseRepository] Error fetching purchase items: $e');
+        print('   Stack trace: $stackTrace');
+      }
       TLoaders.errorSnackBar(
           title: 'Purchase Item Fetch', message: e.toString());
       print(e.toString());
@@ -321,9 +356,6 @@ class PurchaseRepository {
 
       for (var item in purchaseItems) {
         // Skip null items
-        if (item == null) continue;
-
-        // Find the product
         final product = productController.allProducts.firstWhere(
             (p) => p.productId == item.productId,
             orElse: () => ProductModel.empty());

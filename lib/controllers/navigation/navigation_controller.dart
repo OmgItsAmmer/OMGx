@@ -1,11 +1,8 @@
 import 'package:ecommerce_dashboard/views/orders/old_orders/orderScreen.dart';
 import 'package:ecommerce_dashboard/views/products/products.dart';
-import 'package:ecommerce_dashboard/views/settings/settings.dart';
 import 'package:get/get.dart';
-import 'package:flutter/material.dart';
 
 import '../../views/Reviews/reviews.dart';
-import '../../views/category/categoriy_screen.dart';
 
 // Example of controller for Wishlist
 class WishlistController extends GetxController {

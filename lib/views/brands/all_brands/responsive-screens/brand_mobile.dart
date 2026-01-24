@@ -161,8 +161,8 @@ class AllBrandsMobileScreen extends StatelessWidget {
                         ),
                       );
 
-                      if (confirmed == true && brand.brandID != null) {
-                        await brandController.deleteBrand(brand.brandID!);
+                      if (confirmed == true) {
+                        await brandController.deleteBrand(brand.brandID);
                       }
                     },
                   );
@@ -183,12 +183,12 @@ class BrandCard extends StatelessWidget {
   final VoidCallback onDelete;
 
   const BrandCard({
-    Key? key,
+    super.key,
     required this.brand,
     required this.mediaController,
     required this.onEdit,
     required this.onDelete,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -130,7 +130,33 @@ class VendorController extends GetxController {
       final newId = await vendorRepository.insertVendorInTable(json);
       await mediaController.imageAssigner(
           newId, MediaCategory.shop.toString().split('.').last, true);
-      final addressModel = AddressModel(shippingAddress: address.text, vendorId: newId , postalCode: cnic.text , city: address.text , country: address.text , fullName: '${firstName.text} ${lastName.text}' , phoneNumber: phoneNumber.text , userId: null , salesmanId: null , customerId: null );
+      
+      // Trim and sanitize address fields to match database constraint: ^[a-zA-Z0-9\s\.\-\,]+$
+      final trimmedAddress = address.text.trim();
+      final trimmedFirstName = firstName.text.trim();
+      final trimmedLastName = lastName.text.trim();
+      // Handle optional last name - if empty, use only first name
+      final fullName = trimmedLastName.isEmpty 
+          ? trimmedFirstName 
+          : '$trimmedFirstName $trimmedLastName'.trim();
+      
+      // Get postal code from AddressController, default to '62350' if empty
+      final postalCodeValue = AddressController.instance.postalCode.text.trim().isEmpty 
+          ? '62350' 
+          : AddressController.instance.postalCode.text.trim();
+      
+      final addressModel = AddressModel(
+        shippingAddress: trimmedAddress, 
+        vendorId: newId, 
+        postalCode: postalCodeValue, 
+        city: trimmedAddress, 
+        country: trimmedAddress, 
+        fullName: fullName, 
+        phoneNumber: phoneNumber.text.trim(), 
+        userId: null, 
+        salesmanId: null, 
+        customerId: null
+      );
       await AddressController.instance.saveAddress(addressModel, EntityType.vendor);
 
       // Locally adding to table
@@ -159,6 +185,7 @@ class VendorController extends GetxController {
       cnic.clear();
       phoneNumber.clear();
       AddressController.instance.address.clear();
+      AddressController.instance.postalCode.text = '62350'; // Reset to default
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }

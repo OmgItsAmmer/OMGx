@@ -29,8 +29,9 @@ class VendorRepository extends GetxController {
   Future<void> updateVendor(Map<String, dynamic> json) async {
     try {
       int? vendorId = json['vendor_id'];
-      if (vendorId == null)
+      if (vendorId == null) {
         throw Exception('Vendor ID is required for update.');
+      }
 
       // Remove vendor_id from the update payload to avoid trying to update the primary key
       final updateData = Map<String, dynamic>.from(json)..remove('vendor_id');

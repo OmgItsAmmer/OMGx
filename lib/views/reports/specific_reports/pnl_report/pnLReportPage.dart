@@ -22,7 +22,7 @@ class PnLReportPage extends StatelessWidget {
 
   // static String softwareCompanyEmail = 'info@omgz.com';
 
-  const PnLReportPage({required this.reports});
+  const PnLReportPage({super.key, required this.reports});
 
   @override
   Widget build(BuildContext context) {

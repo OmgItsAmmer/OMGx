@@ -1,4 +1,3 @@
-import 'package:ecommerce_dashboard/Models/image/combined_image_model.dart';
 import 'package:ecommerce_dashboard/Models/image/image_model.dart';
 import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
 import 'package:ecommerce_dashboard/common/widgets/loaders/loader_animation.dart';
@@ -11,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:path/path.dart';
 
 import '../../../common/widgets/images/t_rounded_image.dart';
 import '../../../utils/constants/colors.dart';

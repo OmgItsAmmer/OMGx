@@ -7,7 +7,6 @@ import 'package:get/get.dart';
 
 import '../../common/widgets/loaders/tloaders.dart';
 import '../media/media_controller.dart';
-import '../product/product_images_controller.dart';
 
 class ShopController extends GetxController {
   static ShopController get instance => Get.find();

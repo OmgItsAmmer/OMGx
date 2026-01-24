@@ -236,9 +236,9 @@ class SalesMobile extends GetView<SalesController> {
                           onExpansionChanged: (value) {
                             controller.isVariantExpanded.value = value;
                           },
-                          children: [
+                          children: const [
                             Padding(
-                              padding: const EdgeInsets.symmetric(
+                              padding: EdgeInsets.symmetric(
                                   horizontal: TSizes.sm),
                               child: SerialVariantSelector(),
                             ),

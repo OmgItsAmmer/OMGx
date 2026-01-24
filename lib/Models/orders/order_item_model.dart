@@ -60,13 +60,13 @@ class OrderItemModel {
   // Factory method to create an OrderItemModel from JSON response
   factory OrderItemModel.fromJson(Map<String, dynamic> json) {
     return OrderItemModel(
-      orderItemId: json['order_item_id'] as int,
-      productId: json['product_id'] as int,
+      orderItemId: json['order_item_id'] as int? ?? 0,
+      productId: json['product_id'] as int? ?? 0,
       price: (json['price'] is num)
           ? (json['price'] as num).toDouble()
           : double.tryParse(json['price'].toString()) ?? 0.0,
-      quantity: json['quantity'] as int,
-      orderId: json['order_id'] as int,
+      quantity: json['quantity'] as int? ?? 0,
+      orderId: json['order_id'] as int? ?? 0,
       unit: json['unit'] as String?,
       totalBuyPrice: json['total_buy_price'] != null
           ? (json['total_buy_price'] is num)
@@ -199,15 +199,17 @@ class OrderModel {
 
   // Factory method to create an OrderModel from Supabase response
   factory OrderModel.fromJson(Map<String, dynamic> json) {
-    DateTime fullDate = DateTime.parse(json['order_date']);
+    DateTime fullDate = json['order_date'] != null
+        ? DateTime.parse(json['order_date'])
+        : DateTime.now();
     String formattedDate =
         "${fullDate.year.toString().padLeft(4, '0')}-${fullDate.month.toString().padLeft(2, '0')}-${fullDate.day.toString().padLeft(2, '0')}";
 
     return OrderModel(
-      orderId: json['order_id'] as int,
+      orderId: json['order_id'] as int? ?? 0,
       orderDate: formattedDate,
-      subTotal: (json['sub_total'] as num).toDouble(),
-      status: json['status'] as String,
+      subTotal: (json['sub_total'] as num?)?.toDouble() ?? 0.0,
+      status: json['status'] as String? ?? '',
       saletype: json['saletype'] as String?,
       addressId: json['address_id'] as int?,
       userId: json['user_id'] as int?,

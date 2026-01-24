@@ -42,13 +42,13 @@ class AddProductForm extends StatelessWidget {
               SizedBox(
                   width: 200,
                   child:
-                      OutlinedButton(onPressed: () {}, child: Text('Discard'))),
+                      OutlinedButton(onPressed: () {}, child: const Text('Discard'))),
               const SizedBox(
                 width: TSizes.spaceBtwItems,
               ),
               SizedBox(
                   width: 200,
-                  child: ElevatedButton(onPressed: () {}, child: Text('Save'))),
+                  child: ElevatedButton(onPressed: () {}, child: const Text('Save'))),
               const SizedBox(
                 width: TSizes.spaceBtwItems,
               ),

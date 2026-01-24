@@ -1,6 +1,5 @@
 import 'package:ecommerce_dashboard/Models/brand/brand_model.dart';
 import 'package:ecommerce_dashboard/utils/constants/colors.dart';
-import 'package:ecommerce_dashboard/utils/device/device_utility.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
@@ -12,7 +11,6 @@ import '../../../../common/widgets/shimmers/shimmer.dart';
 import '../../../../controllers/brands/brand_controller.dart';
 import '../../../../controllers/media/media_controller.dart';
 import '../../../../utils/constants/enums.dart';
-import '../../../../utils/constants/image_strings.dart';
 import '../../../../utils/constants/sizes.dart';
 import '../../../../utils/validators/validation.dart';
 
@@ -24,8 +22,6 @@ class BrandInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     final BrandController brandController = Get.find<BrandController>();
     final MediaController mediaController = Get.find<MediaController>();
-
-    final bool isMobile = TDeviceUtils.isMobileScreen(context);
 
     return Form(
       key: brandController.brandDetail,
@@ -92,7 +88,7 @@ class BrandInfo extends StatelessWidget {
                 // Fallback to future-based image if no image is selected
                 return FutureBuilder<String?>(
                   future: mediaController.fetchMainImage(
-                    brandController.selectedBrand.value.brandID ?? -1,
+                    brandController.selectedBrand.value.brandID,
                     MediaCategory.brands.toString().split('.').last,
                   ),
                   builder: (context, snapshot) {
@@ -143,19 +139,22 @@ class BrandInfo extends StatelessWidget {
               Expanded(
                 child: Obx(
                   () => ElevatedButton(
-                    onPressed: () {
-                      if (brandModel.brandID == null) {
-                        brandController.insertBrand();
-                      } else {
-                        brandController.updateBrand(brandModel.brandID!);
-                      }
-                    },
+                    onPressed: brandController.isUpdating.value
+                        ? null
+                        : () async {
+                            if (brandModel.brandID == -1) {
+                              await brandController.insertBrand();
+                            } else {
+                              await brandController.updateBrand(
+                                  brandModel.brandID);
+                            }
+                          },
                     child: (brandController.isUpdating.value)
                         ? const CircularProgressIndicator(
                             color: TColors.white,
                           )
                         : Text(
-                            (brandModel.brandID == null) ? 'Save' : 'Update',
+                            (brandModel.brandID == -1) ? 'Save' : 'Update',
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium!
