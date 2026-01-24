@@ -38,6 +38,7 @@ enum MediaCategory {
   folders,
   brands,
   categories,
+  collections,
   products,
   users,
   customers,

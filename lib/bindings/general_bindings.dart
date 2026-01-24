@@ -5,6 +5,7 @@ import '../controllers/account_book/account_book_controller.dart';
 import '../controllers/address/address_controller.dart';
 import '../controllers/brands/brand_controller.dart';
 import '../controllers/category/category_controller.dart';
+import '../controllers/collection/collection_controller.dart';
 import '../controllers/customer/customer_controller.dart';
 import '../controllers/dashboard/dashboard_controoler.dart';
 import '../controllers/expenses/expense_controller.dart';
@@ -51,6 +52,7 @@ class GeneralBindings extends Bindings {
     Get.put(SalesmanController());
     Get.put(BrandController());
     Get.put(CategoryController());
+    Get.put(CollectionController());
     // Get.put(ProductImagesController());
     Get.put(MediaController());
     Get.put(NotificationController());

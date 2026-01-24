@@ -13,6 +13,8 @@ import 'package:get/get.dart';
 import '../views/Reviews/review_screen.dart' show ReviewScreen;
 import '../views/brands/brand_details/brand_detail_screen.dart';
 import '../views/category/categories_detail/category_detail.dart';
+import '../views/collections/all_collections/all_collections.dart';
+import '../views/collections/collection_detail/collection_detail.dart';
 import '../views/customer/add_customer/add_customer.dart';
 import '../views/customer/all_customer/customer.dart';
 import '../views/customer/customer_detail/customer_detail.dart';
@@ -205,6 +207,16 @@ class TAppRoutes {
     GetPage(
         name: TRoutes.reviews,
         page: () => const ReviewScreen(),
+        middlewares: [TRouteMiddleware()]),
+
+    //Collection Screens
+    GetPage(
+        name: TRoutes.collections,
+        page: () => const AllCollections(),
+        middlewares: [TRouteMiddleware()]),
+    GetPage(
+        name: TRoutes.collectionDetails,
+        page: () => const CollectionDetailScreen(),
         middlewares: [TRouteMiddleware()]),
   ];
 }

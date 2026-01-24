@@ -203,6 +203,11 @@ class TSideBar extends StatelessWidget {
                       itemName: 'Categories',
                       route: TRoutes.category,
                     ),
+                    const TMenuItem(
+                      icon: Iconsax.box_1,
+                      itemName: 'Collections',
+                      route: TRoutes.collections,
+                    ),
                       Text(
                       'BUY/SELL',
                       style: Theme.of(context)

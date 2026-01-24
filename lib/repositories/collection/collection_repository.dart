@@ -237,3 +237,4 @@ class CollectionRepository extends GetxController {
     }
   }
 }
+

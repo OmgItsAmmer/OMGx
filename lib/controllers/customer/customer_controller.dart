@@ -198,6 +198,7 @@ class CustomerController extends GetxController {
       cnic.clear();
       phoneNumber.clear();
       AddressController.instance.address.clear();
+      AddressController.instance.postalCode.text = '62350';
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     }

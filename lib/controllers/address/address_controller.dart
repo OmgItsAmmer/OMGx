@@ -42,6 +42,7 @@ class AddressController extends GetxController {
   final isLoading = false.obs; // Indicates whether a loading process is active
 
   final address = TextEditingController();
+  final postalCode = TextEditingController(text: '62350');
 
   Future<void> fetchEntityAddresses(int entityId, EntityType entityType) async {
     try {
@@ -102,18 +103,24 @@ class AddressController extends GetxController {
 
       switch (entityType) {
         case EntityType.customer:
-          addressModel =
-              AddressModel(location: address.text, customerId: entityId);
+          addressModel = AddressModel(
+              location: address.text,
+              postalCode: postalCode.text.isEmpty ? null : postalCode.text,
+              customerId: entityId);
           break;
 
         case EntityType.salesman:
-          addressModel =
-              AddressModel(location: address.text, salesmanId: entityId);
+          addressModel = AddressModel(
+              location: address.text,
+              postalCode: postalCode.text.isEmpty ? null : postalCode.text,
+              salesmanId: entityId);
           break;
 
         case EntityType.vendor:
-          addressModel =
-              AddressModel(location: address.text, vendorId: entityId);
+          addressModel = AddressModel(
+              location: address.text,
+              postalCode: postalCode.text.isEmpty ? null : postalCode.text,
+              vendorId: entityId);
           break;
 
         case EntityType.user:

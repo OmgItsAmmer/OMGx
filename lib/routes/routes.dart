@@ -80,4 +80,8 @@ class TRoutes {
   static const accountBook = '/account-book';
 
   static const reviews = '/reviews';
+
+  //Collection Screens
+  static const collections = '/collections';
+  static const collectionDetails = '/collectionDetails';
 }

@@ -121,6 +121,17 @@ class EntityBasicInfo<T> extends StatelessWidget {
                 // ),
               ],
             ),
+            const SizedBox(
+              height: TSizes.spaceBtwSections,
+            ),
+            TextFormField(
+              controller: AddressController.instance.postalCode,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              maxLines: 1,
+              style: Theme.of(context).textTheme.bodyLarge,
+              decoration: const InputDecoration(labelText: 'Postal Code'),
+            ),
 
             // const SizedBox(height: TSizes.spaceBtwSections,),
 
