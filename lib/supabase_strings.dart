@@ -1,6 +1,13 @@
-class SupabaseStrings {
-  static const String projectUrl = "https://jjxqwtltkepeajwtcish.supabase.co";
-  static const String anonKey =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqeHF3dGx0a2VwZWFqd3RjaXNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzExNzM1NjgsImV4cCI6MjA0Njc0OTU2OH0.oyL_hC_7n36bTKEY8AhiFqV3K2a9r24dOqC5qewdVqg";
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+/// Supabase configuration loaded from .env file
+class SupabaseStrings {
+  /// Supabase project URL
+  static String get projectUrl => dotenv.env['SUPABASE_URL'] ?? '';
+
+  /// Supabase anonymous key (for client-side usage)
+  static String get anonKey => dotenv.env['SUPABASE_ANON_KEY'] ?? '';
+
+  /// Supabase service role key (for admin operations, debug mode only)
+  static String get serviceKey => dotenv.env['SUPABASE_SERVICE_KEY'] ?? '';
 }

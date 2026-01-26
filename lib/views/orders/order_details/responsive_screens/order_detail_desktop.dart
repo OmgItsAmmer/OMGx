@@ -8,10 +8,13 @@ import 'package:ecommerce_dashboard/views/orders/order_details/widgets/customer_
 import 'package:ecommerce_dashboard/views/orders/order_details/widgets/oorder_transaction.dart';
 import 'package:ecommerce_dashboard/views/orders/order_details/widgets/order_info.dart';
 import 'package:ecommerce_dashboard/views/orders/order_details/widgets/order_items.dart';
+import 'package:ecommerce_dashboard/views/orders/order_details/widgets/order_location_map.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../Models/orders/order_item_model.dart';
+import '../../../../Models/orders/order_address_model.dart';
+import '../../../../repositories/order/order_repository.dart';
 import '../../../../controllers/customer/customer_controller.dart';
 import '../../../../controllers/guarantors/guarantor_controller.dart';
 import '../../../../controllers/salesman/salesman_controller.dart';
@@ -19,15 +22,46 @@ import '../../../../utils/constants/enums.dart';
 import '../widgets/customer_info_2.dart';
 import '../widgets/guarrantor_card.dart';
 
-class OrderDetailDesktopScreen extends StatelessWidget {
+class OrderDetailDesktopScreen extends StatefulWidget {
   const OrderDetailDesktopScreen({super.key, required this.orderModel});
 
   final OrderModel orderModel;
 
   @override
+  State<OrderDetailDesktopScreen> createState() => _OrderDetailDesktopScreenState();
+}
+
+class _OrderDetailDesktopScreenState extends State<OrderDetailDesktopScreen> {
+  OrderAddressModel? orderAddress;
+  bool isLoadingAddress = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchOrderAddress();
+  }
+
+  Future<void> _fetchOrderAddress() async {
+    if (widget.orderModel.addressId != null) {
+      final orderRepository = OrderRepository();
+      final address = await orderRepository.fetchOrderAddressWithCoordinates(
+        widget.orderModel.addressId,
+      );
+      setState(() {
+        orderAddress = address;
+        isLoadingAddress = false;
+      });
+    } else {
+      setState(() {
+        isLoadingAddress = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     SaleType? saleTypeFromOrder = SaleType.values.firstWhere(
-      (e) => e.name == orderModel.saletype,
+      (e) => e.name == widget.orderModel.saletype,
       orElse: () => SaleType.cash,
     );
 
@@ -42,14 +76,14 @@ class OrderDetailDesktopScreen extends StatelessWidget {
         Get.find<GuarantorController>();
 
     if (saleTypeFromOrder == SaleType.installment) {
-      guarantorController.fetchGuarantors(orderModel.orderId);
+      guarantorController.fetchGuarantors(widget.orderModel.orderId);
     }
 
     // Listen for status changes to initialize refund data when order is cancelled
     ever(orderController.selectedStatus, (status) {
       if (status == OrderStatus.cancelled &&
           saleTypeFromOrder == SaleType.installment) {
-        installmentController.initializeRefundData(orderModel);
+        installmentController.initializeRefundData(widget.orderModel);
       } else {
         installmentController.shouldShowRefundReport.value = false;
       }
@@ -68,11 +102,19 @@ class OrderDetailDesktopScreen extends StatelessWidget {
                   flex: 2,
                   child: Column(
                     children: [
-                      OrderInfo(orderModel: orderModel),
+                      OrderInfo(orderModel: widget.orderModel),
                       const SizedBox(height: TSizes.spaceBtwSections),
-                      OrderItems(order: orderModel),
+                      OrderItems(order: widget.orderModel),
                       const SizedBox(height: TSizes.spaceBtwSections),
-                      OrderTransaction(orderModel: orderModel),
+                      if (!isLoadingAddress && orderAddress != null)
+                        OrderLocationMap(
+                          orderAddress: orderAddress!,
+                          height: 350,
+                          showFullAddress: true,
+                        ),
+                      if (!isLoadingAddress && orderAddress != null)
+                        const SizedBox(height: TSizes.spaceBtwSections),
+                      OrderTransaction(orderModel: widget.orderModel),
                       const SizedBox(height: TSizes.spaceBtwSections),
                     ],
                   ),
@@ -82,7 +124,7 @@ class OrderDetailDesktopScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       CustomerInfo(
-                        order: orderModel,
+                        order: widget.orderModel,
                         mediaCategory: MediaCategory.customers,
                         title: 'Customer',
                         showAddress: true,
@@ -93,24 +135,24 @@ class OrderDetailDesktopScreen extends StatelessWidget {
                             .selectedCustomer.value.phoneNumber,
                         isLoading: customerController.isLoading.value,
                       ),
-                      if(orderModel.salesmanId != null)
-                      const SizedBox(height: TSizes.spaceBtwSections),
-                      if(orderModel.salesmanId != null)
-                      UserInfo(
-                        mediaCategory: MediaCategory.salesman,
-                        title: 'Salesman',
-                        showAddress: false,
-                        fullName: salesmanController
-                                .selectedSalesman?.value.fullName ??
-                            'Not Found',
-                        email:
-                            salesmanController.selectedSalesman?.value.email ??
-                                'Not Found',
-                        phoneNumber: salesmanController
-                                .selectedSalesman?.value.phoneNumber ??
-                            'Not Found',
-                        isLoading: salesmanController.isLoading.value,
-                      ),
+                      if(widget.orderModel.salesmanId != null) ...[
+                        const SizedBox(height: TSizes.spaceBtwSections),
+                        UserInfo(
+                          mediaCategory: MediaCategory.salesman,
+                          title: 'Salesman',
+                          showAddress: false,
+                          fullName: salesmanController
+                                  .selectedSalesman?.value.fullName ??
+                              'Not Found',
+                          email:
+                              salesmanController.selectedSalesman?.value.email ??
+                                  'Not Found',
+                          phoneNumber: salesmanController
+                                  .selectedSalesman?.value.phoneNumber ??
+                              'Not Found',
+                          isLoading: salesmanController.isLoading.value,
+                        ),
+                      ],
                       const SizedBox(height: TSizes.spaceBtwSections),
                       if (saleTypeFromOrder == SaleType.installment) ...[
                         const GuarantorCard(

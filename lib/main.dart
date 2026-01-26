@@ -1,5 +1,3 @@
-import 'package:ecommerce_dashboard/utils/security/secure_keys.dart';
-import 'package:ecommerce_dashboard/supabase_strings.dart';
 import 'package:ecommerce_dashboard/utils/network/supabase_network_manager.dart';
 
 import 'package:flutter/cupertino.dart';
@@ -13,6 +11,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'app.dart';
 import 'repositories/authentication/authicatioon_repository.dart';
@@ -44,14 +43,12 @@ Future<void> main() async {
   //Get Local Storage
   await GetStorage.init();
 
-  // // Initialize SecureKeys instance
-  // final secureKeys = SecureKeys.instance;
-  // await secureKeys.initialize();
+  // Load environment variables from .env file
+  await dotenv.load(fileName: ".env");
 
-  // Get Supabase credentials securely
-  const supabaseUrl =
-        SupabaseStrings.projectUrl;
-  const supabaseAnonKey = SupabaseStrings.anonKey;
+  // Get Supabase credentials from .env
+  final supabaseUrl = dotenv.env['SUPABASE_URL'] ?? '';
+  final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'] ?? '';
 
   // Initialize SupabaseNetworkManager first for better connection handling
   final networkManager = SupabaseNetworkManager.instance;

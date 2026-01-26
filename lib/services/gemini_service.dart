@@ -1,20 +1,14 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class GeminiService {
- static const String _baseUrl =
-    'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent';
+  static const String _baseUrl =
+      'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent';
 
-  static const String _apiKey = 'AIzaSyDCarVt07VE-NMc6flPQCka0Enqmg8JcBA';
-  static const String _apiKeyStorageKey = 'AIzaSyDCarVt07VE-NMc6flPQCka0Enqmg8JcBA';
-
-  static const FlutterSecureStorage _storage = FlutterSecureStorage(
-    aOptions: AndroidOptions(
-      encryptedSharedPreferences: true,
-    ),
-  );
+  /// Get Gemini API key from .env file
+  static String? get _apiKey => dotenv.env['GEMINI_API_KEY'];
 
   /// Generate a product description using Gemini AI
   ///
@@ -26,8 +20,16 @@ class GeminiService {
     int maxCharacters = 300,
   }) async {
     try {
-      // Use hardcoded API key
-      final url = Uri.parse('$_baseUrl?key=$_apiKey');
+      // Get API key from .env
+      final apiKey = _apiKey;
+      if (apiKey == null || apiKey.isEmpty) {
+        if (kDebugMode) {
+          print('❌ Gemini API key not found in .env file');
+        }
+        return null;
+      }
+
+      final url = Uri.parse('$_baseUrl?key=$apiKey');
 
 final prompt = '''
 You are writing product descriptions for a Pakistani online grocery store. 
@@ -125,21 +127,9 @@ Description: "Peek Freans Cocomo are crispy biscuits filled with rich chocolate 
     return null;
   }
 
-  /// Set the Gemini API key in secure storage
-  ///
-  /// [apiKey] - Your Gemini API key from Google AI Studio
-  static Future<void> setApiKey(String apiKey) async {
-    await _storage.write(key: _apiKeyStorageKey, value: apiKey);
-  }
-
-  /// Check if API key is configured
-  static Future<bool> isApiKeyConfigured() async {
-    final apiKey = await _storage.read(key: _apiKeyStorageKey);
+  /// Check if API key is configured in .env
+  static bool isApiKeyConfigured() {
+    final apiKey = _apiKey;
     return apiKey != null && apiKey.isNotEmpty;
-  }
-
-  /// Remove the API key from secure storage
-  static Future<void> removeApiKey() async {
-    await _storage.delete(key: _apiKeyStorageKey);
   }
 }

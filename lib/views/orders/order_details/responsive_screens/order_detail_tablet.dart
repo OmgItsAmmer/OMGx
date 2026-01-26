@@ -9,25 +9,59 @@ import 'package:ecommerce_dashboard/views/orders/order_details/widgets/customer_
 import 'package:ecommerce_dashboard/views/orders/order_details/widgets/oorder_transaction.dart';
 import 'package:ecommerce_dashboard/views/orders/order_details/widgets/order_info.dart';
 import 'package:ecommerce_dashboard/views/orders/order_details/widgets/order_items.dart';
+import 'package:ecommerce_dashboard/views/orders/order_details/widgets/order_location_map.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../Models/orders/order_item_model.dart';
+import '../../../../Models/orders/order_address_model.dart';
+import '../../../../repositories/order/order_repository.dart';
 import '../../../../controllers/customer/customer_controller.dart';
 import '../../../../controllers/guarantors/guarantor_controller.dart';
 import '../../../../controllers/salesman/salesman_controller.dart';
 import '../../../../utils/constants/enums.dart';
 import '../widgets/guarrantor_card.dart';
 
-class OrderDetailTabletScreen extends StatelessWidget {
+class OrderDetailTabletScreen extends StatefulWidget {
   const OrderDetailTabletScreen({super.key, required this.orderModel});
 
   final OrderModel orderModel;
 
   @override
+  State<OrderDetailTabletScreen> createState() => _OrderDetailTabletScreenState();
+}
+
+class _OrderDetailTabletScreenState extends State<OrderDetailTabletScreen> {
+  OrderAddressModel? orderAddress;
+  bool isLoadingAddress = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchOrderAddress();
+  }
+
+  Future<void> _fetchOrderAddress() async {
+    if (widget.orderModel.addressId != null) {
+      final orderRepository = OrderRepository();
+      final address = await orderRepository.fetchOrderAddressWithCoordinates(
+        widget.orderModel.addressId,
+      );
+      setState(() {
+        orderAddress = address;
+        isLoadingAddress = false;
+      });
+    } else {
+      setState(() {
+        isLoadingAddress = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     SaleType? saleTypeFromOrder = SaleType.values.firstWhere(
-      (e) => e.name == orderModel.saletype,
+      (e) => e.name == widget.orderModel.saletype,
       orElse: () => SaleType.cash,
     );
 
@@ -42,14 +76,14 @@ class OrderDetailTabletScreen extends StatelessWidget {
         Get.find<GuarantorController>();
 
     if (saleTypeFromOrder == SaleType.installment) {
-      guarantorController.fetchGuarantors(orderModel.orderId);
+      guarantorController.fetchGuarantors(widget.orderModel.orderId);
     }
 
     // Listen for status changes to initialize refund data when order is cancelled
     ever(orderController.selectedStatus, (status) {
       if (status == OrderStatus.cancelled &&
           saleTypeFromOrder == SaleType.installment) {
-        installmentController.initializeRefundData(orderModel);
+        installmentController.initializeRefundData(widget.orderModel);
       } else {
         installmentController.shouldShowRefundReport.value = false;
       }
@@ -70,9 +104,9 @@ class OrderDetailTabletScreen extends StatelessWidget {
                   flex: 3,
                   child: Column(
                     children: [
-                      OrderInfo(orderModel: orderModel),
+                      OrderInfo(orderModel: widget.orderModel),
                       const SizedBox(height: TSizes.spaceBtwSections),
-                      OrderItems(order: orderModel),
+                      OrderItems(order: widget.orderModel),
                     ],
                   ),
                 ),
@@ -83,7 +117,7 @@ class OrderDetailTabletScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       CustomerInfo(
-                        order: orderModel,
+                        order: widget.orderModel,
                         mediaCategory: MediaCategory.customers,
                         title: 'Customer',
                         showAddress: true,
@@ -94,7 +128,7 @@ class OrderDetailTabletScreen extends StatelessWidget {
                             .selectedCustomer.value.phoneNumber,
                         isLoading: customerController.isLoading.value,
                       ),
-                      if (orderModel.salesmanId != null) ...[
+                      if (widget.orderModel.salesmanId != null) ...[
                         const SizedBox(height: TSizes.spaceBtwItems),
                         UserInfo(
                           mediaCategory: MediaCategory.salesman,
@@ -121,7 +155,17 @@ class OrderDetailTabletScreen extends StatelessWidget {
             const SizedBox(height: TSizes.spaceBtwSections),
 
             // Transaction Section
-            OrderTransaction(orderModel: orderModel),
+            OrderTransaction(orderModel: widget.orderModel),
+
+            // Map Section
+            if (!isLoadingAddress && orderAddress != null) ...[
+              const SizedBox(height: TSizes.spaceBtwSections),
+              OrderLocationMap(
+                orderAddress: orderAddress!,
+                height: 300,
+                showFullAddress: true,
+              ),
+            ],
 
             // Guarantor Section (if installment)
             if (saleTypeFromOrder == SaleType.installment) ...[

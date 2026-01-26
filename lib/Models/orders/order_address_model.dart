@@ -11,13 +11,26 @@ class OrderAddressModel {
   final int? salesmanId;
   final int? userId;
   final int? addressId;
+  final double? latitude;
+  final double? longitude;
+  final String? placeId;
+  final String? formattedAddress;
 
   String get name => fullName;
 
-  String get formattedAddress {
-    return [location, city, postalCode, country]
-        .where((element) => element != null && element.isNotEmpty)
-        .join(', ');
+  String get displayAddress {
+    return formattedAddress ?? 
+        [location, city, postalCode, country]
+            .where((element) => element != null && element.isNotEmpty)
+            .join(', ');
+  }
+
+  /// Check if the address has valid coordinates
+  bool hasValidCoordinates() {
+    return latitude != null && 
+           longitude != null && 
+           latitude != 0.0 && 
+           longitude != 0.0;
   }
 
   OrderAddressModel({
@@ -33,6 +46,10 @@ class OrderAddressModel {
     this.salesmanId,
     this.userId,
     this.addressId,
+    this.latitude,
+    this.longitude,
+    this.placeId,
+    this.formattedAddress,
   });
 
   // Static function to create an empty order address model
@@ -52,6 +69,10 @@ class OrderAddressModel {
       'salesman_id': salesmanId,
       'user_id': userId,
       'address_id': addressId,
+      'latitude': latitude,
+      'longitude': longitude,
+      'place_id': placeId,
+      'formatted_address': formattedAddress,
     };
 
     if (!isInsert) {
@@ -63,6 +84,24 @@ class OrderAddressModel {
 
   // Factory method to create an OrderAddressModel from JSON
   factory OrderAddressModel.fromJson(Map<String, dynamic> json) {
+    // Parse latitude with proper type handling
+    double? parseLatitude(dynamic value) {
+      if (value == null) return null;
+      if (value is num) {
+        return value.toDouble();
+      }
+      return double.tryParse(value.toString());
+    }
+
+    // Parse longitude with proper type handling
+    double? parseLongitude(dynamic value) {
+      if (value == null) return null;
+      if (value is num) {
+        return value.toDouble();
+      }
+      return double.tryParse(value.toString());
+    }
+
     return OrderAddressModel(
       orderAddressId: json['order_address_id'] as int?,
       location: json['shipping_address'] as String? ?? '',
@@ -76,6 +115,10 @@ class OrderAddressModel {
       salesmanId: json['salesman_id'] as int?,
       userId: json['user_id'] as int?,
       addressId: json['address_id'] as int?,
+      latitude: parseLatitude(json['latitude']),
+      longitude: parseLongitude(json['longitude']),
+      placeId: json['place_id'] as String?,
+      formattedAddress: json['formatted_address'] as String?,
     );
   }
 
@@ -98,6 +141,10 @@ class OrderAddressModel {
     int? salesmanId,
     int? userId,
     int? addressId,
+    double? latitude,
+    double? longitude,
+    String? placeId,
+    String? formattedAddress,
   }) {
     return OrderAddressModel(
       orderAddressId: orderAddressId ?? this.orderAddressId,
@@ -112,6 +159,10 @@ class OrderAddressModel {
       salesmanId: salesmanId ?? this.salesmanId,
       userId: userId ?? this.userId,
       addressId: addressId ?? this.addressId,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      placeId: placeId ?? this.placeId,
+      formattedAddress: formattedAddress ?? this.formattedAddress,
     );
   }
 }

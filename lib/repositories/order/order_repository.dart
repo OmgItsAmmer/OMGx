@@ -6,7 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../main.dart';
 
 import '../../Models/orders/order_item_model.dart';
-import '../../Models/products/product_model.dart';
+import '../../Models/orders/order_address_model.dart';
 import '../../controllers/product/product_controller.dart';
 import '../../repositories/products/product_variants_repository.dart';
 
@@ -603,6 +603,42 @@ class OrderRepository {
         print('Error applying stock changes: $e');
       }
       return false;
+    }
+  }
+
+  /// Fetch order address with coordinates from order_addresses or addresses table
+  Future<OrderAddressModel?> fetchOrderAddressWithCoordinates(int? addressId) async {
+    try {
+      if (addressId == null) return null;
+
+      // First try: order_addresses table
+      final orderAddressResponse = await supabase
+          .from('order_addresses')
+          .select()
+          .eq('address_id', addressId)
+          .maybeSingle();
+
+      if (orderAddressResponse != null) {
+        return OrderAddressModel.fromJson(orderAddressResponse);
+      }
+
+      // Fallback: addresses table
+      final addressResponse = await supabase
+          .from('addresses')
+          .select()
+          .eq('address_id', addressId)
+          .maybeSingle();
+
+      if (addressResponse != null) {
+        return OrderAddressModel.fromJson(addressResponse);
+      }
+
+      return null;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching order address: $e');
+      }
+      return null; // Graceful failure
     }
   }
 }
