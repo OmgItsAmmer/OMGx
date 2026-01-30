@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class GeminiService {
-  static const String _apiKey = 'AIzaSyBUy6-focntjOOc1G-uRpNv8f43GgKSb-w';
+  static String get _apiKey => dotenv.env['GEMINI_API_KEY'] ?? "";
   static const String _baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
 
   /// Generates a product description for a Pakistani karyana (grocery) product

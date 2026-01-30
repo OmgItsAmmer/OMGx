@@ -23,22 +23,22 @@ class SecureKeys {
   static const String _databaseVersionKey = 'database_version';
 
   // Supabase project URL - now using SupabaseStrings as source of truth
-  String get supabaseUrl => const String.fromEnvironment(
-        'SUPABASE_URL',
-        defaultValue: SupabaseStrings.projectUrl,
-      );
+  String get supabaseUrl {
+    const fromEnv = String.fromEnvironment('SUPABASE_URL');
+    return fromEnv.isNotEmpty ? fromEnv : SupabaseStrings.projectUrl;
+  }
 
   // Supabase anon key - For client-side usage
-  String get supabaseAnonKey => const String.fromEnvironment(
-        'SUPABASE_ANON_KEY',
-        defaultValue: SupabaseStrings.anonKey,
-      );
+  String get supabaseAnonKey {
+    const fromEnv = String.fromEnvironment('SUPABASE_ANON_KEY');
+    return fromEnv.isNotEmpty ? fromEnv : SupabaseStrings.anonKey;
+  }
 
   // Service role key - For admin operations, should NEVER be exposed to client
-  String get supabaseServiceKey => const String.fromEnvironment(
-        'SUPABASE_SERVICE_KEY',
-        defaultValue: SupabaseStrings.servieRoleKey,
-      );
+  String get supabaseServiceKey {
+    const fromEnv = String.fromEnvironment('SUPABASE_SERVICE_KEY');
+    return fromEnv.isNotEmpty ? fromEnv : SupabaseStrings.servieRoleKey;
+  }
 
   // Method to clear all stored credentials (useful when switching databases)
   Future<void> clearStoredCredentials() async {

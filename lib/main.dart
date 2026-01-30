@@ -13,6 +13,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'app.dart';
 import 'repositories/authentication/authicatioon_repository.dart';
@@ -23,6 +24,9 @@ final supabase = Supabase.instance.client;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
 
   // Only initialize window_manager for desktop platforms
   if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
