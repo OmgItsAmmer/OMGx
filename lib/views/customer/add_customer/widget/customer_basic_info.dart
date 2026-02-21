@@ -72,7 +72,7 @@ class CustomerBasicInfo extends StatelessWidget {
             ),
 
             TextFormField(
-              validator: (value) => TValidator.validateEmptyText('CNIC', value),
+              // validator: (value) => TValidator.validateEmptyText('CNIC', value),
               controller: customerController.cnic,
               keyboardType:
                   TextInputType.number, // Ensure numeric keyboard is shown
@@ -89,8 +89,8 @@ class CustomerBasicInfo extends StatelessWidget {
             ),
 
             TextFormField(
-              validator: (value) =>
-                  TValidator.validateEmptyText('Phone Number', value),
+              // validator: (value) =>
+                  // TValidator.validateEmptyText('Phone Number', value),
               controller: customerController.phoneNumber,
               keyboardType: const TextInputType.numberWithOptions(
                   decimal: true), // Allow decimal input
@@ -111,8 +111,8 @@ class CustomerBasicInfo extends StatelessWidget {
               children: [
                 Expanded(
                   child: TextFormField(
-                    validator: (value) =>
-                        TValidator.validateEmptyText('Address', value),
+                    // validator: (value) =>
+                        // TValidator.validateEmptyText('Address', value),
                     controller: addressController.address,
                     // Allow only digits
 
