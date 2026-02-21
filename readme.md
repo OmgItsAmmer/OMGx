@@ -1,15 +1,15 @@
 <div align="center">
 
-# 🛒 OMG E-Commerce Dashboard
+# OMGx
 
-**A full-featured admin dashboard for modern e-commerce operations**
+**Installment-based POS solution with full admin dashboard capabilities**
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.5+-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
 [![Supabase](https://img.shields.io/badge/Supabase-Backend-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com)
 [![GetX](https://img.shields.io/badge/GetX-State%20Management-8B5CF6?logo=flutter&logoColor=white)](https://pub.dev/packages/get)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-*Responsive • Cross-platform • Real-time • Secure*
+*Point of Sale • Installments • Admin Dashboard • Cross-platform*
 
 </div>
 
@@ -17,7 +17,7 @@
 
 ## ✨ Overview
 
-OMG E-Commerce Dashboard is a comprehensive business management platform built with **Flutter** and powered by **Supabase**. It provides a complete toolkit for managing orders, products, customers, vendors, sales, and finances — all from a single, elegant interface that adapts seamlessly to desktop, tablet, and mobile devices.
+**OMGx** is an installment-based Point of Sale (POS) solution built with **Flutter** and **Supabase**. It doubles as a comprehensive admin dashboard for business management — handling sales, installments, orders, products, customers, vendors, and finances from a single, responsive interface that works on desktop, tablet, and mobile.
 
 ---
 
@@ -27,17 +27,17 @@ OMG E-Commerce Dashboard is a comprehensive business management platform built w
 <tr>
 <td width="50%">
 
-### 📦 Operations
+### 🏪 POS & Operations
+- **Point of Sale** — Complete POS with sales, checkout, and receipt printing
+- **Installment System** — Installment-based sales, payment plans, and tracking
 - **Order Management** — Track and manage customer orders with full lifecycle support
 - **Product Management** — CRUD operations with variants, brands, categories & collections
 - **Purchase Management** — Vendor purchases and purchase history
-- **Sales & Checkout** — Point-of-sale with admin checkout integration
-- **Installment Tracking** — Manage installment-based sales and payment plans
 
 </td>
 <td width="50%">
 
-### 👥 People & Entities
+### 👥 People & Admin
 - **Customer Management** — Profiles, purchase history, and contact info
 - **Vendor Management** — Supplier tracking with addresses and order history
 - **Salesman Management** — Sales team performance and commission tracking
@@ -228,6 +228,6 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 
 <div align="center">
 
-**Built with ❤️ using Flutter & Supabase**
+**OMGx** — Built with Flutter   & Supabase
 
 </div>
