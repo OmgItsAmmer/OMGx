@@ -1,4 +1,5 @@
 
+import 'package:ecommerce_dashboard/Models/vendor/vendor_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../controllers/vendor/vendor_controller.dart';
@@ -10,12 +11,14 @@ import '../widget/entity_address_info.dart';
 import '../widget/add_discard_bottom_bar.dart';
 
 class AddVendorTablet extends StatelessWidget {
-  const AddVendorTablet({super.key});
+  const AddVendorTablet({super.key, required this.vendorModel});
+
+  final VendorModel vendorModel;
 
   @override
   Widget build(BuildContext context) {
-    final VendorController vendorController = Get.put(VendorController());
-    final AddressController addressController = Get.put(AddressController());
+    final VendorController vendorController = Get.find<VendorController>();
+    final AddressController addressController = Get.find<AddressController>();
 
     return Scaffold(
       appBar: AppBar(
@@ -37,7 +40,7 @@ class AddVendorTablet extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: AddDiscardBottomBar(
-        model: vendorController,
+        model: vendorModel,
         controller: vendorController,
         entityType: EntityType.vendor,
       ),

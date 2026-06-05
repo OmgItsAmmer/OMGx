@@ -17,7 +17,6 @@ import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_thermal_printer/flutter_thermal_printer.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -1748,9 +1747,9 @@ class SalesController extends GetxController {
           0.0); // Remaining amount will be calculated by updateRemainingAmount
 
       // Calculate the remaining amount properly
-      double salesman_comissionAmount = 0.0;
+      double salesmanComissionamount = 0.0;
       if (order.salesmanComission != null && order.salesmanComission! > 0) {
-        salesman_comissionAmount =
+        salesmanComissionamount =
             (subTotal.value * order.salesmanComission!) / 100;
       }
 
@@ -1761,7 +1760,7 @@ class SalesController extends GetxController {
       }
 
       double totalAmount =
-          subTotal.value + shippingFee + (order.tax) + salesman_comissionAmount;
+          subTotal.value + shippingFee + (order.tax) + salesmanComissionamount;
 
       double calculatedRemaining = totalAmount - (order.paidAmount ?? 0.0);
       remainingAmount.value.text = calculatedRemaining.toStringAsFixed(2);
@@ -1874,8 +1873,9 @@ class SalesController extends GetxController {
   void restoreDiscount() {
     try {
       // If no discount is selected, do nothing
-      if (selectedChipIndex.value == -1 || selectedChipValue.value.isEmpty)
+      if (selectedChipIndex.value == -1 || selectedChipValue.value.isEmpty) {
         return;
+      }
 
       // Reset subTotal to the original value
       subTotal.value = originalSubTotal.value;
@@ -2257,7 +2257,7 @@ class SalesController extends GetxController {
     try {
       double shippingFee = getShippingFee();
       double tax = shopController.selectedShop?.value.taxrate ?? 0.0;
-      double salesman_comission = 0.0;
+      double salesmanComission = 0.0;
 
       // Get salesman commission if a salesman is selected
       if (selectedSalesmanId > 0) {
@@ -2269,14 +2269,14 @@ class SalesController extends GetxController {
           double commissionPercent =
               (selectedSalesman.comission ?? 0).toDouble();
           // Convert percentage to amount: (commission% * subTotal) / 100
-          salesman_comission = (commissionPercent * subTotal.value) / 100;
+          salesmanComission = (commissionPercent * subTotal.value) / 100;
         } catch (e) {
-          salesman_comission = 0.0;
+          salesmanComission = 0.0;
         }
       }
 
       // Calculate net total
-      netTotal.value = subTotal.value + shippingFee + tax + salesman_comission;
+      netTotal.value = subTotal.value + shippingFee + tax + salesmanComission;
 
       // Update remaining amount based on net total
       updateRemainingAmount();
@@ -2292,7 +2292,7 @@ class SalesController extends GetxController {
     try {
       double shippingFee = getShippingFee();
       double tax = shopController.selectedShop?.value.taxrate ?? 0.0;
-      double salesman_comission = 0.0;
+      double salesmanComission = 0.0;
 
       // Get salesman commission if a salesman is selected
       if (selectedSalesmanId > 0) {
@@ -2304,16 +2304,16 @@ class SalesController extends GetxController {
           double commissionPercent =
               (selectedSalesman.comission ?? 0).toDouble();
           // Convert percentage to amount: (commission% * originalSubTotal) / 100
-          salesman_comission =
+          salesmanComission =
               (commissionPercent * originalSubTotal.value) / 100;
         } catch (e) {
-          salesman_comission = 0.0;
+          salesmanComission = 0.0;
         }
       }
 
       // Calculate original net total
       originalNetTotal.value =
-          originalSubTotal.value + shippingFee + tax + salesman_comission;
+          originalSubTotal.value + shippingFee + tax + salesmanComission;
     } catch (e) {
       if (kDebugMode) {
         print('Error calculating original net total: $e');

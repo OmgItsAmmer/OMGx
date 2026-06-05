@@ -119,9 +119,9 @@ class AddDiscardBottomBar<T> extends StatelessWidget {
       case EntityType.salesman:
         return (model as dynamic).salesmanId == null ? 'Save' : 'Update';
       case EntityType.vendor:
+        return (model as dynamic).vendorId == null ? 'Save' : 'Update';
       case EntityType.user:
         return 'Save';
-        return (model as dynamic).vendorId == null ? 'Save' : 'Update';
     }
   }
 }

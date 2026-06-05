@@ -6,14 +6,12 @@ import 'package:ecommerce_dashboard/Models/image/image_model.dart';
 import 'package:ecommerce_dashboard/common/widgets/loaders/tloaders.dart';
 import 'package:ecommerce_dashboard/controllers/brands/brand_controller.dart';
 import 'package:ecommerce_dashboard/controllers/category/category_controller.dart';
-import 'package:ecommerce_dashboard/controllers/product/product_images_controller.dart';
 import 'package:ecommerce_dashboard/repositories/products/product_repository.dart';
 import 'package:ecommerce_dashboard/repositories/products/product_variants_repository.dart';
 import 'package:ecommerce_dashboard/services/gemini_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 
 import '../../routes/routes.dart';
 import '../../utils/constants/enums.dart';

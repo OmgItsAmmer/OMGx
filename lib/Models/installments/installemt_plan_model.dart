@@ -1,6 +1,5 @@
 import 'package:ecommerce_dashboard/Models/installments/installment_payment_model.dart';
 
-import 'installment_table_model/installment_table_model.dart';
 
 class InstallmentPlanModel {
   final int? installmentPlanId;

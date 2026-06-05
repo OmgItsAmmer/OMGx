@@ -1,4 +1,3 @@
-import 'package:ecommerce_dashboard/Models/products/variant_model.dart';
 import '../../utils/constants/enums.dart'; // Assuming ProductTag is defined here
 
 class ProductModel {

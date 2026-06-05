@@ -1,4 +1,3 @@
-  import 'dart:io';
 import 'package:ecommerce_dashboard/common/widgets/containers/rounded_container.dart';
 import 'package:ecommerce_dashboard/common/widgets/images/t_rounded_image.dart';
 import 'package:ecommerce_dashboard/common/widgets/loaders/animation_loader.dart';
@@ -9,7 +8,7 @@ import 'package:ecommerce_dashboard/utils/constants/image_strings.dart';
 import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:ecommerce_dashboard/utils/device/device_utility.dart';
 import 'package:flutter/material.dart';
-import 'package:desktop_drop/desktop_drop.dart';
+import 'package:ecommerce_dashboard/platform/drop_target_zone.dart';
 import 'package:get/get.dart';
 import '../../../controllers/media/media_controller.dart';
 import 'folder_dropdown.dart';
@@ -37,14 +36,10 @@ class MediaUploader extends StatelessWidget {
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
-                          // DropZone using desktop_drop
-                          DropTarget(
-                            onDragEntered: (val) {
-                              // print(val);
-                            },
-                            onDragDone: (details) {
-                              for (var file in details.files) {
-                                mediaController.addDroppedFile(File(file.path));
+                          PlatformDropTarget(
+                            onFilesDropped: (paths) {
+                              for (final path in paths) {
+                                mediaController.addDroppedFileFromPath(path);
                               }
                             },
                             child: Container(

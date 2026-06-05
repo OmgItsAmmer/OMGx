@@ -24,6 +24,12 @@ class OrderController extends GetxController {
   static OrderController get instance => Get.find();
   final OrderRepository orderRepository = Get.put(OrderRepository());
 
+  static void _log(String message) {
+    if (kDebugMode) {
+      debugPrint('[OrderController] $message');
+    }
+  }
+
   RxList<OrderModel> allOrders = <OrderModel>[].obs;
 
   Rx<OrderStatus> selectedStatus = OrderStatus.pending.obs;
@@ -49,23 +55,47 @@ class OrderController extends GetxController {
   // }
 
   Future<void> fetchOrders() async {
+    _log('fetchOrders() called (route=${Get.currentRoute})');
+    final session = supabase.auth.currentSession;
+    final user = supabase.auth.currentUser;
+
+    if (session == null || user == null) {
+      _log('No auth session — skip fetch (log in first)');
+      return;
+    }
+
+    _log('Auth OK: uid=${user.id}, email=${user.email}');
+
     try {
       isOrdersFetching.value = true;
+      final previousCount = allOrders.length;
+      _log('Fetching… (had $previousCount orders in memory)');
+
       final orders = await orderRepository.fetchOrders();
 
-      // Assign the fetched orders directly without reversing
       allOrders.assignAll(orders);
       currentOrders.assignAll(orders);
 
-      // Dashboard will auto-update through reactive listeners
-      // No need to manually trigger dashboard updates here
-    } catch (e) {
+      _log(
+        'Done — repository returned ${orders.length}, '
+        'allOrders=${allOrders.length}, currentOrders=${currentOrders.length}',
+      );
+
+      if (orders.isEmpty) {
+        _log(
+          'UI will show empty list. See [OrderRepository] logs above for '
+          'RLS vs parse vs empty table.',
+        );
+      }
+    } catch (e, st) {
+      _log('fetchOrders() exception: $e');
+      _log('Stack: $st');
       if (kDebugMode) {
         TLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
-        print(e);
       }
     } finally {
       isOrdersFetching.value = false;
+      _log('fetchOrders() finished (isOrdersFetching=false)');
     }
   }
 
@@ -541,8 +571,6 @@ class OrderController extends GetxController {
 
       for (var item in orderItems) {
         // Skip null items
-        if (item == null) continue;
-
         try {
           await orderRepository.restoreQuantity(item);
         } catch (e) {
@@ -623,8 +651,6 @@ class OrderController extends GetxController {
 
       for (var item in orderItems) {
         // Skip null items
-        if (item == null) continue;
-
         try {
           await orderRepository.subtractQuantity(item);
         } catch (e) {

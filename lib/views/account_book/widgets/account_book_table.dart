@@ -1,10 +1,8 @@
 import 'package:ecommerce_dashboard/Models/account_book/account_book_model.dart';
-import 'package:ecommerce_dashboard/views/paginated_data_table.dart';
 import 'package:ecommerce_dashboard/controllers/account_book/account_book_controller.dart';
 import 'package:ecommerce_dashboard/utils/constants/colors.dart';
 import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
 import 'add_account_book_dialog.dart';

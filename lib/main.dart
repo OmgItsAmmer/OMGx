@@ -2,41 +2,27 @@ import 'package:ecommerce_dashboard/utils/network/supabase_network_manager.dart'
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'dart:async';
 
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_strategy/url_strategy.dart';
-import 'package:window_manager/window_manager.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'app.dart';
+import 'platform/window_init.dart';
 import 'repositories/authentication/authicatioon_repository.dart';
 import 'repositories/signup/signup_repository.dart';
 
-// Get a reference your Supabase client
-final supabase = Supabase.instance.client;
+/// Resolved after [Supabase.initialize] in main — not at library load time.
+SupabaseClient get supabase => Supabase.instance.client;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Only initialize window_manager for desktop platforms
-  if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
-    await windowManager.ensureInitialized();
-
-    // WindowOptions windowOptions = const WindowOptions(
-    //   //minimumSize: Size(800, 800),
-    //   center: true,
-    //   title: "OMG POS : NEXUS",
-    // );
-    // windowManager.waitUntilReadyToShow(windowOptions, () async {
-    //   await windowManager.show();
-    //   await windowManager.focus();
-    // });
-  }
+  await initDesktopWindow();
 
   // remove # sign from url
   setPathUrlStrategy();

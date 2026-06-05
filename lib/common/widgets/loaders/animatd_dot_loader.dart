@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class AnimatedDotLoader extends StatefulWidget {
+  const AnimatedDotLoader({super.key});
+
   @override
   _AnimatedDotLoaderState createState() => _AnimatedDotLoaderState();
 }

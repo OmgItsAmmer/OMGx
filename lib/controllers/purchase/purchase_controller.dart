@@ -320,8 +320,6 @@ class PurchaseController extends GetxController {
 
       for (var item in purchaseItems) {
         // Skip null items
-        if (item == null) continue;
-
         try {
           await purchaseRepository.addStockQuantity(item);
         } catch (e) {
@@ -366,8 +364,6 @@ class PurchaseController extends GetxController {
 
       for (var item in purchaseItems) {
         // Skip null items
-        if (item == null) continue;
-
         try {
           await purchaseRepository.subtractStockQuantity(item);
         } catch (e) {

@@ -5,6 +5,7 @@ import 'package:ecommerce_dashboard/common/widgets/images/t_rounded_image.dart';
 import 'package:ecommerce_dashboard/controllers/vendor/vendor_controller.dart';
 import 'package:ecommerce_dashboard/controllers/media/media_controller.dart';
 import 'package:ecommerce_dashboard/controllers/table/table_search_controller.dart';
+import 'package:ecommerce_dashboard/controllers/address/address_controller.dart';
 import 'package:ecommerce_dashboard/routes/routes.dart';
 import 'package:ecommerce_dashboard/utils/constants/colors.dart';
 import 'package:ecommerce_dashboard/utils/constants/enums.dart';
@@ -268,7 +269,9 @@ class VendorCard extends StatelessWidget {
               const SizedBox(width: TSizes.sm),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    await Get.find<AddressController>().fetchEntityAddresses(
+                        vendor.vendorId!, EntityType.vendor);
                     Get.find<VendorController>().selectedVendor.value = vendor;
                     Get.toNamed(TRoutes.addVendor, arguments: vendor);
                   },

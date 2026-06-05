@@ -1,8 +1,9 @@
 import 'dart:async';
-import 'dart:io';
 
-import 'package:ecommerce_dashboard/routes/routes.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:ecommerce_dashboard/platform/internet_reachability.dart';
+import 'package:ecommerce_dashboard/routes/routes.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
@@ -30,33 +31,44 @@ class NetworkManager extends GetxController {
   Future<void> _updateConnectionStatus(ConnectivityResult result) async {
     _connectionStatus.value = result;
 
-    bool isOnline = await _hasActualInternet();
+    if (result == ConnectivityResult.none) {
+      hasInternet.value = false;
+      _goToOfflineScreen();
+      return;
+    }
 
+    final isOnline = await _hasActualInternet();
     hasInternet.value = isOnline;
 
     if (!isOnline) {
-      // Navigate to no connection screen
-      Get.offAllNamed(TRoutes.UnkownRoute);
+      _goToOfflineScreen();
     }
+  }
+
+  void _goToOfflineScreen() {
+    if (Get.currentRoute == TRoutes.UnkownRoute) return;
+    Get.offAllNamed(TRoutes.UnkownRoute);
   }
 
   Future<bool> _hasActualInternet() async {
-    try {
-      final result = await InternetAddress.lookup('google.com');
-      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
-    } catch (_) {
+    if (_connectionStatus.value == ConnectivityResult.none) {
       return false;
     }
+    return canReachInternet();
   }
 
-  // You can use this to check manually as well
   Future<bool> isConnected() async {
     try {
       final result = await _connectivity.checkConnectivity();
       if (result == ConnectivityResult.none) return false;
+      _connectionStatus.value = result;
       return await _hasActualInternet();
-    } on PlatformException catch (_) {
-      return false;
+    } on PlatformException catch (e) {
+      if (kDebugMode) {
+        debugPrint('[NetworkManager] connectivity check failed: $e');
+      }
+      // Web: connectivity plugin can throw; still allow login if browser is online.
+      return kIsWeb ? true : false;
     }
   }
 

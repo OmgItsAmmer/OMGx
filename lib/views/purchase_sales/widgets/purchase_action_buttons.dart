@@ -104,14 +104,6 @@ class PurchaseActionButtons extends StatelessWidget {
                     return;
                   }
 
-                  if (purchaseSalesController.selectedAddressId == -1) {
-                    TLoaders.errorSnackBar(
-                      title: 'Address Error',
-                      message: 'Please select a valid address.',
-                    );
-                    return;
-                  }
-
                   // Show checkout dialog for purchase confirmation
                   Get.defaultDialog(
                     title: "Purchase CheckOut Details",

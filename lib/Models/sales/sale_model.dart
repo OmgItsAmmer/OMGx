@@ -1,5 +1,3 @@
-import 'package:ecommerce_dashboard/utils/constants/image_strings.dart';
-import 'package:flutter/material.dart';
 
 class SaleModel {
   final int productId;

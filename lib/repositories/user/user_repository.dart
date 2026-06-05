@@ -1,5 +1,6 @@
 import 'package:ecommerce_dashboard/Models/user/user_model.dart';
 import 'package:ecommerce_dashboard/common/widgets/loaders/tloaders.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -31,6 +32,22 @@ class UserRespository extends GetxController {
       throw TPlatformException(e.code).message;
     } catch (e) {
       throw 'Something went wrong. Please try again';
+    }
+  }
+
+  /// Links auth.uid() to users row so RLS `is_shop_owner()` can allow reads.
+  Future<void> syncAuthUidForCurrentUser(String email) async {
+    final authUser = supabase.auth.currentUser;
+    if (authUser == null) return;
+
+    try {
+      await supabase
+          .from('users')
+          .update({'auth_uid': authUser.id}).eq('email', email);
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('[UserRepository] auth_uid sync failed: $e');
+      }
     }
   }
 

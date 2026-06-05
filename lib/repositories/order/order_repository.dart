@@ -11,6 +11,28 @@ import '../../controllers/product/product_controller.dart';
 import '../../repositories/products/product_variants_repository.dart';
 
 class OrderRepository {
+  static void _log(String message) {
+    if (kDebugMode) {
+      debugPrint('[OrderRepository] $message');
+    }
+  }
+
+  static void _logAuthContext() {
+    final session = supabase.auth.currentSession;
+    final user = supabase.auth.currentUser;
+    _log(
+      'Auth: session=${session != null ? "yes" : "no"}, '
+      'userId=${user?.id ?? "null"}, email=${user?.email ?? "null"}, '
+      'expiresAt=${session?.expiresAt ?? "n/a"}',
+    );
+    if (session == null) {
+      _log(
+        'No session — RLS will block owner_orders_all. '
+        'Log in as shop owner (users.auth_uid / shop.owner_auth_uid).',
+      );
+    }
+  }
+
   //fetch
   Future<List<OrderModel>> fetchCustomerOrders(int customerId) async {
     try {
@@ -84,21 +106,77 @@ class OrderRepository {
   }
 
   Future<List<OrderModel>> fetchOrders() async {
+    _log('fetchOrders() started');
+    _logAuthContext();
+
+    final stopwatch = Stopwatch()..start();
     try {
-      final data = await supabase.from('orders').select();
-      //print(data);
+      _log('Query: from(orders).select().order(order_id desc)');
+      final data = await supabase
+          .from('orders')
+          .select()
+          .order('order_id', ascending: false);
 
-      final orderList = data.map((item) {
-        return OrderModel.fromJson(item);
-      }).toList();
+      stopwatch.stop();
+      _log(
+        'Supabase returned ${data.length} row(s) in ${stopwatch.elapsedMilliseconds}ms',
+      );
 
-      print(orderList.length);
+      if (data.isEmpty) {
+        _log(
+          'Zero rows — likely causes: (1) no orders in DB, '
+          '(2) RLS is_shop_owner() denied, (3) not logged in. '
+          'Check users.auth_uid and shop.owner_auth_uid match auth.uid().',
+        );
+      } else if (kDebugMode) {
+        final first = data.first;
+        _log(
+          'Sample row keys: ${first.keys.toList()} | '
+          'order_id=${first['order_id']}, status=${first['status']}, '
+          'customer_id=${first['customer_id']}, user_id=${first['user_id']}',
+        );
+      }
+
+      final orderList = <OrderModel>[];
+      var parseFailures = 0;
+      for (final item in data) {
+        final orderId = item['order_id'];
+        try {
+          orderList.add(OrderModel.fromJson(Map<String, dynamic>.from(item)));
+        } catch (e, st) {
+          parseFailures++;
+          _log('Parse failed for order_id=$orderId: $e');
+          _log('Row data: $item');
+          _log('Stack: $st');
+        }
+      }
+
+      _log(
+        'Parsed ${orderList.length} order(s), $parseFailures parse failure(s)',
+      );
+
+      if (data.isNotEmpty && orderList.isEmpty) {
+        _log(
+          'All rows failed parsing — fix OrderModel.fromJson vs schema '
+          '(status/payment_method enums, numeric as string).',
+        );
+      }
 
       return orderList;
-    } catch (e) {
+    } on PostgrestException catch (e) {
+      stopwatch.stop();
+      _log(
+        'PostgrestException after ${stopwatch.elapsedMilliseconds}ms: '
+        'code=${e.code}, message=${e.message}, details=${e.details}, hint=${e.hint}',
+      );
+      TLoaders.errorSnackBar(title: 'Order Fetch', message: e.message);
+      return [];
+    } catch (e, st) {
+      stopwatch.stop();
+      _log('fetchOrders() error after ${stopwatch.elapsedMilliseconds}ms: $e');
+      _log('Stack: $st');
       if (kDebugMode) {
         TLoaders.errorSnackBar(title: 'Order Fetch', message: e.toString());
-        print(e.toString());
       }
       return [];
     }

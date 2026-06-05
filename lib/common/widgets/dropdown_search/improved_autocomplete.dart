@@ -41,7 +41,7 @@ class ImprovedAutocomplete<T extends Object> extends StatefulWidget {
   final String? Function(String?)? validator;
 
   const ImprovedAutocomplete({
-    Key? key,
+    super.key,
     required this.titleText,
     this.hintText = 'Select an option',
     required this.displayStringForOption,
@@ -52,7 +52,7 @@ class ImprovedAutocomplete<T extends Object> extends StatefulWidget {
     this.onInvalidInput,
     this.readOnly = false,
     this.validator,
-  }) : super(key: key);
+  });
 
   @override
   State<ImprovedAutocomplete<T>> createState() =>
@@ -109,7 +109,7 @@ class _ImprovedAutocompleteState<T extends Object>
         TLoaders.errorSnackBar(
             title: 'Invalid Selection',
             message:
-                '${widget.titleText} "${currentText}" not found in the list');
+                '${widget.titleText} "$currentText" not found in the list');
 
         // Clear the field
         widget.controller.clear();

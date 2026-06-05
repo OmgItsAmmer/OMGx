@@ -3,9 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../../main.dart';
 
 import '../../common/widgets/loaders/tloaders.dart';
 import '../../network_manager.dart';
@@ -78,9 +76,11 @@ class LoginController extends GetxController {
       await AuthenticationRepository.instance
           .loginWithEmailAndPassword(email.text.trim(), password.text.trim());
 
-      // Fetch user data
-      await userController.setUpApp();
-     
+      final setupOk = await userController.setUpApp();
+      if (!setupOk) {
+        TFullScreenLoader.stopLoading();
+        return;
+      }
 
       // Clear profile image cache to ensure fresh image load
       if (Get.isRegistered<MediaController>()) {

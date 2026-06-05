@@ -33,7 +33,7 @@ class NotificationModel {
     subDescription: null,
     isRead: false.obs, // Default is false, using RxBool
     notificationType: null,
-    expiresAt: DateTime.now().add(Duration(days: 10)), // Default 10 days expiry
+    expiresAt: DateTime.now().add(const Duration(days: 10)), // Default 10 days expiry
     orderId: null,
     installmentPlanId: null,
     productId: null, // Default is null

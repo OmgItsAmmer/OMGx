@@ -12,7 +12,6 @@ import '../expenses/expense_controller.dart';
 import '../orders/orders_controller.dart';
 import 'services/sales_service.dart';
 import '../../repositories/installment/installment_repository.dart';
-import '../../Models/installments/installemt_plan_model.dart';
 
 // Define possible data fetch states
 enum DataFetchState { initial, loading, success, error }

@@ -1,6 +1,6 @@
 // fullscreen_ctroller.dart
+import 'package:ecommerce_dashboard/platform/fullscreen_platform.dart';
 import 'package:get/get.dart';
-import 'package:window_manager/window_manager.dart';
 
 class FullscreenController extends GetxController {
   static FullscreenController get instance => Get.find<FullscreenController>();
@@ -13,12 +13,12 @@ class FullscreenController extends GetxController {
   }
 
   Future<void> _getInitialState() async {
-    isFullscreen.value = await windowManager.isFullScreen();
+    isFullscreen.value = await platformIsFullScreen();
   }
 
   Future<void> toggleFullscreen() async {
-    bool current = isFullscreen.value;
-    await windowManager.setFullScreen(!current);
+    final current = isFullscreen.value;
+    await platformSetFullScreen(!current);
     isFullscreen.value = !current;
   }
 }

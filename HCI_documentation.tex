@@ -1,0 +1,86 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{caption}
+
+\title{HCI Principles (8 Norman Principles) in E-Commerce Dashboard Frontend}
+\author{HCI Documentation}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+This document details the application of Human-Computer Interaction (HCI) principles---specifically Don Norman's 8 core design principles---within the frontend of the E-Commerce Dashboard application developed in Flutter. The application handles complex data such as orders, products, customers, and sales, requiring an intuitive and highly functional interface.
+
+\section{Norman's 8 Principles in the Application}
+
+\subsection{1. Discoverability (Visibility)}
+Discoverability refers to how easily users can find what operations are possible and where they are located. In the dashboard, discoverability is achieved through a permanent navigation sidebar or menu that clearly lists all major modules like Dashboard, Orders, Products, Customers, and Settings.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{task_1.png}
+    \caption{Screenshot showing the main navigation sidebar highlighting the visibility of primary modules.}
+\end{figure}
+
+\subsection{2. Feedback}
+Feedback provides users with continuous, clear information about the results of their actions. When a user logs in, creates a new product variant, or saves settings, the system immediately displays snackbars, loading indicators, or dialog boxes. For instance, the Login Screen triggers a visual loading state while authenticating.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{task_2.png}
+    \caption{Screenshot demonstrating a success/error snackbar or a loading spinner after a user action.}
+\end{figure}
+
+\subsection{3. Conceptual Model}
+A conceptual model is the user's understanding of how the system works. The dashboard mimics a real-world store management system. Concepts like "Purchases", "Sales", "Account Book", and "Inventory Variants" follow established retail workflows, making it easy for a store manager to build an accurate mental model of the software.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{task_3.png}
+    \caption{Screenshot of the 'Sales' or 'Orders' screen showing the workflow of managing a real-world transaction.}
+\end{figure}
+
+\subsection{4. Affordances}
+Affordances are properties of an object that show users how to use it. In the e-commerce dashboard, buttons look clickable using elevated styles with shadows, text fields invite typing through clear borders and hint texts, and table rows highlight on hover to afford clicking for more details.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{task_4.png}
+    \caption{Screenshot highlighting distinct button styles and text fields with clear affordances.}
+\end{figure}
+
+\subsection{5. Signifiers}
+Signifiers are indicators that communicate where an action should take place. For example, a magnifying glass icon in the app bar signifies the search functionality. A downward arrow in a dropdown menu signifies that more options will be revealed upon interaction. 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{task_5.png}
+    \caption{Screenshot focusing on iconography like search icons, dropdown arrows, and action indicators.}
+\end{figure}
+
+\subsection{6. Mappings}
+Mapping refers to the relationship between controls and their effects. In the dashboard's paginated data tables, clicking the "Next" arrow on the right logically maps to advancing to the next page of results, while the "Previous" arrow on the left maps to going back. The relationship between the filter dropdowns and the data grid below them is direct and spatial.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{task_6.png}
+    \caption{Screenshot of a paginated data table showing the logical mapping of navigation controls.}
+\end{figure}
+
+\subsection{7. Constraints}
+Constraints restrict the kind of interactions that can take place, preventing errors. The application employs constraints in forms (e.g., signup or expense entry forms) by disabling the "Submit" button until all required fields are validated. Certain actions are also restricted based on user roles.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{task_7.png}
+    \caption{Screenshot of a form with a disabled submit button or specific fields grayed out due to constraints.}
+\end{figure}
+
+\subsection{8. Consistency}
+Consistency ensures that similar operations use similar elements to achieve similar tasks. The dashboard utilizes a cohesive design system (e.g., consistent rounded containers, standard paddings, and typography) across all screens like Login, Dashboard, and Products. Colors and layouts remain predictable throughout the application.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{task_8.png}
+    \caption{Collage or screenshot demonstrating identical spacing, coloring, and button styling across multiple screens.}
+\end{figure}
+
+\section{Conclusion}
+By adhering to Don Norman's principles, the E-Commerce Dashboard ensures a user-friendly, intuitive, and error-resistant experience for administrators and store managers. The consistent use of design elements maintains a solid architectural pattern that aligns well with standard HCI guidelines.
+
+\end{document}

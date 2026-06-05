@@ -32,7 +32,7 @@ class CustomAutocomplete<T extends Object> extends StatelessWidget {
       optionsViewBuilder;
 
   const CustomAutocomplete({
-    Key? key,
+    super.key,
     required this.displayStringForOption,
     required this.fieldViewBuilder,
     required this.optionsBuilder,
@@ -41,7 +41,7 @@ class CustomAutocomplete<T extends Object> extends StatelessWidget {
     this.optionsViewOpenDirection = OptionsViewOpenDirection.down,
     this.initialValue,
     this.optionsViewBuilder,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

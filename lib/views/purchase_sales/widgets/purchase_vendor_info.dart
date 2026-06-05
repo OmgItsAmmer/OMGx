@@ -3,7 +3,6 @@ import 'package:ecommerce_dashboard/common/widgets/images/t_rounded_image.dart';
 import 'package:ecommerce_dashboard/utils/constants/sizes.dart';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
@@ -87,147 +86,87 @@ class PurchaseVendorInfo extends StatelessWidget {
               ],
             ),
             const SizedBox(height: TSizes.spaceBtwItems),
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Obx(() {
-                        final id = purchaseSalesController.entityId.value;
-                        final image = mediaController.displayImage.value;
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Obx(() {
+                    final id = purchaseSalesController.entityId.value;
+                    final image = mediaController.displayImage.value;
 
-                        if (image != null) {
-                          return FutureBuilder<String?>(
-                            future: mediaController.getImageFromBucket(
-                              MediaCategory.shop.toString().split('.').last,
-                              image.filename ?? '',
-                            ),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const TShimmerEffect(
-                                    width: 120, height: 120);
-                              } else if (snapshot.hasError ||
-                                  snapshot.data == null) {
-                                return const Icon(Icons.error);
-                              } else {
-                                return TRoundedImage(
-                                  isNetworkImage: true,
-                                  width: 120,
-                                  height: 120,
-                                  imageurl: snapshot.data!,
-                                );
-                              }
-                            },
+                    if (image != null) {
+                      return FutureBuilder<String?>(
+                        future: mediaController.getImageFromBucket(
+                          MediaCategory.shop.toString().split('.').last,
+                          image.filename ?? '',
+                        ),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const TShimmerEffect(
+                                width: 120, height: 120);
+                          } else if (snapshot.hasError ||
+                              snapshot.data == null) {
+                            return const Icon(Icons.error);
+                          } else {
+                            return TRoundedImage(
+                              isNetworkImage: true,
+                              width: 120,
+                              height: 120,
+                              imageurl: snapshot.data!,
+                            );
+                          }
+                        },
+                      );
+                    }
+
+                    return FutureBuilder<String?>(
+                      future: mediaController.fetchMainImage(
+                        id,
+                        MediaCategory.vendors.toString().split('.').last,
+                      ),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const TShimmerEffect(
+                              width: 120, height: 120);
+                        } else if (snapshot.hasError ||
+                            snapshot.data == null) {
+                          return const TCircularIcon(
+                            icon: Iconsax.image,
+                            width: 120,
+                            height: 120,
+                            backgroundColor: TColors.primaryBackground,
+                          );
+                        } else {
+                          return TRoundedImage(
+                            isNetworkImage: true,
+                            width: 120,
+                            height: 120,
+                            imageurl: snapshot.data!,
                           );
                         }
-
-                        return FutureBuilder<String?>(
-                          future: mediaController.fetchMainImage(
-                            id,
-                            MediaCategory.vendors.toString().split('.').last,
-                          ),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const TShimmerEffect(
-                                  width: 120, height: 120);
-                            } else if (snapshot.hasError ||
-                                snapshot.data == null) {
-                              return const TCircularIcon(
-                                icon: Iconsax.image,
-                                width: 120,
-                                height: 120,
-                                backgroundColor: TColors.primaryBackground,
-                              );
-                            } else {
-                              return TRoundedImage(
-                                isNetworkImage: true,
-                                width: 120,
-                                height: 120,
-                                imageurl: snapshot.data!,
-                              );
-                            }
-                          },
-                        );
-                      }),
-                      const SizedBox(height: TSizes.spaceBtwSections),
-                      const SizedBox(height: TSizes.spaceBtwItems),
-                      SizedBox(
-                        width: 300,
-                        child: EnhancedAutocomplete<String>(
-                          showOptionsOnFocus: true,
-                          labelText: hintText,
-                          hintText: 'Select a vendor',
-                          options: namesList,
-                          externalController: userNameTextController,
-                          displayStringForOption: (String option) => option,
-                          onSelected: onSelectedName,
-                          validator: (value) =>
-                              TValidator.validateEmptyText(hintText, value),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: TSizes.spaceBtwSections),
-                Expanded(
-                  child: Obx(
-                    () => Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          width: double.infinity,
-                          child: TextFormField(
-                            controller: purchaseSalesController
-                                .vendorPhoneNoController.value,
-                            validator: (value) => TValidator.validateEmptyText(
-                                'Phone Number', value),
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly
-                            ],
-                            readOnly: true,
-                            style: Theme.of(context).textTheme.bodyMedium,
-                            decoration: const InputDecoration(
-                                labelText: 'Phone Number'),
-                          ),
-                        ),
-                        const SizedBox(height: TSizes.spaceBtwInputFields / 2),
-                        SizedBox(
-                          width: double.infinity,
-                          child: TextFormField(
-                            controller: purchaseSalesController
-                                .vendorAddressController.value,
-                            validator: (value) =>
-                                TValidator.validateEmptyText('Address', value),
-                            style: Theme.of(context).textTheme.bodyMedium,
-                            decoration:
-                                const InputDecoration(labelText: 'Address'),
-                            readOnly: true,
-                          ),
-                        ),
-                        const SizedBox(height: TSizes.spaceBtwInputFields / 2),
-                        SizedBox(
-                          width: double.infinity,
-                          child: TextFormField(
-                            controller: purchaseSalesController
-                                .vendorEmailController.value,
-                            validator: (value) =>
-                                TValidator.validateEmptyText('Email', value),
-                            style: Theme.of(context).textTheme.bodyMedium,
-                            decoration:
-                                const InputDecoration(labelText: 'Email'),
-                            keyboardType: TextInputType.emailAddress,
-                            readOnly: true,
-                          ),
-                        ),
-                      ],
+                      },
+                    );
+                  }),
+                  const SizedBox(height: TSizes.spaceBtwSections),
+                  const SizedBox(height: TSizes.spaceBtwItems),
+                  SizedBox(
+                    width: 300,
+                    child: EnhancedAutocomplete<String>(
+                      showOptionsOnFocus: true,
+                      labelText: hintText,
+                      hintText: 'Select a vendor',
+                      options: namesList,
+                      externalController: userNameTextController,
+                      displayStringForOption: (String option) => option,
+                      onSelected: onSelectedName,
+                      validator: (value) =>
+                          TValidator.validateEmptyText(hintText, value),
                     ),
                   ),
-                )
-              ],
+                ],
+              ),
             ),
             const SizedBox(height: TSizes.spaceBtwItems),
           ],

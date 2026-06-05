@@ -75,7 +75,7 @@ class _DropDownSearchState extends State<DropDownSearch> with TickerProviderStat
 
   void _showOverlay() {
     _overlayEntry = _createOverlayEntry();
-    Overlay.of(context)?.insert(_overlayEntry);
+    Overlay.of(context).insert(_overlayEntry);
   }
 
   void _removeOverlay() {

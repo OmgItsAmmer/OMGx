@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
 class TSearchOverlay extends StatelessWidget {
-  const TSearchOverlay({Key? key}) : super(key: key);
+  const TSearchOverlay({super.key});
 
   @override
   Widget build(BuildContext context) {

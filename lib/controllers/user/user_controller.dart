@@ -6,7 +6,6 @@ import 'package:ecommerce_dashboard/controllers/purchase_sales/purchase_sales_co
 import 'package:ecommerce_dashboard/controllers/sales/sales_controller.dart';
 import 'package:ecommerce_dashboard/controllers/salesman/salesman_controller.dart';
 import 'package:ecommerce_dashboard/routes/routes.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -23,7 +22,6 @@ import '../../views/login/login.dart';
 import '../brands/brand_controller.dart';
 import '../category/category_controller.dart';
 import '../customer/customer_controller.dart';
-import '../dashboard/dashboard_controoler.dart';
 import '../media/media_controller.dart';
 import '../product/product_controller.dart';
 import '../shop/shop_controller.dart';
@@ -75,19 +73,28 @@ class UserController extends GetxController {
       final user = supabase.auth.currentUser;
 
       if (user == null) {
-        // User is not logged in, navigate to login screen
         TLoaders.errorSnackBar(
             title: "Oh Snap!",
             message: "Session expired. Please log in again.");
-        Get.offAll(() => const LoginScreen()); // Navigate and clear stack
+        Get.offAllNamed(TRoutes.login);
         return false;
       }
 
+      await userRespository.syncAuthUidForCurrentUser(user.email!);
+
       final userDetail = await userRespository.fetchUserDetials(user.email);
+      if (userDetail.isEmpty) {
+        TLoaders.errorSnackBar(
+          title: 'User Not Found',
+          message:
+              'No row in users for this email. Add the account in Supabase users table.',
+        );
+        return false;
+      }
+
       userData.assignAll(userDetail);
 
-      // For debugging
-      UserModel matchedUser =
+      final matchedUser =
           userData.firstWhere((value) => value.email == user.email);
       currentUser.value = matchedUser;
 
@@ -295,7 +302,7 @@ class UserController extends GetxController {
     }
   }
 
-  Future<void> setUpApp() async {
+  Future<bool> setUpApp() async {
     try {
       final isUserFetched = await fetchUserRecord();
       if (isUserFetched) {
@@ -313,12 +320,14 @@ class UserController extends GetxController {
         await CategoryController.instance.fetchCategories();
         await ExpenseController.instance.fetchExpenses();
         await AccountBookController.instance.setUpAccountBook();
+        return true;
       } else {
-        Get.offAllNamed(TRoutes.login);
         TLoaders.errorSnackBar(title: "Oh Snap!", message: "User not found");
+        return false;
       }
     } catch (e) {
       TLoaders.errorSnackBar(title: "Oh Snap!", message: e.toString());
+      return false;
     }
   }
 }

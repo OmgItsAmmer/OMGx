@@ -112,7 +112,7 @@ class AccountBookDesktop extends StatelessWidget {
                             width: 150,
                             child:
                                 Obx(() => DropdownButtonFormField<EntityType>(
-                                      value: accountBookController
+                                      initialValue: accountBookController
                                           .filterEntityType.value,
                                       decoration: const InputDecoration(
                                         labelText: 'Entity Type',
@@ -147,7 +147,7 @@ class AccountBookDesktop extends StatelessWidget {
                             width: 180,
                             child: Obx(
                                 () => DropdownButtonFormField<TransactionType>(
-                                      value: accountBookController
+                                      initialValue: accountBookController
                                           .filterTransactionType.value,
                                       decoration: const InputDecoration(
                                         labelText: 'Transaction Type',

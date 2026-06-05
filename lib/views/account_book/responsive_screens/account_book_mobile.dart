@@ -87,7 +87,7 @@ class AccountBookMobile extends StatelessWidget {
 
                     // Entity Type Filter
                     Obx(() => DropdownButtonFormField<EntityType>(
-                          value: accountBookController.filterEntityType.value,
+                          initialValue: accountBookController.filterEntityType.value,
                           decoration: const InputDecoration(
                             labelText: 'Entity Type',
                             border: OutlineInputBorder(),
@@ -116,7 +116,7 @@ class AccountBookMobile extends StatelessWidget {
 
                     // Transaction Type Filter
                     Obx(() => DropdownButtonFormField<TransactionType>(
-                          value:
+                          initialValue:
                               accountBookController.filterTransactionType.value,
                           decoration: const InputDecoration(
                             labelText: 'Transaction Type',
@@ -235,7 +235,7 @@ class AccountBookMobile extends StatelessWidget {
                   return Center(
                     child: Column(
                       children: [
-                        Icon(
+                        const Icon(
                           Iconsax.receipt_item,
                           size: 64,
                           color: TColors.grey,

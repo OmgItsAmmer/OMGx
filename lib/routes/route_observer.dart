@@ -1,13 +1,8 @@
 import 'package:ecommerce_dashboard/common/widgets/layout/sidebar/controller/sidebar_controller.dart';
-import 'package:ecommerce_dashboard/common/widgets/loaders/tloaders.dart';
-import 'package:ecommerce_dashboard/controllers/user/user_controller.dart';
 import 'package:ecommerce_dashboard/routes/routes.dart';
-import 'package:ecommerce_dashboard/utils/constants/enums.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
-import '../controllers/product/product_images_controller.dart';
 
 class TRouteObserver extends GetObserver {
   @override

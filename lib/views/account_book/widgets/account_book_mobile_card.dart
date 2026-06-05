@@ -158,7 +158,7 @@ class AccountBookMobileCard extends StatelessWidget {
               // Date
               Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Iconsax.calendar,
                     size: 14,
                     color: TColors.darkGrey,
@@ -177,7 +177,7 @@ class AccountBookMobileCard extends StatelessWidget {
               if (entry.reference != null && entry.reference!.isNotEmpty)
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Iconsax.receipt_item,
                       size: 14,
                       color: TColors.darkGrey,

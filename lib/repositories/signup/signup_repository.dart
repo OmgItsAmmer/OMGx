@@ -1,8 +1,6 @@
-import 'package:ecommerce_dashboard/Models/address/address_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../common/widgets/loaders/tloaders.dart';
 import '../../../main.dart';

@@ -12,7 +12,6 @@ import '../../../../common/widgets/shimmers/shimmer.dart';
 import '../../../../controllers/brands/brand_controller.dart';
 import '../../../../controllers/media/media_controller.dart';
 import '../../../../utils/constants/enums.dart';
-import '../../../../utils/constants/image_strings.dart';
 import '../../../../utils/constants/sizes.dart';
 import '../../../../utils/validators/validation.dart';
 

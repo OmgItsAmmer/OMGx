@@ -143,6 +143,6 @@ class AccountBookModel {
 
   @override
   String toString() {
-    return 'AccountBookModel(id: $accountBookId, entity: $entityName, type: ${transactionTypeDisplay}, amount: \$${amount.toStringAsFixed(2)}, date: ${transactionDate.toString().split(' ')[0]})';
+    return 'AccountBookModel(id: $accountBookId, entity: $entityName, type: $transactionTypeDisplay, amount: \$${amount.toStringAsFixed(2)}, date: ${transactionDate.toString().split(' ')[0]})';
   }
 }

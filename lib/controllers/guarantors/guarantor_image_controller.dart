@@ -21,12 +21,6 @@ class GuarantorImageController extends GetxController {
   // The guarantor entity type for all guarantors
   final String entityType = MediaCategory.guarantors.toString().split('.').last;
 
-  @override
-  void onInit() {
-    super.onInit();
-    // We no longer automatically fetch images on init
-    // Images will only be fetched when explicitly requested
-  }
 
   // Method to fetch guarantor images from the database if needed
   Future<void> fetchGuarantorImages() async {

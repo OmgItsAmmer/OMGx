@@ -852,12 +852,12 @@ class ReportController extends GetxController {
 
     // Print customer information
     final customer = customerController.selectedCustomer.value;
-    if (customer.fullName != null && customer.fullName!.isNotEmpty) {
+    if (customer.fullName.isNotEmpty) {
       bytes += generator.text(
         'Customer: ${customer.fullName}',
         styles: const PosStyles(bold: true),
       );
-      if (customer.phoneNumber != null && customer.phoneNumber!.isNotEmpty) {
+      if (customer.phoneNumber.isNotEmpty) {
         bytes += generator.text(
           'Phone: ${customer.phoneNumber}',
           styles: const PosStyles(align: PosAlign.left),
@@ -870,8 +870,7 @@ class ReportController extends GetxController {
     if (order.salesmanId != null) {
       final salesman = salesmanController.selectedSalesman?.value;
       if (salesman != null &&
-          salesman.fullName != null &&
-          salesman.fullName!.isNotEmpty) {
+          salesman.fullName.isNotEmpty) {
         bytes += generator.text(
           'Salesman: ${salesman.fullName}',
           styles: const PosStyles(bold: true),

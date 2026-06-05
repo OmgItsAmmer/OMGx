@@ -123,7 +123,7 @@ class PurchaseSalesController extends GetxController {
   final vendorNameController = TextEditingController();
   final vendorPhoneNoController = TextEditingController().obs;
   final vendorAddressController = TextEditingController().obs;
-  int? selectedAddressId = -1;
+  int? selectedAddressId;
   final vendorEmailController = TextEditingController().obs;
   RxInt entityId = (-1).obs;
 
@@ -521,12 +521,6 @@ class PurchaseSalesController extends GetxController {
         return -1;
       }
 
-      if (selectedAddressId == null || selectedAddressId == -1) {
-        TLoaders.errorSnackBar(
-            title: 'Address Error', message: 'Please select a valid address.');
-        return -1;
-      }
-
       // Validate paid amount
       double paidAmountValue = double.tryParse(paidAmount.text.trim()) ?? 0.0;
       if (paidAmountValue < 0) {
@@ -759,7 +753,7 @@ class PurchaseSalesController extends GetxController {
       vendorPhoneNoController.value.clear();
       vendorEmailController.value.clear();
       vendorAddressController.value.clear();
-      selectedAddressId = -1;
+      selectedAddressId = null;
       entityId.value = -1;
 
       // Clear vendor image from media controller
@@ -910,12 +904,6 @@ class PurchaseSalesController extends GetxController {
           selectedDate.value == null) {
         TLoaders.errorSnackBar(
             title: 'Checkout Error', message: 'Fill all the fields.');
-        return false;
-      }
-
-      if (selectedAddressId == -1) {
-        TLoaders.errorSnackBar(
-            title: 'Address Error', message: 'Select Valid Address.');
         return false;
       }
 

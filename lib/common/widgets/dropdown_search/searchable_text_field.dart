@@ -11,8 +11,8 @@ class AutoCompleteTextField extends StatefulWidget {
     required this.optionList,
     required this.textController,
     this.parameterFunc,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   _AutoCompleteTextFieldState createState() => _AutoCompleteTextFieldState();

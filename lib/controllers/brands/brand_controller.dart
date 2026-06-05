@@ -206,7 +206,7 @@ class BrandController extends GetxController {
 
       TLoaders.successSnackBar(
         title: 'Brand Updated!',
-        message: '${brandNameText} updated in Database',
+        message: '$brandNameText updated in Database',
       );
       Navigator.of(Get.context!).pop();
     } catch (e) {

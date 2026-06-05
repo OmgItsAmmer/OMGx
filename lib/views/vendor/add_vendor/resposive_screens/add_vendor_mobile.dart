@@ -1,3 +1,4 @@
+import 'package:ecommerce_dashboard/Models/vendor/vendor_model.dart';
 import 'package:ecommerce_dashboard/views/vendor/add_vendor/widget/entity_thumbnail_info.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -9,12 +10,14 @@ import '../widget/entity_basic_info.dart';
 import '../widget/entity_address_info.dart';
 
 class AddVendorMobile extends StatelessWidget {
-  const AddVendorMobile({super.key});
+  const AddVendorMobile({super.key, required this.vendorModel});
+
+  final VendorModel vendorModel;
 
   @override
   Widget build(BuildContext context) {
-    final VendorController vendorController = Get.put(VendorController());
-    final AddressController addressController = Get.put(AddressController());
+    final VendorController vendorController = Get.find<VendorController>();
+    final AddressController addressController = Get.find<AddressController>();
 
     return Scaffold(
       appBar: AppBar(
@@ -39,7 +42,7 @@ class AddVendorMobile extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: AddDiscardBottomBar(
-        model: vendorController,
+        model: vendorModel,
         controller: vendorController,
         entityType: EntityType.vendor,
       ),

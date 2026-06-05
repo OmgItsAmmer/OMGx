@@ -148,6 +148,16 @@ flutter run -d windows
 flutter run -d android
 ```
 
+### Web production build
+
+Desktop-only plugins (`window_manager`, `desktop_drop`) are isolated with conditional imports so web compilation does not pull in `win32`.
+
+Because **Iconsax** uses glyphs that confuse the icon tree shaker, use:
+
+```bash
+flutter build web --no-tree-shake-icons
+```
+
 ---
 
 ## 📁 Project Structure

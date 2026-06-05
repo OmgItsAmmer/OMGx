@@ -194,38 +194,67 @@ class OrderModel {
     return data;
   }
 
-  factory OrderModel.fromJson(Map<String, dynamic> json) {
-    // Handle null or malformed date safely
-    String formattedDate = DateTime.now().toIso8601String();
-    if (json.containsKey('order_date') && json['order_date'] != null) {
-      try {
-        final parsedDate = DateTime.parse(json['order_date'].toString());
-        formattedDate =
-            "${parsedDate.year.toString().padLeft(4, '0')}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.day.toString().padLeft(2, '0')}";
-      } catch (_) {
-        // silently fallback
-      }
-    }
+  static double _asDouble(dynamic value, [double defaultValue = 0.0]) {
+    if (value == null) return defaultValue;
+    if (value is num) return value.toDouble();
+    return double.tryParse(value.toString()) ?? defaultValue;
+  }
 
+  static double? _asNullableDouble(dynamic value) {
+    if (value == null) return null;
+    if (value is num) return value.toDouble();
+    return double.tryParse(value.toString());
+  }
+
+  static int? _asNullableInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value.toString());
+  }
+
+  static String? _asString(dynamic value) {
+    if (value == null) return null;
+    return value.toString();
+  }
+
+  static String _formatOrderDate(dynamic value) {
+    if (value == null) {
+      final now = DateTime.now();
+      return '${now.year.toString().padLeft(4, '0')}-'
+          '${now.month.toString().padLeft(2, '0')}-'
+          '${now.day.toString().padLeft(2, '0')}';
+    }
+    try {
+      final parsed = DateTime.parse(value.toString());
+      return '${parsed.year.toString().padLeft(4, '0')}-'
+          '${parsed.month.toString().padLeft(2, '0')}-'
+          '${parsed.day.toString().padLeft(2, '0')}';
+    } catch (_) {
+      return value.toString();
+    }
+  }
+
+  factory OrderModel.fromJson(Map<String, dynamic> json) {
     return OrderModel(
-      orderId: json['order_id'] as int? ?? 0,
-      orderDate: formattedDate,
-      subTotal: (json['sub_total'] as num?)?.toDouble() ?? 0.0,
-      status: json['status'] as String? ?? 'pending',
-      shippingMethod: json['shipping_method'] as String?,
-      saletype: json['saletype'] as String?, // can be null
-      addressId: json['address_id'] as int?,
-      userId: json['user_id'] as int?, // nullable user_id
-      customerId: json['customer_id'] as int?,
-      paidAmount: (json['paid_amount'] as num?)?.toDouble(),
-      buyingPrice: (json['buying_price'] as num?)?.toDouble(),
-      discount: (json['discount'] as num?)?.toDouble() ?? 0.0,
-      tax: (json['tax'] as num?)?.toDouble() ?? 0.0,
-      shippingFee: (json['shipping_fee'] as num?)?.toDouble() ?? 0.0,
-      idempotencyKey: json['idempotency_key'] as String?,
-      paymentMethod: json['payment_method'] as String? ?? 'cod',
-      salesmanId: json['salesman_id'] as int?, // can be null
-      salesmanComission: json['salesman_comission'] as int? ?? 0,
+      orderId: _asNullableInt(json['order_id']) ?? 0,
+      orderDate: _formatOrderDate(json['order_date']),
+      subTotal: _asDouble(json['sub_total']),
+      status: _asString(json['status']) ?? 'pending',
+      shippingMethod: _asString(json['shipping_method']),
+      saletype: _asString(json['saletype']),
+      addressId: _asNullableInt(json['address_id']),
+      userId: _asNullableInt(json['user_id']),
+      customerId: _asNullableInt(json['customer_id']),
+      paidAmount: _asNullableDouble(json['paid_amount']),
+      buyingPrice: _asNullableDouble(json['buying_price']),
+      discount: _asDouble(json['discount']),
+      tax: _asDouble(json['tax']),
+      shippingFee: _asDouble(json['shipping_fee']),
+      idempotencyKey: _asString(json['idempotency_key']),
+      paymentMethod: _asString(json['payment_method']) ?? 'cod',
+      salesmanId: _asNullableInt(json['salesman_id']),
+      salesmanComission: _asNullableInt(json['salesman_comission']) ?? 0,
       orderItems: json['order_items'] != null
           ? OrderItemModel.fromJsonList(json['order_items'] as List)
           : null,

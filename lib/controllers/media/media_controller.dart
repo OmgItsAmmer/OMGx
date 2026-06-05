@@ -63,6 +63,10 @@ class MediaController extends GetxController {
     droppedFiles.add(file);
   }
 
+  void addDroppedFileFromPath(String path) {
+    droppedFiles.add(File(path));
+  }
+
   void clearDroppedFiles() {
     droppedFiles.clear();
   }
